@@ -1,0 +1,194 @@
+package main
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+)
+
+/* -------------------------------------------- Tests ------------------------------------------- */
+
+func TestStylecheckReportsUnnamedReturns(t *testing.T) {
+	tempDir := t.TempDir()
+	sourcePath := filepath.Join(tempDir, "sample.go")
+	sourceCode := `package sample
+
+type Config struct{}
+
+func Bad(value string) error {
+	return nil
+}
+`
+	if err := os.WriteFile(sourcePath, []byte(sourceCode), 0o600); err != nil {
+		t.Fatalf("write source: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err == nil {
+		t.Fatalf("expected stylecheck to fail, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, `[2.2] function "Bad" has unnamed return values`) {
+		t.Fatalf("expected unnamed return violation, got:\n%s", output)
+	}
+}
+
+func TestStylecheckPassesValidFile(t *testing.T) {
+	tempDir := t.TempDir()
+	sourcePath := filepath.Join(tempDir, "sample.go")
+	sourceCode := `package sample
+
+type Config struct{}
+
+func Good(value string) (err error) {
+	if value == "" {
+		return nil
+	}
+
+	return nil
+}
+`
+	if err := os.WriteFile(sourcePath, []byte(sourceCode), 0o600); err != nil {
+		t.Fatalf("write source: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err != nil {
+		t.Fatalf("expected stylecheck to pass, output:\n%s", output)
+	}
+}
+
+func TestStylecheckMatchesMockPrefixNaming(t *testing.T) {
+	tempDir := t.TempDir()
+	portsDirectory := filepath.Join(tempDir, "internal", "core", "ports")
+	mocksDirectory := filepath.Join(tempDir, "internal", "mocks")
+
+	if err := os.MkdirAll(portsDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir ports: %v", err)
+	}
+
+	if err := os.MkdirAll(mocksDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir mocks: %v", err)
+	}
+
+	portsPath := filepath.Join(portsDirectory, "user_repository.go")
+	portsSource := `package ports
+
+type UserRepository interface {
+	Save(value string) (err error)
+	Load(value string) (err error)
+}
+`
+
+	if err := os.WriteFile(portsPath, []byte(portsSource), 0o600); err != nil {
+		t.Fatalf("write ports: %v", err)
+	}
+
+	mockPath := filepath.Join(mocksDirectory, "user_repository_mock.go")
+	mockSource := `package mocks
+
+type MockUserRepository struct{}
+
+func (m *MockUserRepository) Load(value string) (err error) {
+	return nil
+}
+
+func (m *MockUserRepository) Save(value string) (err error) {
+	return nil
+}
+`
+
+	if err := os.WriteFile(mockPath, []byte(mockSource), 0o600); err != nil {
+		t.Fatalf("write mock: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err == nil {
+		t.Fatalf("expected stylecheck to fail, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, `mock "MockUserRepository" for interface "UserRepository" method order mismatch`) {
+		t.Fatalf("expected prefixed mock-order violation, got:\n%s", output)
+	}
+}
+
+func TestStylecheckReportsAmbiguousMockNaming(t *testing.T) {
+	tempDir := t.TempDir()
+	portsDirectory := filepath.Join(tempDir, "internal", "core", "ports")
+	mocksDirectory := filepath.Join(tempDir, "internal", "mocks")
+
+	if err := os.MkdirAll(portsDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir ports: %v", err)
+	}
+
+	if err := os.MkdirAll(mocksDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir mocks: %v", err)
+	}
+
+	portsPath := filepath.Join(portsDirectory, "identity_repository.go")
+	portsSource := `package ports
+
+type IdentityRepository interface {
+	Load(value string) (err error)
+}
+`
+
+	if err := os.WriteFile(portsPath, []byte(portsSource), 0o600); err != nil {
+		t.Fatalf("write ports: %v", err)
+	}
+
+	mockPrefixPath := filepath.Join(mocksDirectory, "identity_repository_prefix_mock.go")
+	mockPrefixSource := `package mocks
+
+type MockIdentityRepository struct{}
+
+func (m *MockIdentityRepository) Load(value string) (err error) {
+	return nil
+}
+`
+
+	if err := os.WriteFile(mockPrefixPath, []byte(mockPrefixSource), 0o600); err != nil {
+		t.Fatalf("write prefix mock: %v", err)
+	}
+
+	mockSuffixPath := filepath.Join(mocksDirectory, "identity_repository_suffix_mock.go")
+	mockSuffixSource := `package mocks
+
+type IdentityRepositoryMock struct{}
+
+func (m *IdentityRepositoryMock) Load(value string) (err error) {
+	return nil
+}
+`
+
+	if err := os.WriteFile(mockSuffixPath, []byte(mockSuffixSource), 0o600); err != nil {
+		t.Fatalf("write suffix mock: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err == nil {
+		t.Fatalf("expected stylecheck to fail on ambiguous mock naming, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, `multiple mock types match interface "IdentityRepository"`) {
+		t.Fatalf("expected ambiguous mock naming violation, got:\n%s", output)
+	}
+}
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
+
+func runStylecheck(targetDirectory string) (output string, err error) {
+	command := exec.Command("go", "run", ".", targetDirectory)
+	command.Dir = stylecheckModuleDirectory()
+
+	rawOutput, runErr := command.CombinedOutput()
+	return string(rawOutput), runErr
+}
+
+func stylecheckModuleDirectory() (directory string) {
+	_, currentFile, _, _ := runtime.Caller(0)
+	return filepath.Dir(currentFile)
+}
