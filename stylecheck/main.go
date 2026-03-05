@@ -4,6 +4,7 @@
 //   - 2.2 Named returns: all functions must use named, descriptive return values.
 //   - 2.2 Naked returns: explicit return values are required.
 //   - 2.2 Type elision: each parameter must have its own type.
+//   - 2.2 Domain ID constructors: avoid direct casts for key domain identifier types.
 //   - 2.2 Single-letter variables: only i, j, k (loops) and receivers.
 //   - 2.2 Service package type naming: exported types end with Service/UseCase/Config.
 //   - 2.5 CRUD-L ordering inside interfaces.
@@ -67,6 +68,8 @@ const (
 	minCategoryKinds  = 2
 )
 
+const domainPackagePathSegment = "/internal/core/domain/"
+
 /* -------------------------------------------- Types ------------------------------------------- */
 
 // violation represents a single style rule violation.
@@ -104,6 +107,12 @@ type analysisState struct {
 }
 
 var placeholderReturnNamePattern = regexp.MustCompile(`^result[0-9]+$`)
+
+var directDomainIdentifierConstructors = map[string]string{
+	"Username":       "ParseUsername",
+	"ConversationID": "ParseConversationID or ConversationIDFromUsername",
+	"IdentityID":     "ParseIdentityID",
+}
 
 /* -------------------------------------------- Main -------------------------------------------- */
 
@@ -197,6 +206,10 @@ func (state *analysisState) addPerFileViolations(
 	state.violations = append(state.violations, checkNamedReturns(state.fileSet, file)...)
 	state.violations = append(state.violations, checkNakedReturns(state.fileSet, file)...)
 	state.violations = append(state.violations, checkTypeElision(state.fileSet, file)...)
+	state.violations = append(
+		state.violations,
+		checkDirectDomainIdentifierCasts(state.fileSet, file, normalisedPath, isTestFile)...,
+	)
 	state.violations = append(state.violations, checkParamOrder(state.fileSet, file)...)
 	state.violations = append(state.violations, checkConstructorOrder(state.fileSet, file)...)
 	if !isTestFile {
@@ -363,6 +376,53 @@ func checkTypeElision(fileSet *token.FileSet, file *ast.File) (violations []viol
 		}
 		return true
 	})
+	return violations
+}
+
+// checkDirectDomainIdentifierCasts enforces parser/constructor usage for key domain IDs (2.2).
+func checkDirectDomainIdentifierCasts(
+	fileSet *token.FileSet,
+	file *ast.File,
+	path string,
+	isTestFile bool,
+) (violations []violation) {
+	if isTestFile || strings.Contains(path, domainPackagePathSegment) {
+		return nil
+	}
+
+	ast.Inspect(file, func(node ast.Node) bool {
+		callExpression, ok := node.(*ast.CallExpr)
+		if !ok || len(callExpression.Args) != 1 {
+			return true
+		}
+
+		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+
+		packageIdentifier, ok := selector.X.(*ast.Ident)
+		if !ok || packageIdentifier.Name != "domain" {
+			return true
+		}
+
+		recommendedConstructor, found := directDomainIdentifierConstructors[selector.Sel.Name]
+		if !found {
+			return true
+		}
+
+		violations = append(violations, violation{
+			position: fileSet.Position(callExpression.Pos()),
+			rule:     "2.2",
+			message: fmt.Sprintf(
+				"direct cast to domain.%s is disallowed; use %s",
+				selector.Sel.Name,
+				recommendedConstructor,
+			),
+		})
+		return true
+	})
+
 	return violations
 }
 
