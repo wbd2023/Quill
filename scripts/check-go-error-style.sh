@@ -31,6 +31,9 @@ MESSAGE_ERRORS_NEW_CASE="[${RULE_LABEL}] Error context must be lowercase (errors
 MESSAGE_PUNCTUATION="[${RULE_LABEL}] Error context must not end with punctuation:"
 MESSAGE_SECRETS="[${RULE_LABEL}] Error context must not include secrets:"
 MESSAGE_SENTINELS="[${RULE_LABEL}] Sentinel errors must live in domain/errors.go:"
+SECRET_TERM_PATTERN='passphrase|password|privateKey|secretKey|secret|token|seed'
+ERRORF_SECRET_PATTERN_PREFIX='fmt\.Errorf\("[^"]*%[^"]*",[^)]*\b('
+ERRORF_SECRET_PATTERN_SUFFIX=')\b'
 
 # ---------------------------------------------- Paths ---------------------------------------------
 
@@ -88,11 +91,11 @@ fi
 # This catches likely leaks such as:
 #   fmt.Errorf("failed auth for %s", passphrase)
 # It does not flag plain wording like "passphrase is required".
-secrets_pattern='fmt\.Errorf\("[^"]*%[^"]*",[^)]*\b(passphrase|password|privateKey|'
-secrets_pattern+='secretKey|secret|token|seed)\b'
+errorf_secret_pattern="${ERRORF_SECRET_PATTERN_PREFIX}${SECRET_TERM_PATTERN}"
+errorf_secret_pattern+="$ERRORF_SECRET_PATTERN_SUFFIX"
 
 secrets_in_errors=$(rg -n --glob "$STYLE_PATTERN_GO" --glob "$GO_TEST_EXCLUDE" \
-	"$secrets_pattern" \
+	"$errorf_secret_pattern" \
 	"$PROJECT_ROOT/$STYLE_PATH_INTERNAL" "$PROJECT_ROOT/$STYLE_PATH_CMD" |
 	grep -v "$VENDOR_FILTER" || true)
 
