@@ -2,6 +2,7 @@
 //
 // It enforces the following rules from STYLE.md:
 //   - 2.2 Named returns: all functions must use named, descriptive return values.
+//   - 2.2 Naked returns: explicit return values are required.
 //   - 2.2 Type elision: each parameter must have its own type.
 //   - 2.2 Single-letter variables: only i, j, k (loops) and receivers.
 //   - 2.2 Service package type naming: exported types end with Service/UseCase/Config.
@@ -131,6 +132,7 @@ func main() {
 				isTestFile := strings.HasSuffix(path, "_test.go")
 
 				allViolations = append(allViolations, checkNamedReturns(fileSet, file)...)
+				allViolations = append(allViolations, checkNakedReturns(fileSet, file)...)
 				allViolations = append(allViolations, checkTypeElision(fileSet, file)...)
 				allViolations = append(allViolations, checkParamOrder(fileSet, file)...)
 				allViolations = append(allViolations, checkConstructorOrder(fileSet, file)...)
@@ -278,6 +280,58 @@ func checkTypeElision(fileSet *token.FileSet, file *ast.File) (violations []viol
 		return true
 	})
 	return violations
+}
+
+// checkNakedReturns reports naked returns in functions that declare named return values (2.2).
+func checkNakedReturns(fileSet *token.FileSet, file *ast.File) (violations []violation) {
+	ast.Inspect(file, func(node ast.Node) bool {
+		functionDecl, ok := node.(*ast.FuncDecl)
+		if !ok ||
+			functionDecl.Type == nil ||
+			functionDecl.Type.Results == nil ||
+			functionDecl.Body == nil {
+			return true
+		}
+
+		if !funcHasNamedReturns(functionDecl.Type) {
+			return true
+		}
+
+		ast.Inspect(functionDecl.Body, func(bodyNode ast.Node) bool {
+			switch typed := bodyNode.(type) {
+			case *ast.FuncLit:
+				return false
+
+			case *ast.ReturnStmt:
+				if len(typed.Results) == 0 {
+					violations = append(violations, violation{
+						position: fileSet.Position(typed.Pos()),
+						rule:     "2.2",
+						message: fmt.Sprintf(
+							"function %q uses a naked return",
+							functionDecl.Name.Name,
+						),
+					})
+				}
+			}
+
+			return true
+		})
+
+		return true
+	})
+
+	return violations
+}
+
+func funcHasNamedReturns(functionType *ast.FuncType) (found bool) {
+	for _, resultField := range functionType.Results.List {
+		if len(resultField.Names) > 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 // checkSingleLetterVars flags single-letter variable names that are not

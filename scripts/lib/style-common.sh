@@ -15,6 +15,7 @@ STYLE_SCOPE_USAGE="app|tools|all"
 
 STYLE_PATH_CMD="cmd"
 STYLE_PATH_INTERNAL="internal"
+STYLE_PATH_TESTS="tests"
 STYLE_PATH_TOOLS="tools"
 STYLE_PATH_GIT=".git"
 STYLE_PATH_VENDOR="vendor"
@@ -92,7 +93,10 @@ style_collect_files() {
 
 	case "$scope" in
 	"$STYLE_SCOPE_APP")
-		find "$project_root/$STYLE_PATH_INTERNAL" "$project_root/$STYLE_PATH_CMD" \
+		find \
+			"$project_root/$STYLE_PATH_INTERNAL" \
+			"$project_root/$STYLE_PATH_CMD" \
+			"$project_root/$STYLE_PATH_TESTS" \
 			-type f -name "$pattern" 2>/dev/null | sort -u
 		;;
 	"$STYLE_SCOPE_TOOLS")

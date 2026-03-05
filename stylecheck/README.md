@@ -5,6 +5,7 @@
 ## Implemented checks
 
 - `2.2` Named return values are required.
+- `2.2` Naked returns are disallowed when return values are named.
 - `2.2` Parameter type elision is disallowed.
 - `2.2` Single-letter variable names are restricted (`i`, `j`, `k`, `_` only).
 - `2.2` Exported types under `internal/core/services` must end with
@@ -23,5 +24,5 @@ From repo root:
 
 ```bash
 cd tools/stylecheck
-go run . ../../internal ../../cmd
+go run . ../../internal ../../cmd ../../tests
 ```
