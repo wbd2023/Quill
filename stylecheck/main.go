@@ -1,7 +1,7 @@
 // Command stylecheck performs AST-based style checks on Go source files.
 //
 // It enforces the following rules from STYLE.md:
-//   - 2.2 Named returns: all functions must use named return values.
+//   - 2.2 Named returns: all functions must use named, descriptive return values.
 //   - 2.2 Type elision: each parameter must have its own type.
 //   - 2.2 Single-letter variables: only i, j, k (loops) and receivers.
 //   - 2.2 Service package type naming: exported types end with Service/UseCase/Config.
@@ -22,6 +22,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"unicode"
@@ -74,6 +75,8 @@ const (
 	minParamFieldSpan = 2
 )
 
+var placeholderReturnNamePattern = regexp.MustCompile(`^result[0-9]+$`)
+
 /* -------------------------------------------- Main -------------------------------------------- */
 
 func main() {
@@ -89,55 +92,58 @@ func main() {
 	mocks := make(map[string][]methodDecl)
 
 	for _, directory := range directories {
-		walkError := filepath.WalkDir(directory, func(path string, entry os.DirEntry, err error) error {
-			if err != nil {
-				return nil
-			}
-
-			if entry.IsDir() {
-				switch entry.Name() {
-				case "vendor", ".git", "testdata":
-					return filepath.SkipDir
+		walkError := filepath.WalkDir(
+			directory,
+			func(path string, entry os.DirEntry, err error) error {
+				if err != nil {
+					return nil
 				}
+
+				if entry.IsDir() {
+					switch entry.Name() {
+					case "vendor", ".git", "testdata":
+						return filepath.SkipDir
+					}
+					return nil
+				}
+
+				if !strings.HasSuffix(path, ".go") {
+					return nil
+				}
+
+				file, parseError := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
+				if parseError != nil {
+					fmt.Fprintf(os.Stderr, "warning: skipping %s: %v\n", path, parseError)
+					return nil
+				}
+
+				normalisedPath := filepath.ToSlash(path)
+				isTestFile := strings.HasSuffix(path, "_test.go")
+
+				allViolations = append(allViolations, checkNamedReturns(fileSet, file)...)
+				allViolations = append(allViolations, checkTypeElision(fileSet, file)...)
+				allViolations = append(allViolations, checkParamOrder(fileSet, file)...)
+				allViolations = append(allViolations, checkConstructorOrder(fileSet, file)...)
+				allViolations = append(
+					allViolations,
+					checkServiceTypeNaming(fileSet, file, normalisedPath)...,
+				)
+				allViolations = append(
+					allViolations,
+					checkCRUDLOrder(fileSet, file, normalisedPath)...,
+				)
+				collectInterfaces(fileSet, file, normalisedPath, interfaces)
+				collectMockMethods(fileSet, file, normalisedPath, mocks)
+
+				// Single-letter checks skip test files to reduce noise in table-driven
+				// structures and assertion helpers.
+				if !isTestFile {
+					allViolations = append(allViolations, checkSingleLetterVars(fileSet, file)...)
+				}
+
 				return nil
-			}
-
-			if !strings.HasSuffix(path, ".go") {
-				return nil
-			}
-
-			file, parseError := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
-			if parseError != nil {
-				fmt.Fprintf(os.Stderr, "warning: skipping %s: %v\n", path, parseError)
-				return nil
-			}
-
-			normalisedPath := filepath.ToSlash(path)
-			isTestFile := strings.HasSuffix(path, "_test.go")
-
-			allViolations = append(allViolations, checkNamedReturns(fileSet, file)...)
-			allViolations = append(allViolations, checkTypeElision(fileSet, file)...)
-			allViolations = append(allViolations, checkParamOrder(fileSet, file)...)
-			allViolations = append(allViolations, checkConstructorOrder(fileSet, file)...)
-			allViolations = append(
-				allViolations,
-				checkServiceTypeNaming(fileSet, file, normalisedPath)...,
-			)
-			allViolations = append(
-				allViolations,
-				checkCRUDLOrder(fileSet, file, normalisedPath)...,
-			)
-			collectInterfaces(fileSet, file, normalisedPath, interfaces)
-			collectMockMethods(fileSet, file, normalisedPath, mocks)
-
-			// Single-letter checks skip test files to reduce noise from
-			// table-driven test structures and assertion helpers.
-			if !isTestFile {
-				allViolations = append(allViolations, checkSingleLetterVars(fileSet, file)...)
-			}
-
-			return nil
-		})
+			},
+		)
 		if walkError != nil {
 			fmt.Fprintf(os.Stderr, "error walking %s: %v\n", directory, walkError)
 		}
@@ -167,7 +173,10 @@ func checkNamedReturns(fileSet *token.FileSet, file *ast.File) (violations []vio
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch declaration := node.(type) {
 		case *ast.FuncDecl:
-			violations = append(violations, checkFuncReturns(fileSet, declaration.Name.Name, declaration.Type)...)
+			violations = append(
+				violations,
+				checkFuncReturns(fileSet, declaration.Name.Name, declaration.Type)...,
+			)
 
 		case *ast.InterfaceType:
 			if declaration.Methods == nil {
@@ -191,7 +200,11 @@ func checkNamedReturns(fileSet *token.FileSet, file *ast.File) (violations []vio
 }
 
 // checkFuncReturns reports a violation if any return value is unnamed.
-func checkFuncReturns(fileSet *token.FileSet, funcName string, funcType *ast.FuncType) (violations []violation) {
+func checkFuncReturns(
+	fileSet *token.FileSet,
+	funcName string,
+	funcType *ast.FuncType,
+) (violations []violation) {
 	if funcType.Results == nil || len(funcType.Results.List) == 0 {
 		return nil
 	}
@@ -204,8 +217,22 @@ func checkFuncReturns(fileSet *token.FileSet, funcName string, funcType *ast.Fun
 			})
 			return violations // one violation per function is enough
 		}
+
+		for _, name := range field.Names {
+			if placeholderReturnNamePattern.MatchString(name.Name) {
+				violations = append(violations, violation{
+					position: fileSet.Position(name.Pos()),
+					rule:     "2.2",
+					message: fmt.Sprintf(
+						"function %q uses placeholder return name %q",
+						funcName,
+						name.Name,
+					),
+				})
+			}
+		}
 	}
-	return nil
+	return violations
 }
 
 // checkTypeElision ensures each parameter has its own type declaration (2.2).
@@ -228,7 +255,10 @@ func checkTypeElision(fileSet *token.FileSet, file *ast.File) (violations []viol
 				violations = append(violations, violation{
 					position: fileSet.Position(field.Pos()),
 					rule:     "2.2",
-					message:  fmt.Sprintf("type elision: parameters %s share a type", strings.Join(names, ", ")),
+					message: fmt.Sprintf(
+						"type elision: parameters %s share a type",
+						strings.Join(names, ", "),
+					),
 				})
 			}
 		}
@@ -253,7 +283,11 @@ func checkSingleLetterVars(fileSet *token.FileSet, file *ast.File) (violations [
 							violations = append(violations, violation{
 								position: fileSet.Position(name.Pos()),
 								rule:     "2.2",
-								message:  fmt.Sprintf("single-letter parameter %q in function %q", name.Name, declaration.Name.Name),
+								message: fmt.Sprintf(
+									"single-letter parameter %q in function %q",
+									name.Name,
+									declaration.Name.Name,
+								),
 							})
 						}
 					}
@@ -265,15 +299,15 @@ func checkSingleLetterVars(fileSet *token.FileSet, file *ast.File) (violations [
 				return true
 			}
 			for _, lhs := range declaration.Lhs {
-				ident, ok := lhs.(*ast.Ident)
+				identifierNode, ok := lhs.(*ast.Ident)
 				if !ok {
 					continue
 				}
-				if len(ident.Name) == 1 && !allowed[ident.Name] {
+				if len(identifierNode.Name) == 1 && !allowed[identifierNode.Name] {
 					violations = append(violations, violation{
-						position: fileSet.Position(ident.Pos()),
+						position: fileSet.Position(identifierNode.Pos()),
 						rule:     "2.2",
-						message:  fmt.Sprintf("single-letter variable %q", ident.Name),
+						message:  fmt.Sprintf("single-letter variable %q", identifierNode.Name),
 					})
 				}
 			}
@@ -678,7 +712,8 @@ func checkMockOrderAgainstInterfaces(
 				position: mockMethods[index].position,
 				rule:     "2.5",
 				message: fmt.Sprintf(
-					"mock %q for interface %q method order mismatch at position %d: got %q, want %q",
+					"mock %q for interface %q method order mismatch at position %d: "+
+						"got %q, want %q",
 					matchedMockName,
 					interfaceName,
 					index+1,
@@ -839,8 +874,8 @@ func crudCategory(name string) (category int) {
 func receiverTypeName(expr ast.Expr) (typeName string) {
 	switch typed := expr.(type) {
 	case *ast.StarExpr:
-		if ident, ok := typed.X.(*ast.Ident); ok {
-			return ident.Name
+		if identifierNode, ok := typed.X.(*ast.Ident); ok {
+			return identifierNode.Name
 		}
 	case *ast.Ident:
 		return typed.Name
