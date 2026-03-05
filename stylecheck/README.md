@@ -14,6 +14,8 @@
 - `2.7` Parameter ordering checks: `ctx` first, secret parameters last.
 - `2.8` Constructor parameter category ordering:
   repository -> service -> adapter -> config -> secret.
+- `2.9` Objective file-structure ordering for top-level declarations
+  (constants -> errors -> types -> assertions).
 
 ## Run
 
