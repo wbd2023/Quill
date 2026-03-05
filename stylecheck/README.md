@@ -7,6 +7,8 @@
 - `2.2` Named return values are required.
 - `2.2` Naked returns are disallowed when return values are named.
 - `2.2` Parameter type elision is disallowed.
+- `2.2` Direct casts to key domain ID aliases are disallowed outside
+  `internal/core/domain`; parser/constructor helpers are required.
 - `2.2` Single-letter variable names are restricted (`i`, `j`, `k`, `_` only).
 - `2.2` Exported types under `internal/core/services` must end with
   `Service`, `UseCase`, or `Config` (excluding `accountref` helper package).
