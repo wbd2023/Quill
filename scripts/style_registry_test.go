@@ -192,7 +192,7 @@ type styleRegistryRow struct {
 	Target string
 }
 
-func expectedStyleRegistryRows() []styleRegistryRow {
+func expectedStyleRegistryRows() (rows []styleRegistryRow) {
 	row := func(
 		tier string,
 		level string,
@@ -213,7 +213,7 @@ func expectedStyleRegistryRows() []styleRegistryRow {
 		}
 	}
 
-	return []styleRegistryRow{
+	rows = []styleRegistryRow{
 		row("tier1", "required", "1-2", "golangci-lint (app)", "app", "runner", "golangci_app"),
 		row(
 			"tier1",
@@ -388,9 +388,11 @@ func expectedStyleRegistryRows() []styleRegistryRow {
 			"ast_tools",
 		),
 	}
+
+	return rows
 }
 
-func loadStyleRegistryRows(tableOverride string) ([]styleRegistryRow, error) {
+func loadStyleRegistryRows(tableOverride string) (rows []styleRegistryRow, err error) {
 	output, err := runStyleRegistryCommand(
 		tableOverride,
 		[]string{
@@ -419,7 +421,7 @@ func loadStyleRegistryRows(tableOverride string) ([]styleRegistryRow, error) {
 	}
 
 	lines := strings.Split(strings.TrimSpace(output), "\n")
-	rows := make([]styleRegistryRow, 0, len(lines))
+	rows = make([]styleRegistryRow, 0, len(lines))
 	for lineNumber, line := range lines {
 		fields := strings.Split(line, "|")
 		if len(fields) != styleRegistryFieldCount {
@@ -444,7 +446,10 @@ func loadStyleRegistryRows(tableOverride string) ([]styleRegistryRow, error) {
 	return rows, nil
 }
 
-func runStyleRegistryCommand(tableOverride string, scriptLines []string) (string, error) {
+func runStyleRegistryCommand(
+	tableOverride string,
+	scriptLines []string,
+) (output string, err error) {
 	command := exec.Command("bash", "-c", strings.Join(scriptLines, "\n"))
 	command.Env = append(
 		os.Environ(),
@@ -452,8 +457,8 @@ func runStyleRegistryCommand(tableOverride string, scriptLines []string) (string
 		"STYLE_REGISTRY_TABLE_FILE="+tableOverride,
 	)
 
-	rawOutput, runErr := command.CombinedOutput()
-	return string(rawOutput), runErr
+	rawOutput, err := command.CombinedOutput()
+	return string(rawOutput), err
 }
 
 func assertRegistryLoadRejected(t *testing.T, tableFile string, expectedError string) {

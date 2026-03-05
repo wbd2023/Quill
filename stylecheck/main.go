@@ -921,6 +921,7 @@ func classifyTopLevelDecl(declaration ast.Decl) (category int) {
 			if isCompileTimeAssertionDecl(typed) {
 				return declAssertions
 			}
+
 			if isSentinelErrorDecl(typed) {
 				return declErrors
 			}
@@ -940,6 +941,7 @@ func isCompileTimeAssertionDecl(declaration *ast.GenDecl) (found bool) {
 		if !ok || len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "_" {
 			return false
 		}
+
 		if valueSpec.Type == nil || len(valueSpec.Values) != 1 {
 			return false
 		}
