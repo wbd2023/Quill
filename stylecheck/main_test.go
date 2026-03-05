@@ -61,6 +61,30 @@ func Good(value string) (err error) {
 	}
 }
 
+func TestStylecheckReportsPlaceholderReturnNames(t *testing.T) {
+	tempDir := t.TempDir()
+	sourcePath := filepath.Join(tempDir, "sample.go")
+	// Intentionally uses placeholder return naming to assert rule enforcement.
+	sourceCode := `package sample
+
+func Bad() (result0 string) {
+	return "bad"
+}
+`
+	if err := os.WriteFile(sourcePath, []byte(sourceCode), 0o600); err != nil {
+		t.Fatalf("write source: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err == nil {
+		t.Fatalf("expected stylecheck to fail, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, `[2.2] function "Bad" uses placeholder return name "result0"`) {
+		t.Fatalf("expected placeholder return-name violation, got:\n%s", output)
+	}
+}
+
 func TestStylecheckMatchesMockPrefixNaming(t *testing.T) {
 	tempDir := t.TempDir()
 	portsDirectory := filepath.Join(tempDir, "internal", "core", "ports")
@@ -110,7 +134,10 @@ func (m *MockUserRepository) Save(value string) (err error) {
 		t.Fatalf("expected stylecheck to fail, output:\n%s", output)
 	}
 
-	if !strings.Contains(output, `mock "MockUserRepository" for interface "UserRepository" method order mismatch`) {
+	if !strings.Contains(
+		output,
+		`mock "MockUserRepository" for interface "UserRepository" method order mismatch`,
+	) {
 		t.Fatalf("expected prefixed mock-order violation, got:\n%s", output)
 	}
 }

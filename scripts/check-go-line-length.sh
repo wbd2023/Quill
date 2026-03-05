@@ -16,11 +16,15 @@ set -euo pipefail
 # --------------------------------------------- Config ---------------------------------------------
 
 USAGE_EXIT_CODE=2
+MAX_LINE_LENGTH=100
+TAB_WIDTH=4
+FOUND=0
 CACHE_ROOT="${TMPDIR:-/tmp}/ciphera-stylecheck-${USER:-user}"
 GO_BUILD_CACHE="${GO_BUILD_CACHE:-$CACHE_ROOT/go-build}"
 GOLANGCI_CACHE="${GOLANGCI_CACHE:-$CACHE_ROOT/golangci-lint}"
 RULE_LABEL="1.1"
-RULE_MESSAGE_PREFIX="[${RULE_LABEL}] Go line-length findings:"
+RULE_GO_VISUAL_PREFIX="[${RULE_LABEL}] Go line exceeds ${MAX_LINE_LENGTH} columns:"
+RULE_LINTER_PREFIX="[${RULE_LABEL}] Go line-length findings (lll):"
 LINTER_NAME="lll"
 PACKAGE_APP_CMD="./cmd/..."
 PACKAGE_APP_INTERNAL="./internal/..."
@@ -71,13 +75,37 @@ case "$SCOPE" in
 	;;
 esac
 
+mapfile -t GO_FILES < <(style_collect_files "$PROJECT_ROOT" "$SCOPE" "$STYLE_PATTERN_GO")
+
+for file in "${GO_FILES[@]}"; do
+	line_number=0
+	while IFS= read -r line || [ -n "$line" ]; do
+		line_number=$((line_number + 1))
+		expanded_line="${line//$'\t'/    }"
+		line_length=${#expanded_line}
+
+		if [ "$line_length" -le "$MAX_LINE_LENGTH" ]; then
+			continue
+		fi
+
+		echo "$RULE_GO_VISUAL_PREFIX"
+		echo "  ${file}:${line_number} (${line_length} columns, tab width ${TAB_WIDTH})"
+		echo ""
+		FOUND=1
+	done <"$file"
+done
+
 if ! output=$(
 	cd "$PROJECT_ROOT" && GOCACHE="$GO_BUILD_CACHE" GOLANGCI_LINT_CACHE="$GOLANGCI_CACHE" \
 		golangci-lint run "${linter_flags[@]}" "${packages[@]}" 2>&1
 ); then
-	echo "$RULE_MESSAGE_PREFIX"
+	echo "$RULE_LINTER_PREFIX"
 	echo "$output"
 	echo ""
+	FOUND=1
+fi
+
+if [ "$FOUND" -eq 1 ]; then
 	exit 1
 fi
 
