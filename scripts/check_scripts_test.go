@@ -49,8 +49,8 @@ func TestCheckBashLineLengthScript(t *testing.T) {
 	}
 
 	longScriptPath := filepath.Join(tempProjectRoot, "tools", "long.sh")
-	longScriptContent := "#!/bin/bash\nset -euo pipefail\necho \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	longScriptContent += "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n"
+	longPayload := strings.Repeat("a", 120)
+	longScriptContent := "#!/bin/bash\nset -euo pipefail\necho \"" + longPayload + "\"\n"
 	if err := os.WriteFile(longScriptPath, []byte(longScriptContent), 0o600); err != nil {
 		t.Fatalf("write long script: %v", err)
 	}
@@ -65,8 +65,7 @@ func TestCheckBashLineLengthScript(t *testing.T) {
 	}
 
 	allowedLongScriptContent := "#!/bin/bash\nset -euo pipefail\n"
-	allowedLongScriptContent += "echo \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	allowedLongScriptContent += "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" # style: allow-long-line\n"
+	allowedLongScriptContent += "echo \"" + longPayload + "\" # style: allow-long-line\n"
 	if err := os.WriteFile(longScriptPath, []byte(allowedLongScriptContent), 0o600); err != nil {
 		t.Fatalf("rewrite long script with marker: %v", err)
 	}
@@ -98,9 +97,72 @@ func TestCheckBashLineLengthScriptUsage(t *testing.T) {
 	}
 }
 
+func TestCheckGoLineLengthScriptTabWidth(t *testing.T) {
+	tempProjectRoot, targetScript := setupBashScriptHarness(t, "check-go-line-length.sh")
+
+	fakeBinDirectory := filepath.Join(tempProjectRoot, "fake-bin")
+	if err := os.MkdirAll(fakeBinDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir fake bin directory: %v", err)
+	}
+
+	fakeLinterPath := filepath.Join(fakeBinDirectory, "golangci-lint")
+	fakeLinterContent := "#!/bin/bash\nset -euo pipefail\n"
+	fakeLinterContent += "if [ \"${1:-}\" = \"run\" ] && [ \"${2:-}\" = \"--help\" ]; then\n"
+	fakeLinterContent += "\techo \"--enable-only\"\n\texit 0\nfi\n"
+	fakeLinterContent += "if [ \"${1:-}\" = \"run\" ]; then\n\texit 0\nfi\nexit 0\n"
+	if err := os.WriteFile(fakeLinterPath, []byte(fakeLinterContent), 0o700); err != nil {
+		t.Fatalf("write fake golangci-lint: %v", err)
+	}
+
+	goFilePath := filepath.Join(tempProjectRoot, "tools", "tab_width.go")
+	goFileContent := "package tools\n\nfunc tabWidth() {\n\t// " + strings.Repeat("a", 97) + "\n}\n"
+	if err := os.WriteFile(goFilePath, []byte(goFileContent), 0o600); err != nil {
+		t.Fatalf("write tab-width go file: %v", err)
+	}
+
+	goTestFilePath := filepath.Join(tempProjectRoot, "tools", "tab_width_test.go")
+	goTestFileContent := "package tools\n\nfunc TestTabWidth() {\n\t// "
+	goTestFileContent += strings.Repeat("a", 97) + "\n}\n"
+	if err := os.WriteFile(goTestFilePath, []byte(goTestFileContent), 0o600); err != nil {
+		t.Fatalf("write tab-width go test file: %v", err)
+	}
+
+	pathOverride := "PATH=" + fakeBinDirectory + ":" + os.Getenv("PATH")
+	output, err := runBashScriptWithEnv(targetScript, []string{pathOverride}, "--scope", "tools")
+	if err == nil {
+		t.Fatalf("expected tab-width go file to fail, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, "[1.1] Go line exceeds 100 columns") {
+		t.Fatalf("expected tab-width finding, got:\n%s", output)
+	}
+
+	fixedGoFileContent := "package tools\n\nfunc tabWidth() {\n\t// short\n}\n"
+	if err := os.WriteFile(goFilePath, []byte(fixedGoFileContent), 0o600); err != nil {
+		t.Fatalf("rewrite tab-width go file: %v", err)
+	}
+
+	fixedGoTestFileContent := "package tools\n\nfunc TestTabWidth() {\n\t// short\n}\n"
+	if err := os.WriteFile(goTestFilePath, []byte(fixedGoTestFileContent), 0o600); err != nil {
+		t.Fatalf("rewrite tab-width go test file: %v", err)
+	}
+
+	if output, err := runBashScriptWithEnv(
+		targetScript,
+		[]string{pathOverride},
+		"--scope",
+		"tools",
+	); err != nil {
+		t.Fatalf("expected fixed go file to pass, output:\n%s", output)
+	}
+}
+
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
-func setupBashScriptHarness(t *testing.T, scriptName string) (tempProjectRoot string, targetScript string) {
+func setupBashScriptHarness(
+	t *testing.T,
+	scriptName string,
+) (tempProjectRoot string, targetScript string) {
 	t.Helper()
 
 	tempProjectRoot = t.TempDir()
@@ -128,6 +190,19 @@ func setupBashScriptHarness(t *testing.T, scriptName string) (tempProjectRoot st
 func runBashScript(scriptPath string, args ...string) (output string, err error) {
 	commandArguments := append([]string{scriptPath}, args...)
 	command := exec.Command("bash", commandArguments...)
+
+	rawOutput, runErr := command.CombinedOutput()
+	return string(rawOutput), runErr
+}
+
+func runBashScriptWithEnv(
+	scriptPath string,
+	envelope []string,
+	args ...string,
+) (output string, err error) {
+	commandArguments := append([]string{scriptPath}, args...)
+	command := exec.Command("bash", commandArguments...)
+	command.Env = append(os.Environ(), envelope...)
 
 	rawOutput, runErr := command.CombinedOutput()
 	return string(rawOutput), runErr
