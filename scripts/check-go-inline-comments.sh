@@ -69,9 +69,10 @@ while IFS= read -r match; do
 		FOUND=1
 	fi
 done < <(
-	rg -n --glob "$STYLE_PATTERN_GO" --glob '!*_test.go' \
+	rg -n --glob "$STYLE_PATTERN_GO" \
 		"$INLINE_COMMENT_PATTERN" \
-		"$PROJECT_ROOT/$STYLE_PATH_INTERNAL" "$PROJECT_ROOT/$STYLE_PATH_CMD" || true
+		"$PROJECT_ROOT/$STYLE_PATH_INTERNAL" "$PROJECT_ROOT/$STYLE_PATH_CMD" \
+		"$PROJECT_ROOT/$STYLE_PATH_TESTS" || true
 )
 
 # ------------------------------------------- Validation -------------------------------------------

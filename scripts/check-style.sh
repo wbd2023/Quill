@@ -274,7 +274,7 @@ run_registered_target() {
 			(
 				cd "$PROJECT_ROOT/tools/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
-					go run . "$PROJECT_ROOT/tools/stylecheck"
+					go run . "$PROJECT_ROOT/tools/stylecheck" "$PROJECT_ROOT/tools/scripts"
 			)
 			;;
 		*)
