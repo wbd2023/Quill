@@ -9,6 +9,7 @@
 - `2.2` Parameter type elision is disallowed.
 - `2.2` Direct casts to key domain ID aliases are disallowed in all Go code
   (including tests) outside `internal/core/domain`; parser/constructor helpers are required.
+  This check is type-aware and also catches alias-import and local type-alias bypasses.
 - `2.2` Single-letter variable names are restricted (`i`, `j`, `k`, `_` only).
 - `2.2` Exported types under `internal/core/services` must end with
   `Service`, `UseCase`, or `Config` (excluding `accountref` helper package).

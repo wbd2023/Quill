@@ -163,6 +163,36 @@ func Good(raw string) (id domain.IdentityID, err error) {
 	}
 }
 
+func TestStylecheckReportsTypeAliasToDomainIdentifierCast(t *testing.T) {
+	tempDir := t.TempDir()
+	writeTypeAwareDomainFixture(t, tempDir)
+
+	sourcePath := filepath.Join(tempDir, "sample.go")
+	sourceCode := `package sample
+
+import coredomain "example/internal/core/domain"
+
+type AppIdentityID = coredomain.IdentityID
+
+func Bad(raw string) (id AppIdentityID, err error) {
+	id = AppIdentityID(raw)
+	return id, nil
+}
+`
+	if err := os.WriteFile(sourcePath, []byte(sourceCode), 0o600); err != nil {
+		t.Fatalf("write source: %v", err)
+	}
+
+	output, err := runStylecheck(tempDir)
+	if err == nil {
+		t.Fatalf("expected stylecheck to fail, output:\n%s", output)
+	}
+
+	if !strings.Contains(output, `direct cast to domain.IdentityID is disallowed`) {
+		t.Fatalf("expected type-aware direct-cast violation, got:\n%s", output)
+	}
+}
+
 func TestStylecheckMatchesMockPrefixNaming(t *testing.T) {
 	tempDir := t.TempDir()
 	portsDirectory := filepath.Join(tempDir, "internal", "core", "ports")
@@ -479,4 +509,28 @@ func runStylecheck(targetDirectory string) (output string, err error) {
 func stylecheckModuleDirectory() (directory string) {
 	_, currentFile, _, _ := runtime.Caller(0)
 	return filepath.Dir(currentFile)
+}
+
+func writeTypeAwareDomainFixture(t *testing.T, rootDirectory string) {
+	t.Helper()
+
+	goModPath := filepath.Join(rootDirectory, "go.mod")
+	goModContent := "module example\n\ngo 1.24.5\n"
+	if err := os.WriteFile(goModPath, []byte(goModContent), 0o600); err != nil {
+		t.Fatalf("write go.mod: %v", err)
+	}
+
+	domainDirectory := filepath.Join(rootDirectory, "internal", "core", "domain")
+	if err := os.MkdirAll(domainDirectory, 0o700); err != nil {
+		t.Fatalf("mkdir domain fixture: %v", err)
+	}
+
+	domainTypesPath := filepath.Join(domainDirectory, "types.go")
+	domainTypesSource := `package domain
+
+type IdentityID string
+`
+	if err := os.WriteFile(domainTypesPath, []byte(domainTypesSource), 0o600); err != nil {
+		t.Fatalf("write domain fixture types: %v", err)
+	}
 }

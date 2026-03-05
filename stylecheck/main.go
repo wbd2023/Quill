@@ -5,6 +5,7 @@
 //   - 2.2 Naked returns: explicit return values are required.
 //   - 2.2 Type elision: each parameter must have its own type.
 //   - 2.2 Domain ID constructors: avoid direct casts for key domain identifier types.
+//     This uses a type-aware pass with syntax fallback for non-buildable snippets.
 //   - 2.2 Single-letter variables: only i, j, k (loops) and receivers.
 //   - 2.2 Service package type naming: exported types end with Service/UseCase/Config.
 //   - 2.5 CRUD-L ordering inside interfaces.
@@ -24,12 +25,15 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 	"unicode"
+
+	"golang.org/x/tools/go/packages"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
@@ -69,6 +73,7 @@ const (
 )
 
 const domainPackagePathSegment = "/internal/core/domain/"
+const domainPackagePathSuffix = "/internal/core/domain"
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
@@ -99,6 +104,7 @@ type implementationBinding struct {
 
 type analysisState struct {
 	fileSet                *token.FileSet
+	scannedGoFiles         []string
 	violations             []violation
 	interfaces             map[string]interfaceDecl
 	mocks                  map[string][]methodDecl
@@ -124,7 +130,8 @@ func main() {
 		state.walkDirectory(directory)
 	}
 
-	state.addCrossFileViolations()
+	state.addCrossFileViolations(directories)
+	state.violations = dedupeViolations(state.violations)
 	sortViolations(state.violations)
 	printViolationsAndExit(state.violations)
 }
@@ -141,6 +148,7 @@ func parseDirectoriesOrExit() (directories []string) {
 func newAnalysisState() (state *analysisState) {
 	return &analysisState{
 		fileSet:                token.NewFileSet(),
+		scannedGoFiles:         make([]string, 0),
 		interfaces:             make(map[string]interfaceDecl),
 		mocks:                  make(map[string][]methodDecl),
 		implementations:        make(map[string][]methodDecl),
@@ -193,7 +201,8 @@ func (state *analysisState) processFile(path string) {
 		return
 	}
 
-	normalisedPath := filepath.ToSlash(path)
+	normalisedPath := normalisePath(path)
+	state.scannedGoFiles = append(state.scannedGoFiles, normalisedPath)
 	isTestFile := strings.HasSuffix(path, "_test.go")
 	state.addPerFileViolations(file, normalisedPath, isTestFile)
 }
@@ -242,7 +251,15 @@ func (state *analysisState) addPerFileViolations(
 	}
 }
 
-func (state *analysisState) addCrossFileViolations() {
+func (state *analysisState) addCrossFileViolations(scanRoots []string) {
+	typeAwareViolations, typeAwareRan := collectTypeAwareDomainIdentifierCastViolations(
+		scanRoots,
+		state.scannedGoFiles,
+	)
+	if typeAwareRan {
+		state.violations = append(state.violations, typeAwareViolations...)
+	}
+
 	state.violations = append(
 		state.violations,
 		checkMockOrderAgainstInterfaces(state.interfaces, state.mocks)...,
@@ -264,6 +281,31 @@ func sortViolations(violations []violation) {
 		}
 		return violations[i].position.Filename < violations[j].position.Filename
 	})
+}
+
+func dedupeViolations(violations []violation) (deduped []violation) {
+	seen := make(map[string]bool)
+	deduped = make([]violation, 0, len(violations))
+
+	for _, current := range violations {
+		key := fmt.Sprintf(
+			"%s:%d:%d|%s|%s",
+			current.position.Filename,
+			current.position.Line,
+			current.position.Column,
+			current.rule,
+			current.message,
+		)
+
+		if seen[key] {
+			continue
+		}
+
+		seen[key] = true
+		deduped = append(deduped, current)
+	}
+
+	return deduped
 }
 
 func printViolationsAndExit(violations []violation) {
@@ -423,6 +465,136 @@ func checkDirectDomainIdentifierCasts(
 	})
 
 	return violations
+}
+
+func collectTypeAwareDomainIdentifierCastViolations(
+	rootDirectories []string,
+	filePaths []string,
+) (violations []violation, ran bool) {
+	if len(filePaths) == 0 || len(rootDirectories) == 0 {
+		return nil, false
+	}
+
+	requestedFilePaths := make(map[string]bool, len(filePaths))
+	for _, filePath := range filePaths {
+		normalisedPath := normalisePath(filePath)
+		requestedFilePaths[normalisedPath] = true
+	}
+
+	for _, rootDirectory := range rootDirectories {
+		normalisedRoot := normalisePath(rootDirectory)
+
+		packageConfig := &packages.Config{
+			Mode: packages.NeedName |
+				packages.NeedFiles |
+				packages.NeedCompiledGoFiles |
+				packages.NeedSyntax |
+				packages.NeedTypes |
+				packages.NeedTypesInfo,
+			Dir:   normalisedRoot,
+			Tests: true,
+		}
+
+		loadedPackages, err := packages.Load(packageConfig, "./...")
+		if err != nil || len(loadedPackages) == 0 {
+			continue
+		}
+
+		ran = true
+
+		for _, loadedPackage := range loadedPackages {
+			if loadedPackage == nil ||
+				loadedPackage.TypesInfo == nil ||
+				loadedPackage.Fset == nil {
+				continue
+			}
+
+			for _, file := range loadedPackage.Syntax {
+				filePath := normalisePath(loadedPackage.Fset.Position(file.Pos()).Filename)
+
+				if !requestedFilePaths[filePath] {
+					continue
+				}
+
+				if strings.Contains(filePath, domainPackagePathSegment) {
+					continue
+				}
+
+				ast.Inspect(file, func(node ast.Node) bool {
+					callExpression, ok := node.(*ast.CallExpr)
+					if !ok || len(callExpression.Args) != 1 {
+						return true
+					}
+
+					typeAndValue, ok := loadedPackage.TypesInfo.Types[callExpression.Fun]
+					if !ok {
+						return true
+					}
+
+					domainTypeName, found := resolvedDomainIdentifierTypeName(typeAndValue.Type)
+					if !found {
+						return true
+					}
+
+					recommendedConstructor := directDomainIdentifierConstructors[domainTypeName]
+					violations = append(violations, violation{
+						position: loadedPackage.Fset.Position(callExpression.Pos()),
+						rule:     "2.2",
+						message: fmt.Sprintf(
+							"direct cast to domain.%s is disallowed; use %s",
+							domainTypeName,
+							recommendedConstructor,
+						),
+					})
+
+					return true
+				})
+			}
+		}
+	}
+
+	return violations, ran
+}
+
+func resolvedDomainIdentifierTypeName(targetType types.Type) (name string, found bool) {
+	namedType, ok := types.Unalias(targetType).(*types.Named)
+	if !ok {
+		return "", false
+	}
+
+	typeObject := namedType.Obj()
+	if typeObject == nil || typeObject.Pkg() == nil {
+		return "", false
+	}
+
+	packagePath := typeObject.Pkg().Path()
+	if !isDomainPackagePath(packagePath) {
+		return "", false
+	}
+
+	typeName := typeObject.Name()
+	if _, supported := directDomainIdentifierConstructors[typeName]; !supported {
+		return "", false
+	}
+
+	return typeName, true
+}
+
+func isDomainPackagePath(packagePath string) (found bool) {
+	if packagePath == "internal/core/domain" {
+		return true
+	}
+
+	return strings.HasSuffix(packagePath, domainPackagePathSuffix)
+}
+
+func normalisePath(path string) (normalisedPath string) {
+	absolutePath, err := filepath.Abs(path)
+	if err != nil {
+		return filepath.ToSlash(filepath.Clean(path))
+	}
+
+	return filepath.ToSlash(filepath.Clean(absolutePath))
 }
 
 // checkNakedReturns reports naked returns in functions that declare named return values (2.2).
