@@ -208,7 +208,7 @@ func (state *analysisState) addPerFileViolations(
 	state.violations = append(state.violations, checkTypeElision(state.fileSet, file)...)
 	state.violations = append(
 		state.violations,
-		checkDirectDomainIdentifierCasts(state.fileSet, file, normalisedPath, isTestFile)...,
+		checkDirectDomainIdentifierCasts(state.fileSet, file, normalisedPath)...,
 	)
 	state.violations = append(state.violations, checkParamOrder(state.fileSet, file)...)
 	state.violations = append(state.violations, checkConstructorOrder(state.fileSet, file)...)
@@ -384,9 +384,8 @@ func checkDirectDomainIdentifierCasts(
 	fileSet *token.FileSet,
 	file *ast.File,
 	path string,
-	isTestFile bool,
 ) (violations []violation) {
-	if isTestFile || strings.Contains(path, domainPackagePathSegment) {
+	if strings.Contains(path, domainPackagePathSegment) {
 		return nil
 	}
 
