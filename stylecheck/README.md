@@ -12,6 +12,8 @@
   `Service`, `UseCase`, or `Config` (excluding `accountref` helper package).
 - `2.5` Interface methods in `internal/core/ports` must follow CRUD-L ordering.
 - `2.5` Mock method order must match corresponding interface order exactly.
+- `2.5` Implementation method order must match corresponding interface order exactly when
+  compile-time assertions are present.
 - `2.7` Parameter ordering checks: `ctx` first, secret parameters last.
 - `2.8` Constructor parameter category ordering:
   repository -> service -> adapter -> config -> secret.

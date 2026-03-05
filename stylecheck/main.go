@@ -8,6 +8,7 @@
 //   - 2.2 Service package type naming: exported types end with Service/UseCase/Config.
 //   - 2.5 CRUD-L ordering inside interfaces.
 //   - 2.5 Mock method order matches interface method order exactly.
+//   - 2.5 Implementation method order matches interface method order exactly.
 //   - 2.7 Parameter ordering: ctx first, secrets last.
 //   - 2.8 Constructor ordering: repos -> services -> adapters -> config -> secrets.
 //   - 2.9 File structure ordering for top-level declarations.
@@ -86,6 +87,13 @@ type interfaceDecl struct {
 	position token.Position
 }
 
+type implementationBinding struct {
+	interfaceName      string
+	implementationName string
+	implementationKey  string
+	position           token.Position
+}
+
 var placeholderReturnNamePattern = regexp.MustCompile(`^result[0-9]+$`)
 
 /* -------------------------------------------- Main -------------------------------------------- */
@@ -101,6 +109,8 @@ func main() {
 	fileSet := token.NewFileSet()
 	interfaces := make(map[string]interfaceDecl)
 	mocks := make(map[string][]methodDecl)
+	implementations := make(map[string][]methodDecl)
+	implementationBindings := make([]implementationBinding, 0)
 
 	for _, directory := range directories {
 		walkError := filepath.WalkDir(
@@ -149,6 +159,13 @@ func main() {
 				)
 				collectInterfaces(fileSet, file, normalisedPath, interfaces)
 				collectMockMethods(fileSet, file, normalisedPath, mocks)
+				collectImplementationMethods(fileSet, file, normalisedPath, implementations)
+				collectImplementationBindings(
+					fileSet,
+					file,
+					normalisedPath,
+					&implementationBindings,
+				)
 
 				// Single-letter checks skip test files to reduce noise in table-driven
 				// structures and assertion helpers.
@@ -165,6 +182,14 @@ func main() {
 	}
 
 	allViolations = append(allViolations, checkMockOrderAgainstInterfaces(interfaces, mocks)...)
+	allViolations = append(
+		allViolations,
+		checkImplementationOrderAgainstInterfaces(
+			interfaces,
+			implementations,
+			implementationBindings,
+		)...,
+	)
 	sort.Slice(allViolations, func(i int, j int) bool {
 		if allViolations[i].position.Filename == allViolations[j].position.Filename {
 			return allViolations[i].position.Line < allViolations[j].position.Line
@@ -830,6 +855,86 @@ func checkMockOrderAgainstInterfaces(
 	return violations
 }
 
+// checkImplementationOrderAgainstInterfaces compares implementation method order with
+// ports interface order for types that declare compile-time assertions (2.5).
+func checkImplementationOrderAgainstInterfaces(
+	interfaces map[string]interfaceDecl,
+	implementations map[string][]methodDecl,
+	bindings []implementationBinding,
+) (violations []violation) {
+	sort.Slice(bindings, func(i int, j int) bool {
+		if bindings[i].interfaceName == bindings[j].interfaceName {
+			return bindings[i].implementationName < bindings[j].implementationName
+		}
+		return bindings[i].interfaceName < bindings[j].interfaceName
+	})
+
+	for _, binding := range bindings {
+		interfaceDeclaration, found := interfaces[binding.interfaceName]
+		if !found {
+			continue
+		}
+
+		implementationMethods, found := implementations[binding.implementationKey]
+		if !found {
+			continue
+		}
+
+		interfaceMethodNames := make([]string, len(interfaceDeclaration.methods))
+		interfaceMethodNamesSet := make(map[string]bool, len(interfaceDeclaration.methods))
+		for i, method := range interfaceDeclaration.methods {
+			interfaceMethodNames[i] = method.name
+			interfaceMethodNamesSet[method.name] = true
+		}
+
+		implementationInterfaceMethods := make([]methodDecl, 0, len(interfaceMethodNames))
+		for _, method := range implementationMethods {
+			if interfaceMethodNamesSet[method.name] {
+				implementationInterfaceMethods = append(implementationInterfaceMethods, method)
+			}
+		}
+
+		if len(implementationInterfaceMethods) != len(interfaceMethodNames) {
+			violations = append(violations, violation{
+				position: binding.position,
+				rule:     "2.5",
+				message: fmt.Sprintf(
+					"implementation %q for interface %q method count (%d) "+
+						"does not match interface (%d)",
+					binding.implementationName,
+					binding.interfaceName,
+					len(implementationInterfaceMethods),
+					len(interfaceMethodNames),
+				),
+			})
+			continue
+		}
+
+		for index := range interfaceMethodNames {
+			if implementationInterfaceMethods[index].name == interfaceMethodNames[index] {
+				continue
+			}
+
+			violations = append(violations, violation{
+				position: implementationInterfaceMethods[index].position,
+				rule:     "2.5",
+				message: fmt.Sprintf(
+					"implementation %q for interface %q method order mismatch at position %d: "+
+						"got %q, want %q",
+					binding.implementationName,
+					binding.interfaceName,
+					index+1,
+					implementationInterfaceMethods[index].name,
+					interfaceMethodNames[index],
+				),
+			})
+			break
+		}
+	}
+
+	return violations
+}
+
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
 func resolveMockMethodsForInterface(
@@ -868,6 +973,126 @@ func resolveMockMethodsForInterface(
 	}
 
 	return methods, matchedMockName, nil, true
+}
+
+func collectImplementationMethods(
+	fileSet *token.FileSet,
+	file *ast.File,
+	path string,
+	implementations map[string][]methodDecl,
+) {
+	isPortPath := strings.Contains(path, "/internal/core/ports/")
+	isMockPath := strings.Contains(path, "/internal/mocks/")
+	if isPortPath || isMockPath {
+		return
+	}
+
+	for _, declaration := range file.Decls {
+		funcDeclaration, ok := declaration.(*ast.FuncDecl)
+		if !ok || funcDeclaration.Recv == nil || len(funcDeclaration.Recv.List) == 0 {
+			continue
+		}
+
+		receiverName := receiverTypeName(funcDeclaration.Recv.List[0].Type)
+		if receiverName == "" {
+			continue
+		}
+
+		key := typeDeclKey(path, receiverName)
+		implementations[key] = append(implementations[key], methodDecl{
+			name:     funcDeclaration.Name.Name,
+			position: fileSet.Position(funcDeclaration.Name.Pos()),
+		})
+	}
+}
+
+func collectImplementationBindings(
+	fileSet *token.FileSet,
+	file *ast.File,
+	path string,
+	bindings *[]implementationBinding,
+) {
+	if strings.Contains(path, "/internal/mocks/") {
+		return
+	}
+
+	for _, declaration := range file.Decls {
+		genDeclaration, ok := declaration.(*ast.GenDecl)
+		if !ok || genDeclaration.Tok != token.VAR {
+			continue
+		}
+
+		for _, spec := range genDeclaration.Specs {
+			valueSpec, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+
+			if len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "_" {
+				continue
+			}
+
+			interfaceName := typeNameFromExpr(valueSpec.Type)
+			if interfaceName == "" || len(valueSpec.Values) != 1 {
+				continue
+			}
+
+			implementationName := implementationTypeFromAssertion(valueSpec.Values[0])
+			if implementationName == "" {
+				continue
+			}
+
+			*bindings = append(*bindings, implementationBinding{
+				interfaceName:      interfaceName,
+				implementationName: implementationName,
+				implementationKey:  typeDeclKey(path, implementationName),
+				position:           fileSet.Position(valueSpec.Pos()),
+			})
+		}
+	}
+}
+
+func typeNameFromExpr(expression ast.Expr) (name string) {
+	switch typed := expression.(type) {
+	case *ast.Ident:
+		return typed.Name
+	case *ast.SelectorExpr:
+		return typed.Sel.Name
+	default:
+		return ""
+	}
+}
+
+func implementationTypeFromAssertion(expression ast.Expr) (name string) {
+	switch typed := expression.(type) {
+	case *ast.CallExpr:
+		return implementationTypeFromAssertion(typed.Fun)
+
+	case *ast.ParenExpr:
+		return implementationTypeFromAssertion(typed.X)
+
+	case *ast.StarExpr:
+		return typeNameFromExpr(typed.X)
+
+	case *ast.UnaryExpr:
+		if typed.Op == token.AND {
+			return implementationTypeFromAssertion(typed.X)
+		}
+		return ""
+
+	case *ast.CompositeLit:
+		return typeNameFromExpr(typed.Type)
+
+	case *ast.Ident:
+		return typed.Name
+
+	default:
+		return ""
+	}
+}
+
+func typeDeclKey(path string, typeName string) (key string) {
+	return fmt.Sprintf("%s::%s", filepath.ToSlash(filepath.Dir(path)), typeName)
 }
 
 func normaliseMockTypeName(typeName string) (normalisedTypeName string) {
