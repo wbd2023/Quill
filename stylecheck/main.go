@@ -94,115 +94,174 @@ type implementationBinding struct {
 	position           token.Position
 }
 
+type analysisState struct {
+	fileSet                *token.FileSet
+	violations             []violation
+	interfaces             map[string]interfaceDecl
+	mocks                  map[string][]methodDecl
+	implementations        map[string][]methodDecl
+	implementationBindings []implementationBinding
+}
+
 var placeholderReturnNamePattern = regexp.MustCompile(`^result[0-9]+$`)
 
 /* -------------------------------------------- Main -------------------------------------------- */
 
 func main() {
+	directories := parseDirectoriesOrExit()
+	state := newAnalysisState()
+
+	for _, directory := range directories {
+		state.walkDirectory(directory)
+	}
+
+	state.addCrossFileViolations()
+	sortViolations(state.violations)
+	printViolationsAndExit(state.violations)
+}
+
+func parseDirectoriesOrExit() (directories []string) {
 	if len(os.Args) < minRequiredArgs {
 		fmt.Fprintln(os.Stderr, "usage: stylecheck <dir>...")
 		os.Exit(usageExitCode)
 	}
 
-	directories := os.Args[1:]
-	var allViolations []violation
-	fileSet := token.NewFileSet()
-	interfaces := make(map[string]interfaceDecl)
-	mocks := make(map[string][]methodDecl)
-	implementations := make(map[string][]methodDecl)
-	implementationBindings := make([]implementationBinding, 0)
+	return os.Args[1:]
+}
 
-	for _, directory := range directories {
-		walkError := filepath.WalkDir(
-			directory,
-			func(path string, entry os.DirEntry, err error) error {
-				if err != nil {
-					return nil
-				}
+func newAnalysisState() (state *analysisState) {
+	return &analysisState{
+		fileSet:                token.NewFileSet(),
+		interfaces:             make(map[string]interfaceDecl),
+		mocks:                  make(map[string][]methodDecl),
+		implementations:        make(map[string][]methodDecl),
+		implementationBindings: make([]implementationBinding, 0),
+	}
+}
 
-				if entry.IsDir() {
-					switch entry.Name() {
-					case "vendor", ".git", "testdata":
-						return filepath.SkipDir
-					}
-					return nil
-				}
-
-				if !strings.HasSuffix(path, ".go") {
-					return nil
-				}
-
-				file, parseError := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
-				if parseError != nil {
-					fmt.Fprintf(os.Stderr, "warning: skipping %s: %v\n", path, parseError)
-					return nil
-				}
-
-				normalisedPath := filepath.ToSlash(path)
-				isTestFile := strings.HasSuffix(path, "_test.go")
-
-				allViolations = append(allViolations, checkNamedReturns(fileSet, file)...)
-				allViolations = append(allViolations, checkNakedReturns(fileSet, file)...)
-				allViolations = append(allViolations, checkTypeElision(fileSet, file)...)
-				allViolations = append(allViolations, checkParamOrder(fileSet, file)...)
-				allViolations = append(allViolations, checkConstructorOrder(fileSet, file)...)
-				if !isTestFile {
-					allViolations = append(allViolations, checkFileStructureOrder(fileSet, file)...)
-				}
-				allViolations = append(
-					allViolations,
-					checkServiceTypeNaming(fileSet, file, normalisedPath)...,
-				)
-				allViolations = append(
-					allViolations,
-					checkCRUDLOrder(fileSet, file, normalisedPath)...,
-				)
-				collectInterfaces(fileSet, file, normalisedPath, interfaces)
-				collectMockMethods(fileSet, file, normalisedPath, mocks)
-				collectImplementationMethods(fileSet, file, normalisedPath, implementations)
-				collectImplementationBindings(
-					fileSet,
-					file,
-					normalisedPath,
-					&implementationBindings,
-				)
-
-				// Single-letter checks skip test files to reduce noise in table-driven
-				// structures and assertion helpers.
-				if !isTestFile {
-					allViolations = append(allViolations, checkSingleLetterVars(fileSet, file)...)
-				}
-
+func (state *analysisState) walkDirectory(directory string) {
+	walkError := filepath.WalkDir(
+		directory,
+		func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
 				return nil
-			},
-		)
-		if walkError != nil {
-			fmt.Fprintf(os.Stderr, "error walking %s: %v\n", directory, walkError)
-		}
+			}
+
+			if shouldSkipDirectory(entry) {
+				return filepath.SkipDir
+			}
+
+			if entry.IsDir() || !strings.HasSuffix(path, ".go") {
+				return nil
+			}
+
+			state.processFile(path)
+			return nil
+		},
+	)
+	if walkError != nil {
+		fmt.Fprintf(os.Stderr, "error walking %s: %v\n", directory, walkError)
+	}
+}
+
+func shouldSkipDirectory(entry os.DirEntry) (found bool) {
+	if !entry.IsDir() {
+		return false
 	}
 
-	allViolations = append(allViolations, checkMockOrderAgainstInterfaces(interfaces, mocks)...)
-	allViolations = append(
-		allViolations,
+	switch entry.Name() {
+	case "vendor", ".git", "testdata":
+		return true
+	default:
+		return false
+	}
+}
+
+func (state *analysisState) processFile(path string) {
+	file, parseError := parser.ParseFile(state.fileSet, path, nil, parser.ParseComments)
+	if parseError != nil {
+		fmt.Fprintf(os.Stderr, "warning: skipping %s: %v\n", path, parseError)
+		return
+	}
+
+	normalisedPath := filepath.ToSlash(path)
+	isTestFile := strings.HasSuffix(path, "_test.go")
+	state.addPerFileViolations(file, normalisedPath, isTestFile)
+}
+
+func (state *analysisState) addPerFileViolations(
+	file *ast.File,
+	normalisedPath string,
+	isTestFile bool,
+) {
+	state.violations = append(state.violations, checkNamedReturns(state.fileSet, file)...)
+	state.violations = append(state.violations, checkNakedReturns(state.fileSet, file)...)
+	state.violations = append(state.violations, checkTypeElision(state.fileSet, file)...)
+	state.violations = append(state.violations, checkParamOrder(state.fileSet, file)...)
+	state.violations = append(state.violations, checkConstructorOrder(state.fileSet, file)...)
+	if !isTestFile {
+		state.violations = append(state.violations, checkFileStructureOrder(state.fileSet, file)...)
+	}
+
+	state.violations = append(
+		state.violations,
+		checkServiceTypeNaming(state.fileSet, file, normalisedPath)...,
+	)
+	state.violations = append(
+		state.violations,
+		checkCRUDLOrder(state.fileSet, file, normalisedPath)...,
+	)
+
+	collectInterfaces(state.fileSet, file, normalisedPath, state.interfaces)
+	collectMockMethods(state.fileSet, file, normalisedPath, state.mocks)
+	collectImplementationMethods(state.fileSet, file, normalisedPath, state.implementations)
+	collectImplementationBindings(
+		state.fileSet,
+		file,
+		normalisedPath,
+		&state.implementationBindings,
+	)
+
+	// Single-letter checks skip test files to reduce noise in table-driven
+	// structures and assertion helpers.
+	if !isTestFile {
+		state.violations = append(state.violations, checkSingleLetterVars(state.fileSet, file)...)
+	}
+}
+
+func (state *analysisState) addCrossFileViolations() {
+	state.violations = append(
+		state.violations,
+		checkMockOrderAgainstInterfaces(state.interfaces, state.mocks)...,
+	)
+	state.violations = append(
+		state.violations,
 		checkImplementationOrderAgainstInterfaces(
-			interfaces,
-			implementations,
-			implementationBindings,
+			state.interfaces,
+			state.implementations,
+			state.implementationBindings,
 		)...,
 	)
-	sort.Slice(allViolations, func(i int, j int) bool {
-		if allViolations[i].position.Filename == allViolations[j].position.Filename {
-			return allViolations[i].position.Line < allViolations[j].position.Line
-		}
-		return allViolations[i].position.Filename < allViolations[j].position.Filename
-	})
+}
 
-	if len(allViolations) > 0 {
-		for _, current := range allViolations {
-			fmt.Fprintf(os.Stderr, "%s: [%s] %s\n", current.position, current.rule, current.message)
+func sortViolations(violations []violation) {
+	sort.Slice(violations, func(i int, j int) bool {
+		if violations[i].position.Filename == violations[j].position.Filename {
+			return violations[i].position.Line < violations[j].position.Line
 		}
-		os.Exit(1)
+		return violations[i].position.Filename < violations[j].position.Filename
+	})
+}
+
+func printViolationsAndExit(violations []violation) {
+	if len(violations) == 0 {
+		return
 	}
+
+	for _, current := range violations {
+		fmt.Fprintf(os.Stderr, "%s: [%s] %s\n", current.position, current.rule, current.message)
+	}
+	os.Exit(1)
 }
 
 /* ------------------------------------------- Checks ------------------------------------------- */
@@ -367,83 +426,174 @@ func checkSingleLetterVars(fileSet *token.FileSet, file *ast.File) (violations [
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch declaration := node.(type) {
 		case *ast.FuncDecl:
-			// Check parameters only (Recv is excluded, so receivers pass).
-			if declaration.Type.Params != nil {
-				for _, field := range declaration.Type.Params.List {
-					for _, name := range field.Names {
-						if len(name.Name) == 1 && !allowed[name.Name] {
-							violations = append(violations, violation{
-								position: fileSet.Position(name.Pos()),
-								rule:     "2.2",
-								message: fmt.Sprintf(
-									"single-letter parameter %q in function %q",
-									name.Name,
-									declaration.Name.Name,
-								),
-							})
-						}
-					}
-				}
-			}
+			violations = append(
+				violations,
+				checkSingleLetterFuncParams(fileSet, declaration, allowed)...,
+			)
 
 		case *ast.AssignStmt:
-			if declaration.Tok != token.DEFINE {
-				return true
-			}
-			for _, lhs := range declaration.Lhs {
-				identifierNode, ok := lhs.(*ast.Ident)
-				if !ok {
-					continue
-				}
-				if len(identifierNode.Name) == 1 && !allowed[identifierNode.Name] {
-					violations = append(violations, violation{
-						position: fileSet.Position(identifierNode.Pos()),
-						rule:     "2.2",
-						message:  fmt.Sprintf("single-letter variable %q", identifierNode.Name),
-					})
-				}
-			}
+			violations = append(
+				violations,
+				checkSingleLetterAssignStmt(fileSet, declaration, allowed)...,
+			)
 
 		case *ast.RangeStmt:
-			if declaration.Tok != token.DEFINE {
-				return true
-			}
-
-			if key, ok := declaration.Key.(*ast.Ident); ok {
-				if len(key.Name) == 1 && !allowed[key.Name] {
-					violations = append(violations, violation{
-						position: fileSet.Position(key.Pos()),
-						rule:     "2.2",
-						message:  fmt.Sprintf("single-letter range variable %q", key.Name),
-					})
-				}
-			}
-			if declaration.Value != nil {
-				if value, ok := declaration.Value.(*ast.Ident); ok {
-					if len(value.Name) == 1 && !allowed[value.Name] {
-						violations = append(violations, violation{
-							position: fileSet.Position(value.Pos()),
-							rule:     "2.2",
-							message:  fmt.Sprintf("single-letter range variable %q", value.Name),
-						})
-					}
-				}
-			}
+			violations = append(
+				violations,
+				checkSingleLetterRangeStmt(fileSet, declaration, allowed)...,
+			)
 
 		case *ast.ValueSpec:
-			for _, name := range declaration.Names {
-				if len(name.Name) == 1 && !allowed[name.Name] {
-					violations = append(violations, violation{
-						position: fileSet.Position(name.Pos()),
-						rule:     "2.2",
-						message:  fmt.Sprintf("single-letter variable %q", name.Name),
-					})
-				}
-			}
+			violations = append(
+				violations,
+				checkSingleLetterValueSpec(fileSet, declaration, allowed)...,
+			)
 		}
 		return true
 	})
+
 	return violations
+}
+
+func checkSingleLetterFuncParams(
+	fileSet *token.FileSet,
+	declaration *ast.FuncDecl,
+	allowed map[string]bool,
+) (violations []violation) {
+	// Check parameters only (Recv is excluded, so receivers pass).
+	if declaration.Type.Params == nil {
+		return nil
+	}
+
+	for _, field := range declaration.Type.Params.List {
+		for _, name := range field.Names {
+			violationValue := singleLetterNameViolation(
+				fileSet,
+				name,
+				allowed,
+				"2.2",
+				fmt.Sprintf(
+					"single-letter parameter %q in function %q",
+					name.Name,
+					declaration.Name.Name,
+				),
+			)
+			if violationValue != nil {
+				violations = append(violations, *violationValue)
+			}
+		}
+	}
+
+	return violations
+}
+
+func checkSingleLetterAssignStmt(
+	fileSet *token.FileSet,
+	declaration *ast.AssignStmt,
+	allowed map[string]bool,
+) (violations []violation) {
+	if declaration.Tok != token.DEFINE {
+		return nil
+	}
+
+	for _, lhs := range declaration.Lhs {
+		identifierNode, ok := lhs.(*ast.Ident)
+		if !ok {
+			continue
+		}
+
+		violationValue := singleLetterNameViolation(
+			fileSet,
+			identifierNode,
+			allowed,
+			"2.2",
+			fmt.Sprintf("single-letter variable %q", identifierNode.Name),
+		)
+		if violationValue != nil {
+			violations = append(violations, *violationValue)
+		}
+	}
+
+	return violations
+}
+
+func checkSingleLetterRangeStmt(
+	fileSet *token.FileSet,
+	declaration *ast.RangeStmt,
+	allowed map[string]bool,
+) (violations []violation) {
+	if declaration.Tok != token.DEFINE {
+		return nil
+	}
+
+	if key, ok := declaration.Key.(*ast.Ident); ok {
+		violationValue := singleLetterNameViolation(
+			fileSet,
+			key,
+			allowed,
+			"2.2",
+			fmt.Sprintf("single-letter range variable %q", key.Name),
+		)
+		if violationValue != nil {
+			violations = append(violations, *violationValue)
+		}
+	}
+
+	if declaration.Value != nil {
+		if value, ok := declaration.Value.(*ast.Ident); ok {
+			violationValue := singleLetterNameViolation(
+				fileSet,
+				value,
+				allowed,
+				"2.2",
+				fmt.Sprintf("single-letter range variable %q", value.Name),
+			)
+			if violationValue != nil {
+				violations = append(violations, *violationValue)
+			}
+		}
+	}
+
+	return violations
+}
+
+func checkSingleLetterValueSpec(
+	fileSet *token.FileSet,
+	declaration *ast.ValueSpec,
+	allowed map[string]bool,
+) (violations []violation) {
+	for _, name := range declaration.Names {
+		violationValue := singleLetterNameViolation(
+			fileSet,
+			name,
+			allowed,
+			"2.2",
+			fmt.Sprintf("single-letter variable %q", name.Name),
+		)
+		if violationValue != nil {
+			violations = append(violations, *violationValue)
+		}
+	}
+
+	return violations
+}
+
+func singleLetterNameViolation(
+	fileSet *token.FileSet,
+	name *ast.Ident,
+	allowed map[string]bool,
+	rule string,
+	message string,
+) (violationValue *violation) {
+	if len(name.Name) != 1 || allowed[name.Name] {
+		return nil
+	}
+
+	return &violation{
+		position: fileSet.Position(name.Pos()),
+		rule:     rule,
+		message:  message,
+	}
 }
 
 // checkParamOrder ensures ctx is first and secrets are last (2.7).
