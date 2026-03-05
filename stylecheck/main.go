@@ -1087,6 +1087,8 @@ func checkImplementationOrderAgainstInterfaces(
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
+/* ------------------------------------- Resolution Helpers ------------------------------------- */
+
 func resolveMockMethodsForInterface(
 	interfaceName string,
 	mocks map[string][]methodDecl,
@@ -1202,6 +1204,8 @@ func collectImplementationBindings(
 	}
 }
 
+/* -------------------------------------- AST Type Helpers -------------------------------------- */
+
 func typeNameFromExpr(expression ast.Expr) (name string) {
 	switch typed := expression.(type) {
 	case *ast.Ident:
@@ -1258,6 +1262,8 @@ func normaliseMockTypeName(typeName string) (normalisedTypeName string) {
 
 	return normalisedTypeName
 }
+
+/* ----------------------------------- Classification Helpers ----------------------------------- */
 
 // isSecretName returns true if the parameter name represents a secret.
 func isSecretName(name string) (found bool) {
