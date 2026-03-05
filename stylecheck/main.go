@@ -1085,8 +1085,6 @@ func checkImplementationOrderAgainstInterfaces(
 	return violations
 }
 
-/* ------------------------------------------- Helpers ------------------------------------------ */
-
 /* ------------------------------------- Resolution Helpers ------------------------------------- */
 
 func resolveMockMethodsForInterface(
