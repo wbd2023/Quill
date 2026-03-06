@@ -23,10 +23,12 @@ This directory contains project tooling for build helpers and style enforcement.
   - `style-common.sh`: argument, scope, and common helper functions.
   - `style-registry-constants.sh`: shared registry tier and runner constants.
   - `style-registry.sh`: table-driven registry loader.
+  - `style-runner.sh`: shared execution and reporting helpers for `check-style.sh`.
   - `style-registry.table`: single source of truth for check registration order.
 - `tools/stylecheck/`
-  - AST-based Go checker binary source for semantic Go rules.
-  - Organised by rule family and shared analysis helpers to keep individual files focused.
+  - AST-based Go checker module for semantic Go rules.
+  - `cmd/stylecheck/` contains the CLI entrypoint.
+  - `internal/checker/` contains the analysis engine, rule families, and tests.
   - See `tools/stylecheck/README.md` for checker-specific details.
 
 ## Recommended Usage

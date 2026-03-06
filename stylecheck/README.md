@@ -4,23 +4,25 @@
 
 ## Layout
 
-- `main.go`
+- `cmd/stylecheck/main.go`
   - CLI entrypoint only.
-- `analysis.go`
+- `internal/checker/run.go`
+  - Command-facing runner and exit-code orchestration.
+- `internal/checker/analysis_pipeline.go`
   - Directory walking, per-file analysis dispatch, cross-file analysis, and reporting.
-- `analysis_state.go`
+- `internal/checker/analysis_types.go`
   - Shared analysis state and cross-file metadata types.
-- `ast_type_helpers.go`
+- `internal/checker/ast_type_helpers.go`
   - Shared AST and type-string helper functions.
-- `scope_helpers.go`
+- `internal/checker/scope_helpers.go`
   - Shared path-scope helpers for rule filtering.
-- `text_helpers.go`
+- `internal/checker/text_helpers.go`
   - Shared text-style helpers used by multiple rules.
-- `*_rules.go`
+- `internal/checker/*_rules.go`
   - Rule-family implementations grouped by concern.
-- `*_collection.go`
+- `internal/checker/*_collection.go`
   - Cross-file method and implementation metadata collection helpers.
-- `*_test.go`
+- `internal/checker/*_test.go`
   - Rule-family regression tests plus shared test helpers.
 
 ## Implemented checks
@@ -56,5 +58,5 @@ From repo root:
 
 ```bash
 cd tools/stylecheck
-go run . ../../internal ../../cmd ../../tests
+go run ./cmd/stylecheck ../../internal ../../cmd ../../tests
 ```
