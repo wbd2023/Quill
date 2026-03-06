@@ -8,12 +8,18 @@
   - CLI entrypoint only.
 - `analysis.go`
   - Directory walking, per-file analysis dispatch, cross-file analysis, and reporting.
-- `state.go`
+- `analysis_state.go`
   - Shared analysis state and cross-file metadata types.
-- `ast_helpers.go`
+- `ast_type_helpers.go`
   - Shared AST and type-string helper functions.
+- `scope_helpers.go`
+  - Shared path-scope helpers for rule filtering.
+- `text_helpers.go`
+  - Shared text-style helpers used by multiple rules.
 - `*_rules.go`
   - Rule-family implementations grouped by concern.
+- `*_collection.go`
+  - Cross-file method and implementation metadata collection helpers.
 - `*_test.go`
   - Rule-family regression tests plus shared test helpers.
 

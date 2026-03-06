@@ -126,8 +126,8 @@ func (state *analysisState) addPerFileViolations(
 		&state.implementationBindings,
 	)
 
-	// Single-letter checks skip test files to reduce noise in table-driven
-	// structures and assertion helpers.
+	// Single-letter checks skip test files to reduce noise in table-driven structures and assertion
+	// helpers.
 	if !isTestFile {
 		state.violations = append(state.violations, checkSingleLetterVars(state.fileSet, file)...)
 	}
