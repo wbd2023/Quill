@@ -10,6 +10,18 @@ import (
 	"testing"
 )
 
+const localBinRelativePath = ".local/bin"
+const goBinRelativePath = "bin"
+const fakeGoPathDirectoryName = "gopath"
+const styleRegistryTableHeader = "# tier|level|rule|name|scope|runner|target"
+
+var scriptLibraryFiles = []string{
+	"style-common.sh",
+	"style-registry-constants.sh",
+	"style-registry.sh",
+	"style-registry.table",
+}
+
 type scriptHarness struct {
 	projectRoot       string
 	scriptsDirectory  string
@@ -27,7 +39,7 @@ func newScriptHarness(t *testing.T, scriptNames ...string) (harness scriptHarnes
 	harness.scriptsDirectory = filepath.Join(harness.projectRoot, "tools", "scripts")
 	harness.fakeBinDirectory = filepath.Join(harness.projectRoot, "fake-bin")
 	harness.fakeHomeDirectory = filepath.Join(harness.projectRoot, "home")
-	harness.fakeGoPath = filepath.Join(harness.projectRoot, "gopath")
+	harness.fakeGoPath = filepath.Join(harness.projectRoot, fakeGoPathDirectoryName)
 
 	libraryDirectory := filepath.Join(harness.scriptsDirectory, "lib")
 	if err := os.MkdirAll(libraryDirectory, 0o700); err != nil {
@@ -40,8 +52,7 @@ func newScriptHarness(t *testing.T, scriptNames ...string) (harness scriptHarnes
 		copyFile(t, sourcePath, targetPath)
 	}
 
-	libraryFiles := []string{"style-common.sh", "style-registry.sh", "style-registry.table"}
-	for _, fileName := range libraryFiles {
+	for _, fileName := range scriptLibraryFiles {
 		sourcePath := filepath.Join(currentScriptsDirectory(), "lib", fileName)
 		targetPath := filepath.Join(libraryDirectory, fileName)
 		copyFile(t, sourcePath, targetPath)
@@ -52,13 +63,13 @@ func newScriptHarness(t *testing.T, scriptNames ...string) (harness scriptHarnes
 	}
 
 	if err := os.MkdirAll(
-		filepath.Join(harness.fakeHomeDirectory, ".local", "bin"),
+		filepath.Join(harness.fakeHomeDirectory, localBinRelativePath),
 		0o700,
 	); err != nil {
 		t.Fatalf("mkdir fake home local bin: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(harness.fakeGoPath, "bin"), 0o700); err != nil {
+	if err := os.MkdirAll(filepath.Join(harness.fakeGoPath, goBinRelativePath), 0o700); err != nil {
 		t.Fatalf("mkdir fake gopath bin: %v", err)
 	}
 
@@ -97,6 +108,10 @@ func (harness scriptHarness) writeScript(
 	t.Helper()
 
 	path = filepath.Join(harness.scriptsDirectory, scriptName)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatalf("mkdir script parent for %s: %v", path, err)
+	}
+
 	if err := os.WriteFile(path, []byte(contents), 0o700); err != nil {
 		t.Fatalf("write script %s: %v", path, err)
 	}
@@ -151,6 +166,11 @@ func currentScriptsDirectory() (directory string) {
 	return filepath.Dir(currentFile)
 }
 
+func registryTableLines(rows ...string) (lines []string) {
+	lines = append([]string{styleRegistryTableHeader}, rows...)
+	return lines
+}
+
 func runBashScript(scriptPath string, args ...string) (output string, err error) {
 	commandArguments := append([]string{scriptPath}, args...)
 	command := exec.Command("bash", commandArguments...)
@@ -178,6 +198,10 @@ func copyFile(t *testing.T, sourcePath string, targetPath string) {
 	contents, err := os.ReadFile(sourcePath)
 	if err != nil {
 		t.Fatalf("read %s: %v", sourcePath, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(targetPath), 0o700); err != nil {
+		t.Fatalf("mkdir parent for %s: %v", targetPath, err)
 	}
 
 	if err := os.WriteFile(targetPath, contents, 0o600); err != nil {

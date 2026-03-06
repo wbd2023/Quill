@@ -19,43 +19,63 @@ func TestCheckStyleScriptWarnsOnRecommendationFindings(t *testing.T) {
 	logPath := filepath.Join(harness.projectRoot, "style.log")
 	harness.writeScript(
 		t,
-		"check-required.sh",
+		requiredCheckScriptPath,
 		"#!/bin/bash\nset -euo pipefail\necho \"required:$*\" >> \"$STYLE_TEST_LOG\"\n",
 	)
 	harness.writeScript(
 		t,
-		"check-app-only.sh",
+		appOnlyCheckScriptPath,
 		"#!/bin/bash\nset -euo pipefail\necho \"app:$*\" >> \"$STYLE_TEST_LOG\"\nexit 1\n",
 	)
 	harness.writeScript(
 		t,
-		"check-recommend.sh",
+		recommendationCheckScriptPath,
 		"#!/bin/bash\nset -euo pipefail\necho \"recommend:$*\" >> \"$STYLE_TEST_LOG\"\n"+
 			"echo \"fake recommendation\"\nexit 1\n",
 	)
 
 	registryTable := writeRegistryTable(
 		t,
-		[]string{
-			"# tier|level|rule|name|scope|runner|target",
-			"tier2|required|9.1|Required tools check|tools|script_scope|check-required.sh",
-			"tier2|required|9.2|App only check|app|script_scope|check-app-only.sh",
-			"tier2|recommendation|R9.1|Optional tools check|all|script_scope|check-recommend.sh",
-		},
+		registryTableLines(
+			requiredRegistryRow(
+				registryTierTwo,
+				"9.1",
+				"Required tools check",
+				registryScopeTools,
+				registryRunnerScriptScope,
+				requiredCheckScriptPath,
+			),
+			requiredRegistryRow(
+				registryTierTwo,
+				"9.2",
+				"App only check",
+				registryScopeApp,
+				registryRunnerScriptScope,
+				appOnlyCheckScriptPath,
+			),
+			recommendationRegistryRow(
+				registryTierTwo,
+				"R9.1",
+				"Optional tools check",
+				registryScopeAll,
+				registryRunnerScriptScope,
+				recommendationCheckScriptPath,
+			),
+		),
 	)
 
 	environment := harness.env(
 		[]string{harness.fakeBinDirectory},
-		"STYLE_REGISTRY_TABLE_FILE="+registryTable,
-		"STYLE_TEST_LOG="+logPath,
+		styleRegistryTableEnvName+"="+registryTable,
+		styleTestLogEnvName+"="+logPath,
 	)
 	output, err := runBashScriptWithEnv(
 		harness.scriptPath("check-style.sh"),
 		environment,
 		"--scope",
-		"tools",
+		registryScopeTools,
 		"--profile",
-		"all",
+		styleProfileAll,
 	)
 	if err != nil {
 		t.Fatalf("expected warning-only style run to pass, output:\n%s", output)
@@ -97,33 +117,46 @@ func TestCheckStyleScriptFailsStrictRecommendations(t *testing.T) {
 
 	harness.writeScript(
 		t,
-		"check-required.sh",
+		requiredCheckScriptPath,
 		"#!/bin/bash\nset -euo pipefail\nexit 0\n",
 	)
 	harness.writeScript(
 		t,
-		"check-recommend.sh",
+		recommendationCheckScriptPath,
 		"#!/bin/bash\nset -euo pipefail\necho \"fake recommendation\"\nexit 1\n",
 	)
 
 	registryTable := writeRegistryTable(
 		t,
-		[]string{
-			"# tier|level|rule|name|scope|runner|target",
-			"tier2|required|9.1|Required tools check|all|script_scope|check-required.sh",
-			"tier2|recommendation|R9.1|Optional tools check|all|script_scope|check-recommend.sh",
-		},
+		registryTableLines(
+			requiredRegistryRow(
+				registryTierTwo,
+				"9.1",
+				"Required tools check",
+				registryScopeAll,
+				registryRunnerScriptScope,
+				requiredCheckScriptPath,
+			),
+			recommendationRegistryRow(
+				registryTierTwo,
+				"R9.1",
+				"Optional tools check",
+				registryScopeAll,
+				registryRunnerScriptScope,
+				recommendationCheckScriptPath,
+			),
+		),
 	)
 
 	environment := harness.env(
 		[]string{harness.fakeBinDirectory},
-		"STYLE_REGISTRY_TABLE_FILE="+registryTable,
+		styleRegistryTableEnvName+"="+registryTable,
 	)
 	output, err := runBashScriptWithEnv(
 		harness.scriptPath("check-style.sh"),
 		environment,
 		"--profile",
-		"all",
+		styleProfileAll,
 		"--strict-recommendations",
 	)
 	if err == nil {
@@ -161,22 +194,28 @@ func TestCheckStyleScriptRunsExecutorTargets(t *testing.T) {
 
 	registryTable := writeRegistryTable(
 		t,
-		[]string{
-			"# tier|level|rule|name|scope|runner|target",
-			"tier1|required|1-2|Executor check|tools|runner|golangci_tools",
-		},
+		registryTableLines(
+			requiredRegistryRow(
+				registryTierOne,
+				"1-2",
+				"Executor check",
+				registryScopeTools,
+				registryRunnerExecutor,
+				registryTargetGolangciTools,
+			),
+		),
 	)
 
 	environment := harness.env(
 		[]string{harness.fakeBinDirectory},
-		"STYLE_REGISTRY_TABLE_FILE="+registryTable,
-		"STYLE_TEST_LOG="+logPath,
+		styleRegistryTableEnvName+"="+registryTable,
+		styleTestLogEnvName+"="+logPath,
 	)
 	output, err := runBashScriptWithEnv(
 		harness.scriptPath("check-style.sh"),
 		environment,
 		"--scope",
-		"tools",
+		registryScopeTools,
 	)
 	if err != nil {
 		t.Fatalf("expected executor-backed style run to pass, output:\n%s", output)

@@ -12,9 +12,6 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
-const domainPackagePathSegment = "/internal/core/domain/"
-const domainPackagePathSuffix = "/internal/core/domain"
-
 var directDomainIdentifierConstructors = map[string]string{
 	"Username":       "ParseUsername",
 	"ConversationID": "ParseConversationID or ConversationIDFromUsername",
@@ -29,7 +26,7 @@ func checkDirectDomainIdentifierCasts(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if strings.Contains(path, domainPackagePathSegment) {
+	if strings.Contains(path, domainPathSegment) {
 		return nil
 	}
 
@@ -118,7 +115,7 @@ func collectTypeAwareDomainIdentifierCastViolations(
 					continue
 				}
 
-				if strings.Contains(filePath, domainPackagePathSegment) {
+				if strings.Contains(filePath, domainPathSegment) {
 					continue
 				}
 
@@ -187,5 +184,5 @@ func isDomainPackagePath(packagePath string) (found bool) {
 		return true
 	}
 
-	return strings.HasSuffix(packagePath, domainPackagePathSuffix)
+	return strings.HasSuffix(packagePath, domainPathSuffix)
 }

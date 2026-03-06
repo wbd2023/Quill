@@ -1,19 +1,19 @@
 # tier|level|rule|name|scope|runner|target
 tier1|required|1-2|golangci-lint (app)|app|runner|golangci_app
 tier1|required|1-2|golangci-lint (tools/stylecheck)|tools|runner|golangci_tools
-tier2|required|1.1|Line length (Go)|all|script_scope|check-go-line-length.sh
-tier2|required|1.1|Line length (Bash scripts)|all|script_scope|check-bash-line-length.sh
-tier2|required|1.2|Language spelling (non-Go, UK locale)|all|script_scope|check-spelling.sh
-tier2|required|3.2|Markdown style (markdownlint)|all|script_scope|check-markdown.sh
-tier2|required|1.3|Architecture imports|app|script|check-go-architecture-imports.sh
-tier2|required|1.4|ASCII-only characters|all|script_scope|check-ascii.sh
-tier2|required|2.2|Naming conventions|all|script_scope|check-naming.sh
-tier2|required|2.4|Section header format|all|script_scope|check-section-headers.sh
-tier2|required|2.10|No magic values (Go)|all|script_scope|check-go-magic-values.sh
-tier2|required|2.11|Bash script style|all|script_scope|check-bash-style.sh
-tier2|required|2.11|Bash static analysis (shellcheck)|all|script_scope|check-shellcheck.sh
-tier2|required|2.11|Bash formatting (shfmt)|all|script_scope|check-shfmt.sh
-tier2|recommendation|R2.10|Magic values (Bash)|all|script_scope|check-bash-magic-values.sh
-tier2|recommendation|R2.12|Guard-clause spacing (Go)|all|script_scope|check-vertical-spacing.sh
+tier2|required|1.1|Line length (Go)|all|script_scope|checks/go/line-length.sh
+tier2|required|1.1|Line length (Bash scripts)|all|script_scope|checks/bash/line-length.sh
+tier2|required|1.2|Language spelling (non-Go, UK locale)|all|script_scope|checks/general/spelling.sh
+tier2|required|3.2|Markdown style (markdownlint)|all|script_scope|checks/general/markdown.sh
+tier2|required|1.3|Architecture imports|app|script|checks/go/architecture-imports.sh
+tier2|required|1.4|ASCII-only characters|all|script_scope|checks/general/ascii.sh
+tier2|required|2.2|Naming conventions|all|script_scope|checks/general/naming.sh
+tier2|required|2.4|Section header format|all|script_scope|checks/general/section-headers.sh
+tier2|required|2.10|No magic values (Go)|all|script_scope|checks/go/magic-values.sh
+tier2|required|2.11|Bash script style|all|script_scope|checks/bash/style.sh
+tier2|required|2.11|Bash static analysis (shellcheck)|all|script_scope|checks/bash/shellcheck.sh
+tier2|required|2.11|Bash formatting (shfmt)|all|script_scope|checks/bash/shfmt.sh
+tier2|recommendation|R2.10|Magic values (Bash)|all|script_scope|checks/bash/magic-values.sh
+tier2|recommendation|R2.12|Guard-clause spacing (Go)|all|script_scope|checks/go/vertical-spacing.sh
 tier3|required|2.2+|AST rules (app)|app|runner|ast_app
 tier3|required|2.2+|AST rules (tools/stylecheck)|tools|runner|ast_tools

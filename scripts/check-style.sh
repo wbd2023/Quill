@@ -21,16 +21,6 @@ PROFILE_REQUIRED="required"
 PROFILE_ALL="all"
 LEVEL_REQUIRED="$PROFILE_REQUIRED"
 LEVEL_RECOMMENDATION="recommendation"
-RUNNER_KIND_SCRIPT="script"
-RUNNER_KIND_SCRIPT_SCOPE="script_scope"
-RUNNER_KIND_EXECUTOR="runner"
-RUNNER_TARGET_GOLANGCI_APP="golangci_app"
-RUNNER_TARGET_GOLANGCI_TOOLS="golangci_tools"
-RUNNER_TARGET_AST_APP="ast_app"
-RUNNER_TARGET_AST_TOOLS="ast_tools"
-TIER_ONE="tier1"
-TIER_TWO="tier2"
-TIER_THREE="tier3"
 TIER_ONE_NAME="Tier 1: Go linters"
 TIER_TWO_NAME="Tier 2: Text and script checks"
 TIER_THREE_NAME="Tier 3: AST analysis"
@@ -239,15 +229,15 @@ run_registered_target() {
 	local target="$2"
 
 	case "$runner_kind" in
-	"$RUNNER_KIND_SCRIPT")
+	"$STYLE_RUNNER_SCRIPT")
 		bash "$SCRIPT_DIR/$target"
 		;;
-	"$RUNNER_KIND_SCRIPT_SCOPE")
+	"$STYLE_RUNNER_SCRIPT_SCOPE")
 		bash "$SCRIPT_DIR/$target" --scope "$SCOPE"
 		;;
-	"$RUNNER_KIND_EXECUTOR")
+	"$STYLE_RUNNER_EXECUTOR")
 		case "$target" in
-		"$RUNNER_TARGET_GOLANGCI_APP")
+		"$STYLE_RUNNER_TARGET_GOLANGCI_APP")
 			(
 				cd "$PROJECT_ROOT"
 				GOCACHE="$GO_BUILD_CACHE" \
@@ -255,7 +245,7 @@ run_registered_target() {
 					golangci-lint run ./...
 			)
 			;;
-		"$RUNNER_TARGET_GOLANGCI_TOOLS")
+		"$STYLE_RUNNER_TARGET_GOLANGCI_TOOLS")
 			(
 				cd "$PROJECT_ROOT/tools/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
@@ -263,14 +253,14 @@ run_registered_target() {
 					golangci-lint run ./...
 			)
 			;;
-		"$RUNNER_TARGET_AST_APP")
+		"$STYLE_RUNNER_TARGET_AST_APP")
 			(
 				cd "$PROJECT_ROOT/tools/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
 					go run . "$PROJECT_ROOT/internal" "$PROJECT_ROOT/cmd" "$PROJECT_ROOT/tests"
 			)
 			;;
-		"$RUNNER_TARGET_AST_TOOLS")
+		"$STYLE_RUNNER_TARGET_AST_TOOLS")
 			(
 				cd "$PROJECT_ROOT/tools/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
@@ -337,23 +327,23 @@ echo ""
 
 print_tier_heading "$TIER_ONE_NAME"
 
-run_registered_checks "$TIER_ONE" "$LEVEL_REQUIRED"
+run_registered_checks "$STYLE_TIER_ONE" "$LEVEL_REQUIRED"
 
 # --------------------------------- Tier 2: Text and script checks ---------------------------------
 
 print_tier_heading "$TIER_TWO_NAME"
 
-run_registered_checks "$TIER_TWO" "$LEVEL_REQUIRED"
+run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_REQUIRED"
 
 if [ "$PROFILE" = "$PROFILE_ALL" ]; then
-	run_registered_checks "$TIER_TWO" "$LEVEL_RECOMMENDATION"
+	run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_RECOMMENDATION"
 fi
 
 # -------------------------------------- Tier 3: AST analysis --------------------------------------
 
 print_tier_heading "$TIER_THREE_NAME"
 
-run_registered_checks "$TIER_THREE" "$LEVEL_REQUIRED"
+run_registered_checks "$STYLE_TIER_THREE" "$LEVEL_REQUIRED"
 
 # --------------------------------------------- Summary --------------------------------------------
 

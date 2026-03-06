@@ -13,7 +13,7 @@ func collectInterfaces(
 	path string,
 	interfaces map[string]interfaceDecl,
 ) {
-	if !strings.Contains(path, "/internal/core/ports/") {
+	if !strings.Contains(path, corePortsPathSegment) {
 		return
 	}
 
@@ -59,7 +59,7 @@ func collectMockMethods(
 	path string,
 	mocks map[string][]methodDecl,
 ) {
-	if !strings.Contains(path, "/internal/mocks/") {
+	if !strings.Contains(path, mocksPathSegment) {
 		return
 	}
 

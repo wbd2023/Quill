@@ -7,6 +7,13 @@ import (
 	"testing"
 )
 
+var requiredStyleToolNames = []string{
+	"misspell",
+	"golangci-lint",
+	"shfmt",
+	"shellcheck",
+}
+
 /* -------------------------------------------- Tests ------------------------------------------- */
 
 func TestInstallStyleToolsScriptUsesExistingTools(t *testing.T) {
@@ -14,10 +21,9 @@ func TestInstallStyleToolsScriptUsesExistingTools(t *testing.T) {
 	harness.writeProxyCommand(t, "mkdir")
 	writeFakeGoCommand(t, harness, false)
 
-	goBinDirectory := filepath.Join(harness.fakeGoPath, "bin")
-	localBinDirectory := filepath.Join(harness.fakeHomeDirectory, ".local", "bin")
-	toolNames := []string{"misspell", "golangci-lint", "shfmt", "shellcheck"}
-	for _, toolName := range toolNames {
+	goBinDirectory := filepath.Join(harness.fakeGoPath, goBinRelativePath)
+	localBinDirectory := filepath.Join(harness.fakeHomeDirectory, localBinRelativePath)
+	for _, toolName := range requiredStyleToolNames {
 		writeStubExecutable(t, filepath.Join(goBinDirectory, toolName))
 	}
 	writeStubExecutable(t, filepath.Join(localBinDirectory, "markdownlint"))

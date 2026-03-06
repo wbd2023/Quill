@@ -8,13 +8,20 @@ This directory contains project tooling for build helpers and style enforcement.
   - Makefile include modules for grouped targets.
   - Current style target definitions live in `tools/make/style.mk`.
 - `tools/scripts/`
-  - Shell entrypoints, text-oriented checkers, and installers.
+  - Shell entrypoints, test files, and shared script infrastructure.
   - Primary entrypoints:
     - `check-style.sh`: master STYLE.md pipeline
     - `install-style-tools.sh`: installs required third-party tools
+- `tools/scripts/checks/`
+  - Individual shell check implementations used by `check-style.sh`.
+  - Organised by concern:
+    - `bash/`: Bash-specific checks
+    - `go/`: Go-specific text or runner-backed checks
+    - `general/`: repository-wide checks spanning multiple file types
 - `tools/scripts/lib/`
-  - Shared shell libraries used by style scripts.
+  - Shared shell libraries and registry data used by style scripts.
   - `style-common.sh`: argument, scope, and common helper functions.
+  - `style-registry-constants.sh`: shared registry tier and runner constants.
   - `style-registry.sh`: table-driven registry loader.
   - `style-registry.table`: single source of truth for check registration order.
 - `tools/stylecheck/`

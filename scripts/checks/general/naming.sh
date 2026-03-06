@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# tools/scripts/check-naming.sh
+# tools/scripts/checks/general/naming.sh
 # Checks naming conventions using text patterns (STYLE.md 2.2).
 #
 # Rules:
@@ -9,7 +9,7 @@
 #	- Use descriptive constant names in Bash scripts (for example COLOUR_RESET over NC).
 #
 # Usage:
-#	./tools/scripts/check-naming.sh [--scope app|tools|all]
+#	./tools/scripts/checks/general/naming.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no violations, 1 if violations found.
 
@@ -33,10 +33,11 @@ MESSAGE_NC_NAME+=" (prefer COLOUR_RESET over NC):"
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

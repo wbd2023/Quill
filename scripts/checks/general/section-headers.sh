@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# tools/scripts/check-section-headers.sh
+# tools/scripts/checks/general/section-headers.sh
 # Checks section header formatting (STYLE.md 2.4).
 #
 # Rules:
@@ -10,7 +10,7 @@
 #	- 100+ line Go/Bash files must include at least one section header.
 #
 # Usage:
-#	./tools/scripts/check-section-headers.sh [--scope app|tools|all]
+#	./tools/scripts/checks/general/section-headers.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no violations, 1 if violations found.
 
@@ -33,10 +33,11 @@ FOUND=0
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

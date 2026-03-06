@@ -22,6 +22,31 @@ const (
 
 const minParamFieldSpan = 2
 
+var constructorParameterCategoryLabels = map[int]string{
+	categoryRepository: "repository",
+	categoryService:    "service",
+	categoryAdapter:    "adapter",
+	categoryConfig:     "config",
+	categorySecret:     "secret",
+}
+
+var secretParameterNames = map[string]bool{
+	"passphrase": true,
+	"privateKey": true,
+	"token":      true,
+	"seed":       true,
+	"secret":     true,
+	"password":   true,
+	"secretKey":  true,
+}
+
+var configParameterNames = map[string]bool{
+	"serverURL":  true,
+	"relayURL":   true,
+	"identityID": true,
+	"timeout":    true,
+}
+
 /* --------------------------------------- Ordering Rules --------------------------------------- */
 
 // checkParamOrder ensures ctx is first and secrets are last (2.7).
@@ -83,14 +108,6 @@ func checkParamOrder(fileSet *token.FileSet, file *ast.File) (violations []viola
 // checkConstructorOrder ensures constructor parameters follow the canonical
 // ordering: repositories -> services -> adapters -> config -> secrets (2.8).
 func checkConstructorOrder(fileSet *token.FileSet, file *ast.File) (violations []violation) {
-	categoryLabel := map[int]string{
-		categoryRepository: "repository",
-		categoryService:    "service",
-		categoryAdapter:    "adapter",
-		categoryConfig:     "config",
-		categorySecret:     "secret",
-	}
-
 	ast.Inspect(file, func(node ast.Node) bool {
 		funcDecl, ok := node.(*ast.FuncDecl)
 		if !ok || funcDecl.Type.Params == nil {
@@ -118,8 +135,8 @@ func checkConstructorOrder(fileSet *token.FileSet, file *ast.File) (violations [
 					rule:     "2.8",
 					message: fmt.Sprintf(
 						"%s parameter appears after %s parameter in constructor %q",
-						categoryLabel[category],
-						categoryLabel[prevCategory],
+						constructorParameterCategoryLabels[category],
+						constructorParameterCategoryLabels[prevCategory],
 						funcDecl.Name.Name,
 					),
 				})
@@ -138,27 +155,12 @@ func checkConstructorOrder(fileSet *token.FileSet, file *ast.File) (violations [
 
 // isSecretName returns true if the parameter name represents a secret.
 func isSecretName(name string) (found bool) {
-	secrets := map[string]bool{
-		"passphrase": true,
-		"privateKey": true,
-		"token":      true,
-		"seed":       true,
-		"secret":     true,
-		"password":   true,
-		"secretKey":  true,
-	}
-	return secrets[name]
+	return secretParameterNames[name]
 }
 
 // isConfigName returns true if the parameter name represents configuration.
 func isConfigName(name string) (found bool) {
-	configs := map[string]bool{
-		"serverURL":  true,
-		"relayURL":   true,
-		"identityID": true,
-		"timeout":    true,
-	}
-	return configs[name]
+	return configParameterNames[name]
 }
 
 // isConstructor returns true if the function name follows the NewXxx pattern.
