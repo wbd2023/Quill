@@ -199,6 +199,36 @@ install_shellcheck() {
 	rm -rf "$temporary_directory"
 }
 
+install_ripgrep() {
+	if command -v rg >/dev/null 2>&1; then
+		return
+	fi
+
+	if command -v apt-get >/dev/null 2>&1; then
+		if [ "$(id -u)" -eq 0 ]; then
+			echo "Installing ripgrep via apt-get (root)..."
+			apt-get update
+			apt-get install -y ripgrep
+			return
+		fi
+
+		if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+			echo "Installing ripgrep via apt-get (sudo)..."
+			sudo -n apt-get update
+			sudo -n apt-get install -y ripgrep
+			return
+		fi
+	fi
+
+	if command -v brew >/dev/null 2>&1; then
+		echo "Installing ripgrep via Homebrew..."
+		brew install ripgrep
+		return
+	fi
+
+	echo "ripgrep (rg) is required but could not be installed automatically"
+}
+
 install_markdownlint() {
 	if command -v markdownlint >/dev/null 2>&1; then
 		return
@@ -233,6 +263,7 @@ if ! command -v shfmt >/dev/null 2>&1; then
 	install_go_tool "shfmt" "mvdan.cc/sh/v3/cmd/shfmt" "$SHFMT_VERSION"
 fi
 
+install_ripgrep
 install_shellcheck
 install_markdownlint
 
@@ -242,6 +273,7 @@ required_tools=(
 	misspell
 	golangci-lint
 	shfmt
+	rg
 	shellcheck
 	markdownlint
 )
