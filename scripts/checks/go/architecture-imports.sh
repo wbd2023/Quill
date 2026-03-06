@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# tools/scripts/check-go-architecture-imports.sh
+# tools/scripts/checks/go/architecture-imports.sh
 # Checks Clean Architecture dependency rules (STYLE.md 1.3).
 #
 # Rules:
-#   - core must not import from adapters or app.
-#   - adapters must not import from app.
+#	- core must not import from adapters or app.
+#	- adapters must not import from app.
 #
 # Exit code: 0 if no violations, 1 if violations found.
 
@@ -27,10 +27,11 @@ MESSAGE_ADAPTER_IMPORTS="[${RULE_LABEL}] adapters must not import from app:"
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 if ! style_require_command "go" "$USAGE_EXIT_CODE"; then
 	exit "$USAGE_EXIT_CODE"

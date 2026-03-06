@@ -13,11 +13,11 @@ func checkServiceTypeNaming(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if !strings.Contains(path, "/internal/core/services/") {
+	if !strings.Contains(path, coreServicesPathSegment) {
 		return nil
 	}
 
-	if strings.Contains(path, "/internal/core/services/accountref/") {
+	if strings.Contains(path, coreServicesAccountRefPathSegment) {
 		return nil
 	}
 

@@ -14,8 +14,8 @@ func collectImplementationMethods(
 	path string,
 	implementations map[string][]methodDecl,
 ) {
-	isPortPath := strings.Contains(path, "/internal/core/ports/")
-	isMockPath := strings.Contains(path, "/internal/mocks/")
+	isPortPath := strings.Contains(path, corePortsPathSegment)
+	isMockPath := strings.Contains(path, mocksPathSegment)
 	if isPortPath || isMockPath {
 		return
 	}
@@ -45,7 +45,7 @@ func collectImplementationBindings(
 	path string,
 	bindings *[]implementationBinding,
 ) {
-	if strings.Contains(path, "/internal/mocks/") {
+	if strings.Contains(path, mocksPathSegment) {
 		return
 	}
 

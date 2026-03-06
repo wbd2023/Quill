@@ -24,7 +24,7 @@ func checkCRUDLOrder(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if !strings.Contains(path, "/internal/core/ports/") {
+	if !strings.Contains(path, corePortsPathSegment) {
 		return nil
 	}
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# tools/scripts/check-bash-magic-values.sh
+# tools/scripts/checks/bash/magic-values.sh
 # Recommends avoiding magic numeric values in Bash scripts (STYLE.md 2.10).
 #
 # Rules:
@@ -8,7 +8,7 @@
 #	- Trivial values (0, 1, -1) are allowed.
 #
 # Usage:
-#	./tools/scripts/check-bash-magic-values.sh [--scope app|tools|all]
+#	./tools/scripts/checks/bash/magic-values.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no recommendation findings, 1 if findings exist.
 
@@ -37,10 +37,11 @@ MESSAGE_HEAD_LIMITS+=" in Bash scripts:"
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

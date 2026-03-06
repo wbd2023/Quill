@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# tools/scripts/check-spelling.sh
+# tools/scripts/checks/general/spelling.sh
 # Checks Australian-English-compatible spelling using misspell (UK locale).
 #
 # Rules:
@@ -8,7 +8,7 @@
 #	- Go files are checked separately via golangci-lint misspell.
 #
 # Usage:
-#	./tools/scripts/check-spelling.sh [--scope app|tools|all]
+#	./tools/scripts/checks/general/spelling.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no violations, 1 if violations found, 2 if tool unavailable.
 
@@ -30,10 +30,11 @@ MISSPELL_LOCALE='UK'
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

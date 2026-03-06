@@ -9,8 +9,8 @@ import (
 /* -------------------------------------------- Tests ------------------------------------------- */
 
 func TestCheckBashLineLengthScript(t *testing.T) {
-	harness := newScriptHarness(t, "check-bash-line-length.sh")
-	targetScript := harness.scriptPath("check-bash-line-length.sh")
+	harness := newScriptHarness(t, checkPathBashLineLength)
+	targetScript := harness.scriptPath(checkPathBashLineLength)
 
 	harness.writeProjectFile(
 		t,
@@ -81,8 +81,8 @@ func TestCheckBashLineLengthScript(t *testing.T) {
 }
 
 func TestCheckBashLineLengthScriptUsage(t *testing.T) {
-	harness := newScriptHarness(t, "check-bash-line-length.sh")
-	targetScript := harness.scriptPath("check-bash-line-length.sh")
+	harness := newScriptHarness(t, checkPathBashLineLength)
+	targetScript := harness.scriptPath(checkPathBashLineLength)
 
 	output, err := runBashScript(targetScript, "--bad-flag")
 	if err == nil {
@@ -104,8 +104,8 @@ func TestCheckBashLineLengthScriptUsage(t *testing.T) {
 }
 
 func TestCheckGoLineLengthScriptTabWidth(t *testing.T) {
-	harness := newScriptHarness(t, "check-go-line-length.sh")
-	targetScript := harness.scriptPath("check-go-line-length.sh")
+	harness := newScriptHarness(t, checkPathGoLineLength)
+	targetScript := harness.scriptPath(checkPathGoLineLength)
 
 	fakeLinterContent := "#!/bin/bash\nset -euo pipefail\n"
 	fakeLinterContent += "if [ \"${1:-}\" = \"run\" ] && [ \"${2:-}\" = \"--help\" ]; then\n"

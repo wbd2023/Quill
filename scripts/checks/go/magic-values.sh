@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# tools/scripts/check-go-magic-values.sh
+# tools/scripts/checks/go/magic-values.sh
 # Checks for magic numeric values in Go files (STYLE.md 2.10).
 #
 # Rules:
@@ -8,7 +8,7 @@
 #	- Enforced via golangci-lint mnd.
 #
 # Usage:
-#	./tools/scripts/check-go-magic-values.sh [--scope app|tools|all]
+#	./tools/scripts/checks/go/magic-values.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no violations, 1 if violations found, 2 if setup error.
 
@@ -30,10 +30,11 @@ PACKAGE_TOOLS="./..."
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 STYLECHECK_DIRECTORY="$PROJECT_ROOT/$STYLE_PATH_TOOLS/stylecheck"
 
 # ---------------------------------------------- Args ----------------------------------------------

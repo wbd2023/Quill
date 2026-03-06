@@ -6,37 +6,42 @@ import (
 	"go/token"
 )
 
+var allowedSingleLetterNames = map[string]bool{
+	"i": true,
+	"j": true,
+	"k": true,
+	"_": true,
+}
+
 /* ---------------------------------------- Naming Rules ---------------------------------------- */
 
 // checkSingleLetterVars flags single-letter variable names that are not
 // loop indices (i, j, k) or method receivers (2.2).
 func checkSingleLetterVars(fileSet *token.FileSet, file *ast.File) (violations []violation) {
-	allowed := map[string]bool{"i": true, "j": true, "k": true, "_": true}
-
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch declaration := node.(type) {
 		case *ast.FuncDecl:
 			violations = append(
 				violations,
-				checkSingleLetterFuncParams(fileSet, declaration, allowed)...,
+				checkSingleLetterFuncParams(fileSet, declaration, allowedSingleLetterNames)...,
 			)
 
 		case *ast.AssignStmt:
 			violations = append(
 				violations,
-				checkSingleLetterAssignStmt(fileSet, declaration, allowed)...,
+				checkSingleLetterAssignStmt(fileSet, declaration, allowedSingleLetterNames)...,
 			)
 
 		case *ast.RangeStmt:
 			violations = append(
 				violations,
-				checkSingleLetterRangeStmt(fileSet, declaration, allowed)...,
+				checkSingleLetterRangeStmt(fileSet, declaration, allowedSingleLetterNames)...,
 			)
 
 		case *ast.ValueSpec:
 			violations = append(
 				violations,
-				checkSingleLetterValueSpec(fileSet, declaration, allowed)...,
+				checkSingleLetterValueSpec(fileSet, declaration, allowedSingleLetterNames)...,
 			)
 		}
 		return true

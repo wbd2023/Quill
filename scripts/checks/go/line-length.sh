@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# tools/scripts/check-go-line-length.sh
+# tools/scripts/checks/go/line-length.sh
 # Checks Go line length using golangci-lint lll (STYLE.md 1.1).
 #
 # Rules:
 #	- Go lines must be at most 100 characters.
 #
 # Usage:
-#	./tools/scripts/check-go-line-length.sh [--scope app|tools|all]
+#	./tools/scripts/checks/go/line-length.sh [--scope app|tools|all]
 #
 # Exit code: 0 if no violations, 1 if violations found, 2 if invalid usage/tool unavailable.
 
@@ -35,10 +35,11 @@ LINTER_HELP_ENABLE_ONLY='--enable-only'
 # ---------------------------------------------- Paths ---------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
-source "$SCRIPT_DIR/lib/style-common.sh"
+source "$SCRIPTS_DIR/lib/style-common.sh"
 
-PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPT_DIR")"
+PROJECT_ROOT="$(style_project_root_from_dir "$SCRIPTS_DIR")"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

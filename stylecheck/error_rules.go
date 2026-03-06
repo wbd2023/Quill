@@ -12,8 +12,6 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
-const adaptersPathSegment = "/internal/adapters/"
-const domainErrorsFilePathSuffix = "/internal/core/domain/errors.go"
 const secretLikeNameFragmentPassphrase = "passphrase"
 const secretLikeNameFragmentPassword = "password"
 const secretLikeNameFragmentPrivateKey = "privatekey"
