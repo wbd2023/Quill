@@ -2,86 +2,11 @@ package main
 
 import (
 	"fmt"
-	"go/ast"
-	"go/token"
-	"path/filepath"
 	"sort"
 	"strings"
 )
 
 /* --------------------------------------- Interface Rules -------------------------------------- */
-
-// collectInterfaces records interface method order from internal/core/ports.
-func collectInterfaces(
-	fileSet *token.FileSet,
-	file *ast.File,
-	path string,
-	interfaces map[string]interfaceDecl,
-) {
-	if !strings.Contains(path, "/internal/core/ports/") {
-		return
-	}
-
-	for _, declaration := range file.Decls {
-		genDecl, ok := declaration.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.TYPE {
-			continue
-		}
-		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec)
-			if !ok {
-				continue
-			}
-			interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
-			if !ok || interfaceType.Methods == nil {
-				continue
-			}
-
-			methods := make([]methodDecl, 0, len(interfaceType.Methods.List))
-			for _, method := range interfaceType.Methods.List {
-				if len(method.Names) == 0 {
-					continue
-				}
-				methods = append(methods, methodDecl{
-					name:     method.Names[0].Name,
-					position: fileSet.Position(method.Pos()),
-				})
-			}
-
-			interfaces[typeSpec.Name.Name] = interfaceDecl{
-				name:     typeSpec.Name.Name,
-				methods:  methods,
-				position: fileSet.Position(typeSpec.Pos()),
-			}
-		}
-	}
-}
-
-// collectMockMethods records method order for each mock receiver type.
-func collectMockMethods(
-	fileSet *token.FileSet,
-	file *ast.File,
-	path string,
-	mocks map[string][]methodDecl,
-) {
-	if !strings.Contains(path, "/internal/mocks/") {
-		return
-	}
-	for _, declaration := range file.Decls {
-		funcDecl, ok := declaration.(*ast.FuncDecl)
-		if !ok || funcDecl.Recv == nil || len(funcDecl.Recv.List) == 0 {
-			continue
-		}
-		receiver := receiverTypeName(funcDecl.Recv.List[0].Type)
-		if receiver == "" {
-			continue
-		}
-		mocks[receiver] = append(mocks[receiver], methodDecl{
-			name:     funcDecl.Name.Name,
-			position: fileSet.Position(funcDecl.Name.Pos()),
-		})
-	}
-}
 
 // checkMockOrderAgainstInterfaces compares mock method order with ports interface order (2.5).
 func checkMockOrderAgainstInterfaces(
@@ -291,87 +216,6 @@ func resolveMockMethodsForInterface(
 	}
 
 	return methods, matchedMockName, nil, true
-}
-
-func collectImplementationMethods(
-	fileSet *token.FileSet,
-	file *ast.File,
-	path string,
-	implementations map[string][]methodDecl,
-) {
-	isPortPath := strings.Contains(path, "/internal/core/ports/")
-	isMockPath := strings.Contains(path, "/internal/mocks/")
-	if isPortPath || isMockPath {
-		return
-	}
-
-	for _, declaration := range file.Decls {
-		funcDeclaration, ok := declaration.(*ast.FuncDecl)
-		if !ok || funcDeclaration.Recv == nil || len(funcDeclaration.Recv.List) == 0 {
-			continue
-		}
-
-		receiverName := receiverTypeName(funcDeclaration.Recv.List[0].Type)
-		if receiverName == "" {
-			continue
-		}
-
-		key := typeDeclKey(path, receiverName)
-		implementations[key] = append(implementations[key], methodDecl{
-			name:     funcDeclaration.Name.Name,
-			position: fileSet.Position(funcDeclaration.Name.Pos()),
-		})
-	}
-}
-
-func collectImplementationBindings(
-	fileSet *token.FileSet,
-	file *ast.File,
-	path string,
-	bindings *[]implementationBinding,
-) {
-	if strings.Contains(path, "/internal/mocks/") {
-		return
-	}
-
-	for _, declaration := range file.Decls {
-		genDeclaration, ok := declaration.(*ast.GenDecl)
-		if !ok || genDeclaration.Tok != token.VAR {
-			continue
-		}
-
-		for _, spec := range genDeclaration.Specs {
-			valueSpec, ok := spec.(*ast.ValueSpec)
-			if !ok {
-				continue
-			}
-
-			if len(valueSpec.Names) != 1 || valueSpec.Names[0].Name != "_" {
-				continue
-			}
-
-			interfaceName := typeNameFromExpr(valueSpec.Type)
-			if interfaceName == "" || len(valueSpec.Values) != 1 {
-				continue
-			}
-
-			implementationName := implementationTypeFromAssertion(valueSpec.Values[0])
-			if implementationName == "" {
-				continue
-			}
-
-			*bindings = append(*bindings, implementationBinding{
-				interfaceName:      interfaceName,
-				implementationName: implementationName,
-				implementationKey:  typeDeclKey(path, implementationName),
-				position:           fileSet.Position(valueSpec.Pos()),
-			})
-		}
-	}
-}
-
-func typeDeclKey(path string, typeName string) (key string) {
-	return fmt.Sprintf("%s::%s", filepath.ToSlash(filepath.Dir(path)), typeName)
 }
 
 func normaliseMockTypeName(typeName string) (normalisedTypeName string) {

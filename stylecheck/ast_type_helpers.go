@@ -3,6 +3,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"strconv"
 )
 
 /* -------------------------------------- AST Type Helpers -------------------------------------- */
@@ -73,4 +74,18 @@ func typeString(expression ast.Expr) (typeName string) {
 	default:
 		return ""
 	}
+}
+
+func extractStringLiteral(expression ast.Expr) (value string, found bool) {
+	literal, ok := expression.(*ast.BasicLit)
+	if !ok || literal.Kind != token.STRING {
+		return "", false
+	}
+
+	unquotedValue, err := strconv.Unquote(literal.Value)
+	if err != nil {
+		return "", false
+	}
+
+	return unquotedValue, true
 }

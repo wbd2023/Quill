@@ -13,16 +13,7 @@ import (
 /* ------------------------------------------ Constants ----------------------------------------- */
 
 const adaptersPathSegment = "/internal/adapters/"
-const cmdPathSegment = "/cmd/"
-const internalPathSegment = "/internal/"
-const testsPathSegment = "/tests/"
 const domainErrorsFilePathSuffix = "/internal/core/domain/errors.go"
-const inlineCommentDirectiveCodeGenerated = "code generated"
-const inlineCommentDirectiveFixme = "fixme:"
-const inlineCommentDirectiveGo = "go:"
-const inlineCommentDirectiveNolint = "nolint"
-const inlineCommentDirectiveTodo = "todo:"
-const inlineCommentPunctuation = ".!?"
 const secretLikeNameFragmentPassphrase = "passphrase"
 const secretLikeNameFragmentPassword = "password"
 const secretLikeNameFragmentPrivateKey = "privatekey"
@@ -189,75 +180,7 @@ func checkAdapterErrorWrapping(
 	return violations
 }
 
-/* ---------------------------------------- Comment Rules --------------------------------------- */
-
-// checkInlineCommentStyle validates trailing inline comment case and punctuation (2.3).
-func checkInlineCommentStyle(
-	fileSet *token.FileSet,
-	file *ast.File,
-	path string,
-) (violations []violation) {
-	if !isAppScopePath(path) {
-		return nil
-	}
-
-	commentMap := ast.NewCommentMap(fileSet, file, file.Comments)
-	seen := make(map[token.Pos]bool)
-
-	for node, commentGroups := range commentMap {
-		nodeEndLine := fileSet.Position(node.End()).Line
-
-		for _, commentGroup := range commentGroups {
-			for _, comment := range commentGroup.List {
-				if !strings.HasPrefix(comment.Text, "//") {
-					continue
-				}
-
-				if seen[comment.Pos()] {
-					continue
-				}
-
-				commentPosition := fileSet.Position(comment.Pos())
-				if commentPosition.Line != nodeEndLine {
-					continue
-				}
-
-				payload := strings.TrimSpace(strings.TrimPrefix(comment.Text, "//"))
-				if payload == "" || isInlineCommentDirective(payload) {
-					continue
-				}
-
-				seen[comment.Pos()] = true
-
-				if startsWithUppercaseLetter(payload) {
-					violations = append(violations, violation{
-						position: fileSet.Position(comment.Pos()),
-						rule:     "2.3",
-						message:  "inline trailing comment should start lower-case",
-					})
-				}
-
-				if endsWithSentencePunctuation(payload) {
-					violations = append(violations, violation{
-						position: fileSet.Position(comment.Pos()),
-						rule:     "2.3",
-						message:  "inline trailing comment should not end with punctuation",
-					})
-				}
-			}
-		}
-	}
-
-	return violations
-}
-
 /* ------------------------------------------- Helpers ------------------------------------------ */
-
-func isAppScopePath(path string) (found bool) {
-	return strings.Contains(path, internalPathSegment) ||
-		strings.Contains(path, cmdPathSegment) ||
-		strings.Contains(path, testsPathSegment)
-}
 
 func importAliasesForPath(file *ast.File, importPath string) (aliases map[string]bool) {
 	aliases = make(map[string]bool)
@@ -294,20 +217,6 @@ func pathBase(value string) (base string) {
 
 	parts := strings.Split(value, "/")
 	return parts[len(parts)-1]
-}
-
-func extractStringLiteral(expression ast.Expr) (value string, found bool) {
-	literal, ok := expression.(*ast.BasicLit)
-	if !ok || literal.Kind != token.STRING {
-		return "", false
-	}
-
-	unquotedValue, err := strconv.Unquote(literal.Value)
-	if err != nil {
-		return "", false
-	}
-
-	return unquotedValue, true
 }
 
 func checkErrorMessageLiteralStyle(
@@ -394,24 +303,4 @@ func isBareErrReturn(returnStatement *ast.ReturnStmt) (found bool) {
 	}
 
 	return identifier.Name == "err"
-}
-
-func isInlineCommentDirective(comment string) (found bool) {
-	normalisedComment := strings.ToLower(strings.TrimSpace(comment))
-
-	return strings.HasPrefix(normalisedComment, inlineCommentDirectiveNolint) ||
-		strings.HasPrefix(normalisedComment, inlineCommentDirectiveTodo) ||
-		strings.HasPrefix(normalisedComment, inlineCommentDirectiveFixme) ||
-		strings.HasPrefix(normalisedComment, inlineCommentDirectiveGo) ||
-		strings.HasPrefix(normalisedComment, inlineCommentDirectiveCodeGenerated)
-}
-
-func startsWithUppercaseLetter(value string) (found bool) {
-	firstRune, _ := utf8.DecodeRuneInString(value)
-	return unicode.IsUpper(firstRune)
-}
-
-func endsWithSentencePunctuation(value string) (found bool) {
-	lastRune, _ := utf8.DecodeLastRuneInString(value)
-	return strings.ContainsRune(inlineCommentPunctuation, lastRune)
 }
