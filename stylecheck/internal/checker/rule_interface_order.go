@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"stylecheck/internal/checker/collect"
 )
 
 /* --------------------------------------- Interface Rules -------------------------------------- */
 
 // checkMockOrderAgainstInterfaces compares mock method order with ports interface order (2.5).
 func checkMockOrderAgainstInterfaces(
-	interfaces map[string]interfaceDecl,
-	mocks map[string][]methodDecl,
+	interfaces map[string]collect.InterfaceDecl,
+	mocks map[string][]collect.MethodDecl,
 ) (violations []violation) {
 	interfaceNames := make([]string, 0, len(interfaces))
 	for name := range interfaces {
@@ -20,15 +22,15 @@ func checkMockOrderAgainstInterfaces(
 	sort.Strings(interfaceNames)
 
 	for _, interfaceName := range interfaceNames {
-		interfaceDecl := interfaces[interfaceName]
+		interfaceDeclaration := interfaces[interfaceName]
 		mockMethods, matchedMockName, ambiguousMockNames, found := resolveMockMethodsForInterface(
 			interfaceName,
 			mocks,
 		)
 		if len(ambiguousMockNames) > 0 {
-			position := interfaceDecl.position
+			position := interfaceDeclaration.Position
 			if len(mockMethods) > 0 {
-				position = mockMethods[0].position
+				position = mockMethods[0].Position
 			}
 			violations = append(violations, violation{
 				position: position,
@@ -46,19 +48,19 @@ func checkMockOrderAgainstInterfaces(
 			continue
 		}
 
-		interfaceMethodNames := make([]string, len(interfaceDecl.methods))
-		for i, method := range interfaceDecl.methods {
-			interfaceMethodNames[i] = method.name
+		interfaceMethodNames := make([]string, len(interfaceDeclaration.Methods))
+		for i, method := range interfaceDeclaration.Methods {
+			interfaceMethodNames[i] = method.Name
 		}
 		mockMethodNames := make([]string, len(mockMethods))
 		for i, method := range mockMethods {
-			mockMethodNames[i] = method.name
+			mockMethodNames[i] = method.Name
 		}
 
 		if len(interfaceMethodNames) != len(mockMethodNames) {
-			position := interfaceDecl.position
+			position := interfaceDeclaration.Position
 			if len(mockMethods) > 0 {
-				position = mockMethods[0].position
+				position = mockMethods[0].Position
 			}
 			violations = append(violations, violation{
 				position: position,
@@ -79,7 +81,7 @@ func checkMockOrderAgainstInterfaces(
 				continue
 			}
 			violations = append(violations, violation{
-				position: mockMethods[index].position,
+				position: mockMethods[index].Position,
 				rule:     "2.5",
 				message: fmt.Sprintf(
 					"mock %q for interface %q method order mismatch at position %d: "+
@@ -98,54 +100,54 @@ func checkMockOrderAgainstInterfaces(
 	return violations
 }
 
-// checkImplementationOrderAgainstInterfaces compares implementation method order with
-// ports interface order for types that declare compile-time assertions (2.5).
+// checkImplementationOrderAgainstInterfaces compares implementation method order with ports
+// interface order for types that declare compile-time assertions (2.5).
 func checkImplementationOrderAgainstInterfaces(
-	interfaces map[string]interfaceDecl,
-	implementations map[string][]methodDecl,
-	bindings []implementationBinding,
+	interfaces map[string]collect.InterfaceDecl,
+	implementations map[string][]collect.MethodDecl,
+	bindings []collect.ImplementationBinding,
 ) (violations []violation) {
 	sort.Slice(bindings, func(i int, j int) bool {
-		if bindings[i].interfaceName == bindings[j].interfaceName {
-			return bindings[i].implementationName < bindings[j].implementationName
+		if bindings[i].InterfaceName == bindings[j].InterfaceName {
+			return bindings[i].ImplementationName < bindings[j].ImplementationName
 		}
-		return bindings[i].interfaceName < bindings[j].interfaceName
+		return bindings[i].InterfaceName < bindings[j].InterfaceName
 	})
 
 	for _, binding := range bindings {
-		interfaceDeclaration, found := interfaces[binding.interfaceName]
+		interfaceDeclaration, found := interfaces[binding.InterfaceName]
 		if !found {
 			continue
 		}
 
-		implementationMethods, found := implementations[binding.implementationKey]
+		implementationMethods, found := implementations[binding.ImplementationKey]
 		if !found {
 			continue
 		}
 
-		interfaceMethodNames := make([]string, len(interfaceDeclaration.methods))
-		interfaceMethodNamesSet := make(map[string]bool, len(interfaceDeclaration.methods))
-		for i, method := range interfaceDeclaration.methods {
-			interfaceMethodNames[i] = method.name
-			interfaceMethodNamesSet[method.name] = true
+		interfaceMethodNames := make([]string, len(interfaceDeclaration.Methods))
+		interfaceMethodNamesSet := make(map[string]bool, len(interfaceDeclaration.Methods))
+		for i, method := range interfaceDeclaration.Methods {
+			interfaceMethodNames[i] = method.Name
+			interfaceMethodNamesSet[method.Name] = true
 		}
 
-		implementationInterfaceMethods := make([]methodDecl, 0, len(interfaceMethodNames))
+		implementationInterfaceMethods := make([]collect.MethodDecl, 0, len(interfaceMethodNames))
 		for _, method := range implementationMethods {
-			if interfaceMethodNamesSet[method.name] {
+			if interfaceMethodNamesSet[method.Name] {
 				implementationInterfaceMethods = append(implementationInterfaceMethods, method)
 			}
 		}
 
 		if len(implementationInterfaceMethods) != len(interfaceMethodNames) {
 			violations = append(violations, violation{
-				position: binding.position,
+				position: binding.Position,
 				rule:     "2.5",
 				message: fmt.Sprintf(
 					"implementation %q for interface %q method count (%d) "+
 						"does not match interface (%d)",
-					binding.implementationName,
-					binding.interfaceName,
+					binding.ImplementationName,
+					binding.InterfaceName,
 					len(implementationInterfaceMethods),
 					len(interfaceMethodNames),
 				),
@@ -154,20 +156,20 @@ func checkImplementationOrderAgainstInterfaces(
 		}
 
 		for index := range interfaceMethodNames {
-			if implementationInterfaceMethods[index].name == interfaceMethodNames[index] {
+			if implementationInterfaceMethods[index].Name == interfaceMethodNames[index] {
 				continue
 			}
 
 			violations = append(violations, violation{
-				position: implementationInterfaceMethods[index].position,
+				position: implementationInterfaceMethods[index].Position,
 				rule:     "2.5",
 				message: fmt.Sprintf(
 					"implementation %q for interface %q method order mismatch at position %d: "+
 						"got %q, want %q",
-					binding.implementationName,
-					binding.interfaceName,
+					binding.ImplementationName,
+					binding.InterfaceName,
 					index+1,
-					implementationInterfaceMethods[index].name,
+					implementationInterfaceMethods[index].Name,
 					interfaceMethodNames[index],
 				),
 			})
@@ -182,9 +184,9 @@ func checkImplementationOrderAgainstInterfaces(
 
 func resolveMockMethodsForInterface(
 	interfaceName string,
-	mocks map[string][]methodDecl,
+	mocks map[string][]collect.MethodDecl,
 ) (
-	methods []methodDecl,
+	methods []collect.MethodDecl,
 	matchedMockName string,
 	ambiguousMockNames []string,
 	found bool,

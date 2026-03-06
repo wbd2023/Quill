@@ -1,4 +1,4 @@
-package checker
+package collect
 
 import (
 	"fmt"
@@ -6,16 +6,18 @@ import (
 	"go/token"
 	"path/filepath"
 	"strings"
+
+	"stylecheck/internal/checker/support"
 )
 
-func collectImplementationMethods(
+func CollectImplementationMethods(
 	fileSet *token.FileSet,
 	file *ast.File,
 	path string,
-	implementations map[string][]methodDecl,
+	implementations map[string][]MethodDecl,
 ) {
-	isPortPath := strings.Contains(path, corePortsPathSegment)
-	isMockPath := strings.Contains(path, mocksPathSegment)
+	isPortPath := strings.Contains(path, support.CorePortsPathSegment)
+	isMockPath := strings.Contains(path, support.MocksPathSegment)
 	if isPortPath || isMockPath {
 		return
 	}
@@ -26,26 +28,26 @@ func collectImplementationMethods(
 			continue
 		}
 
-		receiverName := receiverTypeName(funcDeclaration.Recv.List[0].Type)
+		receiverName := support.ReceiverTypeName(funcDeclaration.Recv.List[0].Type)
 		if receiverName == "" {
 			continue
 		}
 
 		key := typeDeclKey(path, receiverName)
-		implementations[key] = append(implementations[key], methodDecl{
-			name:     funcDeclaration.Name.Name,
-			position: fileSet.Position(funcDeclaration.Name.Pos()),
+		implementations[key] = append(implementations[key], MethodDecl{
+			Name:     funcDeclaration.Name.Name,
+			Position: fileSet.Position(funcDeclaration.Name.Pos()),
 		})
 	}
 }
 
-func collectImplementationBindings(
+func CollectImplementationBindings(
 	fileSet *token.FileSet,
 	file *ast.File,
 	path string,
-	bindings *[]implementationBinding,
+	bindings *[]ImplementationBinding,
 ) {
-	if strings.Contains(path, mocksPathSegment) {
+	if strings.Contains(path, support.MocksPathSegment) {
 		return
 	}
 
@@ -65,21 +67,21 @@ func collectImplementationBindings(
 				continue
 			}
 
-			interfaceName := typeNameFromExpr(valueSpec.Type)
+			interfaceName := support.TypeNameFromExpr(valueSpec.Type)
 			if interfaceName == "" || len(valueSpec.Values) != 1 {
 				continue
 			}
 
-			implementationName := implementationTypeFromAssertion(valueSpec.Values[0])
+			implementationName := support.ImplementationTypeFromAssertion(valueSpec.Values[0])
 			if implementationName == "" {
 				continue
 			}
 
-			*bindings = append(*bindings, implementationBinding{
-				interfaceName:      interfaceName,
-				implementationName: implementationName,
-				implementationKey:  typeDeclKey(path, implementationName),
-				position:           fileSet.Position(valueSpec.Pos()),
+			*bindings = append(*bindings, ImplementationBinding{
+				InterfaceName:      interfaceName,
+				ImplementationName: implementationName,
+				ImplementationKey:  typeDeclKey(path, implementationName),
+				Position:           fileSet.Position(valueSpec.Pos()),
 			})
 		}
 	}

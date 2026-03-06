@@ -8,6 +8,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"stylecheck/internal/checker/support"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
@@ -29,7 +31,7 @@ func checkGoErrorHandlingStyle(
 	path string,
 	isTestFile bool,
 ) (violations []violation) {
-	if !isAppScopePath(path) {
+	if !support.IsAppScopePath(path) {
 		return nil
 	}
 
@@ -54,7 +56,7 @@ func checkGoErrorHandlingStyle(
 
 		switch {
 		case selectorExpression.Sel.Name == "Errorf" && fmtImportAliases[packageIdentifier.Name]:
-			message, found := extractStringLiteral(callExpression.Args[0])
+			message, found := support.ExtractStringLiteral(callExpression.Args[0])
 			if found {
 				violations = append(
 					violations,
@@ -84,7 +86,7 @@ func checkGoErrorHandlingStyle(
 			}
 
 		case selectorExpression.Sel.Name == "New" && errorsImportAliases[packageIdentifier.Name]:
-			message, found := extractStringLiteral(callExpression.Args[0])
+			message, found := support.ExtractStringLiteral(callExpression.Args[0])
 			if !found {
 				return true
 			}
@@ -103,7 +105,7 @@ func checkGoErrorHandlingStyle(
 		return true
 	})
 
-	if isTestFile || strings.HasSuffix(path, domainErrorsFilePathSuffix) {
+	if isTestFile || strings.HasSuffix(path, support.DomainErrorsFilePathSuffix) {
 		return violations
 	}
 
@@ -143,7 +145,7 @@ func checkAdapterErrorWrapping(
 	path string,
 	isTestFile bool,
 ) (violations []violation) {
-	if isTestFile || !strings.Contains(path, adaptersPathSegment) {
+	if isTestFile || !strings.Contains(path, support.AdaptersPathSegment) {
 		return nil
 	}
 
@@ -228,7 +230,7 @@ func checkErrorMessageLiteralStyle(
 		return nil
 	}
 
-	if startsWithUppercaseLetter(trimmedMessage) {
+	if support.StartsWithUppercaseLetter(trimmedMessage) {
 		violations = append(violations, violation{
 			position: fileSet.Position(expression.Pos()),
 			rule:     "2.1",
@@ -236,7 +238,7 @@ func checkErrorMessageLiteralStyle(
 		})
 	}
 
-	if endsWithSentencePunctuation(trimmedMessage) {
+	if support.EndsWithSentencePunctuation(trimmedMessage) {
 		violations = append(violations, violation{
 			position: fileSet.Position(expression.Pos()),
 			rule:     "2.1",

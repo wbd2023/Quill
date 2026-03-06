@@ -30,7 +30,9 @@ This directory contains project tooling for build helpers and style enforcement.
 - `tools/stylecheck/`
   - AST-based Go checker module for semantic Go rules.
   - `cmd/stylecheck/` contains the CLI entrypoint.
-  - `internal/checker/` contains the analysis engine, rule families, and tests.
+  - `internal/checker/` contains the runner, analysis engine, rule families, and tests.
+  - `internal/checker/collect/` contains cross-file metadata collection helpers.
+  - `internal/checker/support/` contains shared AST/text/path helper functions.
   - See `tools/stylecheck/README.md` for checker-specific details.
 
 ## Recommended Usage
