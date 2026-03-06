@@ -19,6 +19,7 @@ This directory contains project tooling for build helpers and style enforcement.
   - `style-registry.table`: single source of truth for check registration order.
 - `tools/stylecheck/`
   - AST-based Go checker binary source for semantic Go rules.
+  - Organised by rule family and shared analysis helpers to keep individual files focused.
   - See `tools/stylecheck/README.md` for checker-specific details.
 
 ## Recommended Usage
