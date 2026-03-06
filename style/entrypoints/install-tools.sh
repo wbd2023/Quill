@@ -16,6 +16,7 @@ MISSPELL_VERSION="v0.3.4"
 GOLANGCI_LINT_VERSION="v2.6.2"
 SHFMT_VERSION="v3.12.0"
 MARKDOWNLINT_CLI_VERSION="0.45.0"
+RIPGREP_VERSION="14.1.0"
 GO_BIN_SUBDIR="/bin"
 LOCAL_NPM_PREFIX="${HOME}/.local"
 LOCAL_NPM_BIN="$LOCAL_NPM_PREFIX/bin"
@@ -46,6 +47,79 @@ install_go_tool() {
 
 	echo "Installing $label@$version..."
 	go install "$package_path@$version"
+}
+
+normalise_semver() {
+	local value="$1"
+	value="${value#v}"
+	value="${value%%[^0-9.]*}"
+	printf '%s' "$value"
+}
+
+version_at_least() {
+	local actual="$1"
+	local required="$2"
+	local normalised_actual
+	local normalised_required
+	local sorted_minimum
+
+	normalised_actual="$(normalise_semver "$actual")"
+	normalised_required="$(normalise_semver "$required")"
+
+	if [ -z "$normalised_actual" ] || [ -z "$normalised_required" ]; then
+		return 1
+	fi
+
+	sorted_minimum="$(
+		printf '%s\n%s\n' "$normalised_required" "$normalised_actual" | sort -V | head -n 1
+	)"
+
+	[ "$sorted_minimum" = "$normalised_required" ]
+}
+
+golangci_lint_version() {
+	golangci-lint version |
+		awk '
+			{
+				for (field_index = 1; field_index <= NF; field_index++) {
+					if ($field_index == "version") {
+						value = $(field_index + 1)
+						sub(/^v/, "", value)
+						print value
+						exit
+					}
+				}
+			}
+		'
+}
+
+shfmt_version() {
+	shfmt --version | awk 'NR == 1 { sub(/^v/, "", $1); print $1; exit }'
+}
+
+shellcheck_version() {
+	shellcheck --version | awk '/^version:/ { print $2; exit }'
+}
+
+ripgrep_version() {
+	rg --version | awk 'NR == 1 { print $2; exit }'
+}
+
+markdownlint_version() {
+	markdownlint --version | awk 'NR == 1 { sub(/^v/, "", $1); print $1; exit }'
+}
+
+ensure_minimum_tool_version() {
+	local tool_name="$1"
+	local required_version="$2"
+	local actual_version="$3"
+	local -n errors_ref="$4"
+
+	if ! version_at_least "$actual_version" "$required_version"; then
+		errors_ref+=(
+			"$tool_name version ${actual_version:-unknown} is below required $required_version"
+		)
+	fi
 }
 
 verify_archive_checksum() {
@@ -285,8 +359,59 @@ for tool_name in "${required_tools[@]}"; do
 	fi
 done
 
+version_errors=()
+
+if command -v golangci-lint >/dev/null 2>&1; then
+	ensure_minimum_tool_version \
+		"golangci-lint" \
+		"$GOLANGCI_LINT_VERSION" \
+		"$(golangci_lint_version)" \
+		version_errors
+fi
+
+if command -v shfmt >/dev/null 2>&1; then
+	ensure_minimum_tool_version \
+		"shfmt" \
+		"$SHFMT_VERSION" \
+		"$(shfmt_version)" \
+		version_errors
+fi
+
+if command -v shellcheck >/dev/null 2>&1; then
+	ensure_minimum_tool_version \
+		"shellcheck" \
+		"$SHELLCHECK_VERSION" \
+		"$(shellcheck_version)" \
+		version_errors
+fi
+
+if command -v rg >/dev/null 2>&1; then
+	ensure_minimum_tool_version \
+		"ripgrep" \
+		"$RIPGREP_VERSION" \
+		"$(ripgrep_version)" \
+		version_errors
+fi
+
+if command -v markdownlint >/dev/null 2>&1; then
+	ensure_minimum_tool_version \
+		"markdownlint-cli" \
+		"$MARKDOWNLINT_CLI_VERSION" \
+		"$(markdownlint_version)" \
+		version_errors
+fi
+
 if [ "${#missing_tools[@]}" -gt 0 ]; then
 	echo "missing required style tools: ${missing_tools[*]}"
+	echo "$MESSAGE_PATH_HINT"
+	exit 1
+fi
+
+if [ "${#version_errors[@]}" -gt 0 ]; then
+	echo "style tool version requirements not met:"
+	for version_error in "${version_errors[@]}"; do
+		echo "- $version_error"
+	done
 	echo "$MESSAGE_PATH_HINT"
 	exit 1
 fi
