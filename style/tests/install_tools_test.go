@@ -11,6 +11,7 @@ var requiredStyleToolNames = []string{
 	"misspell",
 	"golangci-lint",
 	"shfmt",
+	"rg",
 	"shellcheck",
 }
 
