@@ -1,5 +1,5 @@
 # Style checks
-STYLE_CHECK := ./tools/scripts/check-style.sh
+STYLE_CHECK := ./tools/style/entrypoints/check-style.sh
 STYLE_VERBOSE_FLAG := $(if $(filter true TRUE yes YES 1,$(VERBOSE)),--verbose,)
 
 .PHONY: style style-verbose style-all style-all-verbose style-all-strict style-all-strict-verbose
