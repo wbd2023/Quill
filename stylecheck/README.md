@@ -6,21 +6,21 @@
 
 - `cmd/stylecheck/main.go`
   - CLI entrypoint only.
-- `internal/checker/run.go`
+- `internal/checker/runner.go`
   - Command-facing runner and exit-code orchestration.
 - `internal/checker/analysis_pipeline.go`
   - Directory walking, per-file analysis dispatch, cross-file analysis, and reporting.
 - `internal/checker/analysis_types.go`
   - Shared analysis state and cross-file metadata types.
-- `internal/checker/ast_type_helpers.go`
+- `internal/checker/support_ast_types.go`
   - Shared AST and type-string helper functions.
-- `internal/checker/scope_helpers.go`
+- `internal/checker/support_paths.go`
   - Shared path-scope helpers for rule filtering.
-- `internal/checker/text_helpers.go`
+- `internal/checker/support_text.go`
   - Shared text-style helpers used by multiple rules.
-- `internal/checker/*_rules.go`
+- `internal/checker/rule_*.go`
   - Rule-family implementations grouped by concern.
-- `internal/checker/*_collection.go`
+- `internal/checker/collect_*.go`
   - Cross-file method and implementation metadata collection helpers.
 - `internal/checker/*_test.go`
   - Rule-family regression tests plus shared test helpers.

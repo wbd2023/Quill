@@ -164,7 +164,7 @@ func (harness scriptHarness) env(pathEntries []string, extra ...string) (environ
 
 func currentScriptsDirectory() (directory string) {
 	_, currentFile, _, _ := runtime.Caller(0)
-	return filepath.Dir(currentFile)
+	return filepath.Clean(filepath.Join(filepath.Dir(currentFile), ".."))
 }
 
 func registryTableLines(rows ...string) (lines []string) {
