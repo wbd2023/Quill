@@ -4,6 +4,8 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"stylecheck/internal/checker/support"
 )
 
 const inlineCommentDirectiveCodeGenerated = "code generated"
@@ -18,7 +20,7 @@ func checkInlineCommentStyle(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if !isAppScopePath(path) {
+	if !support.IsAppScopePath(path) {
 		return nil
 	}
 
@@ -50,7 +52,7 @@ func checkInlineCommentStyle(
 
 				seen[comment.Pos()] = true
 
-				if startsWithUppercaseLetter(payload) {
+				if support.StartsWithUppercaseLetter(payload) {
 					violations = append(violations, violation{
 						position: fileSet.Position(comment.Pos()),
 						rule:     "2.3",
@@ -58,7 +60,7 @@ func checkInlineCommentStyle(
 					})
 				}
 
-				if endsWithSentencePunctuation(payload) {
+				if support.EndsWithSentencePunctuation(payload) {
 					violations = append(violations, violation{
 						position: fileSet.Position(comment.Pos()),
 						rule:     "2.3",

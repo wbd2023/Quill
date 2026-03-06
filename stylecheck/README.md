@@ -12,16 +12,18 @@
   - Directory walking, per-file analysis dispatch, cross-file analysis, and reporting.
 - `internal/checker/analysis_types.go`
   - Shared analysis state and cross-file metadata types.
-- `internal/checker/support_ast_types.go`
-  - Shared AST and type-string helper functions.
-- `internal/checker/support_paths.go`
-  - Shared path-scope helpers for rule filtering.
-- `internal/checker/support_text.go`
-  - Shared text-style helpers used by multiple rules.
+- `internal/checker/support/`
+  - Shared helper package:
+  - `ast_types.go`: AST and type-string helper functions.
+  - `paths.go`: path-scope helpers for rule filtering.
+  - `text.go`: text-style helpers used by multiple rules.
 - `internal/checker/rule_*.go`
   - Rule-family implementations grouped by concern.
-- `internal/checker/collect_*.go`
-  - Cross-file method and implementation metadata collection helpers.
+- `internal/checker/collect/`
+  - Cross-file collection helper package:
+  - `interfaces.go`: interface and mock method collection.
+  - `implementations.go`: implementation method and binding collection.
+  - `types.go`: shared collection metadata types.
 - `internal/checker/*_test.go`
   - Rule-family regression tests plus shared test helpers.
 

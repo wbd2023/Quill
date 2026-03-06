@@ -1,6 +1,10 @@
 package checker
 
-import "go/token"
+import (
+	"go/token"
+
+	"stylecheck/internal/checker/collect"
+)
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
@@ -11,30 +15,12 @@ type violation struct {
 	message  string
 }
 
-type methodDecl struct {
-	name     string
-	position token.Position
-}
-
-type interfaceDecl struct {
-	name     string
-	methods  []methodDecl
-	position token.Position
-}
-
-type implementationBinding struct {
-	interfaceName      string
-	implementationName string
-	implementationKey  string
-	position           token.Position
-}
-
 type analysisState struct {
 	fileSet                *token.FileSet
 	scannedGoFiles         []string
 	violations             []violation
-	interfaces             map[string]interfaceDecl
-	mocks                  map[string][]methodDecl
-	implementations        map[string][]methodDecl
-	implementationBindings []implementationBinding
+	interfaces             map[string]collect.InterfaceDecl
+	mocks                  map[string][]collect.MethodDecl
+	implementations        map[string][]collect.MethodDecl
+	implementationBindings []collect.ImplementationBinding
 }

@@ -6,6 +6,8 @@ import (
 	"go/token"
 	"strings"
 	"unicode"
+
+	"stylecheck/internal/checker/support"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
@@ -105,8 +107,8 @@ func checkParamOrder(fileSet *token.FileSet, file *ast.File) (violations []viola
 	return violations
 }
 
-// checkConstructorOrder ensures constructor parameters follow the canonical
-// ordering: repositories -> services -> adapters -> config -> secrets (2.8).
+// checkConstructorOrder ensures constructor parameters follow the canonical ordering:
+// repositories -> services -> adapters -> config -> secrets (2.8).
 func checkConstructorOrder(fileSet *token.FileSet, file *ast.File) (violations []violation) {
 	ast.Inspect(file, func(node ast.Node) bool {
 		funcDecl, ok := node.(*ast.FuncDecl)
@@ -173,7 +175,7 @@ func isConstructor(name string) (found bool) {
 
 // classifyParam determines the category of a constructor parameter.
 func classifyParam(field *ast.Field) (category int) {
-	typeName := typeString(field.Type)
+	typeName := support.TypeString(field.Type)
 
 	if strings.Contains(typeName, "Repository") {
 		return categoryRepository

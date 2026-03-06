@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"golang.org/x/tools/go/packages"
+
+	"stylecheck/internal/checker/support"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
@@ -26,7 +28,7 @@ func checkDirectDomainIdentifierCasts(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if strings.Contains(path, domainPathSegment) {
+	if strings.Contains(path, support.DomainPathSegment) {
 		return nil
 	}
 
@@ -115,7 +117,7 @@ func collectTypeAwareDomainIdentifierCastViolations(
 					continue
 				}
 
-				if strings.Contains(filePath, domainPathSegment) {
+				if strings.Contains(filePath, support.DomainPathSegment) {
 					continue
 				}
 
@@ -184,5 +186,5 @@ func isDomainPackagePath(packagePath string) (found bool) {
 		return true
 	}
 
-	return strings.HasSuffix(packagePath, domainPathSuffix)
+	return strings.HasSuffix(packagePath, support.DomainPathSuffix)
 }

@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"stylecheck/internal/checker/support"
 )
 
 const (
@@ -24,7 +26,7 @@ func checkCRUDLOrder(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if !strings.Contains(path, corePortsPathSegment) {
+	if !strings.Contains(path, support.CorePortsPathSegment) {
 		return nil
 	}
 

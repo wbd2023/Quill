@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"stylecheck/internal/checker/support"
 )
 
 // checkServiceTypeNaming enforces exported type naming in internal/core/services (2.2).
@@ -13,11 +15,11 @@ func checkServiceTypeNaming(
 	file *ast.File,
 	path string,
 ) (violations []violation) {
-	if !strings.Contains(path, coreServicesPathSegment) {
+	if !strings.Contains(path, support.CoreServicesPathSegment) {
 		return nil
 	}
 
-	if strings.Contains(path, coreServicesAccountRefPathSegment) {
+	if strings.Contains(path, support.CoreServicesAccountRefPathSegment) {
 		return nil
 	}
 

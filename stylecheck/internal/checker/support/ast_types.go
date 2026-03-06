@@ -1,4 +1,4 @@
-package checker
+package support
 
 import (
 	"go/ast"
@@ -8,7 +8,7 @@ import (
 
 /* -------------------------------------- AST Type Helpers -------------------------------------- */
 
-func typeNameFromExpr(expression ast.Expr) (name string) {
+func TypeNameFromExpr(expression ast.Expr) (name string) {
 	switch typed := expression.(type) {
 	case *ast.Ident:
 		return typed.Name
@@ -19,25 +19,25 @@ func typeNameFromExpr(expression ast.Expr) (name string) {
 	}
 }
 
-func implementationTypeFromAssertion(expression ast.Expr) (name string) {
+func ImplementationTypeFromAssertion(expression ast.Expr) (name string) {
 	switch typed := expression.(type) {
 	case *ast.CallExpr:
-		return implementationTypeFromAssertion(typed.Fun)
+		return ImplementationTypeFromAssertion(typed.Fun)
 
 	case *ast.ParenExpr:
-		return implementationTypeFromAssertion(typed.X)
+		return ImplementationTypeFromAssertion(typed.X)
 
 	case *ast.StarExpr:
-		return typeNameFromExpr(typed.X)
+		return TypeNameFromExpr(typed.X)
 
 	case *ast.UnaryExpr:
 		if typed.Op == token.AND {
-			return implementationTypeFromAssertion(typed.X)
+			return ImplementationTypeFromAssertion(typed.X)
 		}
 		return ""
 
 	case *ast.CompositeLit:
-		return typeNameFromExpr(typed.Type)
+		return TypeNameFromExpr(typed.Type)
 
 	case *ast.Ident:
 		return typed.Name
@@ -47,8 +47,8 @@ func implementationTypeFromAssertion(expression ast.Expr) (name string) {
 	}
 }
 
-// receiverTypeName returns the receiver type for methods (supports T and *T).
-func receiverTypeName(expression ast.Expr) (typeName string) {
+// ReceiverTypeName returns the receiver type for methods (supports T and *T).
+func ReceiverTypeName(expression ast.Expr) (typeName string) {
 	switch typed := expression.(type) {
 	case *ast.StarExpr:
 		if identifierNode, ok := typed.X.(*ast.Ident); ok {
@@ -60,23 +60,23 @@ func receiverTypeName(expression ast.Expr) (typeName string) {
 	return ""
 }
 
-// typeString extracts a human-readable type name from an AST expression.
-func typeString(expression ast.Expr) (typeName string) {
+// TypeString extracts a human-readable type name from an AST expression.
+func TypeString(expression ast.Expr) (typeName string) {
 	switch typed := expression.(type) {
 	case *ast.Ident:
 		return typed.Name
 	case *ast.SelectorExpr:
-		return typeString(typed.X) + "." + typed.Sel.Name
+		return TypeString(typed.X) + "." + typed.Sel.Name
 	case *ast.StarExpr:
-		return typeString(typed.X)
+		return TypeString(typed.X)
 	case *ast.ArrayType:
-		return "[]" + typeString(typed.Elt)
+		return "[]" + TypeString(typed.Elt)
 	default:
 		return ""
 	}
 }
 
-func extractStringLiteral(expression ast.Expr) (value string, found bool) {
+func ExtractStringLiteral(expression ast.Expr) (value string, found bool) {
 	literal, ok := expression.(*ast.BasicLit)
 	if !ok || literal.Kind != token.STRING {
 		return "", false

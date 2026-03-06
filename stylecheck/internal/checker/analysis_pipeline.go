@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"stylecheck/internal/checker/collect"
 )
 
 /* --------------------------------------- Analysis State --------------------------------------- */
@@ -17,10 +19,10 @@ func newAnalysisState() (state *analysisState) {
 	return &analysisState{
 		fileSet:                token.NewFileSet(),
 		scannedGoFiles:         make([]string, 0),
-		interfaces:             make(map[string]interfaceDecl),
-		mocks:                  make(map[string][]methodDecl),
-		implementations:        make(map[string][]methodDecl),
-		implementationBindings: make([]implementationBinding, 0),
+		interfaces:             make(map[string]collect.InterfaceDecl),
+		mocks:                  make(map[string][]collect.MethodDecl),
+		implementations:        make(map[string][]collect.MethodDecl),
+		implementationBindings: make([]collect.ImplementationBinding, 0),
 	}
 }
 
@@ -116,10 +118,10 @@ func (state *analysisState) addPerFileViolations(
 		checkCRUDLOrder(state.fileSet, file, normalisedPath)...,
 	)
 
-	collectInterfaces(state.fileSet, file, normalisedPath, state.interfaces)
-	collectMockMethods(state.fileSet, file, normalisedPath, state.mocks)
-	collectImplementationMethods(state.fileSet, file, normalisedPath, state.implementations)
-	collectImplementationBindings(
+	collect.CollectInterfaces(state.fileSet, file, normalisedPath, state.interfaces)
+	collect.CollectMockMethods(state.fileSet, file, normalisedPath, state.mocks)
+	collect.CollectImplementationMethods(state.fileSet, file, normalisedPath, state.implementations)
+	collect.CollectImplementationBindings(
 		state.fileSet,
 		file,
 		normalisedPath,
