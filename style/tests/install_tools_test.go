@@ -19,6 +19,9 @@ var requiredStyleToolNames = []string{
 
 func TestInstallStyleToolsScriptUsesExistingTools(t *testing.T) {
 	harness := newScriptHarness(t, "entrypoints/install-tools.sh")
+	harness.writeProxyCommand(t, "awk")
+	harness.writeProxyCommand(t, "sort")
+	harness.writeProxyCommand(t, "head")
 	harness.writeProxyCommand(t, "mkdir")
 	writeFakeGoCommand(t, harness, false)
 
@@ -45,6 +48,9 @@ func TestInstallStyleToolsScriptUsesExistingTools(t *testing.T) {
 
 func TestInstallStyleToolsScriptReportsMissingToolsAfterInstallAttempt(t *testing.T) {
 	harness := newScriptHarness(t, "entrypoints/install-tools.sh")
+	harness.writeProxyCommand(t, "awk")
+	harness.writeProxyCommand(t, "sort")
+	harness.writeProxyCommand(t, "head")
 	harness.writeProxyCommand(t, "mkdir")
 	writeFakeGoCommand(t, harness, true)
 
@@ -75,7 +81,36 @@ func writeStubExecutable(t *testing.T, path string) {
 		t.Fatalf("mkdir stub executable dir: %v", err)
 	}
 
-	contents := "#!/bin/bash\nset -euo pipefail\nexit 0\n"
+	contents := "#!/bin/bash\nset -euo pipefail\n"
+	contents += "tool_name=\"${0##*/}\"\n"
+	contents += "case \"$tool_name\" in\n"
+	contents += "golangci-lint)\n"
+	contents += "\tif [ \"${1:-}\" = \"version\" ]; then\n"
+	contents += "\t\techo \"golangci-lint has version 2.6.2\"\n"
+	contents += "\tfi\n"
+	contents += "\t;;\n"
+	contents += "shfmt)\n"
+	contents += "\tif [ \"${1:-}\" = \"--version\" ]; then\n"
+	contents += "\t\techo \"v3.12.0\"\n"
+	contents += "\tfi\n"
+	contents += "\t;;\n"
+	contents += "shellcheck)\n"
+	contents += "\tif [ \"${1:-}\" = \"--version\" ]; then\n"
+	contents += "\t\techo \"version: 0.10.0\"\n"
+	contents += "\tfi\n"
+	contents += "\t;;\n"
+	contents += "rg)\n"
+	contents += "\tif [ \"${1:-}\" = \"--version\" ]; then\n"
+	contents += "\t\techo \"ripgrep 14.1.0\"\n"
+	contents += "\tfi\n"
+	contents += "\t;;\n"
+	contents += "markdownlint)\n"
+	contents += "\tif [ \"${1:-}\" = \"--version\" ]; then\n"
+	contents += "\t\techo \"0.45.0\"\n"
+	contents += "\tfi\n"
+	contents += "\t;;\n"
+	contents += "esac\n"
+	contents += "exit 0\n"
 	if err := os.WriteFile(path, []byte(contents), 0o700); err != nil {
 		t.Fatalf("write stub executable %s: %v", path, err)
 	}
