@@ -7,33 +7,27 @@ This directory contains project tooling for build helpers and style enforcement.
 - `tools/make/`
   - Makefile include modules for grouped targets.
   - Current style target definitions live in `tools/make/style.mk`.
-- `tools/scripts/`
-  - Shell entrypoints and shared script infrastructure.
-  - Primary entrypoints:
-    - `check-style.sh`: master STYLE.md pipeline
-    - `install-style-tools.sh`: installs required third-party tools
-- `tools/scripts/checks/`
+- `tools/style/`
+  - Style tooling domain root.
+  - `entrypoints/`: runnable style commands (`check-style.sh`, `install-tools.sh`)
+  - `checks/`: shell checks grouped by concern (`bash`, `go`, `repository`)
+  - `internal/`: shared shell helpers and registry definitions
+  - `tests/`: Go black-box tests for style tooling
+  - `ast/`: AST-based Go checker module
+  - See `tools/style/README.md` for style tooling details.
+- `tools/style/checks/`
   - Individual shell check implementations used by `check-style.sh`.
   - Organised by concern:
     - `bash/`: Bash-specific checks
     - `go/`: Go-specific text or runner-backed checks
-    - `general/`: repository-wide checks spanning multiple file types
-- `tools/scripts/lib/`
+    - `repository/`: repository-wide checks spanning multiple file types
+- `tools/style/internal/`
   - Shared shell libraries and registry data used by style scripts.
-  - `style-common.sh`: argument, scope, and common helper functions.
-  - `style-registry-constants.sh`: shared registry tier and runner constants.
-  - `style-registry.sh`: table-driven registry loader.
-  - `style-runner.sh`: shared execution and reporting helpers for `check-style.sh`.
-  - `style-registry.table`: single source of truth for check registration order.
-- `tools/scripts/tests/`
-  - Go-based black-box tests for shell tooling and registry behaviour.
-- `tools/stylecheck/`
-  - AST-based Go checker module for semantic Go rules.
-  - `cmd/stylecheck/` contains the CLI entrypoint.
-  - `internal/checker/` contains the runner, analysis engine, rule families, and tests.
-  - `internal/checker/collect/` contains cross-file metadata collection helpers.
-  - `internal/checker/support/` contains shared AST/text/path helper functions.
-  - See `tools/stylecheck/README.md` for checker-specific details.
+  - `common.sh`: argument, scope, and common helper functions.
+  - `registry-constants.sh`: shared registry tier and runner constants.
+  - `registry.sh`: table-driven registry loader.
+  - `runner.sh`: shared execution and reporting helpers for `check-style.sh`.
+  - `registry.table`: single source of truth for check registration order.
 
 ## Recommended Usage
 
@@ -54,5 +48,5 @@ Verbose output can be enabled with `VERBOSE=true`.
 
 ## Testing
 
-- Shell tooling tests: `go test ./tools/scripts/...`
-- AST checker tests: `(cd tools/stylecheck && go test ./...)`
+- Shell tooling tests: `go test ./tools/style/...`
+- AST checker tests: `(cd tools/style/ast && go test ./...)`
