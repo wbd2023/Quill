@@ -58,6 +58,8 @@ WARNED=0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=tools/scripts/lib/style-common.sh
 source "$SCRIPT_DIR/lib/style-common.sh"
+# shellcheck source=tools/scripts/lib/style-runner.sh
+source "$SCRIPT_DIR/lib/style-runner.sh"
 # shellcheck source=tools/scripts/lib/style-registry.sh
 source "$SCRIPT_DIR/lib/style-registry.sh"
 
@@ -72,15 +74,8 @@ LOCAL_NPM_BIN="${HOME}/.local/bin"
 
 mkdir -p "$GO_BUILD_CACHE" "$GOLANGCI_CACHE"
 
-prepend_path_if_dir() {
-	local candidate_dir="$1"
-	if [ -d "$candidate_dir" ]; then
-		PATH="$candidate_dir:$PATH"
-	fi
-}
-
-prepend_path_if_dir "$GO_BIN_DIR"
-prepend_path_if_dir "$LOCAL_NPM_BIN"
+style_runner_prepend_path_if_dir "$GO_BIN_DIR"
+style_runner_prepend_path_if_dir "$LOCAL_NPM_BIN"
 
 SCOPE="$STYLE_SCOPE_ALL"
 USAGE_LINE_ONE_SUFFIX="[--verbose] [--scope $STYLE_SCOPE_USAGE]"
@@ -134,187 +129,6 @@ if [[ ! "$PROFILE" =~ ^($PROFILE_REQUIRED|$PROFILE_ALL)$ ]]; then
 	exit "$USAGE_EXIT_CODE"
 fi
 
-run_check_with_mode() {
-	local mode="$1"
-	local rule="$2"
-	local name="$3"
-	local runner_kind="$4"
-	local target="$5"
-
-	printf "  %-8s %-45s" "[$rule]" "$name"
-
-	local output
-	local exit_code
-	if output=$(run_registered_target "$runner_kind" "$target" 2>&1); then
-		exit_code=0
-	else
-		exit_code=$?
-	fi
-
-	if [ "$exit_code" -eq 0 ]; then
-		echo -e "${GREEN}PASS${COLOUR_RESET}"
-		PASSED=$((PASSED + 1))
-		return
-	fi
-
-	if [ "$mode" = "$LEVEL_RECOMMENDATION" ]; then
-		if [ "$STRICT_RECOMMENDATIONS" = true ]; then
-			echo -e "${RED}FAIL${COLOUR_RESET}"
-			FAILED=$((FAILED + 1))
-		else
-			echo -e "${YELLOW}WARN${COLOUR_RESET}"
-			WARNED=$((WARNED + 1))
-		fi
-	else
-		echo -e "${RED}FAIL${COLOUR_RESET}"
-		FAILED=$((FAILED + 1))
-	fi
-
-	if [ "$VERBOSE" = true ]; then
-		echo ""
-		echo "$output" | head -"${VERBOSE_OUTPUT_LINE_LIMIT}" | sed 's/^/\t/'
-		echo ""
-	fi
-}
-
-print_tier_heading() {
-	local tier_name="$1"
-
-	echo ""
-	echo -e "${CYAN}${tier_name}${COLOUR_RESET}"
-	echo ""
-}
-
-run_required_check() {
-	local rule="$1"
-	local name="$2"
-	local runner_kind="$3"
-	local target="$4"
-
-	run_check_with_mode "$LEVEL_REQUIRED" "$rule" "$name" "$runner_kind" "$target"
-}
-
-run_recommendation_check() {
-	local rule="$1"
-	local name="$2"
-	local runner_kind="$3"
-	local target="$4"
-
-	run_check_with_mode "$LEVEL_RECOMMENDATION" "$rule" "$name" "$runner_kind" "$target"
-}
-
-scope_allows() {
-	local required_scope="$1"
-
-	case "$required_scope" in
-	"$STYLE_SCOPE_ALL")
-		return 0
-		;;
-	"$STYLE_SCOPE_APP")
-		[ "$SCOPE" = "$STYLE_SCOPE_APP" ] || [ "$SCOPE" = "$STYLE_SCOPE_ALL" ]
-		return
-		;;
-	"$STYLE_SCOPE_TOOLS")
-		[ "$SCOPE" = "$STYLE_SCOPE_TOOLS" ] || [ "$SCOPE" = "$STYLE_SCOPE_ALL" ]
-		return
-		;;
-	*)
-		return 1
-		;;
-	esac
-}
-
-run_registered_target() {
-	local runner_kind="$1"
-	local target="$2"
-
-	case "$runner_kind" in
-	"$STYLE_RUNNER_SCRIPT")
-		bash "$SCRIPT_DIR/$target"
-		;;
-	"$STYLE_RUNNER_SCRIPT_SCOPE")
-		bash "$SCRIPT_DIR/$target" --scope "$SCOPE"
-		;;
-	"$STYLE_RUNNER_EXECUTOR")
-		case "$target" in
-		"$STYLE_RUNNER_TARGET_GOLANGCI_APP")
-			(
-				cd "$PROJECT_ROOT"
-				GOCACHE="$GO_BUILD_CACHE" \
-					GOLANGCI_LINT_CACHE="$GOLANGCI_CACHE" \
-					golangci-lint run ./...
-			)
-			;;
-		"$STYLE_RUNNER_TARGET_GOLANGCI_TOOLS")
-			(
-				cd "$PROJECT_ROOT/tools/stylecheck"
-				GOCACHE="$GO_BUILD_CACHE" \
-					GOLANGCI_LINT_CACHE="$GOLANGCI_CACHE" \
-					golangci-lint run ./...
-			)
-			;;
-		"$STYLE_RUNNER_TARGET_AST_APP")
-			(
-				cd "$PROJECT_ROOT/tools/stylecheck"
-				GOCACHE="$GO_BUILD_CACHE" \
-					go run . "$PROJECT_ROOT/internal" "$PROJECT_ROOT/cmd" "$PROJECT_ROOT/tests"
-			)
-			;;
-		"$STYLE_RUNNER_TARGET_AST_TOOLS")
-			(
-				cd "$PROJECT_ROOT/tools/stylecheck"
-				GOCACHE="$GO_BUILD_CACHE" \
-					go run . "$PROJECT_ROOT/tools/stylecheck" "$PROJECT_ROOT/tools/scripts"
-			)
-			;;
-		*)
-			echo "$MESSAGE_UNKNOWN_RUNNER_TARGET $target"
-			return "$USAGE_EXIT_CODE"
-			;;
-		esac
-		;;
-	*)
-		echo "$MESSAGE_UNKNOWN_RUNNER_KIND $runner_kind"
-		return "$USAGE_EXIT_CODE"
-		;;
-	esac
-}
-
-run_registered_checks() {
-	local tier_filter="$1"
-	local level_filter="$2"
-
-	local index
-	for index in "${!CHECK_TIERS[@]}"; do
-		if [ "${CHECK_TIERS[$index]}" != "$tier_filter" ]; then
-			continue
-		fi
-
-		if [ "${CHECK_LEVELS[$index]}" != "$level_filter" ]; then
-			continue
-		fi
-
-		if ! scope_allows "${CHECK_SCOPES[$index]}"; then
-			continue
-		fi
-
-		if [ "$level_filter" = "$LEVEL_RECOMMENDATION" ]; then
-			run_recommendation_check \
-				"${CHECK_RULES[$index]}" \
-				"${CHECK_NAMES[$index]}" \
-				"${CHECK_RUNNERS[$index]}" \
-				"${CHECK_TARGETS[$index]}"
-			continue
-		fi
-
-		run_required_check \
-			"${CHECK_RULES[$index]}" \
-			"${CHECK_NAMES[$index]}" \
-			"${CHECK_RUNNERS[$index]}" \
-			"${CHECK_TARGETS[$index]}"
-	done
-}
-
 style_register_default_checks
 
 echo ""
@@ -325,47 +139,30 @@ echo ""
 
 # ---------------------------------- Tier 1: Go linters (non-1.1) ----------------------------------
 
-print_tier_heading "$TIER_ONE_NAME"
+style_runner_print_tier_heading "$TIER_ONE_NAME"
 
-run_registered_checks "$STYLE_TIER_ONE" "$LEVEL_REQUIRED"
+style_runner_run_registered_checks "$STYLE_TIER_ONE" "$LEVEL_REQUIRED"
 
 # --------------------------------- Tier 2: Text and script checks ---------------------------------
 
-print_tier_heading "$TIER_TWO_NAME"
+style_runner_print_tier_heading "$TIER_TWO_NAME"
 
-run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_REQUIRED"
+style_runner_run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_REQUIRED"
 
 if [ "$PROFILE" = "$PROFILE_ALL" ]; then
-	run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_RECOMMENDATION"
+	style_runner_run_registered_checks "$STYLE_TIER_TWO" "$LEVEL_RECOMMENDATION"
 fi
 
 # -------------------------------------- Tier 3: AST analysis --------------------------------------
 
-print_tier_heading "$TIER_THREE_NAME"
+style_runner_print_tier_heading "$TIER_THREE_NAME"
 
-run_registered_checks "$STYLE_TIER_THREE" "$LEVEL_REQUIRED"
+style_runner_run_registered_checks "$STYLE_TIER_THREE" "$LEVEL_REQUIRED"
 
 # --------------------------------------------- Summary --------------------------------------------
 
-echo ""
-echo -e "${BLUE}${SEPARATOR_LINE}${COLOUR_RESET}"
-echo ""
-echo -e "  Results: ${GREEN}$PASSED passed${COLOUR_RESET}, ${YELLOW}$WARNED warned${COLOUR_RESET},"
-echo -e "           ${RED}$FAILED failed${COLOUR_RESET}"
-echo ""
-
-if [ "$FAILED" -eq 0 ]; then
-	if [ "$WARNED" -gt 0 ]; then
-		echo -e "  ${YELLOW}${SUMMARY_WITH_WARNINGS}${COLOUR_RESET}"
-		echo ""
-		exit 0
-	fi
-
-	echo -e "  ${GREEN}${SUMMARY_ALL_PASS}${COLOUR_RESET}"
-	echo ""
+if style_runner_print_summary; then
 	exit 0
 fi
 
-echo -e "  ${RED}${SUMMARY_FAILURE}${COLOUR_RESET}"
-echo ""
 exit 1

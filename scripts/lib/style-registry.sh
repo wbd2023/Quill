@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-# ---------------------------------------------- Paths ---------------------------------------------
+# -------------------------------------------- Bootstrap -------------------------------------------
 
 STYLE_REGISTRY_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=tools/scripts/lib/style-registry-constants.sh

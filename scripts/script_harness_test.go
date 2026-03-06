@@ -19,6 +19,7 @@ var scriptLibraryFiles = []string{
 	"style-common.sh",
 	"style-registry-constants.sh",
 	"style-registry.sh",
+	"style-runner.sh",
 	"style-registry.table",
 }
 
