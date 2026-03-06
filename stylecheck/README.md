@@ -2,6 +2,21 @@
 
 `stylecheck` is the AST-based checker used by `tools/scripts/check-style.sh` (Tier 3).
 
+## Layout
+
+- `main.go`
+  - CLI entrypoint only.
+- `analysis.go`
+  - Directory walking, per-file analysis dispatch, cross-file analysis, and reporting.
+- `state.go`
+  - Shared analysis state and cross-file metadata types.
+- `ast_helpers.go`
+  - Shared AST and type-string helper functions.
+- `*_rules.go`
+  - Rule-family implementations grouped by concern.
+- `*_test.go`
+  - Rule-family regression tests plus shared test helpers.
+
 ## Implemented checks
 
 - `2.2` Named return values are required.
