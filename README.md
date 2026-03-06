@@ -8,7 +8,7 @@ This directory contains project tooling for build helpers and style enforcement.
   - Makefile include modules for grouped targets.
   - Current style target definitions live in `tools/make/style.mk`.
 - `tools/scripts/`
-  - Shell-based checkers and installers.
+  - Shell entrypoints, text-oriented checkers, and installers.
   - Primary entrypoints:
     - `check-style.sh`: master STYLE.md pipeline
     - `install-style-tools.sh`: installs required third-party tools
@@ -18,7 +18,7 @@ This directory contains project tooling for build helpers and style enforcement.
   - `style-registry.sh`: table-driven registry loader.
   - `style-registry.table`: single source of truth for check registration order.
 - `tools/stylecheck/`
-  - AST-based Go checker binary source.
+  - AST-based Go checker binary source for semantic Go rules.
   - See `tools/stylecheck/README.md` for checker-specific details.
 
 ## Recommended Usage
