@@ -1,6 +1,6 @@
 # tier|level|rule|name|scope|runner|target
 tier1|required|1-2|golangci-lint (app)|app|runner|golangci_app
-tier1|required|1-2|golangci-lint (tools/style/ast)|tools|runner|golangci_tools
+tier1|required|1-2|golangci-lint (tools/style/stylecheck)|tools|runner|golangci_tools
 tier2|required|1.1|Line length (Go)|all|script_scope|checks/go/line-length.sh
 tier2|required|1.1|Line length (Bash scripts)|all|script_scope|checks/bash/line-length.sh
 tier2|required|1.2|Language spelling (non-Go, UK locale)|all|script_scope|checks/repository/spelling.sh
@@ -16,4 +16,4 @@ tier2|required|2.11|Bash formatting (shfmt)|all|script_scope|checks/bash/shfmt.s
 tier2|recommendation|R2.10|Magic values (Bash)|all|script_scope|checks/bash/magic-values.sh
 tier2|recommendation|R2.12|Guard-clause spacing (Go)|all|script_scope|checks/go/vertical-spacing.sh
 tier3|required|2.2+|AST rules (app)|app|runner|ast_app
-tier3|required|2.2+|AST rules (tools/style/ast)|tools|runner|ast_tools
+tier3|required|2.2+|AST rules (tools/style/stylecheck)|tools|runner|ast_tools

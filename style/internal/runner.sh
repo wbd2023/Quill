@@ -103,7 +103,7 @@ style_runner_run_registered_target() {
 			;;
 		"$STYLE_RUNNER_TARGET_GOLANGCI_TOOLS")
 			(
-				cd "$PROJECT_ROOT/tools/style/ast"
+				cd "$PROJECT_ROOT/tools/style/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
 					GOLANGCI_LINT_CACHE="$GOLANGCI_CACHE" \
 					golangci-lint run ./...
@@ -111,9 +111,9 @@ style_runner_run_registered_target() {
 			;;
 		"$STYLE_RUNNER_TARGET_AST_APP")
 			(
-				cd "$PROJECT_ROOT/tools/style/ast"
+				cd "$PROJECT_ROOT/tools/style/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
-					go run ./cmd/stylecheck \
+					go run . \
 					"$PROJECT_ROOT/internal" \
 					"$PROJECT_ROOT/cmd" \
 					"$PROJECT_ROOT/tests"
@@ -121,11 +121,10 @@ style_runner_run_registered_target() {
 			;;
 		"$STYLE_RUNNER_TARGET_AST_TOOLS")
 			(
-				cd "$PROJECT_ROOT/tools/style/ast"
+				cd "$PROJECT_ROOT/tools/style/stylecheck"
 				GOCACHE="$GO_BUILD_CACHE" \
-					go run ./cmd/stylecheck \
-					"$PROJECT_ROOT/tools/style/ast/cmd/stylecheck" \
-					"$PROJECT_ROOT/tools/style/ast/internal/checker" \
+					go run . \
+					"$PROJECT_ROOT/tools/style/stylecheck" \
 					"$PROJECT_ROOT/tools/style/tests"
 			)
 			;;
