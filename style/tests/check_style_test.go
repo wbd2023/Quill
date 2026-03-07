@@ -179,10 +179,10 @@ func TestCheckStyleScriptRunsExecutorTargets(t *testing.T) {
 	writeFakeGoCommand(t, harness, false)
 
 	if err := os.MkdirAll(
-		filepath.Join(harness.projectRoot, "tools", "style", "ast"),
+		filepath.Join(harness.projectRoot, "tools", "style", "stylecheck"),
 		0o700,
 	); err != nil {
-		t.Fatalf("mkdir style ast module: %v", err)
+		t.Fatalf("mkdir stylecheck module: %v", err)
 	}
 
 	logPath := filepath.Join(harness.projectRoot, "executor.log")
@@ -231,8 +231,8 @@ func TestCheckStyleScriptRunsExecutorTargets(t *testing.T) {
 		t.Fatalf("expected golangci-lint execution, got log:\n%s", logOutput)
 	}
 
-	if !strings.Contains(logOutput, "/tools/style/ast") {
-		t.Fatalf("expected executor to run inside tools/style/ast, got log:\n%s", logOutput)
+	if !strings.Contains(logOutput, "/tools/style/stylecheck") {
+		t.Fatalf("expected executor to run inside tools/style/stylecheck, got log:\n%s", logOutput)
 	}
 }
 

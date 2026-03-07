@@ -35,7 +35,7 @@ STYLE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$STYLE_DIR/internal/common.sh"
 
 PROJECT_ROOT="$(style_project_root_from_dir "$STYLE_DIR")"
-STYLECHECK_DIRECTORY="$PROJECT_ROOT/$STYLE_PATH_TOOLS/style/ast"
+STYLECHECK_DIRECTORY="$PROJECT_ROOT/$STYLE_PATH_TOOLS/style/stylecheck"
 
 # ---------------------------------------------- Args ----------------------------------------------
 

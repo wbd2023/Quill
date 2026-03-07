@@ -4,16 +4,16 @@ This directory contains project tooling for build helpers and style enforcement.
 
 ## Structure
 
-- `tools/make/`
+- `build/`
   - Makefile include modules for grouped targets.
-  - Current style target definitions live in `tools/make/style.mk`.
+  - No longer used; style targets now live directly in the root `Makefile`.
 - `tools/style/`
   - Style tooling domain root.
   - `entrypoints/`: runnable style commands (`check-style.sh`, `install-tools.sh`)
   - `checks/`: shell checks grouped by concern (`bash`, `go`, `repository`)
   - `internal/`: shared shell helpers and registry definitions
   - `tests/`: Go black-box tests for style tooling
-  - `ast/`: AST-based Go checker module
+  - `stylecheck/`: AST-based Go checker module
   - See `tools/style/README.md` for style tooling details.
 - `tools/style/checks/`
   - Individual shell check implementations used by `check-style.sh`.
@@ -34,7 +34,7 @@ This directory contains project tooling for build helpers and style enforcement.
 Run style checks through `make` targets rather than calling each script directly.
 
 - `make style`
-  - Required STYLE.md checks only.
+  - Required style-guide checks only.
 - `make style-all`
   - Required checks plus recommendation checks.
 - `make style-all-strict`
@@ -49,4 +49,4 @@ Verbose output can be enabled with `VERBOSE=true`.
 ## Testing
 
 - Shell tooling tests: `go test ./tools/style/...`
-- AST checker tests: `(cd tools/style/ast && go test ./...)`
+- AST checker tests: `(cd tools/style/stylecheck && go test ./...)`

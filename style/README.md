@@ -16,7 +16,7 @@ This directory contains the complete STYLE.md automation pipeline.
     (`registry-constants.sh`, `registry.sh`, `registry.table`).
 - `tests/`
   - Go black-box tests for entrypoints, registry loading, and check behaviour.
-- `ast/`
+- `stylecheck/`
   - AST-based Go checker module used by Tier 3 checks.
 
 ## Usage
