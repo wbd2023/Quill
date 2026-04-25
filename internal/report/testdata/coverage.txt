@@ -1,0 +1,20 @@
+STYLE.md Coverage
+
+Requirements
+Automated:          1
+Review-only:        1
+Manual-deferred:    0
+
+Sections
+Automated:   1
+Partial:     0
+Review-only: 1
+Manual:      0
+
+[3.2]  Context, resources, and concurrency  AUTOMATED  (1/1 automated)
+[5.1]  Audience  REVIEW_ONLY  (0/1 automated)
+
+Outstanding Requirements
+[5.1]  REVIEW_ONLY  5.1.explain-security-plainly
+    Security concepts SHOULD be explained in plain language.
+    why: Plain-language quality is a writing judgement rather than a lint rule.

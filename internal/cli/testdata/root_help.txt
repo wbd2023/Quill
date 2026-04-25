@@ -1,0 +1,11 @@
+usage:
+  style <command> [flags]
+
+commands:
+  check     run STYLE.md checks
+  fix       run safe style auto-fixes
+  doctor    check pinned style tools
+  coverage  show STYLE.md automation coverage
+  install   install pinned style tools
+
+run `style help <command>` or `style <command> -h` to see command-specific flags

@@ -1,0 +1,12 @@
+
+STYLE.md Compliance Check
+
+Control Plane
+  [toolchain]  Pinned toolchain  PASS
+
+External Tools
+  [markdown]  markdownlint  FAIL
+    requirements: 5.2.concise-and-clear
+    missing from PATH
+
+Results: 1 passed, 0 warned, 1 failed, 0 skipped

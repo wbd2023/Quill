@@ -1,0 +1,18 @@
+usage:
+  style check [flags]
+
+run STYLE.md checks
+
+flags:
+  -format string
+      	format: text|json (default "text")
+    -profile string
+      	profile: required|all (default "required")
+    -repo-root string
+      	repository root (auto-detected when omitted)
+    -scope string
+      	scope: app|tools|all (default "all")
+    -strict-recommendations
+      	fail on recommendation findings
+    -verbose
+      	print failing output
