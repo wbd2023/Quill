@@ -82,10 +82,10 @@ func fileCommandRuleWithConfig(
 	configFile string,
 ) (rule RuleDefinition) {
 	rule = fileCommandRule(id, name, toolID, fileSet, arguments)
-	detail := rule.Spec.Detail.(contract.FileCommandExecution)
-	detail.ConfigArgument = configArgument
-	detail.ConfigFile = configFile
-	rule.Spec.Detail = detail
+	execution := rule.Spec.Detail.(contract.FileCommandExecution)
+	execution.ConfigArgument = configArgument
+	execution.ConfigFile = configFile
+	rule.Spec.Detail = execution
 	return rule
 }
 
@@ -178,8 +178,8 @@ func lineLengthRule() (rule RuleDefinition) {
 		"Line length",
 		ScannerLineLength,
 	)
-	detail := rule.Spec.Detail.(contract.RepositoryScanExecution)
-	detail.FileSet = "line_length"
-	rule.Spec.Detail = detail
+	execution := rule.Spec.Detail.(contract.RepositoryScanExecution)
+	execution.FileSet = "line_length"
+	rule.Spec.Detail = execution
 	return rule
 }

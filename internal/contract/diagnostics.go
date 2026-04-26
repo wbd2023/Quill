@@ -1,5 +1,7 @@
 package contract
 
+import "errors"
+
 type Diagnostic struct {
 	Code    string
 	File    string
@@ -18,4 +20,8 @@ func (result ExecutionResult) Empty() (empty bool) {
 	return len(result.Diagnostics) == 0 &&
 		result.Output == "" &&
 		result.Command == CommandResult{}
+}
+
+func ViolationsFound() (err error) {
+	return errors.New("violations found")
 }

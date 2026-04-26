@@ -25,12 +25,11 @@ func Bad(value string) error {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/returns/named-values] function "Bad" has unnamed return values`,
-	) {
-		t.Fatalf("expected unnamed return violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesValidFile(t *testing.T) {
@@ -72,12 +71,11 @@ func Bad() (result0 string) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/returns/no-placeholder-names] function "Bad" uses placeholder return name "result0"`,
-	) {
-		t.Fatalf("expected placeholder return-name violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleReportsNakedReturns(t *testing.T) {
@@ -100,10 +98,9 @@ func Bad(value string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/returns/no-naked-returns] function "Bad" uses a naked return`,
-	) {
-		t.Fatalf("expected naked-return violation, got: %#v", result.Diagnostics)
-	}
+	)
 }

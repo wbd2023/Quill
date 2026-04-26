@@ -21,6 +21,22 @@ type shellFunction struct {
 	name string
 }
 
+type safetyPatterns struct {
+	function              *regexp.Regexp
+	assignment            *regexp.Regexp
+	export                *regexp.Regexp
+	which                 *regexp.Regexp
+	readLoop              *regexp.Regexp
+	shellcheckSuppression *regexp.Regexp
+}
+
+type shellSafetyState struct {
+	functions   []shellFunction
+	diagnostics []contract.Diagnostic
+	foundMktemp bool
+	foundTrap   bool
+}
+
 /* ---------------------------------------- Safety Rules ---------------------------------------- */
 
 func CheckSafety(
@@ -28,161 +44,18 @@ func CheckSafety(
 	repository policy.RepositoryConfig,
 	scope contract.Scope,
 ) (result contract.ExecutionResult, err error) {
-	shellFunctionPattern := regexp.MustCompile(
-		`^\s*(?:function\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*(?:\(\))?\s*\{`,
-	)
-	shellAssignmentPattern := regexp.MustCompile(
-		`^\s*(?:local\s+)?([A-Za-z_][A-Za-z0-9_]*)=`,
-	)
-	shellExportPattern := regexp.MustCompile(
-		`^\s*(?:readonly\s+|export\s+)([A-Za-z_][A-Za-z0-9_]*)=`,
-	)
-	shellWhichPattern := regexp.MustCompile(`\bwhich\s+[A-Za-z0-9_.-]+`)
-	shellReadLoopPattern := regexp.MustCompile(`\|\s*while\b.*\bread\b`)
-	shellcheckDisablePattern := regexp.MustCompile(
-		`^\s*#\s*shellcheck\s+disable=([A-Z0-9,]+)(?:\s+--\s+(.+))?\s*$`,
-	)
-
 	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}
 
+	patterns := newSafetyPatterns()
 	for _, path := range files {
-		contents, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return contract.ExecutionResult{}, readErr
+		diagnostics, err := checkShellSafetyFile(repoRoot, path, patterns)
+		if err != nil {
+			return contract.ExecutionResult{}, err
 		}
-
-		lines := strings.Split(strings.ReplaceAll(string(contents), "\r\n", "\n"), "\n")
-		functions := make([]shellFunction, 0)
-		foundMktemp := false
-		foundTrap := false
-
-		for index, line := range lines {
-			lineNumber := index + 1
-			trimmed := strings.TrimSpace(line)
-
-			if strings.Contains(line, "mktemp") {
-				foundMktemp = true
-			}
-			if strings.Contains(trimmed, "trap ") {
-				foundTrap = true
-			}
-
-			if matches := shellFunctionPattern.FindStringSubmatch(line); len(matches) > 1 {
-				name := matches[1]
-				functions = append(functions, shellFunction{line: lineNumber, name: name})
-
-				if name != "main" && !isLowerSnakeCase(name) {
-					result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-						"bash/safety/naming",
-						repoRoot,
-						path,
-						lineNumber,
-						"Bash function names should use lower-case with underscores",
-					))
-				}
-			}
-
-			if matches := shellExportPattern.FindStringSubmatch(line); len(matches) > 1 &&
-				!isUpperSnakeCase(matches[1]) {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/naming",
-					repoRoot,
-					path,
-					lineNumber,
-					"Bash constants and exported variables should use upper-case with underscores",
-				))
-			}
-
-			if matches := shellAssignmentPattern.FindStringSubmatch(line); len(matches) > 1 {
-				name := matches[1]
-				if !isUpperSnakeCase(name) && !isLowerSnakeCase(name) {
-					result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-						"bash/safety/naming",
-						repoRoot,
-						path,
-						lineNumber,
-						"Bash non-exported variable names should use lower-case with underscores",
-					))
-				}
-			}
-
-			if shellWhichPattern.MatchString(line) {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/script-shape",
-					repoRoot,
-					path,
-					lineNumber,
-					"detect dependencies with command -v, not which",
-				))
-			}
-
-			if looksLikeManualTempPath(trimmed) {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/temp-path",
-					repoRoot,
-					path,
-					lineNumber,
-					"temporary resources must be created with mktemp",
-				))
-			}
-
-			if shellReadLoopPattern.MatchString(line) {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/script-shape",
-					repoRoot,
-					path,
-					lineNumber,
-					"avoid cmd | while read loops when loop state must survive",
-				))
-			}
-
-			if strings.Contains(trimmed, "shellcheck disable=") &&
-				!hasLocalShellcheckSuppressionReason(trimmed, shellcheckDisablePattern) {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/suppression",
-					repoRoot,
-					path,
-					lineNumber,
-					"shellcheck suppressions must include rule IDs and a short reason",
-				))
-			}
-		}
-
-		if foundMktemp && !foundTrap {
-			result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-				"bash/safety/temp-path",
-				repoRoot,
-				path,
-				0,
-				"Bash scripts using mktemp must install trap-based cleanup",
-			))
-		}
-
-		if isNonTrivialShellScript(functions) {
-			lastFunction := functions[len(functions)-1]
-			if lastFunction.name != "main" {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/script-shape",
-					repoRoot,
-					path,
-					lastFunction.line,
-					"non-trivial Bash scripts must keep main() as the bottom-most function",
-				))
-			}
-
-			if lastLine := lastSignificantShellLine(lines); lastLine != `main "$@"` {
-				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
-					"bash/safety/script-shape",
-					repoRoot,
-					path,
-					0,
-					`non-trivial Bash scripts must end with main "$@"`,
-				))
-			}
-		}
+		result.Diagnostics = append(result.Diagnostics, diagnostics...)
 	}
 
 	if len(result.Diagnostics) == 0 {
@@ -192,109 +65,66 @@ func CheckSafety(
 	return result, contract.ViolationsFound()
 }
 
-func bashSafetyDiagnostic(
-	code string,
+func newSafetyPatterns() (patterns safetyPatterns) {
+	return safetyPatterns{
+		function: regexp.MustCompile(
+			`^\s*(?:function\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*(?:\(\))?\s*\{`,
+		),
+		assignment: regexp.MustCompile(
+			`^\s*(?:local\s+)?([A-Za-z_][A-Za-z0-9_]*)=`,
+		),
+		export:   regexp.MustCompile(`^\s*(?:readonly\s+|export\s+)([A-Za-z_][A-Za-z0-9_]*)=`),
+		which:    regexp.MustCompile(`\bwhich\s+[A-Za-z0-9_.-]+`),
+		readLoop: regexp.MustCompile(`\|\s*while\b.*\bread\b`),
+		shellcheckSuppression: regexp.MustCompile(
+			`^\s*#\s*shellcheck\s+disable=([A-Z0-9,]+)(?:\s+--\s+(.+))?\s*$`,
+		),
+	}
+}
+
+func checkShellSafetyFile(
 	repoRoot string,
 	path string,
-	line int,
-	message string,
-) (diagnostic contract.Diagnostic) {
-	return contract.Diagnostic{
-		Code:    code,
-		File:    filewalk.RelativePath(repoRoot, path),
-		Line:    line,
-		Message: message,
+	patterns safetyPatterns,
+) (diagnostics []contract.Diagnostic, err error) {
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
 	}
+
+	lines := strings.Split(strings.ReplaceAll(string(contents), "\r\n", "\n"), "\n")
+	state := shellSafetyState{
+		functions: make([]shellFunction, 0),
+	}
+
+	for index, line := range lines {
+		scanShellSafetyLine(repoRoot, path, patterns, index+1, line, &state)
+	}
+
+	state.addCleanupDiagnostics(repoRoot, path)
+	state.addScriptShapeDiagnostics(repoRoot, path, lines)
+	return state.diagnostics, nil
 }
 
-/* ------------------------------------------- Naming ------------------------------------------- */
-
-func isLowerSnakeCase(value string) (found bool) {
-	if value == "" {
-		return false
-	}
-
-	for _, character := range value {
-		if character == '_' ||
-			('a' <= character && character <= 'z') ||
-			('0' <= character && character <= '9') {
-			continue
-		}
-
-		return false
-	}
-
-	return true
-}
-
-func isUpperSnakeCase(value string) (found bool) {
-	if value == "" {
-		return false
-	}
-
-	for _, character := range value {
-		if character == '_' ||
-			('A' <= character && character <= 'Z') ||
-			('0' <= character && character <= '9') {
-			continue
-		}
-
-		return false
-	}
-
-	return true
-}
-
-/* --------------------------------------- Temporary Paths -------------------------------------- */
-
-func looksLikeManualTempPath(line string) (found bool) {
-	if strings.Contains(line, "mktemp") {
-		return false
-	}
-
-	if strings.Contains(line, "/tmp/") || strings.Contains(line, "/var/tmp/") {
-		return true
-	}
-
-	return strings.Contains(line, "TMPDIR=") || strings.Contains(line, "tmp_dir=/tmp")
-}
-
-/* ---------------------------------------- Suppressions ---------------------------------------- */
-
-func hasLocalShellcheckSuppressionReason(
+func scanShellSafetyLine(
+	repoRoot string,
+	path string,
+	patterns safetyPatterns,
+	lineNumber int,
 	line string,
-	shellcheckDisablePattern *regexp.Regexp,
-) (found bool) {
-	matches := shellcheckDisablePattern.FindStringSubmatch(line)
-	if len(matches) < shellcheckMatchesLength {
-		return false
+	state *shellSafetyState,
+) {
+	trimmed := strings.TrimSpace(line)
+
+	if strings.Contains(line, "mktemp") {
+		state.foundMktemp = true
+	}
+	if strings.Contains(trimmed, "trap ") {
+		state.foundTrap = true
 	}
 
-	return matches[shellcheckRuleCaptureIndex] != "" &&
-		strings.TrimSpace(matches[shellcheckReasonCaptureIndex]) != ""
-}
-
-/* ---------------------------------------- Script Shape ---------------------------------------- */
-
-func isNonTrivialShellScript(functions []shellFunction) (found bool) {
-	for _, function := range functions {
-		if function.name != "main" {
-			return true
-		}
-	}
-
-	return false
-}
-
-func lastSignificantShellLine(lines []string) (line string) {
-	for index := len(lines) - 1; index >= 0; index-- {
-		trimmed := strings.TrimSpace(lines[index])
-		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
-			continue
-		}
-
-		return trimmed
-	}
-
-	return ""
+	state.checkFunctionName(repoRoot, path, patterns, lineNumber, line)
+	state.checkVariableName(repoRoot, path, patterns, lineNumber, line)
+	state.checkScriptShape(repoRoot, path, patterns, lineNumber, line, trimmed)
+	state.checkShellcheckSuppression(repoRoot, path, patterns, lineNumber, trimmed)
 }

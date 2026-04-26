@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/ulikunitz/xz"
 )
@@ -69,30 +68,7 @@ func extractShellcheckBinary(
 			}
 
 			foundBinary = true
-			if err = os.MkdirAll(filepath.Dir(targetPath), defaultDirectoryMode); err != nil {
-				return "", err
-			}
-			targetFile, err := os.OpenFile(
-				targetPath,
-				os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
-				executableMode,
-			)
-			if err != nil {
-				return "", err
-			}
-
-			if _, err = io.Copy(targetFile, tarReader); err != nil {
-				if closeErr := targetFile.Close(); closeErr != nil {
-					return "", fmt.Errorf(
-						"copy shellcheck file %q: %w",
-						targetPath,
-						errors.Join(err, closeErr),
-					)
-				}
-				return "", err
-			}
-
-			if err = targetFile.Close(); err != nil {
+			if err = writeShellcheckBinary(targetPath, tarReader); err != nil {
 				return "", err
 			}
 
@@ -102,41 +78,30 @@ func extractShellcheckBinary(
 	}
 }
 
-func validateShellcheckArchiveEntry(
-	header *tar.Header,
-	version string,
-) (name string, err error) {
-	switch header.Typeflag {
-	case tar.TypeSymlink, tar.TypeLink:
-		return "", fmt.Errorf("shellcheck archive contains link entry %q", header.Name)
+func writeShellcheckBinary(targetPath string, source io.Reader) (err error) {
+	if err = os.MkdirAll(filepath.Dir(targetPath), defaultDirectoryMode); err != nil {
+		return err
 	}
 
-	rawName := header.Name
-	if header.Typeflag == tar.TypeDir {
-		rawName = strings.TrimSuffix(rawName, "/")
+	targetFile, err := os.OpenFile(
+		targetPath,
+		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+		executableMode,
+	)
+	if err != nil {
+		return err
 	}
 
-	name = path.Clean(rawName)
-	if name == "." ||
-		name != rawName ||
-		path.IsAbs(rawName) ||
-		strings.HasPrefix(name, "../") ||
-		strings.Contains(name, "/../") {
-		return "", fmt.Errorf("unsafe shellcheck archive path %q", header.Name)
+	if _, err = io.Copy(targetFile, source); err != nil {
+		if closeErr := targetFile.Close(); closeErr != nil {
+			return fmt.Errorf(
+				"copy shellcheck file %q: %w",
+				targetPath,
+				errors.Join(err, closeErr),
+			)
+		}
+		return err
 	}
 
-	root := shellcheckArchiveRoot(version)
-	switch name {
-	case root,
-		path.Join(root, "LICENSE.txt"),
-		path.Join(root, "README.txt"),
-		path.Join(root, "shellcheck"):
-		return name, nil
-	default:
-		return "", fmt.Errorf("unexpected shellcheck archive entry %q", header.Name)
-	}
-}
-
-func shellcheckArchiveRoot(version string) (root string) {
-	return "shellcheck-v" + version
+	return targetFile.Close()
 }

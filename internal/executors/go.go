@@ -16,14 +16,14 @@ func backendCommandExecutor(
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
-	detail, found := spec.BackendCommandExecution()
+	execution, found := spec.BackendCommandExecution()
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf(
 			"backend command executor received empty spec",
 		)
 	}
 
-	switch detail.Action {
+	switch execution.Action {
 	case rulepack.BackendActionGolangci:
 		return runGolangci(context, spec)
 	case rulepack.BackendActionGoFormat:
@@ -31,7 +31,7 @@ func backendCommandExecutor(
 	default:
 		return contract.ExecutionResult{}, fmt.Errorf(
 			"unknown backend command action %q",
-			detail.Action,
+			execution.Action,
 		)
 	}
 }
@@ -41,18 +41,18 @@ func backendCheckExecutor(
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
-	detail, found := spec.BackendCheckExecution()
+	execution, found := spec.BackendCheckExecution()
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf("backend check executor received empty spec")
 	}
 
-	switch detail.Language {
+	switch execution.Language {
 	case goLanguage:
 		return runGoStyleCheck(context, spec)
 	default:
 		return contract.ExecutionResult{}, fmt.Errorf(
 			"unsupported backend check language %q",
-			detail.Language,
+			execution.Language,
 		)
 	}
 }

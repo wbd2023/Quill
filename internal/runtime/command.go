@@ -3,11 +3,8 @@ package runtime
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
-	"sort"
-	"strings"
 	"time"
 
 	"ciphera/tools/internal/contract"
@@ -37,38 +34,6 @@ type CommandResult struct {
 	ExitCode  int
 	TimedOut  bool
 	Truncated bool
-}
-
-type CommandError struct {
-	Name      string
-	Arguments []string
-	Result    CommandResult
-	Err       error
-}
-
-func (err CommandError) Error() (message string) {
-	switch {
-	case err.Result.TimedOut:
-		return fmt.Sprintf("%s timed out", commandText(err.Name, err.Arguments))
-	case err.Err != nil:
-		return fmt.Sprintf("%s failed: %v", commandText(err.Name, err.Arguments), err.Err)
-	default:
-		return fmt.Sprintf("%s failed with exit code %d",
-			commandText(err.Name, err.Arguments),
-			err.Result.ExitCode,
-		)
-	}
-}
-
-func (err CommandError) Unwrap() (wrapped error) {
-	return err.Err
-}
-
-type limitedBuffer struct {
-	builder   strings.Builder
-	limit     int64
-	written   int64
-	truncated bool
 }
 
 /* -------------------------------------- Command Execution ------------------------------------- */
@@ -197,53 +162,4 @@ func commandExitCode(err error) (exitCode int) {
 	}
 
 	return -1
-}
-
-func commandText(name string, arguments []string) (text string) {
-	if len(arguments) == 0 {
-		return name
-	}
-
-	return name + " " + strings.Join(arguments, " ")
-}
-
-func (buffer *limitedBuffer) Write(data []byte) (count int, err error) {
-	count = len(data)
-	remaining := buffer.limit - buffer.written
-	if remaining <= 0 {
-		buffer.truncated = true
-		return count, nil
-	}
-
-	if int64(len(data)) > remaining {
-		data = data[:int(remaining)]
-		buffer.truncated = true
-	}
-
-	buffer.written += int64(len(data))
-	_, _ = buffer.builder.Write(data)
-	return count, nil
-}
-
-func (buffer *limitedBuffer) String() (output string) {
-	return buffer.builder.String()
-}
-
-func environmentEntries(environment map[string]string) (values []string) {
-	if len(environment) == 0 {
-		return nil
-	}
-
-	keys := make([]string, 0, len(environment))
-	for key := range environment {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	values = make([]string, 0, len(keys))
-	for _, key := range keys {
-		values = append(values, key+"="+environment[key])
-	}
-
-	return values
 }

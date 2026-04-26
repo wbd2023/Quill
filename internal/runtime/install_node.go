@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -70,10 +69,6 @@ func installNodeTool(
 	return nil
 }
 
-func npmInstallArguments() (arguments []string) {
-	return []string{"ci", "--ignore-scripts", "--no-audit", "--no-fund"}
-}
-
 /* ------------------------------------------ Lockfiles ----------------------------------------- */
 
 func prepareLockedNodeInstall(
@@ -109,112 +104,6 @@ func prepareLockedNodeInstall(
 	return nil
 }
 
-func validatePackageMetadata(packagePath string, lockPath string) (err error) {
-	packageName, err := readPackageName(packagePath)
-	if err != nil {
-		return err
-	}
-
-	lockName, err := readPackageName(lockPath)
-	if err != nil {
-		return err
-	}
-
-	if lockName != packageName {
-		return fmt.Errorf(
-			"package-lock name %q does not match package.json name %q",
-			lockName,
-			packageName,
-		)
-	}
-
-	return nil
-}
-
-func readPackageName(path string) (name string, err error) {
-	contents, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-
-	var document struct {
-		Name string `json:"name"`
-	}
-	if err = json.Unmarshal(contents, &document); err != nil {
-		return "", err
-	}
-
-	if document.Name == "" {
-		return "", fmt.Errorf("%s does not define a package name", filepath.Base(path))
-	}
-
-	return document.Name, nil
-}
-
-func validatePackageLock(
-	path string,
-	tool contract.Tool,
-	capability toolchain.Capability,
-) (err error) {
-	contents, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	var document struct {
-		Packages map[string]struct {
-			Version string `json:"version"`
-		} `json:"packages"`
-	}
-	if err = json.Unmarshal(contents, &document); err != nil {
-		return err
-	}
-
-	packageEntry, found := document.Packages["node_modules/"+capability.InstallSource]
-	if !found {
-		return fmt.Errorf("package lock does not contain %s", capability.InstallSource)
-	}
-
-	if packageEntry.Version != tool.PinnedVersion {
-		return fmt.Errorf(
-			"package lock pins %s@%s, profile pins %s",
-			capability.InstallSource,
-			packageEntry.Version,
-			tool.PinnedVersion,
-		)
-	}
-
-	return nil
-}
-
-/* ------------------------------------------- Copying ------------------------------------------ */
-
-func copyFile(source string, destination string, mode os.FileMode) (err error) {
-	sourceFile, err := os.Open(source)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		closeErr := sourceFile.Close()
-		if err == nil {
-			err = closeErr
-		}
-	}()
-
-	destinationFile, err := os.OpenFile(destination, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		closeErr := destinationFile.Close()
-		if err == nil {
-			err = closeErr
-		}
-	}()
-
-	if _, err = io.Copy(destinationFile, sourceFile); err != nil {
-		return err
-	}
-
-	return destinationFile.Chmod(mode)
+func npmInstallArguments() (arguments []string) {
+	return []string{"ci", "--ignore-scripts", "--no-audit", "--no-fund"}
 }

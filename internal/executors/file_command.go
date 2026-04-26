@@ -14,12 +14,12 @@ func fileCommandExecutor(
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
-	detail, found := spec.FileCommandExecution()
+	execution, found := spec.FileCommandExecution()
 	if !found {
 		return contract.ExecutionResult{}, errors.New("file-command executor received empty spec")
 	}
 
-	files, err := runner.CollectFileSetFiles(context, detail.FileSet)
+	files, err := runner.CollectFileSetFiles(context, execution.FileSet)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}
@@ -28,14 +28,14 @@ func fileCommandExecutor(
 		return contract.ExecutionResult{}, nil
 	}
 
-	tool, found := context.Effective.ToolByID(detail.ToolID)
+	tool, found := context.Effective.ToolByID(execution.ToolID)
 	if !found {
-		return contract.ExecutionResult{}, errUnknownTool(detail.ToolID)
+		return contract.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
 
-	capability, found := context.ToolCapabilities[detail.ToolID]
+	capability, found := context.ToolCapabilities[execution.ToolID]
 	if !found {
-		return contract.ExecutionResult{}, errUnknownTool(detail.ToolID)
+		return contract.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
 
 	arguments := runner.FileCommandArguments(context.RepoRoot, spec)

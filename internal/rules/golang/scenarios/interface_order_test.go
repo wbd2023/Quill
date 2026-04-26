@@ -44,12 +44,11 @@ func (m *MockUserRepository) Save(value string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`mock "MockUserRepository" for interface "UserRepository" method order mismatch`,
-	) {
-		t.Fatalf("expected prefixed mock-order violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleReportsImplementationOrderMismatch(t *testing.T) {
@@ -93,12 +92,11 @@ var _ ports.UserRepository = (*UserFileRepository)(nil)
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`implementation "UserFileRepository" for interface "UserRepository" method order mismatch`,
-	) {
-		t.Fatalf("expected implementation-order violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesImplementationOrderMatch(t *testing.T) {
@@ -197,7 +195,5 @@ func (m *IdentityRepositoryMock) Load(value string) (err error) {
 		)
 	}
 
-	if !hasDiagnosticText(result, `multiple mock types match interface "IdentityRepository"`) {
-		t.Fatalf("expected ambiguous mock naming violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, `multiple mock types match interface "IdentityRepository"`)
 }

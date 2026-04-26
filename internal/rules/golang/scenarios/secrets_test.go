@@ -24,9 +24,7 @@ func Token() (token string) {
 		t.Fatalf("expected secret literal failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "source code must not hard-code secret-like string literals") {
-		t.Fatalf("expected secret literal violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "source code must not hard-code secret-like string literals")
 }
 
 func TestGoStyleIgnoresNonSensitiveLiterals(t *testing.T) {

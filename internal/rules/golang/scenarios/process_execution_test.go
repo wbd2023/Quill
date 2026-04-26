@@ -24,9 +24,7 @@ func BadExec(commandText string) (command *exec.Cmd) {
 		t.Fatalf("expected process execution failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "process execution must avoid shell interpolation") {
-		t.Fatalf("expected shell interpolation violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "process execution must avoid shell interpolation")
 }
 
 func TestGoStyleAcceptsDirectArgumentProcessExecution(t *testing.T) {

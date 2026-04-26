@@ -122,6 +122,18 @@ Production packages must keep these boundaries:
 - Concrete rule packages import no `profile`; Go rules import no `rulepack`.
 - `report` owns final text and JSON formatting; rules and executors return data.
 
+## File Shape
+
+The style platform uses balanced granularity:
+
+- Split files when a file owns multiple domain responsibilities.
+- Merge tiny glue files when they only contain one helper, alias, or constant and add navigation
+  cost.
+- Prefer role-named files over broad names such as `types.go`, `helpers.go`, `model.go`, and
+  `checks.go`, unless the file is genuinely package-wide.
+- Generated and machine-maintained files such as `go.sum` and `package-lock.json` are excluded from
+  aesthetic file-shape judgement.
+
 ## Implementation
 
 - `cmd/style/`

@@ -6,6 +6,35 @@ import (
 	"ciphera/tools/internal/report"
 )
 
+func runDoctor(tool CLI, options doctorOptions) (exitCode int) {
+	context, err := loadContext(options.repoRoot, "")
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	toolIDs := toolIDsFromTools(context.Effective.Tools)
+
+	statuses, allValid := inspectToolchain(
+		context.Effective.Tools,
+		context.ToolCapabilities,
+		toolIDs,
+		context.ToolEnvironment,
+	)
+	result := report.ToolchainResult{Statuses: statuses}
+	_, err = renderToolchainStatus(tool.stdout, options.format, result)
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	if allValid {
+		return 0
+	}
+
+	return 1
+}
+
 func parseDoctorOptions(arguments []string) (options doctorOptions, err error) {
 	return parseDoctorOptionsWithResolver(resolveRepoRoot, arguments)
 }
@@ -47,33 +76,4 @@ func doctorUsageText() (usage string) {
 	var options doctorOptions
 	var format string
 	return commandUsage("doctor", summary, newDoctorFlagSet(&options, &format))
-}
-
-func runDoctor(tool CLI, options doctorOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, "")
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	toolIDs := toolIDsFromTools(context.Effective.Tools)
-
-	statuses, allValid := inspectToolchain(
-		context.Effective.Tools,
-		context.ToolCapabilities,
-		toolIDs,
-		context.ToolEnvironment,
-	)
-	result := report.ToolchainResult{Statuses: statuses}
-	_, err = renderToolchainStatus(tool.stdout, options.format, result)
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	if allValid {
-		return 0
-	}
-
-	return 1
 }

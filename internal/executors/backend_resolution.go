@@ -3,15 +3,11 @@ package executors
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runtime"
 )
-
-/* ------------------------------------- Backend Resolution ------------------------------------- */
 
 func goLanguageBackends(
 	context runner.Context,
@@ -62,57 +58,6 @@ func languageBackendWorkdir(
 	}
 
 	return filepath.Join(repoRoot, backend.Workdir)
-}
-
-/* --------------------------------------- Output Helpers --------------------------------------- */
-
-func appendExecutorOutput(builder *strings.Builder, output string) {
-	output = strings.TrimSpace(output)
-	if output == "" {
-		return
-	}
-
-	if builder.Len() > 0 {
-		builder.WriteString("\n")
-	}
-
-	builder.WriteString(output)
-}
-
-/* --------------------------------------- Command Helpers -------------------------------------- */
-
-func runToolByID(
-	context runner.Context,
-	workdir string,
-	toolID string,
-	arguments ...string,
-) (output string, err error) {
-	tool, found := context.Effective.ToolByID(toolID)
-	if !found {
-		return "", fmt.Errorf("unknown tool %q", toolID)
-	}
-
-	capability, found := context.ToolCapabilities[toolID]
-	if !found {
-		return "", fmt.Errorf("unknown tool capability %q", toolID)
-	}
-
-	return runtime.RunToolCommand(workdir, context.GoEnvironment, tool, capability, arguments...)
-}
-
-func runCommandOutput(
-	workdir string,
-	environment map[string]string,
-	name string,
-	arguments ...string,
-) (output string, err error) {
-	result, err := runtime.RunCommand(runtime.CommandRequest{
-		Directory:   workdir,
-		Environment: environment,
-		Name:        name,
-		Arguments:   append([]string{}, arguments...),
-	})
-	return runtime.CommandOutput(result, err)
 }
 
 func errEmptyBackendAction(action string) (err error) {

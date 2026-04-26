@@ -38,20 +38,15 @@ func BadErrorStyle(secretToken string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "error context must be lowercase (errors.New)") {
-		t.Fatalf("expected lower-case error-context violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "error context must be lowercase (errors.New)")
 
-	if !hasDiagnosticText(result, "error context must not end with punctuation (errors.New)") {
-		t.Fatalf("expected punctuation error-context violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "error context must not end with punctuation (errors.New)")
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		"error context must not include secrets in fmt.Errorf arguments",
-	) {
-		t.Fatalf("expected secret-argument violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleReportsSentinelErrorsOutsideDomainErrorsFile(t *testing.T) {
@@ -78,12 +73,11 @@ var ErrServiceFailed = errors.New("service failed")
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		"sentinel errors must be declared in internal/core/domain/errors.go",
-	) {
-		t.Fatalf("expected sentinel-location violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleReportsAdapterBareErrReturn(t *testing.T) {
@@ -114,12 +108,11 @@ func BadAdapter() (value string, err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		"adapter error returns must wrap low-level errors with context (%w)",
-	) {
-		t.Fatalf("expected adapter-wrap violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesAdapterWrappedErrorReturn(t *testing.T) {

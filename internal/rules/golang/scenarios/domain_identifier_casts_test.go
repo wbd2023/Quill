@@ -29,9 +29,7 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, `direct cast to domain.IdentityID is disallowed`) {
-		t.Fatalf("expected direct-cast violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, `direct cast to domain.IdentityID is disallowed`)
 }
 
 func TestGoStylePassesDomainIdentifierParserUsage(t *testing.T) {
@@ -80,9 +78,7 @@ func Bad(raw string) (id AppIdentityID, err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, `direct cast to domain.IdentityID is disallowed`) {
-		t.Fatalf("expected type-aware direct-cast violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, `direct cast to domain.IdentityID is disallowed`)
 }
 
 func TestGoStyleUsesProfileDomainIdentifierVocabulary(t *testing.T) {
@@ -109,7 +105,5 @@ func Bad(raw string) (id domain.SessionKey, err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, `use ParseSessionKey`) {
-		t.Fatalf("expected alternate constructor diagnostic, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, `use ParseSessionKey`)
 }

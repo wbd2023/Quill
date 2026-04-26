@@ -2,14 +2,11 @@ package styleguide
 
 import "strings"
 
-/* ------------------------------------------ Constants ----------------------------------------- */
-
 const (
 	RequirementIDFormatSectionSlug = "section_slug"
-	minimumCodeSpanMarkerLength    = 2
 )
 
-/* --------------------------------------- Requirement IDs -------------------------------------- */
+/* ------------------------------------ Requirement Sections ------------------------------------ */
 
 func RequirementSection(requirementID string) (section string) {
 	return requirementSection(requirementID, RequirementIDFormatSectionSlug)
@@ -37,99 +34,6 @@ func requirementSection(requirementID string, format string) (section string) {
 	}
 
 	return section
-}
-
-/* --------------------------------------- Heading Parsing -------------------------------------- */
-
-func parseHeadingText(value string) (section string, title string, found bool) {
-	value = trimMarkdownHeadingPrefix(value)
-	if value == "" {
-		return "", "", false
-	}
-
-	section, remainder, found := strings.Cut(strings.TrimSpace(value), " ")
-	if !found || !isSectionID(section) {
-		return "", "", false
-	}
-
-	title = strings.TrimSpace(remainder)
-	if title == "" {
-		return "", "", false
-	}
-
-	return section, title, true
-}
-
-func trimMarkdownHeadingPrefix(value string) (trimmed string) {
-	trimmed = strings.TrimSpace(value)
-	if !strings.HasPrefix(trimmed, "#") {
-		return trimmed
-	}
-
-	trimmed = strings.TrimLeft(trimmed, "#")
-	return strings.TrimSpace(trimmed)
-}
-
-/* ------------------------------------- Requirement Parsing ------------------------------------ */
-
-func parseRequirementText(
-	value string,
-	pendingRequirementID string,
-	format string,
-) (requirementID string, text string, found bool) {
-	itemBody, found := parseListItemBody(value)
-	if !found {
-		itemBody = strings.TrimSpace(value)
-	}
-
-	if requirementID, remainder, found := extractRequirementMarker(itemBody); found {
-		if !isRequirementID(requirementID, format) {
-			return "", "", false
-		}
-
-		text = strings.TrimSpace(remainder)
-		if text == "" {
-			return "", "", false
-		}
-
-		return requirementID, text, true
-	}
-
-	if pendingRequirementID == "" || !isRequirementID(pendingRequirementID, format) {
-		return "", "", false
-	}
-
-	text = strings.TrimSpace(itemBody)
-	if text == "" {
-		return "", "", false
-	}
-
-	return pendingRequirementID, text, true
-}
-
-func extractRequirementMarker(
-	itemBody string,
-) (requirementID string, remainder string, found bool) {
-	switch {
-	case strings.HasPrefix(itemBody, "`["):
-		endIndex := strings.Index(itemBody, "]`")
-		if endIndex <= minimumCodeSpanMarkerLength {
-			return "", "", false
-		}
-
-		return itemBody[minimumCodeSpanMarkerLength:endIndex], itemBody[endIndex+2:], true
-
-	case strings.HasPrefix(itemBody, "["):
-		endIndex := strings.IndexByte(itemBody, ']')
-		if endIndex <= 1 {
-			return "", "", false
-		}
-
-		return itemBody[1:endIndex], itemBody[endIndex+1:], true
-
-	default:
-		return "", "", false
-	}
 }
 
 /* ---------------------------------------- ID Validation --------------------------------------- */

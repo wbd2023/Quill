@@ -17,6 +17,8 @@ func CheckTestHygiene(
 		return nil
 	}
 
+	violations = append(violations, checkTestHelperPlacement(fileSet, file)...)
+
 	for _, declaration := range file.Decls {
 		function, ok := declaration.(*ast.FuncDecl)
 		if !ok || function.Body == nil || isTestEntrypoint(function.Name.Name) {
@@ -83,6 +85,38 @@ func CheckTestHygiene(
 
 		return true
 	})
+
+	return violations
+}
+
+func checkTestHelperPlacement(
+	fileSet *token.FileSet,
+	file *ast.File,
+) (violations []Violation) {
+	pendingHelpers := make([]*ast.FuncDecl, 0)
+
+	for _, declaration := range file.Decls {
+		function, ok := declaration.(*ast.FuncDecl)
+		if !ok || function.Body == nil {
+			continue
+		}
+
+		if isTestEntrypoint(function.Name.Name) {
+			for _, helper := range pendingHelpers {
+				violations = append(violations, Violation{
+					Position: fileSet.Position(helper.Pos()),
+					Rule:     DiagnosticTestHelperOrder,
+					Message:  "test helpers should appear below test cases",
+				})
+			}
+			pendingHelpers = nil
+			continue
+		}
+
+		if _, hasTestingHandle := testingHandleParameter(function); hasTestingHandle {
+			pendingHelpers = append(pendingHelpers, function)
+		}
+	}
 
 	return violations
 }

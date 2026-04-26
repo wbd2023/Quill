@@ -38,24 +38,21 @@ func TestSomething(t *testing.T) {}
 		t.Fatalf("expected test hygiene failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "test helpers that accept testing handles must call Helper()") {
-		t.Fatalf("expected missing Helper violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(
+		t,
+		result,
+		"test helpers that accept testing handles must call Helper()",
+	)
 
-	if !hasDiagnosticText(result, "tests must use t.Setenv() instead of os.Setenv()") {
-		t.Fatalf("expected Setenv violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "tests must use t.Setenv() instead of os.Setenv()")
 
-	if !hasDiagnosticText(result, "tests must use t.TempDir() instead of os.MkdirTemp()") {
-		t.Fatalf("expected TempDir violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "tests must use t.TempDir() instead of os.MkdirTemp()")
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		"tests must avoid time.Sleep() when a deterministic signal is possible",
-	) {
-		t.Fatalf("expected time.Sleep violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleAcceptsTestHygienePatterns(t *testing.T) {
@@ -72,13 +69,13 @@ func TestGoStyleAcceptsTestHygienePatterns(t *testing.T) {
 
 import "testing"
 
-func writeFixture(t *testing.T) {
-	t.Helper()
-}
-
 func TestSomething(t *testing.T) {
 	directory := t.TempDir()
 	t.Setenv("HOME", directory)
+}
+
+func writeFixture(t *testing.T) {
+	t.Helper()
 }
 `
 	writeSourceFile(t, sourcePath, sourceCode)

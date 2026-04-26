@@ -25,13 +25,9 @@ var _ = rand.Int
 		t.Fatalf("expected cryptography failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "production code must not import math/rand") {
-		t.Fatalf("expected math/rand violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "production code must not import math/rand")
 
-	if !hasDiagnosticText(result, "deprecated cryptographic package crypto/sha1") {
-		t.Fatalf("expected deprecated crypto violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "deprecated cryptographic package crypto/sha1")
 }
 
 func TestGoStyleAcceptsModernCryptographyImports(t *testing.T) {

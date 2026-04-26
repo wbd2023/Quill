@@ -45,7 +45,7 @@ func Close(response *http.Response) {
 		"network requests must use an http.Client with an explicit timeout",
 		"ignored close errors require an inline comment explaining why they are safe",
 	} {
-		if hasDiagnosticText(result, fragment) {
+		if hasDiagnostic(result, diagnosticMatch{message: fragment}) {
 			continue
 		}
 

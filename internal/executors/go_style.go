@@ -15,7 +15,7 @@ func runGoStyleCheck(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 ) (result contract.ExecutionResult, err error) {
-	detail, found := spec.BackendCheckExecution()
+	execution, found := spec.BackendCheckExecution()
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf("go style check received empty spec")
 	}
@@ -46,7 +46,7 @@ func runGoStyleCheck(
 			context.RepoRoot,
 			roots,
 			context.Policy,
-			detail.Check,
+			execution.Check,
 		)
 		diagnostics = append(diagnostics, styleResult.Diagnostics...)
 		appendExecutorOutput(&builder, styleResult.Output)

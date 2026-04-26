@@ -92,14 +92,14 @@ func generatedCommentBody(line string, inBlockComment bool) (comment string) {
 		return strings.TrimSpace(comment)
 	}
 
-	if strings.HasPrefix(line, "/*") {
-		comment = strings.TrimSpace(strings.TrimPrefix(line, "/*"))
+	if after, ok := strings.CutPrefix(line, "/*"); ok {
+		comment = strings.TrimSpace(after)
 		comment = strings.TrimSuffix(comment, "*/")
 		return strings.TrimSpace(comment)
 	}
 
-	if strings.HasPrefix(line, "<!--") {
-		comment = strings.TrimSpace(strings.TrimPrefix(line, "<!--"))
+	if after, ok := strings.CutPrefix(line, "<!--"); ok {
+		comment = strings.TrimSpace(after)
 		comment = strings.TrimSuffix(comment, "-->")
 		return strings.TrimSpace(comment)
 	}

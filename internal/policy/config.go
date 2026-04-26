@@ -2,6 +2,10 @@ package policy
 
 import "ciphera/tools/internal/contract"
 
+const SchemaVersion = 1
+
+const RequirementIDFormatSectionSlug = "section_slug"
+
 type Config struct {
 	SchemaVersion int
 	RulePacks     RulePackConfig
@@ -30,6 +34,13 @@ type StyleGuideConfig struct {
 
 type ImportsConfig struct {
 	LocalPrefix string
+}
+
+type ToolPin struct {
+	ID               string
+	Version          string
+	TimeoutSeconds   int
+	OutputLimitBytes int64
 }
 
 func (config Config) FileSet(name string) (fileSet FileSetConfig, found bool) {

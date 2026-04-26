@@ -1,7 +1,6 @@
 package scenarios
 
 import (
-	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -10,8 +9,6 @@ import (
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/rules/golang"
 )
-
-/* ------------------------------------------- Harness ------------------------------------------ */
 
 func runGoStyleResult(
 	t *testing.T,
@@ -35,47 +32,6 @@ func runGoStyleResultWithPolicy(
 		config,
 	)
 	return result, err
-}
-
-func expectDiagnosticMessage(
-	t *testing.T,
-	result contract.ExecutionResult,
-	fragment string,
-) {
-	t.Helper()
-
-	if hasDiagnosticText(result, fragment) {
-		return
-	}
-
-	t.Fatalf("expected diagnostic containing %q, got %+v", fragment, result.Diagnostics)
-}
-
-func rejectDiagnosticMessage(
-	t *testing.T,
-	result contract.ExecutionResult,
-	fragment string,
-) {
-	t.Helper()
-
-	if hasDiagnosticText(result, fragment) {
-		t.Fatalf("unexpected diagnostic containing %q: %+v", fragment, result.Diagnostics)
-	}
-}
-
-func hasDiagnosticText(result contract.ExecutionResult, fragment string) (found bool) {
-	for _, diagnostic := range result.Diagnostics {
-		text := diagnostic.Code + " " +
-			diagnostic.File + " " +
-			diagnostic.Message + " [" +
-			diagnostic.Code + "] " +
-			diagnostic.Message
-		if strings.Contains(text, fragment) {
-			return true
-		}
-	}
-
-	return false
 }
 
 func writeTypeAwareDomainFixture(t *testing.T, rootDirectory string) {

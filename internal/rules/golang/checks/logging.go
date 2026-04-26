@@ -32,62 +32,90 @@ func CheckStructuredLogging(
 			return true
 		}
 
-		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
-		if !ok || !isStructuredLogCall(selector, slogAliases) {
-			return true
-		}
-
-		fieldCount := len(callExpression.Args) - 1
-		if fieldCount <= 0 {
-			return true
-		}
-
-		if fieldCount%2 != 0 {
-			violations = append(violations, Violation{
-				Position: fileSet.Position(callExpression.Pos()),
-				Rule:     DiagnosticStructuredLogs,
-				Message:  "structured log calls must use key/value pairs",
-			})
-			return true
-		}
-
-		for argumentIndex := 1; argumentIndex < len(callExpression.Args); argumentIndex += 2 {
-			keyExpression := callExpression.Args[argumentIndex]
-			key, found := literalString(keyExpression)
-			if !found {
-				violations = append(violations, Violation{
-					Position: fileSet.Position(keyExpression.Pos()),
-					Rule:     DiagnosticStableLogKeys,
-					Message:  "structured log keys must be string literals",
-				})
-				continue
-			}
-
-			if !isStructuredLogKey(key) {
-				violations = append(violations, Violation{
-					Position: fileSet.Position(keyExpression.Pos()),
-					Rule:     DiagnosticStableLogKeys,
-					Message: fmt.Sprintf(
-						"structured log key %q must be lower-case ASCII with underscores only",
-						key,
-					),
-				})
-			}
-
-			valueExpression := callExpression.Args[argumentIndex+1]
-			if containsSecretLikeName(key, parameters.SecretNames) ||
-				expressionContainsSecretLikeIdentifier(valueExpression, parameters.SecretNames) ||
-				expressionContainsSensitiveStringLiteral(valueExpression) {
-				violations = append(violations, Violation{
-					Position: fileSet.Position(valueExpression.Pos()),
-					Rule:     DiagnosticNoSecretsInLogs,
-					Message:  "structured logs must not include secrets, tokens, or private keys",
-				})
-			}
-		}
+		violations = append(violations, checkStructuredLogCall(
+			fileSet,
+			callExpression,
+			slogAliases,
+			parameters,
+		)...)
 
 		return true
 	})
+
+	return violations
+}
+
+func checkStructuredLogCall(
+	fileSet *token.FileSet,
+	callExpression *ast.CallExpr,
+	slogAliases map[string]bool,
+	parameters policy.GoParameterConfig,
+) (violations []Violation) {
+	selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+	if !ok || !isStructuredLogCall(selector, slogAliases) {
+		return nil
+	}
+
+	fieldCount := len(callExpression.Args) - 1
+	if fieldCount <= 0 {
+		return nil
+	}
+
+	if fieldCount%2 != 0 {
+		return []Violation{{
+			Position: fileSet.Position(callExpression.Pos()),
+			Rule:     DiagnosticStructuredLogs,
+			Message:  "structured log calls must use key/value pairs",
+		}}
+	}
+
+	for argumentIndex := 1; argumentIndex < len(callExpression.Args); argumentIndex += 2 {
+		violations = append(violations, checkStructuredLogPair(
+			fileSet,
+			callExpression.Args[argumentIndex],
+			callExpression.Args[argumentIndex+1],
+			parameters,
+		)...)
+	}
+
+	return violations
+}
+
+func checkStructuredLogPair(
+	fileSet *token.FileSet,
+	keyExpression ast.Expr,
+	valueExpression ast.Expr,
+	parameters policy.GoParameterConfig,
+) (violations []Violation) {
+	key, found := literalString(keyExpression)
+	if !found {
+		return []Violation{{
+			Position: fileSet.Position(keyExpression.Pos()),
+			Rule:     DiagnosticStableLogKeys,
+			Message:  "structured log keys must be string literals",
+		}}
+	}
+
+	if !isStructuredLogKey(key) {
+		violations = append(violations, Violation{
+			Position: fileSet.Position(keyExpression.Pos()),
+			Rule:     DiagnosticStableLogKeys,
+			Message: fmt.Sprintf(
+				"structured log key %q must be lower-case ASCII with underscores only",
+				key,
+			),
+		})
+	}
+
+	if containsSecretLikeName(key, parameters.SecretNames) ||
+		expressionContainsSecretLikeIdentifier(valueExpression, parameters.SecretNames) ||
+		expressionContainsSensitiveStringLiteral(valueExpression) {
+		violations = append(violations, Violation{
+			Position: fileSet.Position(valueExpression.Pos()),
+			Rule:     DiagnosticNoSecretsInLogs,
+			Message:  "structured logs must not include secrets, tokens, or private keys",
+		})
+	}
 
 	return violations
 }
