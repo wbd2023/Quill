@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-/* ---------------------------------------- Test Helpers ---------------------------------------- */
-
 func writeFile(t *testing.T, root string, relativePath string, contents string) {
 	t.Helper()
 
@@ -25,10 +23,10 @@ func writeFile(t *testing.T, root string, relativePath string, contents string) 
 func projectRoot(t *testing.T) (root string) {
 	t.Helper()
 
-	_, currentFile, _, ok := runtime.Caller(0)
+	_, callerFile, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatal("runtime.Caller failed")
 	}
 
-	return filepath.Clean(filepath.Join(filepath.Dir(currentFile), "..", "..", ".."))
+	return filepath.Clean(filepath.Join(filepath.Dir(callerFile), "..", "..", ".."))
 }

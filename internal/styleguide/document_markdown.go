@@ -27,12 +27,12 @@ func parseRequirementID(line string) (requirementID string, found bool) {
 
 func nodePlainText(source []byte, node gast.Node) (plain string) {
 	var builder strings.Builder
-	_ = gast.Walk(node, func(current gast.Node, entering bool) (status gast.WalkStatus, err error) {
+	_ = gast.Walk(node, func(child gast.Node, entering bool) (status gast.WalkStatus, err error) {
 		if !entering {
 			return gast.WalkContinue, nil
 		}
 
-		switch typedNode := current.(type) {
+		switch typedNode := child.(type) {
 		case *gast.Text:
 			builder.Write(typedNode.Segment.Value(source))
 			if typedNode.HardLineBreak() || typedNode.SoftLineBreak() {
@@ -72,8 +72,8 @@ func startsWithOrderedListMarker(value string) (found bool) {
 		return false
 	}
 
-	for _, runeValue := range value[:dotIndex] {
-		if runeValue < '0' || runeValue > '9' {
+	for _, character := range value[:dotIndex] {
+		if character < '0' || character > '9' {
 			return false
 		}
 	}

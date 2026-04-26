@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// Layout describes the repository-local directories used by the style toolchain.
 type Layout struct {
 	RepoRoot     string
 	ToolsDir     string
@@ -52,7 +51,6 @@ func newLayout(repoRoot string, toolsDir string) (layout Layout) {
 	}
 }
 
-// SearchPath returns the PATH value that exposes pinned repository-local tools first.
 func (layout Layout) SearchPath() (value string) {
 	return strings.Join(
 		[]string{layout.ToolBinDir, layout.NodeBinDir, os.Getenv("PATH")},
@@ -60,14 +58,12 @@ func (layout Layout) SearchPath() (value string) {
 	)
 }
 
-// ToolEnvironment returns the base environment for external style tools.
 func (layout Layout) ToolEnvironment() (environment map[string]string) {
 	return map[string]string{
 		"PATH": layout.SearchPath(),
 	}
 }
 
-// GoEnvironment returns the tool environment with repository-local Go caches.
 func (layout Layout) GoEnvironment() (environment map[string]string) {
 	environment = layout.ToolEnvironment()
 	environment["GOCACHE"] = layout.GoBuildCache

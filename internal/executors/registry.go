@@ -1,24 +1,24 @@
 package executors
 
 import (
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/runner"
 )
 
 func Checkers() (executors runner.ExecutorRegistry) {
 	return runner.ExecutorRegistry{
-		contract.ExecutorToolchain:      runner.ToolchainExecutor,
-		contract.ExecutorControlPlane:   controlPlaneExecutor,
-		contract.ExecutorFileCommand:    runner.FileCommandExecutor,
-		contract.ExecutorGolangci:       golangciExecutor,
-		contract.ExecutorGoStyle:        goStyleExecutor,
-		contract.ExecutorRepositoryScan: repositoryScanExecutor,
+		rulepack.ExecutorToolchain:      runner.ToolchainExecutor,
+		rulepack.ExecutorControlPlane:   controlPlaneExecutor,
+		rulepack.ExecutorFileCommand:    fileCommandExecutor,
+		rulepack.ExecutorBackendCommand: backendCommandExecutor,
+		rulepack.ExecutorBackendCheck:   backendCheckExecutor,
+		rulepack.ExecutorRepositoryScan: repositoryScanExecutor,
 	}
 }
 
 func Fixers() (executors runner.ExecutorRegistry) {
 	return runner.ExecutorRegistry{
-		contract.ExecutorFileCommand: runner.FileCommandExecutor,
-		contract.ExecutorGoFormat:    goFormatExecutor,
+		rulepack.ExecutorFileCommand:    fileCommandExecutor,
+		rulepack.ExecutorBackendCommand: backendCommandExecutor,
 	}
 }

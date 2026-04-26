@@ -3,58 +3,51 @@ package rulepack
 import (
 	"slices"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/toolchain"
 )
 
-/* -------------------------------------------- Tools ------------------------------------------- */
-
-func coreTools() (tools []contract.Tool) {
-	return []contract.Tool{
-		builtinTool(contract.ToolGo, "Go", "go", "1.24.5", contract.ToolVersionGoCommand),
+func coreTools() (tools []toolchain.Capability) {
+	return []toolchain.Capability{
+		builtinTool(ToolGo, "Go", "go", ToolVersionGoCommand),
 		goBinaryTool(
-			contract.ToolGoimports,
+			ToolGoimports,
 			"goimports",
 			"goimports",
-			"v0.42.0",
 			"golang.org/x/tools",
 			"golang.org/x/tools/cmd/goimports",
 		),
 		goBinaryTool(
-			contract.ToolMisspell,
+			ToolMisspell,
 			"misspell",
 			"misspell",
-			"v0.3.4",
 			"github.com/client9/misspell",
 			"github.com/client9/misspell/cmd/misspell",
 		),
 		goBinaryTool(
-			contract.ToolGolangciLint,
+			ToolGolangciLint,
 			"golangci-lint",
 			"golangci-lint",
-			"v2.6.2",
 			"github.com/golangci/golangci-lint/v2",
 			"github.com/golangci/golangci-lint/v2/cmd/golangci-lint",
 		),
 		goBinaryTool(
-			contract.ToolShfmt,
+			ToolShfmt,
 			"shfmt",
 			"shfmt",
-			"v3.12.0",
 			"mvdan.cc/sh/v3",
 			"mvdan.cc/sh/v3/cmd/shfmt",
 		),
 		shellcheckArchiveTool(),
 		nodePackageTool(
-			contract.ToolMarkdownlint,
+			ToolMarkdownlint,
 			"markdownlint",
 			"markdownlint",
-			"0.45.0",
 			"markdownlint-cli",
 		),
 	}
 }
 
-func selectTools(toolIDs ...string) (tools []contract.Tool) {
+func selectTools(toolIDs ...string) (tools []toolchain.Capability) {
 	wanted := make(map[string]bool, len(toolIDs))
 	for _, toolID := range toolIDs {
 		wanted[toolID] = true
@@ -66,7 +59,7 @@ func selectTools(toolIDs ...string) (tools []contract.Tool) {
 		}
 	}
 
-	slices.SortFunc(tools, func(left contract.Tool, right contract.Tool) int {
+	slices.SortFunc(tools, func(left toolchain.Capability, right toolchain.Capability) int {
 		if left.ID < right.ID {
 			return -1
 		}

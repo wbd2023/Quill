@@ -74,18 +74,18 @@ func parseBlockMetadata(
 
 func parseMetadataFields(body string) (fields map[string]string, err error) {
 	fields = make(map[string]string)
-	currentKey := ""
-	currentValue := ""
+	fieldKey := ""
+	fieldText := ""
 
 	flush := func() error {
-		if currentKey == "" {
+		if fieldKey == "" {
 			return nil
 		}
 
-		if _, exists := fields[currentKey]; exists {
-			return fmt.Errorf("duplicate %q in style metadata comment", currentKey)
+		if _, exists := fields[fieldKey]; exists {
+			return fmt.Errorf("duplicate %q in style metadata comment", fieldKey)
 		}
-		fields[currentKey] = strings.TrimSpace(currentValue)
+		fields[fieldKey] = strings.TrimSpace(fieldText)
 		return nil
 	}
 
@@ -102,16 +102,16 @@ func parseMetadataFields(body string) (fields map[string]string, err error) {
 				return nil, err
 			}
 
-			currentKey = key
-			currentValue = strings.TrimSpace(value)
+			fieldKey = key
+			fieldText = strings.TrimSpace(value)
 			continue
 		}
 
-		if currentKey == "" {
+		if fieldKey == "" {
 			return nil, fmt.Errorf("malformed style metadata comment near %q", line)
 		}
 
-		currentValue += " " + line
+		fieldText += " " + line
 	}
 
 	if err := flush(); err != nil {

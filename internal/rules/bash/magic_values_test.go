@@ -1,4 +1,4 @@
-package bashstyle
+package bash
 
 import (
 	"strings"
@@ -27,18 +27,18 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 		source,
 	)
 
-	output, err := CheckMagicValues(
+	result, err := CheckMagicValues(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.ScopeTools,
+		contract.Scope("tools"),
 	)
 	if err == nil {
 		t.Fatal("expected bash magic-value failure")
 	}
 
-	if !strings.Contains(output, "tools/example.sh:3") ||
-		!strings.Contains(output, "tools/example.sh:4") {
-		t.Fatalf("expected output to include offending lines, got:\n%s", output)
+	if !hasDiagnostic(result, "bash/magic-values/non-trivial", "tools/example.sh", 3, "") ||
+		!hasDiagnostic(result, "bash/magic-values/non-trivial", "tools/example.sh", 4, "") {
+		t.Fatalf("expected diagnostics to include offending lines, got: %#v", result.Diagnostics)
 	}
 }
 
@@ -60,12 +60,12 @@ func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
 		source,
 	)
 
-	output, err := CheckMagicValues(
+	result, err := CheckMagicValues(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.ScopeTools,
+		contract.Scope("tools"),
 	)
 	if err != nil {
-		t.Fatalf("expected trivial literals to pass, output:\n%s", output)
+		t.Fatalf("expected trivial literals to pass, diagnostics: %#v", result.Diagnostics)
 	}
 }

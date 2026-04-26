@@ -2,8 +2,6 @@ package cli
 
 import "io"
 
-/* --------------------------------------------- CLI -------------------------------------------- */
-
 func New(stdout io.Writer, stderr io.Writer) (tool CLI) {
 	if stdout == nil {
 		stdout = io.Discard

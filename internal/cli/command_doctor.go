@@ -3,9 +3,7 @@ package cli
 import (
 	"flag"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runner"
 )
 
 func parseDoctorOptions(arguments []string) (options doctorOptions, err error) {
@@ -52,7 +50,7 @@ func doctorUsageText() (usage string) {
 }
 
 func runDoctor(tool CLI, options doctorOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, contract.ScopeAll)
+	context, err := loadContext(options.repoRoot, "")
 	if err != nil {
 		tool.writeError(err)
 		return 1
@@ -60,8 +58,9 @@ func runDoctor(tool CLI, options doctorOptions) (exitCode int) {
 
 	toolIDs := toolIDsFromTools(context.Effective.Tools)
 
-	statuses, allValid := runner.InspectToolchain(
+	statuses, allValid := inspectToolchain(
 		context.Effective.Tools,
+		context.ToolCapabilities,
 		toolIDs,
 		context.ToolEnvironment,
 	)

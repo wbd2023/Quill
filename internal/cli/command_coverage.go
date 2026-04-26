@@ -4,24 +4,60 @@ import (
 	"flag"
 	"io"
 
+	"ciphera/tools/internal/coverage"
+	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/report"
+	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
 
+/* -------------------------------------- Coverage Command -------------------------------------- */
+
 func runCoverage(tool CLI, options coverageOptions) (exitCode int) {
-	coverage, err := styleguide.Coverage(options.repoRoot)
+	coverageReport, err := loadCoverageReport(options.repoRoot)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	if err = writeCoverageResult(tool.stdout, coverage, options); err != nil {
+	if err = writeCoverageResult(tool.stdout, coverageReport, options); err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
 	return 0
 }
+
+/* -------------------------------------- Coverage Loading -------------------------------------- */
+
+func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err error) {
+	config, err := profile.Load(repoRoot)
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	document, err := styleguide.Load(repoRoot, styleguide.Config{
+		Path:                config.StyleGuide.Path,
+		RequirementIDFormat: config.StyleGuide.RequirementIDFormat,
+	})
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	effective, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	return coverage.Build(document, effective.Rules), nil
+}
+
+/* --------------------------------------- Option Parsing --------------------------------------- */
 
 func parseCoverageOptions(arguments []string) (options coverageOptions, err error) {
 	return parseCoverageOptionsWithResolver(resolveRepoRoot, arguments)
@@ -70,11 +106,13 @@ func coverageUsageText() (usage string) {
 	return commandUsage("coverage", summary, newCoverageFlagSet(&options, &format))
 }
 
+/* ------------------------------------------ Rendering ----------------------------------------- */
+
 func writeCoverageResult(
 	writer io.Writer,
-	coverage styleguide.CoverageReport,
+	coverageReport coverage.Report,
 	options coverageOptions,
 ) (err error) {
-	view := report.NewCoverageView(coverage)
+	view := report.NewCoverageView(coverageReport)
 	return report.WriteCoverage(writer, options.format, view, options.verbose)
 }

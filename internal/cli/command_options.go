@@ -8,7 +8,7 @@ import (
 type checkOptions struct {
 	repoRoot              string
 	scope                 contract.Scope
-	profile               contract.CheckProfile
+	mode                  contract.CheckMode
 	format                report.OutputFormat
 	strictRecommendations bool
 	verbose               bool

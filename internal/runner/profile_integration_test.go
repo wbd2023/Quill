@@ -9,9 +9,7 @@ import (
 	"ciphera/tools/internal/fixtures/profiles"
 )
 
-/* ----------------------------------------- Integration ---------------------------------------- */
-
-func TestNewContextLoadsCipheraLikeFixture(t *testing.T) {
+func TestNewContextLoadsCurrentProfileFixture(t *testing.T) {
 	fixtureRoot := t.TempDir()
 	profiles.Write(t, fixtureRoot, profiles.Current(t))
 
@@ -28,7 +26,7 @@ func TestNewContextLoadsCipheraLikeFixture(t *testing.T) {
 		"package messages\n\ntype MessageRepository interface { ListMessages() }\n",
 	)
 
-	context := testContext(t, fixtureRoot, contract.ScopeAll)
+	context := testContext(t, fixtureRoot, contract.Scope("all"))
 
 	if len(context.Effective.Rules) == 0 {
 		t.Fatal("expected effective rules to be loaded for fixture")

@@ -15,20 +15,28 @@ func testContext(
 ) (context Context) {
 	t.Helper()
 
-	policy, err := profile.Load(repoRoot)
+	config, err := profile.Load(repoRoot)
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
 
-	registry, err := rulepack.DefaultRegistry(policy.RulePacks.Enabled)
+	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	effective, err := policy.Compile(registry)
+	effective, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	return NewContext(repoRoot, scope, policy, effective)
+	return NewContext(
+		repoRoot,
+		scope,
+		config,
+		effective,
+		registry.ToolCapabilities(),
+		map[string]string{"PATH": ""},
+		map[string]string{"PATH": ""},
+	)
 }

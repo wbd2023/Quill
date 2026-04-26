@@ -101,6 +101,15 @@ func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
 		t.Fatalf("unexpected extracted contents: %q", contents)
 	}
 
+	info, err := os.Stat(binaryPath)
+	if err != nil {
+		t.Fatalf("stat extracted binary: %v", err)
+	}
+
+	if info.Mode().Perm() != executableMode {
+		t.Fatalf("extracted binary mode = %v, want %v", info.Mode().Perm(), executableMode)
+	}
+
 	readmePath := filepath.Join(destination, "shellcheck-v0.10.0", "README.txt")
 	if _, err := os.Stat(readmePath); err == nil {
 		t.Fatal("expected README to be ignored, not extracted")

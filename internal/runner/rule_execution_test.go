@@ -4,41 +4,46 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/toolchain"
 )
 
 func TestRunRuleUsesInjectedExecutor(t *testing.T) {
+	repoRoot := t.TempDir()
 	rule := contract.Rule{
-		RuleDefinition: contract.RuleDefinition{
-			ID: "test/rule",
-			Spec: contract.ExecutionSpec{
-				Executor: "test_executor",
+		ID: "test/rule",
+		Spec: contract.ExecutionSpec{
+			Kind: contract.ExecutorKind("test_executor"),
+			Detail: contract.RepositoryScanExecution{
+				Scanner: "test",
 			},
 		},
 	}
 	context := NewContext(
-		t.TempDir(),
-		contract.ScopeAll,
-		profile.Profile{},
-		profile.EffectiveConfig{},
+		repoRoot,
+		contract.Scope("all"),
+		policy.Config{},
+		contract.EffectiveConfig{},
+		nil,
+		nil,
+		nil,
 	)
 	executors := ExecutorRegistry{
 		"test_executor": func(
 			_ Context,
 			_ contract.ExecutionSpec,
-			_ map[string]runtime.ToolStatus,
-		) (string, error) {
-			return "ran", nil
+			_ map[string]toolchain.Status,
+		) (contract.ExecutionResult, error) {
+			return contract.ExecutionResult{Output: "ran"}, nil
 		},
 	}
 
-	output, err := RunRule(rule, context, nil, executors)
+	result, err := RunRule(rule, context, nil, executors)
 	if err != nil {
 		t.Fatalf("RunRule: %v", err)
 	}
 
-	if output != "ran" {
-		t.Fatalf("output = %q, want ran", output)
+	if result.Output != "ran" {
+		t.Fatalf("output = %q, want ran", result.Output)
 	}
 }

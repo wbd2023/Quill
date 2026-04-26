@@ -9,17 +9,21 @@ import (
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
-func TestParseCheckOptionsRejectsInvalidProfile(t *testing.T) {
-	_, err := parseCheckOptions([]string{"--profile", "invalid"})
+func TestParseCheckOptionsRejectsInvalidMode(t *testing.T) {
+	_, err := parseCheckOptions([]string{"--mode", "invalid"})
 	if err == nil {
-		t.Fatal("expected invalid profile error")
+		t.Fatal("expected invalid mode error")
 	}
 }
 
-func TestParseCheckOptionsRejectsInvalidScope(t *testing.T) {
-	_, err := parseCheckOptions([]string{"--scope", "invalid"})
-	if err == nil {
-		t.Fatal("expected invalid scope error")
+func TestParseCheckOptionsAcceptsConfiguredScopeName(t *testing.T) {
+	options, err := parseCheckOptions([]string{"--scope", "custom"})
+	if err != nil {
+		t.Fatalf("parseCheckOptions: %v", err)
+	}
+
+	if options.scope != "custom" {
+		t.Fatalf("scope = %q, want custom", options.scope)
 	}
 }
 

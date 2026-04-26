@@ -1,40 +1,37 @@
 package runner
 
 import (
-	"path/filepath"
-
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/toolchain"
 )
 
 type Context struct {
-	RepoRoot        string
-	Scope           contract.Scope
-	Policy          profile.Profile
-	Effective       profile.EffectiveConfig
-	Layout          runtime.Layout
-	ToolEnvironment map[string]string
-	GoEnvironment   map[string]string
+	RepoRoot         string
+	Scope            contract.Scope
+	Policy           policy.Config
+	Effective        contract.EffectiveConfig
+	ToolCapabilities map[string]toolchain.Capability
+	ToolEnvironment  map[string]string
+	GoEnvironment    map[string]string
 }
 
 func NewContext(
 	repoRoot string,
 	scope contract.Scope,
-	policy profile.Profile,
-	effective profile.EffectiveConfig,
+	config policy.Config,
+	effective contract.EffectiveConfig,
+	capabilities []toolchain.Capability,
+	toolEnvironment map[string]string,
+	goEnvironment map[string]string,
 ) (context Context) {
-	layout := runtime.LayoutForRepository(repoRoot)
-	goEnvironment := layout.GoEnvironment()
-	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDir, "golangci")
-
 	return Context{
-		RepoRoot:        repoRoot,
-		Scope:           scope,
-		Policy:          policy,
-		Effective:       effective,
-		Layout:          layout,
-		ToolEnvironment: layout.ToolEnvironment(),
-		GoEnvironment:   goEnvironment,
+		RepoRoot:         repoRoot,
+		Scope:            scope,
+		Policy:           config,
+		Effective:        effective,
+		ToolCapabilities: toolchain.CapabilitiesByID(capabilities),
+		ToolEnvironment:  toolEnvironment,
+		GoEnvironment:    goEnvironment,
 	}
 }

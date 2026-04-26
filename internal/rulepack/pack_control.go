@@ -1,9 +1,5 @@
 package rulepack
 
-import "ciphera/tools/internal/contract"
-
-/* ---------------------------------------- Control Pack ---------------------------------------- */
-
 func controlPack() (pack Pack) {
 	return Pack{
 		ID:    PackControl,
@@ -13,13 +9,13 @@ func controlPack() (pack Pack) {
 			toolchainRule(
 				"toolchain/check-versions",
 				"Pinned toolchain versions",
-				contract.ToolGo,
-				contract.ToolGoimports,
-				contract.ToolMisspell,
-				contract.ToolGolangciLint,
-				contract.ToolShfmt,
-				contract.ToolShellcheck,
-				contract.ToolMarkdownlint,
+				ToolGo,
+				ToolGoimports,
+				ToolMisspell,
+				ToolGolangciLint,
+				ToolShfmt,
+				ToolShellcheck,
+				ToolMarkdownlint,
 			),
 			controlPlaneRule(
 				"control-plane/enforcement-levels",

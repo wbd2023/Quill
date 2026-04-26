@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */
@@ -20,10 +19,10 @@ var (
 type Executor func(
 	context Context,
 	spec contract.ExecutionSpec,
-	toolStatuses map[string]runtime.ToolStatus,
-) (output string, err error)
+	toolStatuses map[string]toolchain.Status,
+) (result contract.ExecutionResult, err error)
 
-type ExecutorRegistry map[string]Executor
+type ExecutorRegistry map[contract.ExecutorKind]Executor
 
 func IsBlocked(err error) (blocked bool) {
 	return errors.Is(err, errRuleBlocked)
@@ -66,18 +65,18 @@ func ToolIDsForFixes(rules []contract.Rule) (toolIDs []string) {
 func RunRule(
 	rule contract.Rule,
 	context Context,
-	toolStatuses map[string]runtime.ToolStatus,
+	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
-) (output string, err error) {
+) (result contract.ExecutionResult, err error) {
 	return runRuleSpec(rule.ID, rule.Spec, rule.ToolIDs(), context, toolStatuses, executors)
 }
 
 func RunFix(
 	rule contract.Rule,
 	context Context,
-	toolStatuses map[string]runtime.ToolStatus,
+	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
-) (output string, err error) {
+) (result contract.ExecutionResult, err error) {
 	return runRuleSpec(rule.ID, rule.FixSpec, rule.FixToolIDs(), context, toolStatuses, executors)
 }
 
@@ -86,20 +85,31 @@ func runRuleSpec(
 	spec contract.ExecutionSpec,
 	toolIDs []string,
 	context Context,
-	toolStatuses map[string]runtime.ToolStatus,
+	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
-) (output string, err error) {
-	if spec.Executor == "" {
-		return "", nil
+) (result contract.ExecutionResult, err error) {
+	if spec.Empty() {
+		return contract.ExecutionResult{}, nil
 	}
 
-	if len(toolIDs) > 0 && !runtime.AllToolsValid(toolIDs, toolStatuses) {
-		return runtime.ExplainToolIssues(toolIDs, toolStatuses), errRuleBlocked
+	if len(toolIDs) > 0 && !toolchain.AllToolsValid(toolIDs, toolStatuses) {
+		return contract.ExecutionResult{
+			Diagnostics: []contract.Diagnostic{
+				{
+					Code:    "toolchain/blocked",
+					Message: toolchain.ExplainToolIssues(toolIDs, toolStatuses),
+				},
+			},
+		}, errRuleBlocked
 	}
 
-	executor, found := executors[spec.Executor]
+	executor, found := executors[spec.Kind]
 	if !found {
-		return "", fmt.Errorf("rule %s uses unknown executor %q", ruleID, spec.Executor)
+		return contract.ExecutionResult{}, fmt.Errorf(
+			"rule %s uses unknown executor %q",
+			ruleID,
+			spec.Executor(),
+		)
 	}
 
 	return executor(context, spec, toolStatuses)
@@ -108,24 +118,31 @@ func runRuleSpec(
 func ToolchainExecutor(
 	_ Context,
 	spec contract.ExecutionSpec,
-	toolStatuses map[string]runtime.ToolStatus,
-) (output string, err error) {
-	var builder strings.Builder
+	toolStatuses map[string]toolchain.Status,
+) (result contract.ExecutionResult, err error) {
+	detail, found := spec.ToolchainExecution()
+	if !found {
+		return contract.ExecutionResult{}, fmt.Errorf("toolchain executor received empty spec")
+	}
+
+	diagnostics := make([]contract.Diagnostic, 0, len(detail.ToolIDs))
 	foundFailure := false
-	for _, toolID := range spec.ToolIDs {
+	for _, toolID := range detail.ToolIDs {
 		status, found := toolStatuses[toolID]
 		if !found || status.Valid {
 			continue
 		}
 
 		foundFailure = true
-		builder.WriteString(runtime.ExplainToolIssues([]string{toolID}, toolStatuses))
-		builder.WriteString("\n")
+		diagnostics = append(diagnostics, contract.Diagnostic{
+			Code:    "toolchain/invalid",
+			Message: toolchain.ExplainToolIssues([]string{toolID}, toolStatuses),
+		})
 	}
 
 	if !foundFailure {
-		return "", nil
+		return contract.ExecutionResult{}, nil
 	}
 
-	return strings.TrimSpace(builder.String()), errRuleViolation
+	return contract.ExecutionResult{Diagnostics: diagnostics}, errRuleViolation
 }

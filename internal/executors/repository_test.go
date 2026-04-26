@@ -8,18 +8,18 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/rulepack"
 )
 
 /* ------------------------------------- Repository Scanners ------------------------------------ */
 
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepoRoot(t), contract.ScopeTools)
+	context := testContext(t, fixtures.RepoRoot(t), contract.Scope("tools"))
 
 	if _, err := repositoryScanExecutor(
 		context,
-		contract.ExecutionSpec{Scanner: rulepack.RepositoryScannerASCII},
+		repositoryScanSpec(rulepack.ScannerASCII),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanExecutor(ascii): %v", err)
@@ -27,11 +27,11 @@ func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 }
 
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepoRoot(t), contract.ScopeAll)
+	context := testContext(t, fixtures.RepoRoot(t), contract.Scope("all"))
 
 	if _, err := repositoryScanExecutor(
 		context,
-		contract.ExecutionSpec{Scanner: "unknown"},
+		repositoryScanSpec("unknown"),
 		nil,
 	); err == nil {
 		t.Fatal("expected unknown scanner to be rejected")
@@ -84,82 +84,124 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		"package domain\n\ntype Message struct{}\n",
 	)
 
-	context := testContext(t, fixtureRoot, contract.ScopeAll)
-	if output, err := repositoryScanExecutor(
+	context := testContext(t, fixtureRoot, contract.Scope("all"))
+	if result, err := repositoryScanExecutor(
 		context,
-		contract.ExecutionSpec{Scanner: rulepack.RepositoryScannerArchitecture},
+		repositoryScanSpec(rulepack.ScannerArchitecture),
 		nil,
 	); err != nil {
-		t.Fatalf("repositoryScanExecutor(architecture): %v\n%s", err, output)
+		t.Fatalf("repositoryScanExecutor(architecture): %v\n%s", err, result.Output)
 	}
 
-	output, err := repositoryScanExecutor(
+	result, err := repositoryScanExecutor(
 		context,
-		contract.ExecutionSpec{Scanner: rulepack.RepositoryScannerNaming},
+		repositoryScanSpec(rulepack.ScannerNaming),
 		nil,
 	)
 	if err == nil {
 		t.Fatal("expected alternate naming policy to reject Repository suffixes")
 	}
 
-	if !strings.Contains(output, "use Store not Repository") {
-		t.Fatalf("expected alternate naming vocabulary in output, got:\n%s", output)
+	if !hasDiagnostic(
+		result,
+		"naming/vocabulary/go-type-suffix",
+		"internal/app/services/message_service.go",
+		8,
+		"use Store not Repository",
+	) {
+		t.Fatalf("expected alternate naming vocabulary diagnostic, got: %#v", result.Diagnostics)
 	}
+}
+
+func hasDiagnostic(
+	result contract.ExecutionResult,
+	code string,
+	file string,
+	line int,
+	messageFragment string,
+) (found bool) {
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code != code {
+			continue
+		}
+		if file != "" && diagnostic.File != file {
+			continue
+		}
+		if line != 0 && diagnostic.Line != line {
+			continue
+		}
+		if messageFragment != "" && !strings.Contains(diagnostic.Message, messageFragment) {
+			continue
+		}
+
+		return true
+	}
+
+	return false
 }
 
 /* -------------------------------------- Fixture Profiles -------------------------------------- */
 
-func alternatePolicyForTest(t *testing.T) (policy profile.Profile) {
+func alternatePolicyForTest(t *testing.T) (config policy.Config) {
 	t.Helper()
 
-	policy = profiles.Current(t)
-	policy.Repository.RootMarkers = []string{"STYLE.md", "style.toml", "ALTROOT"}
-	policy.Repository.AppScanRoots = []string{"cmd", "internal"}
-	policy.Repository.ToolsScanRoots = []string{"tools"}
-	policy.FileSets = replaceFileSet(policy.FileSets, profile.FileSetConfig{
-		Name:          "markdown",
-		Extensions:    []string{".md"},
-		AppFiles:      []string{"STYLE.md"},
-		AppPrefixes:   []string{"cmd/", "internal/"},
-		ToolsPrefixes: []string{"tools/"},
-	})
-	policy.Imports.LocalPrefix = "example.com/altchat"
-	policy.Paths.Classes = map[string][]string{
-		rulepack.PathClassApp:             {"cmd/", "internal/"},
-		rulepack.PathClassApplicationPort: {"internal/app/ports/"},
-		rulepack.PathClassConcreteInfra:   {"internal/adapters/"},
-		rulepack.PathClassDomain:          {"internal/domain/"},
-		rulepack.PathClassDomainErrors:    {"internal/domain/errors.go"},
-		rulepack.PathClassTestMocks:       {"internal/testsupport/mocks/"},
+	config = profiles.Current(t)
+	config.Repository.RootMarkers = []string{"STYLE.md", "style.toml", "ALTROOT"}
+	config.Repository.Scopes = map[contract.Scope][]string{
+		"app":   {"cmd", "internal"},
+		"tools": {"tools"},
+		"all":   {"."},
 	}
-	policy.Language.Backends = []profile.LanguageBackendConfig{
+	config.FileSets = replaceFileSet(config.FileSets, policy.FileSetConfig{
+		Name:       "markdown",
+		Extensions: []string{".md"},
+		Files: map[contract.Scope][]string{
+			"app": {"STYLE.md"},
+		},
+		Prefixes: map[contract.Scope][]string{
+			"app":   {"cmd/", "internal/"},
+			"tools": {"tools/"},
+		},
+	})
+	config.Imports.LocalPrefix = "example.com/altchat"
+	config.Paths.Classes = map[string][]string{
+		"go_source":        {"cmd/", "internal/"},
+		"application_port": {"internal/app/ports/"},
+		"concrete_infra":   {"internal/adapters/"},
+		"domain":           {"internal/domain/"},
+		"domain_errors":    {"internal/domain/errors.go"},
+		"test_mocks":       {"internal/testsupport/mocks/"},
+	}
+	config.Language.Backends = []policy.LanguageBackendConfig{
 		{
-			Name:        "go_app",
+			Name:        "application_go",
 			Language:    "go",
+			Scope:       contract.Scope("app"),
 			Workdir:     ".",
 			FormatPaths: []string{"cmd", "internal"},
 			StylePaths:  []string{"cmd", "internal"},
 		},
 		{
-			Name:        "go_tools",
+			Name:        "tooling_go",
 			Language:    "go",
+			Scope:       contract.Scope("tools"),
 			Workdir:     "tools",
 			FormatPaths: []string{"cmd", "internal"},
 			StylePaths:  []string{"tools/cmd", "tools/internal"},
 		},
 	}
-	policy.Naming.GoTypeSuffixForbidden = []string{"Repository"}
-	policy.Naming.GoTypeSuffixPreferred = "Store"
-	policy.Naming.GoIdentifierSuffixForbidden = []string{"Repository"}
-	policy.Naming.GoIdentifierSuffixPreferred = "Store"
-	policy.Naming.GoParameters.ConstructorCategories = replaceConstructorCategory(
-		policy.Naming.GoParameters.ConstructorCategories,
-		profile.GoConstructorCategory{
+	config.Naming.GoTypeSuffixForbidden = []string{"Repository"}
+	config.Naming.GoTypeSuffixPreferred = "Store"
+	config.Naming.GoIdentifierSuffixForbidden = []string{"Repository"}
+	config.Naming.GoIdentifierSuffixPreferred = "Store"
+	config.Naming.GoParameters.ConstructorCategories = replaceConstructorCategory(
+		config.Naming.GoParameters.ConstructorCategories,
+		policy.GoConstructorCategory{
 			Name:        "repository",
 			TypeMarkers: []string{"Store"},
 		},
 	)
-	policy.Architecture.Layers = []profile.ArchitectureLayer{
+	config.Architecture.Layers = []policy.ArchitectureLayer{
 		{
 			Name:         "domain",
 			PackageRoots: []string{"internal/domain"},
@@ -187,16 +229,25 @@ func alternatePolicyForTest(t *testing.T) (policy profile.Profile) {
 		},
 	}
 
-	return policy
+	return config
 }
 
 /* --------------------------------------- Fixture Helpers -------------------------------------- */
 
+func repositoryScanSpec(scanner string) (spec contract.ExecutionSpec) {
+	return contract.ExecutionSpec{
+		Kind: rulepack.ExecutorRepositoryScan,
+		Detail: contract.RepositoryScanExecution{
+			Scanner: scanner,
+		},
+	}
+}
+
 func replaceFileSet(
-	fileSets []profile.FileSetConfig,
-	replacement profile.FileSetConfig,
-) (updated []profile.FileSetConfig) {
-	updated = append([]profile.FileSetConfig{}, fileSets...)
+	fileSets []policy.FileSetConfig,
+	replacement policy.FileSetConfig,
+) (updated []policy.FileSetConfig) {
+	updated = append([]policy.FileSetConfig{}, fileSets...)
 	for index, fileSet := range updated {
 		if fileSet.Name != replacement.Name {
 			continue
@@ -210,10 +261,10 @@ func replaceFileSet(
 }
 
 func replaceConstructorCategory(
-	categories []profile.GoConstructorCategory,
-	replacement profile.GoConstructorCategory,
-) (updated []profile.GoConstructorCategory) {
-	updated = append([]profile.GoConstructorCategory{}, categories...)
+	categories []policy.GoConstructorCategory,
+	replacement policy.GoConstructorCategory,
+) (updated []policy.GoConstructorCategory) {
+	updated = append([]policy.GoConstructorCategory{}, categories...)
 	for index, category := range updated {
 		if category.Name != replacement.Name {
 			continue

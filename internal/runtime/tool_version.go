@@ -9,38 +9,92 @@ import (
 	"strings"
 
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/toolchain"
+)
+
+const (
+	toolVersionGoCommand  toolchain.VersionKind = "go_command"
+	toolVersionBuildInfo  toolchain.VersionKind = "build_info"
+	toolVersionShellcheck toolchain.VersionKind = "shellcheck"
+	toolVersionNodeCLI    toolchain.VersionKind = "node_cli"
 )
 
 /* -------------------------------------- Version Detection ------------------------------------- */
 
 func detectVersion(
 	tool contract.Tool,
+	capability toolchain.Capability,
 	path string,
 	environment map[string]string,
 ) (version string, err error) {
-	switch tool.VersionKind {
-	case contract.ToolVersionGoCommand:
-		return detectGoVersion(path, environment)
-
-	case contract.ToolVersionBuildInfo:
-		return detectBuildInfoVersion(tool, path)
-
-	case contract.ToolVersionShellcheck:
-		return detectCommandVersion(path, "--version", environment, parseShellcheckVersion)
-
-	case contract.ToolVersionNodeCLI:
-		return detectCommandVersion(path, "--version", environment, parseSingleTokenVersion)
-
-	default:
-		return "", fmt.Errorf("unsupported version detector %s", tool.VersionKind)
+	handler, found := versionHandlers()[capability.VersionKind]
+	if !found {
+		return "", fmt.Errorf("unsupported version detector %s", capability.VersionKind)
 	}
+
+	return handler(tool, capability, path, environment)
+}
+
+type versionHandler func(
+	tool contract.Tool,
+	capability toolchain.Capability,
+	path string,
+	environment map[string]string,
+) (string, error)
+
+func versionHandlers() (handlers map[toolchain.VersionKind]versionHandler) {
+	return map[toolchain.VersionKind]versionHandler{
+		toolVersionGoCommand: func(
+			_ contract.Tool,
+			_ toolchain.Capability,
+			path string,
+			environment map[string]string,
+		) (string, error) {
+			return detectGoVersion(path, environment)
+		},
+		toolVersionBuildInfo: func(
+			_ contract.Tool,
+			capability toolchain.Capability,
+			path string,
+			_ map[string]string,
+		) (string, error) {
+			return detectBuildInfoVersion(capability, path)
+		},
+		toolVersionShellcheck: func(
+			_ contract.Tool,
+			_ toolchain.Capability,
+			path string,
+			environment map[string]string,
+		) (string, error) {
+			return detectCommandVersion(path, "--version", environment, parseShellcheckVersion)
+		},
+		toolVersionNodeCLI: func(
+			_ contract.Tool,
+			_ toolchain.Capability,
+			path string,
+			environment map[string]string,
+		) (string, error) {
+			return detectCommandVersion(path, "--version", environment, parseSingleTokenVersion)
+		},
+	}
+}
+
+func SupportsVersionKind(kind toolchain.VersionKind) (supported bool) {
+	_, supported = versionHandlers()[kind]
+	return supported
 }
 
 func detectGoVersion(
 	commandPath string,
 	environment map[string]string,
 ) (version string, err error) {
-	output, err := RunCommand(".", environment, commandPath, "version")
+	result, err := RunCommand(CommandRequest{
+		Directory:   ".",
+		Environment: environment,
+		Name:        commandPath,
+		Arguments:   []string{"version"},
+	})
+	output, err := CommandOutput(result, err)
 	if err != nil {
 		return "", err
 	}
@@ -59,13 +113,16 @@ func detectGoVersion(
 	return "", fmt.Errorf("could not parse go version")
 }
 
-func detectBuildInfoVersion(tool contract.Tool, path string) (version string, err error) {
+func detectBuildInfoVersion(
+	capability toolchain.Capability,
+	path string,
+) (version string, err error) {
 	info, err := buildinfo.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("could not read embedded build info")
 	}
 
-	if tool.ModulePath != "" && info.Main.Path != tool.ModulePath {
+	if capability.ModulePath != "" && info.Main.Path != capability.ModulePath {
 		return "", fmt.Errorf("unexpected build target %s", info.Main.Path)
 	}
 
@@ -82,7 +139,13 @@ func detectCommandVersion(
 	environment map[string]string,
 	parse func(string) (string, error),
 ) (version string, err error) {
-	output, err := RunCommand(".", environment, commandPath, argument)
+	result, err := RunCommand(CommandRequest{
+		Directory:   ".",
+		Environment: environment,
+		Name:        commandPath,
+		Arguments:   []string{argument},
+	})
+	output, err := CommandOutput(result, err)
 	if err != nil {
 		return "", err
 	}
@@ -92,6 +155,7 @@ func detectCommandVersion(
 
 func inspectLocalToolVersion(
 	tool contract.Tool,
+	capability toolchain.Capability,
 	path string,
 ) (version string, found bool, err error) {
 	if _, err = os.Stat(path); err != nil {
@@ -102,7 +166,7 @@ func inspectLocalToolVersion(
 		return "", false, err
 	}
 
-	version, err = detectVersion(tool, path, nil)
+	version, err = detectVersion(tool, capability, path, nil)
 	if err != nil {
 		return "", false, nil
 	}
@@ -111,10 +175,10 @@ func inspectLocalToolVersion(
 }
 
 func parseShellcheckVersion(output string) (version string, err error) {
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "version:") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "version:")), nil
+		if after, ok := strings.CutPrefix(line, "version:"); ok {
+			return strings.TrimSpace(after), nil
 		}
 	}
 
@@ -136,22 +200,22 @@ func matchesPinnedVersion(actual string, pinned string) (matches bool) {
 	return normaliseVersion(actual) == normaliseVersion(pinned)
 }
 
-func normaliseVersion(value string) (normalised string) {
-	value = strings.TrimPrefix(strings.TrimSpace(value), "v")
-	end := len(value)
-	for index, runeValue := range value {
-		if (runeValue < '0' || runeValue > '9') && runeValue != '.' {
+func normaliseVersion(version string) (normalised string) {
+	version = strings.TrimPrefix(strings.TrimSpace(version), "v")
+	end := len(version)
+	for index, character := range version {
+		if (character < '0' || character > '9') && character != '.' {
 			end = index
 			break
 		}
 	}
 
-	value = value[:end]
-	if value == "" {
+	version = version[:end]
+	if version == "" {
 		return ""
 	}
 
-	parts := strings.Split(value, ".")
+	parts := strings.Split(version, ".")
 	for _, piece := range parts {
 		if _, err := strconv.Atoi(piece); err != nil {
 			return ""

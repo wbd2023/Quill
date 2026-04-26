@@ -3,6 +3,7 @@ package report
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -16,27 +17,23 @@ func TestWriteCheckText(t *testing.T) {
 	result := CheckResult{
 		Entries: []CheckEntry{
 			{
-				Rule: contract.Rule{
-					RuleDefinition: contract.RuleDefinition{
-						ID:    "toolchain",
-						Name:  "Pinned toolchain",
-						Group: contract.RuleGroupControlPlane,
-					},
+				Rule: NewRuleSummary(contract.Rule{
+					ID:             "toolchain",
+					Name:           "Pinned toolchain",
+					Group:          contract.RuleGroup("control_plane"),
 					RequirementIDs: []string{"0.1.security-first"},
-				},
-				Status: CheckStatusPass,
+				}),
+				Status: contract.CheckStatusPass,
 			},
 			{
-				Rule: contract.Rule{
-					RuleDefinition: contract.RuleDefinition{
-						ID:    "markdown",
-						Name:  "markdownlint",
-						Group: contract.RuleGroupExternal,
-					},
+				Rule: NewRuleSummary(contract.Rule{
+					ID:             "markdown",
+					Name:           "markdownlint",
+					Group:          contract.RuleGroup("external_tools"),
 					RequirementIDs: []string{"5.2.concise-and-clear"},
-				},
-				Status: CheckStatusFail,
-				Output: "missing from PATH",
+				}),
+				Status: contract.CheckStatusFail,
+				Result: contract.ExecutionResult{Output: "missing from PATH"},
 			},
 		},
 	}
@@ -62,15 +59,13 @@ func TestWriteCheckJSON(t *testing.T) {
 	view := NewCheckView(CheckResult{
 		Entries: []CheckEntry{
 			{
-				Rule: contract.Rule{
-					RuleDefinition: contract.RuleDefinition{
-						ID:    "toolchain",
-						Name:  "Pinned toolchain",
-						Group: contract.RuleGroupControlPlane,
-					},
+				Rule: NewRuleSummary(contract.Rule{
+					ID:             "toolchain",
+					Name:           "Pinned toolchain",
+					Group:          contract.RuleGroup("control_plane"),
 					RequirementIDs: []string{"0.1.security-first"},
-				},
-				Status: CheckStatusPass,
+				}),
+				Status: contract.CheckStatusPass,
 			},
 		},
 	})
@@ -84,7 +79,15 @@ func TestWriteCheckJSON(t *testing.T) {
 	}
 
 	var envelope struct {
-		Check CheckView `json:"check"`
+		Check struct {
+			Summary CheckSummary `json:"summary"`
+			Result  struct {
+				Entries []struct {
+					RuleID string `json:"rule_id"`
+					Name   string `json:"name"`
+				} `json:"entries"`
+			} `json:"result"`
+		} `json:"check"`
 	}
 	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
 		t.Fatalf("decode check json: %v", err)
@@ -92,5 +95,16 @@ func TestWriteCheckJSON(t *testing.T) {
 
 	if envelope.Check.Summary.Passed != 1 {
 		t.Fatalf("unexpected JSON summary: %+v", envelope.Check.Summary)
+	}
+
+	if len(envelope.Check.Result.Entries) != 1 ||
+		envelope.Check.Result.Entries[0].RuleID != "toolchain" {
+		t.Fatalf("unexpected JSON entries: %+v", envelope.Check.Result.Entries)
+	}
+
+	for _, forbidden := range []string{"spec", "fix_spec", "install_kind", "module_path"} {
+		if strings.Contains(buffer.String(), forbidden) {
+			t.Fatalf("check JSON leaked internal field %q: %s", forbidden, buffer.String())
+		}
 	}
 }

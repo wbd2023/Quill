@@ -1,25 +1,20 @@
-package bashstyle
+package bash
 
 import (
-	"fmt"
 	"os"
 	"regexp"
 	"strings"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/profile"
-	repostyle "ciphera/tools/internal/rules/repo"
+	"ciphera/tools/internal/filewalk"
+	"ciphera/tools/internal/policy"
 )
-
-/* ------------------------------------------ Constants ----------------------------------------- */
 
 const (
 	shellcheckRuleCaptureIndex   = 1
 	shellcheckReasonCaptureIndex = 2
 	shellcheckMatchesLength      = 3
 )
-
-/* -------------------------------------------- Types ------------------------------------------- */
 
 type shellFunction struct {
 	line int
@@ -30,9 +25,9 @@ type shellFunction struct {
 
 func CheckSafety(
 	repoRoot string,
-	repository profile.RepositoryConfig,
+	repository policy.RepositoryConfig,
 	scope contract.Scope,
-) (output string, err error) {
+) (result contract.ExecutionResult, err error) {
 	shellFunctionPattern := regexp.MustCompile(
 		`^\s*(?:function\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*(?:\(\))?\s*\{`,
 	)
@@ -48,18 +43,15 @@ func CheckSafety(
 		`^\s*#\s*shellcheck\s+disable=([A-Z0-9,]+)(?:\s+--\s+(.+))?\s*$`,
 	)
 
-	files, err := repostyle.CollectFiles(repoRoot, repository, scope, ".sh")
+	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
 	if err != nil {
-		return "", err
+		return contract.ExecutionResult{}, err
 	}
-
-	var builder strings.Builder
-	foundViolation := false
 
 	for _, path := range files {
 		contents, readErr := os.ReadFile(path)
 		if readErr != nil {
-			return "", readErr
+			return contract.ExecutionResult{}, readErr
 		}
 
 		lines := strings.Split(strings.ReplaceAll(string(contents), "\r\n", "\n"), "\n")
@@ -83,111 +75,136 @@ func CheckSafety(
 				functions = append(functions, shellFunction{line: lineNumber, name: name})
 
 				if name != "main" && !isLowerSnakeCase(name) {
-					foundViolation = true
-					builder.WriteString(fmt.Sprintf(
-						"%s:%d Bash function names should use lower-case with underscores\n",
-						repostyle.RelativePath(repoRoot, path),
+					result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+						"bash/safety/naming",
+						repoRoot,
+						path,
 						lineNumber,
+						"Bash function names should use lower-case with underscores",
 					))
 				}
 			}
 
 			if matches := shellExportPattern.FindStringSubmatch(line); len(matches) > 1 &&
 				!isUpperSnakeCase(matches[1]) {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d Bash constants and exported variables should use "+
-						"upper-case with underscores\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/naming",
+					repoRoot,
+					path,
 					lineNumber,
+					"Bash constants and exported variables should use upper-case with underscores",
 				))
 			}
 
 			if matches := shellAssignmentPattern.FindStringSubmatch(line); len(matches) > 1 {
 				name := matches[1]
 				if !isUpperSnakeCase(name) && !isLowerSnakeCase(name) {
-					foundViolation = true
-					builder.WriteString(fmt.Sprintf(
-						"%s:%d Bash non-exported variable names should use "+
-							"lower-case with underscores\n",
-						repostyle.RelativePath(repoRoot, path),
+					result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+						"bash/safety/naming",
+						repoRoot,
+						path,
 						lineNumber,
+						"Bash non-exported variable names should use lower-case with underscores",
 					))
 				}
 			}
 
 			if shellWhichPattern.MatchString(line) {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d detect dependencies with command -v, not which\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/script-shape",
+					repoRoot,
+					path,
 					lineNumber,
+					"detect dependencies with command -v, not which",
 				))
 			}
 
 			if looksLikeManualTempPath(trimmed) {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d temporary resources must be created with mktemp\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/temp-path",
+					repoRoot,
+					path,
 					lineNumber,
+					"temporary resources must be created with mktemp",
 				))
 			}
 
 			if shellReadLoopPattern.MatchString(line) {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d avoid cmd | while read loops when loop state must survive\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/script-shape",
+					repoRoot,
+					path,
 					lineNumber,
+					"avoid cmd | while read loops when loop state must survive",
 				))
 			}
 
 			if strings.Contains(trimmed, "shellcheck disable=") &&
 				!hasLocalShellcheckSuppressionReason(trimmed, shellcheckDisablePattern) {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d shellcheck suppressions must include rule IDs and a short reason\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/suppression",
+					repoRoot,
+					path,
 					lineNumber,
+					"shellcheck suppressions must include rule IDs and a short reason",
 				))
 			}
 		}
 
 		if foundMktemp && !foundTrap {
-			foundViolation = true
-			builder.WriteString(fmt.Sprintf(
-				"%s Bash scripts using mktemp must install trap-based cleanup\n",
-				repostyle.RelativePath(repoRoot, path),
+			result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+				"bash/safety/temp-path",
+				repoRoot,
+				path,
+				0,
+				"Bash scripts using mktemp must install trap-based cleanup",
 			))
 		}
 
 		if isNonTrivialShellScript(functions) {
 			lastFunction := functions[len(functions)-1]
 			if lastFunction.name != "main" {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d non-trivial Bash scripts must keep main() as the bottom-most function\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/script-shape",
+					repoRoot,
+					path,
 					lastFunction.line,
+					"non-trivial Bash scripts must keep main() as the bottom-most function",
 				))
 			}
 
 			if lastLine := lastSignificantShellLine(lines); lastLine != `main "$@"` {
-				foundViolation = true
-				builder.WriteString(fmt.Sprintf(
-					"%s non-trivial Bash scripts must end with main \"$@\"\n",
-					repostyle.RelativePath(repoRoot, path),
+				result.Diagnostics = append(result.Diagnostics, bashSafetyDiagnostic(
+					"bash/safety/script-shape",
+					repoRoot,
+					path,
+					0,
+					`non-trivial Bash scripts must end with main "$@"`,
 				))
 			}
 		}
 	}
 
-	if !foundViolation {
-		return "", nil
+	if len(result.Diagnostics) == 0 {
+		return contract.ExecutionResult{}, nil
 	}
 
-	return builder.String(), errViolationsFound
+	return result, contract.ViolationsFound()
+}
+
+func bashSafetyDiagnostic(
+	code string,
+	repoRoot string,
+	path string,
+	line int,
+	message string,
+) (diagnostic contract.Diagnostic) {
+	return contract.Diagnostic{
+		Code:    code,
+		File:    filewalk.RelativePath(repoRoot, path),
+		Line:    line,
+		Message: message,
+	}
 }
 
 /* ------------------------------------------- Naming ------------------------------------------- */
@@ -197,10 +214,10 @@ func isLowerSnakeCase(value string) (found bool) {
 		return false
 	}
 
-	for _, current := range value {
-		if current == '_' ||
-			('a' <= current && current <= 'z') ||
-			('0' <= current && current <= '9') {
+	for _, character := range value {
+		if character == '_' ||
+			('a' <= character && character <= 'z') ||
+			('0' <= character && character <= '9') {
 			continue
 		}
 
@@ -215,10 +232,10 @@ func isUpperSnakeCase(value string) (found bool) {
 		return false
 	}
 
-	for _, current := range value {
-		if current == '_' ||
-			('A' <= current && current <= 'Z') ||
-			('0' <= current && current <= '9') {
+	for _, character := range value {
+		if character == '_' ||
+			('A' <= character && character <= 'Z') ||
+			('0' <= character && character <= '9') {
 			continue
 		}
 

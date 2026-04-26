@@ -1,119 +1,113 @@
-package bashstyle
+package bash
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/profile"
-	repostyle "ciphera/tools/internal/rules/repo"
+	"ciphera/tools/internal/filewalk"
+	"ciphera/tools/internal/policy"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
 const (
-	trivialZeroValue        = "0"
-	trivialOneValue         = "1"
-	trivialNegativeOneValue = "-1"
-	firstCaptureIndex       = 1
-	secondCaptureIndex      = 2
+	trivialZero        = "0"
+	trivialOne         = "1"
+	trivialNegativeOne = "-1"
+	firstCaptureIndex  = 1
+	secondCaptureIndex = 2
 )
 
 /* -------------------------------------- Magic Value Rules ------------------------------------- */
 
 func CheckMagicValues(
 	repoRoot string,
-	repository profile.RepositoryConfig,
+	repository policy.RepositoryConfig,
 	scope contract.Scope,
-) (output string, err error) {
+) (result contract.ExecutionResult, err error) {
 	exitLiteralPattern := regexp.MustCompile(`^\s*exit\s+(-?\d+)\s*$`)
 	comparisonPattern := regexp.MustCompile(`-(eq|ne|gt|lt|ge|le)\s+(-?\d+)`)
 	headLimitPattern := regexp.MustCompile(`\bhead\s+-([0-9]+)\b`)
 
-	files, err := repostyle.CollectFiles(repoRoot, repository, scope, ".sh")
+	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
 	if err != nil {
-		return "", err
+		return contract.ExecutionResult{}, err
 	}
 
-	var builder strings.Builder
-	found := false
-
 	for _, path := range files {
-		file, openErr := os.Open(path)
-		if openErr != nil {
-			return "", openErr
-		}
-
-		scanner := bufio.NewScanner(file)
-		lineNumber := 0
-		for scanner.Scan() {
-			lineNumber++
-			line := scanner.Text()
-			if shouldSkipShellNumericLine(line) {
-				continue
+		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
+			if shouldSkipShellNumericLine(line.Text) {
+				return nil
 			}
 
-			if value := matchSingleLiteral(exitLiteralPattern, line); value != "" &&
-				isNonTrivialShellValue(value) {
-				found = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d uses non-trivial exit code literal %s\n",
-					repostyle.RelativePath(repoRoot, path),
-					lineNumber,
-					value,
+			if value := matchSingleLiteral(exitLiteralPattern, line.Text); value != "" &&
+				isNonTrivialShellLiteral(value) {
+				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
+					repoRoot,
+					path,
+					line.Number,
+					fmt.Sprintf("uses non-trivial exit code literal %s", value),
 				))
 			}
 
-			if strings.Contains(line, "$#") {
-				continue
+			if strings.Contains(line.Text, "$#") {
+				return nil
 			}
 
 			if value := matchCapturedLiteral(
 				comparisonPattern,
-				line,
+				line.Text,
 				secondCaptureIndex,
-			); value != "" && isNonTrivialShellValue(value) {
-				found = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d uses non-trivial comparison literal %s\n",
-					repostyle.RelativePath(repoRoot, path),
-					lineNumber,
-					value,
+			); value != "" && isNonTrivialShellLiteral(value) {
+				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
+					repoRoot,
+					path,
+					line.Number,
+					fmt.Sprintf("uses non-trivial comparison literal %s", value),
 				))
 			}
 
 			if value := matchCapturedLiteral(
 				headLimitPattern,
-				line,
+				line.Text,
 				firstCaptureIndex,
-			); value != "" && value != trivialZeroValue && value != trivialOneValue {
-				found = true
-				builder.WriteString(fmt.Sprintf(
-					"%s:%d uses non-trivial head limit literal %s\n",
-					repostyle.RelativePath(repoRoot, path),
-					lineNumber,
-					value,
+			); value != "" && value != trivialZero && value != trivialOne {
+				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
+					repoRoot,
+					path,
+					line.Number,
+					fmt.Sprintf("uses non-trivial head limit literal %s", value),
 				))
 			}
-		}
 
-		if scanErr := scanner.Err(); scanErr != nil {
-			return "", closeFile(file, scanErr)
-		}
-
-		if closeErr := closeFile(file, nil); closeErr != nil {
-			return "", closeErr
+			return nil
+		})
+		if err != nil {
+			return contract.ExecutionResult{}, err
 		}
 	}
 
-	if !found {
-		return "", nil
+	if len(result.Diagnostics) == 0 {
+		return contract.ExecutionResult{}, nil
 	}
 
-	return builder.String(), errViolationsFound
+	return result, contract.ViolationsFound()
+}
+
+func bashMagicDiagnostic(
+	repoRoot string,
+	path string,
+	line int,
+	message string,
+) (diagnostic contract.Diagnostic) {
+	return contract.Diagnostic{
+		Code:    "bash/magic-values/non-trivial",
+		File:    filewalk.RelativePath(repoRoot, path),
+		Line:    line,
+		Message: message,
+	}
 }
 
 /* ----------------------------------------- Line Skips ----------------------------------------- */
@@ -143,10 +137,10 @@ func matchCapturedLiteral(pattern *regexp.Regexp, line string, index int) (value
 	return matches[index]
 }
 
-/* ------------------------------------ Value Classification ------------------------------------ */
+/* ----------------------------------- Literal Classification ----------------------------------- */
 
-func isNonTrivialShellValue(value string) (nonTrivial bool) {
-	return value != trivialZeroValue &&
-		value != trivialOneValue &&
-		value != trivialNegativeOneValue
+func isNonTrivialShellLiteral(literal string) (nonTrivial bool) {
+	return literal != trivialZero &&
+		literal != trivialOne &&
+		literal != trivialNegativeOne
 }

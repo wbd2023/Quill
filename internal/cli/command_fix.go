@@ -7,7 +7,7 @@ import (
 	"ciphera/tools/internal/executors"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* ----------------------------------------- Fix Command ---------------------------------------- */
@@ -44,7 +44,7 @@ func newFixFlagSet(options *fixOptions, scope *string) (flagSet *flag.FlagSet) {
 		"",
 		"repository root (auto-detected when omitted)",
 	)
-	flagSet.StringVar(scope, "scope", string(contract.ScopeAll), "scope: app|tools|all")
+	flagSet.StringVar(scope, "scope", "", "configured scope (profile default when omitted)")
 	return flagSet
 }
 
@@ -62,14 +62,15 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 		return 1
 	}
 
-	rules := fixableRules(context.Effective.Rules, options.scope)
+	rules := fixableRules(context.Effective.Rules, context)
 	if len(rules) == 0 {
 		return 0
 	}
 
 	toolIDs := runner.ToolIDsForFixes(rules)
-	statuses, allValid := runner.InspectToolchain(
+	statuses, allValid := inspectToolchain(
 		context.Effective.Tools,
+		context.ToolCapabilities,
 		toolIDs,
 		context.ToolEnvironment,
 	)
@@ -83,13 +84,13 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 		return 1
 	}
 
-	statusIndex := runtime.StatusesByID(statuses)
+	statusIndex := toolchain.StatusesByID(statuses)
 	fixers := executors.Fixers()
 	for _, rule := range rules {
-		output, err := runner.RunFix(rule, context, statusIndex, fixers)
+		result, err := runner.RunFix(rule, context, statusIndex, fixers)
 		if err != nil {
-			tool.writeCommandOutput(output)
-			if output == "" {
+			tool.writeCommandOutput(result.Output)
+			if result.Output == "" {
 				tool.writeError(err)
 			}
 			return 1
@@ -101,14 +102,14 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 
 func fixableRules(
 	available []contract.Rule,
-	scope contract.Scope,
+	context runner.Context,
 ) (rules []contract.Rule) {
 	for _, rule := range available {
-		if !contract.ScopeCovers(scope, rule.Scope) {
+		if !context.Policy.Repository.ScopesOverlap(context.Scope, rule.Scope) {
 			continue
 		}
 
-		if rule.FixSpec.Executor == "" {
+		if rule.FixSpec.Empty() {
 			continue
 		}
 

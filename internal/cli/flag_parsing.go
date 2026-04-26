@@ -39,23 +39,23 @@ func parseArguments(flagSet *flag.FlagSet, summary string, arguments []string) (
 /* ---------------------------------------- Value Parsing --------------------------------------- */
 
 func parseScope(value string) (scope contract.Scope, err error) {
-	switch contract.Scope(value) {
-	case contract.ScopeApp, contract.ScopeTools, contract.ScopeAll:
-		return contract.Scope(value), nil
-	default:
-		return contract.ScopeUnknown, fmt.Errorf(
-			"invalid scope %q: must be app, tools, or all",
-			value,
-		)
+	if strings.TrimSpace(value) == "" {
+		return "", nil
 	}
+
+	return contract.Scope(value), nil
 }
 
-func parseProfile(value string) (profile contract.CheckProfile, err error) {
-	switch contract.CheckProfile(value) {
-	case contract.CheckProfileRequired, contract.CheckProfileAll:
-		return contract.CheckProfile(value), nil
+func errUnknownScope(scope contract.Scope) (err error) {
+	return fmt.Errorf("unknown scope %q in style profile", scope)
+}
+
+func parseCheckMode(value string) (mode contract.CheckMode, err error) {
+	switch contract.CheckMode(value) {
+	case contract.CheckModeRequired, contract.CheckModeAll:
+		return contract.CheckMode(value), nil
 	default:
-		return "", fmt.Errorf("invalid profile %q: must be required or all", value)
+		return "", fmt.Errorf("invalid mode %q: must be required or all", value)
 	}
 }
 

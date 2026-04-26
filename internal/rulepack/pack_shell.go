@@ -2,58 +2,58 @@ package rulepack
 
 import "ciphera/tools/internal/contract"
 
-/* ----------------------------------------- Shell Pack ----------------------------------------- */
-
 func shellPack() (pack Pack) {
 	shfmtRule := fileCommandRule(
 		"bash/shfmt",
 		"Bash formatting (shfmt)",
-		contract.ToolShfmt,
+		ToolShfmt,
 		"shell",
 		[]string{"-d"},
 	)
 	shfmtRule.FixSpec = contract.ExecutionSpec{
-		Executor:  contract.ExecutorFileCommand,
-		ToolID:    contract.ToolShfmt,
-		FileSet:   "shell",
-		Arguments: []string{"-w"},
+		Kind: ExecutorFileCommand,
+		Detail: contract.FileCommandExecution{
+			ToolID:    ToolShfmt,
+			FileSet:   "shell",
+			Arguments: []string{"-w"},
+		},
 	}
 
 	return Pack{
 		ID:   PackShell,
 		Name: "Shell",
 		Tools: selectTools(
-			contract.ToolShellcheck,
-			contract.ToolShfmt,
+			ToolShellcheck,
+			ToolShfmt,
 		),
 		Rules: []RuleDefinition{
 			fileCommandRule(
 				"bash/shellcheck",
 				"Bash static analysis (shellcheck)",
-				contract.ToolShellcheck,
+				ToolShellcheck,
 				"shell",
 				[]string{"-x"},
 			),
 			shfmtRule,
-			repoScanRule(
+			scannerRule(
 				"bash/structure",
 				"Bash script structure",
-				RepositoryScannerBashStructure,
+				ScannerBashStructure,
 			),
-			repoScanRule(
+			scannerRule(
 				"bash/safety",
 				"Bash safety and conventions",
-				RepositoryScannerBashSafety,
+				ScannerBashSafety,
 			),
-			repoScanRule(
+			scannerRule(
 				"bash/test-hygiene",
 				"Bash test hygiene",
-				RepositoryScannerBashTestHygiene,
+				ScannerBashTestHygiene,
 			),
-			repoScanRule(
+			scannerRule(
 				"bash/magic-values",
 				"Magic values (Bash)",
-				RepositoryScannerBashMagicValues,
+				ScannerBashMagicValues,
 			),
 		},
 	}

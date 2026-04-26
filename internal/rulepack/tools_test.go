@@ -9,6 +9,8 @@ import (
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
+	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/profile"
 )
 
 /* ------------------------------------------- Tooling ------------------------------------------ */
@@ -20,7 +22,7 @@ func TestRegistryToolsHaveUniqueIDs(t *testing.T) {
 	}
 
 	seenIDs := make(map[string]bool)
-	for _, tool := range registry.Tools() {
+	for _, tool := range registry.ToolCapabilities() {
 		if seenIDs[tool.ID] {
 			t.Fatalf("duplicate tool ID: %s", tool.ID)
 		}
@@ -35,22 +37,22 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	for _, tool := range registry.Tools() {
+	for _, tool := range registry.ToolCapabilities() {
 		switch tool.InstallKind {
-		case contract.ToolInstallNone,
-			contract.ToolInstallGoBinary,
-			contract.ToolInstallNodePackage,
-			contract.ToolInstallShellcheckArchive:
+		case ToolInstallNone,
+			ToolInstallGoBinary,
+			ToolInstallNodePackage,
+			ToolInstallShellcheckArchive:
 		default:
 			t.Fatalf("tool %q uses unsupported install strategy %q", tool.ID, tool.InstallKind)
 		}
 
 		switch tool.InstallKind {
-		case contract.ToolInstallGoBinary, contract.ToolInstallNodePackage:
+		case ToolInstallGoBinary, ToolInstallNodePackage:
 			if tool.InstallSource == "" {
 				t.Fatalf("tool %q must define an install source", tool.ID)
 			}
-		case contract.ToolInstallNone, contract.ToolInstallShellcheckArchive:
+		case ToolInstallNone, ToolInstallShellcheckArchive:
 			if tool.InstallSource != "" {
 				t.Fatalf("tool %q must not define an install source", tool.ID)
 			}
@@ -62,7 +64,7 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 
 func TestPinnedGoVersionMatchesModuleFiles(t *testing.T) {
 	goDirectivePattern := regexp.MustCompile(`(?m)^go ([0-9]+\.[0-9]+(?:\.[0-9]+)?)$`)
-	goTool := toolByID(t, contract.ToolGo)
+	goTool := toolByID(t, ToolGo)
 
 	rootModule := readRepoFile(t, "go.mod")
 	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
@@ -87,7 +89,7 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 	requireLinePattern := regexp.MustCompile(
 		`(?m)^\s*golang\.org/x/tools (v[0-9]+\.[0-9]+\.[0-9]+)(?:$| // indirect$)`,
 	)
-	goimportsTool := toolByID(t, contract.ToolGoimports)
+	goimportsTool := toolByID(t, ToolGoimports)
 
 	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
 	matches := requireLinePattern.FindStringSubmatch(styleModule)
@@ -109,12 +111,18 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 func toolByID(t *testing.T, toolID string) (tool contract.Tool) {
 	t.Helper()
 
-	registry, err := DefaultRegistry(nil)
+	config := profiles.Current(t)
+	registry, err := DefaultRegistry(config.RulePacks.Enabled)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	tool, found := registry.ToolByID(toolID)
+	effective, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		t.Fatalf("profile.Compile: %v", err)
+	}
+
+	tool, found := effective.ToolByID(toolID)
 	if !found {
 		t.Fatalf("missing %s tool in registry", toolID)
 	}

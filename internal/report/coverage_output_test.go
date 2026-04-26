@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"ciphera/tools/internal/coverage"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -13,8 +14,8 @@ import (
 func TestWriteCoverageText(t *testing.T) {
 	var buffer bytes.Buffer
 
-	coverage := styleguide.CoverageReport{
-		Requirements: []styleguide.Requirement{
+	coverageReport := coverage.Report{
+		Requirements: []coverage.Requirement{
 			{
 				ID:      "3.2.ctx-first",
 				Section: "3.2",
@@ -30,25 +31,26 @@ func TestWriteCoverageText(t *testing.T) {
 				Reason:  "Plain-language quality is a writing judgement rather than a lint rule.",
 			},
 		},
-		Sections: []styleguide.SectionCoverage{
+		Sections: []coverage.Section{
 			{
 				Section:          "3.2",
 				Title:            "Context, resources, and concurrency",
-				Status:           styleguide.CoverageAutomated,
+				Status:           coverage.StatusAutomated,
 				RequirementCount: 1,
 				AutomatedCount:   1,
 			},
 			{
 				Section:          "5.1",
 				Title:            "Audience",
-				Status:           styleguide.CoverageReviewOnly,
+				Status:           coverage.StatusReviewOnly,
 				RequirementCount: 1,
 				ReviewOnlyCount:  1,
 			},
 		},
 	}
 
-	if err := WriteCoverage(&buffer, FormatText, NewCoverageView(coverage), true); err != nil {
+	view := NewCoverageView(coverageReport)
+	if err := WriteCoverage(&buffer, FormatText, view, true); err != nil {
 		t.Fatalf("WriteCoverage: %v", err)
 	}
 
@@ -61,8 +63,8 @@ func TestWriteCoverageText(t *testing.T) {
 func TestWriteCoverageJSON(t *testing.T) {
 	var buffer bytes.Buffer
 
-	view := NewCoverageView(styleguide.CoverageReport{
-		Requirements: []styleguide.Requirement{
+	view := NewCoverageView(coverage.Report{
+		Requirements: []coverage.Requirement{
 			{
 				ID:      "3.2.ctx-first",
 				Section: "3.2",
@@ -75,13 +77,20 @@ func TestWriteCoverageJSON(t *testing.T) {
 	}
 
 	var envelope struct {
-		Coverage CoverageView `json:"coverage"`
+		Coverage struct {
+			Report struct {
+				Requirements []struct {
+					ID string `json:"id"`
+				} `json:"requirements"`
+			} `json:"report"`
+		} `json:"coverage"`
 	}
 	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
 		t.Fatalf("decode coverage json: %v", err)
 	}
 
-	if len(envelope.Coverage.Report.Requirements) != 1 {
+	if len(envelope.Coverage.Report.Requirements) != 1 ||
+		envelope.Coverage.Report.Requirements[0].ID != "3.2.ctx-first" {
 		t.Fatalf("unexpected coverage payload: %+v", envelope.Coverage)
 	}
 }

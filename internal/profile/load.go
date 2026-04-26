@@ -6,53 +6,53 @@ import (
 	"path/filepath"
 	"strings"
 
+	"ciphera/tools/internal/policy"
+
 	"github.com/BurntSushi/toml"
 )
 
-/* ------------------------------------------- Loading ------------------------------------------ */
-
-func Load(repoRoot string) (policy Profile, err error) {
-	policy, err = loadProfileFile(filepath.Join(repoRoot, "style.toml"))
+func Load(repoRoot string) (config policy.Config, err error) {
+	config, err = loadProfileFile(filepath.Join(repoRoot, "style.toml"))
 	if err != nil {
-		return Profile{}, err
+		return policy.Config{}, err
 	}
 
-	if err = policy.Validate(); err != nil {
-		return Profile{}, err
+	if err = Validate(config); err != nil {
+		return policy.Config{}, err
 	}
 
-	if err = policy.Repository.ValidateRoot(repoRoot); err != nil {
-		return Profile{}, fmt.Errorf("repository root does not satisfy profile markers: %w", err)
+	if err = config.Repository.ValidateRoot(repoRoot); err != nil {
+		return policy.Config{}, fmt.Errorf(
+			"repository root does not satisfy profile markers: %w",
+			err,
+		)
 	}
 
-	return policy, nil
+	return config, nil
 }
 
-func loadProfileFile(path string) (policy Profile, err error) {
+func loadProfileFile(path string) (config policy.Config, err error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		return Profile{}, err
+		return policy.Config{}, err
 	}
 
 	return parseProfile(string(contents))
 }
 
-func parseProfile(contents string) (policy Profile, err error) {
-	policy = Profile{
-		Paths: PathClassSet{Classes: make(map[string][]string)},
-	}
-
-	metadata, err := toml.Decode(contents, &policy)
+func parseProfile(contents string) (config policy.Config, err error) {
+	var schema schemaConfig
+	metadata, err := toml.Decode(contents, &schema)
 	if err != nil {
-		return Profile{}, err
+		return policy.Config{}, err
 	}
 
 	undecoded := metadata.Undecoded()
 	if len(undecoded) > 0 {
-		return Profile{}, fmt.Errorf("unknown style.toml key %q", undecodedKey(undecoded[0]))
+		return policy.Config{}, fmt.Errorf("unknown style.toml key %q", undecodedKey(undecoded[0]))
 	}
 
-	return policy, nil
+	return policyFromSchema(schema), nil
 }
 
 func undecodedKey(key toml.Key) (text string) {

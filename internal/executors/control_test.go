@@ -20,8 +20,8 @@ func TestCheckQualityTargetsAcceptsExpectedShape(t *testing.T) {
 		t,
 		repoRoot,
 		filepath.Join("mk", "quality.mk"),
-		`LINT_REQUIRED_ARGS = --profile required
-LINT_FULL_ARGS = --profile all --strict-recommendations --verbose
+		`LINT_REQUIRED_ARGS = --mode required
+LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
 
 lint: $(STYLE_BIN)
 	@$(STYLE_CMD) check $(LINT_FULL_ARGS)
@@ -54,8 +54,8 @@ func TestCheckQualityTargetsRejectsMissingRequiredRecipe(t *testing.T) {
 		t,
 		repoRoot,
 		filepath.Join("mk", "quality.mk"),
-		`LINT_REQUIRED_ARGS = --profile required
-LINT_FULL_ARGS = --profile all --strict-recommendations --verbose
+		`LINT_REQUIRED_ARGS = --mode required
+LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
 lint: $(STYLE_BIN)
 	@$(STYLE_CMD) check $(LINT_FULL_ARGS)
 	`,

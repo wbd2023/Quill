@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* ------------------------------------------ Registry ------------------------------------------ */
@@ -22,7 +23,7 @@ func TestDefaultRegistryLoadsEnabledRulePacks(t *testing.T) {
 		t.Fatal("expected enabled packs to register rules")
 	}
 
-	if _, found := registry.ToolByID(contract.ToolMarkdownlint); !found {
+	if _, found := registry.ToolByID(ToolMarkdownlint); !found {
 		t.Fatal("expected markdown pack tool to be registered")
 	}
 }
@@ -49,7 +50,10 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "first",
 					Spec: contract.ExecutionSpec{
-						Executor: contract.ExecutorRepositoryScan,
+						Kind: ExecutorRepositoryScan,
+						Detail: contract.RepositoryScanExecution{
+							Scanner: "test",
+						},
 					},
 				},
 			},
@@ -62,7 +66,10 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "second",
 					Spec: contract.ExecutionSpec{
-						Executor: contract.ExecutorRepositoryScan,
+						Kind: ExecutorRepositoryScan,
+						Detail: contract.RepositoryScanExecution{
+							Scanner: "test",
+						},
 					},
 				},
 			},
@@ -93,14 +100,14 @@ func TestRegistryRejectsConflictingToolDefinitions(t *testing.T) {
 		{
 			ID:   "one",
 			Name: "one",
-			Tools: []contract.Tool{
+			Tools: []toolchain.Capability{
 				{ID: "tool", Name: "tool", Command: "first"},
 			},
 		},
 		{
 			ID:   "two",
 			Name: "two",
-			Tools: []contract.Tool{
+			Tools: []toolchain.Capability{
 				{ID: "tool", Name: "tool", Command: "second"},
 			},
 		},

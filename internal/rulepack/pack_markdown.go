@@ -1,21 +1,17 @@
 package rulepack
 
-import "ciphera/tools/internal/contract"
-
-/* ---------------------------------------- Markdown Pack --------------------------------------- */
-
 func markdownPack() (pack Pack) {
 	return Pack{
 		ID:   PackMarkdown,
 		Name: "Markdown",
 		Tools: selectTools(
-			contract.ToolMarkdownlint,
+			ToolMarkdownlint,
 		),
 		Rules: []RuleDefinition{
 			fileCommandRuleWithConfig(
 				"markdown/style",
 				"Markdown style",
-				contract.ToolMarkdownlint,
+				ToolMarkdownlint,
 				"markdown",
 				nil,
 				"-c",

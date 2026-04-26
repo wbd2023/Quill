@@ -4,9 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
 )
 
@@ -46,20 +44,27 @@ func installUsageText() (usage string) {
 }
 
 func runInstall(tool CLI, options installOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, contract.ScopeAll)
+	context, err := loadContext(options.repoRoot, "")
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	if err := runtime.Install(context.Layout, tool.stdout, context.Effective.Tools); err != nil {
+	layout := runtime.LayoutForRepository(context.RepoRoot)
+	if err := runtime.Install(
+		layout,
+		tool.stdout,
+		context.Effective.Tools,
+		context.ToolCapabilities,
+	); err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
 	toolIDs := toolIDsFromTools(context.Effective.Tools)
-	statuses, allValid := runner.InspectToolchain(
+	statuses, allValid := inspectToolchain(
 		context.Effective.Tools,
+		context.ToolCapabilities,
 		toolIDs,
 		context.ToolEnvironment,
 	)

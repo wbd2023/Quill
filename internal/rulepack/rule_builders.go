@@ -12,10 +12,12 @@ func toolchainRule(
 	return RuleDefinition{
 		ID:    id,
 		Name:  name,
-		Group: contract.RuleGroupControlPlane,
+		Group: RuleGroupControlPlane,
 		Spec: contract.ExecutionSpec{
-			Executor: contract.ExecutorToolchain,
-			ToolIDs:  append([]string{}, toolIDs...),
+			Kind: ExecutorToolchain,
+			Detail: contract.ToolchainExecution{
+				ToolIDs: append([]string{}, toolIDs...),
+			},
 		},
 	}
 }
@@ -37,11 +39,13 @@ func controlPlaneRuleWithConfig(
 	return RuleDefinition{
 		ID:                 id,
 		Name:               name,
-		Group:              contract.RuleGroupControlPlane,
+		Group:              RuleGroupControlPlane,
 		RequiredConfigRefs: []string{configRef},
 		Spec: contract.ExecutionSpec{
-			Executor: contract.ExecutorControlPlane,
-			Check:    check,
+			Kind: ExecutorControlPlane,
+			Detail: contract.ControlPlaneExecution{
+				Check: check,
+			},
 		},
 	}
 }
@@ -56,12 +60,14 @@ func fileCommandRule(
 	return RuleDefinition{
 		ID:    id,
 		Name:  name,
-		Group: contract.RuleGroupExternal,
+		Group: RuleGroupExternal,
 		Spec: contract.ExecutionSpec{
-			Executor:  contract.ExecutorFileCommand,
-			ToolID:    toolID,
-			FileSet:   fileSet,
-			Arguments: append([]string{}, arguments...),
+			Kind: ExecutorFileCommand,
+			Detail: contract.FileCommandExecution{
+				ToolID:    toolID,
+				FileSet:   fileSet,
+				Arguments: append([]string{}, arguments...),
+			},
 		},
 	}
 }
@@ -76,38 +82,43 @@ func fileCommandRuleWithConfig(
 	configFile string,
 ) (rule RuleDefinition) {
 	rule = fileCommandRule(id, name, toolID, fileSet, arguments)
-	rule.Spec.ConfigArgument = configArgument
-	rule.Spec.ConfigFile = configFile
+	detail := rule.Spec.Detail.(contract.FileCommandExecution)
+	detail.ConfigArgument = configArgument
+	detail.ConfigFile = configFile
+	rule.Spec.Detail = detail
 	return rule
 }
 
 func golangciRule(
 	id string,
 	name string,
-	backend string,
 ) (rule RuleDefinition) {
 	return RuleDefinition{
 		ID:    id,
 		Name:  name,
-		Group: contract.RuleGroupLanguage,
+		Group: RuleGroupLanguage,
 		Spec: contract.ExecutionSpec{
-			Executor: contract.ExecutorGolangci,
-			ToolIDs: []string{
-				contract.ToolGo,
-				contract.ToolGoimports,
-				contract.ToolGolangciLint,
+			Kind: ExecutorBackendCommand,
+			Detail: contract.BackendCommandExecution{
+				ToolIDs: []string{
+					ToolGo,
+					ToolGoimports,
+					ToolGolangciLint,
+				},
+				Action:   BackendActionGolangci,
+				Language: LanguageGo,
 			},
-			Backend:  backend,
-			Language: LanguageGo,
 		},
 		FixSpec: contract.ExecutionSpec{
-			Executor: contract.ExecutorGoFormat,
-			ToolIDs: []string{
-				contract.ToolGo,
-				contract.ToolGoimports,
+			Kind: ExecutorBackendCommand,
+			Detail: contract.BackendCommandExecution{
+				ToolIDs: []string{
+					ToolGo,
+					ToolGoimports,
+				},
+				Action:   BackendActionGoFormat,
+				Language: LanguageGo,
 			},
-			Backend:  backend,
-			Language: LanguageGo,
 		},
 	}
 }
@@ -115,54 +126,60 @@ func golangciRule(
 func goStyleRule(
 	id string,
 	name string,
-	backend string,
+	check string,
 ) (rule RuleDefinition) {
 	return RuleDefinition{
-		ID:                  id,
-		Name:                name,
-		Group:               contract.RuleGroupLanguage,
-		RequiredPathClasses: requiredGoStylePathClasses(),
+		ID:    id,
+		Name:  name,
+		Group: RuleGroupLanguage,
 		Spec: contract.ExecutionSpec{
-			Executor: contract.ExecutorGoStyle,
-			ToolIDs:  []string{contract.ToolGo},
-			Backend:  backend,
-			Language: LanguageGo,
+			Kind: ExecutorBackendCheck,
+			Detail: contract.BackendCheckExecution{
+				ToolIDs:  []string{ToolGo},
+				Check:    check,
+				Language: LanguageGo,
+			},
 		},
 	}
 }
 
-func repoScanRule(
+func scannerRule(
 	id string,
 	name string,
 	scanner string,
 ) (rule RuleDefinition) {
-	return repoScanRuleWithConfig(id, name, scanner)
+	return scanRuleWithConfig(id, name, RuleGroupText, scanner)
 }
 
-func repoScanRuleWithConfig(
+func scanRuleWithConfig(
 	id string,
 	name string,
+	group contract.RuleGroup,
 	scanner string,
 	configRefs ...string,
 ) (rule RuleDefinition) {
 	return RuleDefinition{
 		ID:                 id,
 		Name:               name,
-		Group:              contract.RuleGroupRepository,
+		Group:              group,
 		RequiredConfigRefs: append([]string{}, configRefs...),
 		Spec: contract.ExecutionSpec{
-			Executor: contract.ExecutorRepositoryScan,
-			Scanner:  scanner,
+			Kind: ExecutorRepositoryScan,
+			Detail: contract.RepositoryScanExecution{
+				Scanner: scanner,
+			},
 		},
 	}
 }
 
 func lineLengthRule() (rule RuleDefinition) {
-	rule = repoScanRule(
-		"repo/line-length",
+	rule = scannerRule(
+		"text/line-length",
 		"Line length",
-		RepositoryScannerLineLength,
+		ScannerLineLength,
 	)
-	rule.Spec.FileSet = "line_length"
+	detail := rule.Spec.Detail.(contract.RepositoryScanExecution)
+	detail.FileSet = "line_length"
+	rule.Spec.Detail = detail
 	return rule
 }

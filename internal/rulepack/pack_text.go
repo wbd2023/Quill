@@ -1,56 +1,50 @@
 package rulepack
 
-import (
-	"ciphera/tools/internal/contract"
-)
-
-/* ------------------------------------------ Text Pack ----------------------------------------- */
-
 func textPack() (pack Pack) {
 	return Pack{
 		ID:   PackText,
 		Name: "Text",
 		Tools: selectTools(
-			contract.ToolMisspell,
+			ToolMisspell,
 		),
 		Rules: []RuleDefinition{
 			fileCommandRule(
-				"docs/spelling",
+				"text/spelling",
 				"Spelling (non-Go)",
-				contract.ToolMisspell,
+				ToolMisspell,
 				"spelling",
 				[]string{"-error", "-locale", "UK"},
 			),
 			lineLengthRule(),
-			repoScanRule(
-				"repo/ascii",
+			scannerRule(
+				"text/ascii",
 				"ASCII-only characters",
-				RepositoryScannerASCII,
+				ScannerASCII,
 			),
-			repoScanRule(
-				"repo/exception-markers",
+			scannerRule(
+				"text/exception-markers",
 				"Exception marker syntax",
-				RepositoryScannerExceptionMarkers,
+				ScannerExceptionMarkers,
 			),
-			repoScanRule(
-				"repo/secrets",
-				"Committed secrets",
-				RepositoryScannerSecrets,
-			),
-			repoScanRule(
-				"repo/maintenance-markers",
+			scannerRule(
+				"text/maintenance-markers",
 				"TODO and FIXME marker format",
-				RepositoryScannerMaintenanceMarkers,
+				ScannerMaintenanceMarkers,
 			),
-			repoScanRule(
-				"repo/section-headers",
+			scannerRule(
+				"text/section-headers",
 				"Section header format",
-				RepositoryScannerSectionHeaders,
+				ScannerSectionHeaders,
 			),
-			repoScanRule(
-				"repo/section-header-names",
+			scannerRule(
+				"text/section-header-density",
+				"Section header density",
+				ScannerSectionHeaderDensity,
+			),
+			scannerRule(
+				"text/section-header-names",
 				"Section header naming",
-				RepositoryScannerSectionHeaderNames,
+				ScannerSectionHeaderNames,
 			),
 		},
 	}
