@@ -3,6 +3,7 @@ package golang
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"ciphera/tools/internal/contract"
@@ -129,13 +130,7 @@ func isAllowedImport(
 			continue
 		}
 
-		for _, allowedLayer := range layer.MayImport {
-			if allowedLayer == toLayer {
-				return true
-			}
-		}
-
-		return false
+		return slices.Contains(layer.MayImport, toLayer)
 	}
 
 	return true

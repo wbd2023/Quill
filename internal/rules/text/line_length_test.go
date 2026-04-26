@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/styleguide"
+	"ciphera/tools/internal/styleguide/markers"
 )
 
 func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {
@@ -37,7 +37,7 @@ func TestCheckLineLengthsHonoursShellAllowMarker(t *testing.T) {
 	source := strings.Join([]string{
 		"#!/bin/bash",
 		"set -euo pipefail",
-		"echo \"" + longLine + "\" # " + styleguide.ExceptionMarker(styleguide.ExceptionLongLine),
+		"echo \"" + longLine + "\" # " + markers.Text(markers.LongLine),
 		"",
 	}, "\n")
 	path := fixtures.WriteFile(

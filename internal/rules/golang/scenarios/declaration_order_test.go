@@ -25,12 +25,11 @@ func NewService() (service *Service) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/order/file] declaration group "constants" appears after "types"`,
-	) {
-		t.Fatalf("expected file-structure violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesValidFileStructureOrder(t *testing.T) {

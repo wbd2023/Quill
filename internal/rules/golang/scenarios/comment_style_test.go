@@ -23,11 +23,7 @@ func BadInline(value string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "inline trailing comment should start lower-case") {
-		t.Fatalf("expected inline-case violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "inline trailing comment should start lower-case")
 
-	if !hasDiagnosticText(result, "inline trailing comment should not end with punctuation") {
-		t.Fatalf("expected inline-punctuation violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "inline trailing comment should not end with punctuation")
 }

@@ -23,12 +23,11 @@ type MessageRepository interface {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/order/crudl] method "Save" in interface "MessageRepository" is out of CRUD-L order`,
-	) {
-		t.Fatalf("expected CRUD-L order violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesValidCRUDLOrder(t *testing.T) {

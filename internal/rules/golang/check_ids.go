@@ -5,6 +5,7 @@ const (
 	GoCheckData               = "data"
 	GoCheckDomainIdentifiers  = "domain_identifiers"
 	GoCheckErrors             = "errors"
+	GoCheckFileShape          = "file_shape"
 	GoCheckGuardClauseSpacing = "guard_clause_spacing"
 	GoCheckLogging            = "logging"
 	GoCheckNaming             = "naming"
@@ -24,6 +25,7 @@ func CheckIDs() (ids []string) {
 		GoCheckData,
 		GoCheckDomainIdentifiers,
 		GoCheckErrors,
+		GoCheckFileShape,
 		GoCheckGuardClauseSpacing,
 		GoCheckLogging,
 		GoCheckNaming,

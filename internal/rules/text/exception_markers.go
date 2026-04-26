@@ -4,7 +4,7 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/styleguide"
+	"ciphera/tools/internal/styleguide/markers"
 )
 
 func CheckExceptionMarkers(
@@ -19,8 +19,8 @@ func CheckExceptionMarkers(
 
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
-			_, _, markerFound, valid := styleguide.ParseExceptionMarker(line.Text)
-			if !markerFound || valid {
+			marker := markers.Parse(line.Text)
+			if marker.Status != markers.Invalid {
 				return nil
 			}
 

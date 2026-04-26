@@ -1,9 +1,13 @@
 package executors
 
 import (
+	"errors"
+
 	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/runner"
 )
+
+var errViolationsFound = errors.New("violations found")
 
 func Checkers() (executors runner.ExecutorRegistry) {
 	return runner.ExecutorRegistry{

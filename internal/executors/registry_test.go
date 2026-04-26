@@ -38,16 +38,16 @@ func TestRulepackScannersHaveBindings(t *testing.T) {
 
 	scanners := repositoryScanners()
 	for _, rule := range registry.Rules() {
-		detail, found := rule.Spec.RepositoryScanExecution()
+		execution, found := rule.Spec.RepositoryScanExecution()
 		if !found {
 			continue
 		}
 
-		if _, found := scanners[detail.Scanner]; !found {
+		if _, found := scanners[execution.Scanner]; !found {
 			t.Fatalf(
 				"rule %q uses scanner %q without a binding",
 				rule.ID,
-				detail.Scanner,
+				execution.Scanner,
 			)
 		}
 	}
@@ -65,16 +65,16 @@ func TestRulepackGoChecksHaveDispatch(t *testing.T) {
 	}
 
 	for _, rule := range registry.Rules() {
-		detail, found := rule.Spec.BackendCheckExecution()
+		execution, found := rule.Spec.BackendCheckExecution()
 		if !found {
 			continue
 		}
 
-		if !checks[detail.Check] {
+		if !checks[execution.Check] {
 			t.Fatalf(
 				"rule %q uses Go check %q without dispatch",
 				rule.ID,
-				detail.Check,
+				execution.Check,
 			)
 		}
 	}

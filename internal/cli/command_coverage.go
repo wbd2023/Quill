@@ -28,35 +28,6 @@ func runCoverage(tool CLI, options coverageOptions) (exitCode int) {
 	return 0
 }
 
-/* -------------------------------------- Coverage Loading -------------------------------------- */
-
-func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err error) {
-	config, err := profile.Load(repoRoot)
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	document, err := styleguide.Load(repoRoot, styleguide.Config{
-		Path:                config.StyleGuide.Path,
-		RequirementIDFormat: config.StyleGuide.RequirementIDFormat,
-	})
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	effective, err := profile.Compile(config, registry.Definitions())
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	return coverage.Build(document, effective.Rules), nil
-}
-
 /* --------------------------------------- Option Parsing --------------------------------------- */
 
 func parseCoverageOptions(arguments []string) (options coverageOptions, err error) {
@@ -104,6 +75,35 @@ func coverageUsageText() (usage string) {
 	var options coverageOptions
 	var format string
 	return commandUsage("coverage", summary, newCoverageFlagSet(&options, &format))
+}
+
+/* -------------------------------------- Coverage Loading -------------------------------------- */
+
+func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err error) {
+	config, err := profile.Load(repoRoot)
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	document, err := styleguide.Load(repoRoot, styleguide.Config{
+		Path:                config.StyleGuide.Path,
+		RequirementIDFormat: config.StyleGuide.RequirementIDFormat,
+	})
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	effective, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	return coverage.Build(document, effective.Rules), nil
 }
 
 /* ------------------------------------------ Rendering ----------------------------------------- */

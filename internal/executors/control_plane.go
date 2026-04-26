@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
@@ -15,17 +14,6 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-/* -------------------------------------------- Types ------------------------------------------- */
-
-type qualityMakefileSurface struct {
-	Variables map[string]string
-	Targets   map[string]qualityMakefileTarget
-}
-
-type qualityMakefileTarget struct {
-	Recipes []string
-}
-
 /* ------------------------------------ Control Plane Checks ------------------------------------ */
 
 func controlPlaneExecutor(
@@ -33,13 +21,13 @@ func controlPlaneExecutor(
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
-	detail, found := spec.ControlPlaneExecution()
+	execution, found := spec.ControlPlaneExecution()
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf("control-plane executor received empty spec")
 	}
 
 	var output string
-	switch detail.Check {
+	switch execution.Check {
 	case rulepack.ControlPlaneCheckEnforcementLevels:
 		output, err = checkEnforcementLevels()
 
@@ -52,7 +40,7 @@ func controlPlaneExecutor(
 	default:
 		return contract.ExecutionResult{}, fmt.Errorf(
 			"unknown control-plane check %q",
-			detail.Check,
+			execution.Check,
 		)
 	}
 
@@ -149,59 +137,4 @@ func checkQualityTargets(
 	}
 
 	return "", nil
-}
-
-/* -------------------------------------- Makefile Parsing -------------------------------------- */
-
-func parseQualityMakefileSurface(contents string) (surface qualityMakefileSurface) {
-	surface = qualityMakefileSurface{
-		Variables: make(map[string]string),
-		Targets:   make(map[string]qualityMakefileTarget),
-	}
-
-	activeTarget := ""
-	for _, line := range strings.Split(contents, "\n") {
-		trimmed := strings.TrimSpace(line)
-		switch {
-		case trimmed == "", strings.HasPrefix(trimmed, "#"):
-			activeTarget = ""
-
-		case strings.HasPrefix(line, "\t"):
-			if activeTarget == "" {
-				continue
-			}
-
-			target := surface.Targets[activeTarget]
-			target.Recipes = append(target.Recipes, strings.TrimSpace(line))
-			surface.Targets[activeTarget] = target
-
-		case strings.Contains(trimmed, "=") && !strings.Contains(trimmed, ":"):
-			name, value, _ := strings.Cut(trimmed, "=")
-			surface.Variables[strings.TrimSpace(name)] = strings.TrimSpace(value)
-			activeTarget = ""
-
-		case strings.Contains(trimmed, ":"):
-			targetName, _, _ := strings.Cut(trimmed, ":")
-			targetName = strings.TrimSpace(targetName)
-			surface.Targets[targetName] = qualityMakefileTarget{}
-			activeTarget = targetName
-
-		default:
-			activeTarget = ""
-		}
-	}
-
-	return surface
-}
-
-/* --------------------------------------- Recipe Matching -------------------------------------- */
-
-func hasRecipeLine(lines []string, expected string) (found bool) {
-	for _, line := range lines {
-		if strings.TrimSpace(line) == expected {
-			return true
-		}
-	}
-
-	return false
 }

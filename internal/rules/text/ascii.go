@@ -6,7 +6,7 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/styleguide"
+	"ciphera/tools/internal/styleguide/markers"
 )
 
 func CheckASCII(
@@ -21,7 +21,7 @@ func CheckASCII(
 
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
-			if styleguide.HasExceptionMarker(line.Text, styleguide.ExceptionNonASCII) {
+			if markers.Has(line.Text, markers.NonASCII) {
 				return nil
 			}
 

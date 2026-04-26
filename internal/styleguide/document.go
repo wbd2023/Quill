@@ -5,6 +5,14 @@ import (
 	"path/filepath"
 )
 
+const (
+	VerificationAutomated      VerificationMode = "automated"
+	VerificationReviewOnly     VerificationMode = "review_only"
+	VerificationManualDeferred VerificationMode = "manual_deferred"
+)
+
+type VerificationMode string
+
 type Config struct {
 	Path                string
 	RequirementIDFormat string
@@ -26,6 +34,12 @@ type Requirement struct {
 	Text    string
 	Mode    VerificationMode
 	Reason  string
+}
+
+type RequirementMetadata struct {
+	ID     string
+	Mode   VerificationMode
+	Reason string
 }
 
 func Load(repoRoot string, config Config) (document Document, err error) {

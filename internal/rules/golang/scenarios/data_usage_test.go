@@ -41,7 +41,7 @@ func Build(repositoryPointer *repository, values []string) (payloadPointer *payl
 		"struct literals must use named fields by default",
 		"slice emptiness checks must use len(values) instead of nil guards",
 	} {
-		if hasDiagnosticText(result, fragment) {
+		if hasDiagnostic(result, diagnosticMatch{message: fragment}) {
 			continue
 		}
 

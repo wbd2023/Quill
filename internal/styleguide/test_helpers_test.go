@@ -1,18 +1,24 @@
 package styleguide
 
-func extractHeadings(contents string) (headings []Heading) {
+import "testing"
+
+func extractHeadings(t *testing.T, contents string) (headings []Heading) {
+	t.Helper()
+
 	document, err := compileDocument([]byte(contents), testStyleGuideConfig())
 	if err != nil {
-		panic(err)
+		t.Fatalf("compileDocument: %v", err)
 	}
 
 	return document.Headings
 }
 
-func extractRequirements(contents string) (requirements []Requirement) {
+func extractRequirements(t *testing.T, contents string) (requirements []Requirement) {
+	t.Helper()
+
 	document, err := compileDocument([]byte(contents), testStyleGuideConfig())
 	if err != nil {
-		panic(err)
+		t.Fatalf("compileDocument: %v", err)
 	}
 
 	return document.Requirements

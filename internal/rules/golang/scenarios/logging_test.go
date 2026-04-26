@@ -25,13 +25,9 @@ func BadLogging() {
 		t.Fatalf("expected structured logging failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "structured log key \"Path\" must be lower-case ASCII") {
-		t.Fatalf("expected structured log key violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "structured log key \"Path\" must be lower-case ASCII")
 
-	if !hasDiagnosticText(result, "structured log calls must use key/value pairs") {
-		t.Fatalf("expected structured log key/value violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "structured log calls must use key/value pairs")
 }
 
 func TestGoStyleAcceptsStructuredLoggingWithStableKeys(t *testing.T) {
@@ -76,7 +72,5 @@ func BadLogging(passphrase string) {
 		t.Fatalf("expected structured logging failure, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(result, "structured logs must not include secrets") {
-		t.Fatalf("expected secret logging violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, "structured logs must not include secrets")
 }

@@ -8,41 +8,6 @@ import (
 	"ciphera/tools/internal/runtime"
 )
 
-func parseInstallOptions(arguments []string) (options installOptions, err error) {
-	return parseInstallOptionsWithResolver(resolveRepoRoot, arguments)
-}
-
-func parseInstallOptionsWithResolver(
-	resolve repositoryRootResolver,
-	arguments []string,
-) (options installOptions, err error) {
-	const summary = "install pinned style tools"
-	flagSet := newInstallFlagSet(&options)
-	if err = parseArguments(flagSet, summary, arguments); err != nil {
-		return options, err
-	}
-
-	options.repoRoot, err = resolve(options.repoRoot)
-	return options, err
-}
-
-func newInstallFlagSet(options *installOptions) (flagSet *flag.FlagSet) {
-	flagSet = newFlagSet("install")
-	flagSet.StringVar(
-		&options.repoRoot,
-		"repo-root",
-		"",
-		"repository root (auto-detected when omitted)",
-	)
-	return flagSet
-}
-
-func installUsageText() (usage string) {
-	const summary = "install pinned style tools"
-	var options installOptions
-	return commandUsage("install", summary, newInstallFlagSet(&options))
-}
-
 func runInstall(tool CLI, options installOptions) (exitCode int) {
 	context, err := loadContext(options.repoRoot, "")
 	if err != nil {
@@ -84,4 +49,39 @@ func runInstall(tool CLI, options installOptions) (exitCode int) {
 	}
 
 	return 0
+}
+
+func parseInstallOptions(arguments []string) (options installOptions, err error) {
+	return parseInstallOptionsWithResolver(resolveRepoRoot, arguments)
+}
+
+func parseInstallOptionsWithResolver(
+	resolve repositoryRootResolver,
+	arguments []string,
+) (options installOptions, err error) {
+	const summary = "install pinned style tools"
+	flagSet := newInstallFlagSet(&options)
+	if err = parseArguments(flagSet, summary, arguments); err != nil {
+		return options, err
+	}
+
+	options.repoRoot, err = resolve(options.repoRoot)
+	return options, err
+}
+
+func newInstallFlagSet(options *installOptions) (flagSet *flag.FlagSet) {
+	flagSet = newFlagSet("install")
+	flagSet.StringVar(
+		&options.repoRoot,
+		"repo-root",
+		"",
+		"repository root (auto-detected when omitted)",
+	)
+	return flagSet
+}
+
+func installUsageText() (usage string) {
+	const summary = "install pinned style tools"
+	var options installOptions
+	return commandUsage("install", summary, newInstallFlagSet(&options))
 }

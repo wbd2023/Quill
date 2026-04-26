@@ -29,19 +29,17 @@ func Worse(token string, value string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/parameters/context-first] ctx must be the first parameter in "Bad"`,
-	) {
-		t.Fatalf("expected ctx-order violation, got: %#v", result.Diagnostics)
-	}
+	)
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/parameters/secrets-last] secret parameters must be last in "Worse"`,
-	) {
-		t.Fatalf("expected secret-order violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStyleReportsConstructorParameterOrderViolation(t *testing.T) {
@@ -67,13 +65,12 @@ func NewThing(relayClient *RelayClient, userRepository UserRepository) (thing *T
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/constructors/category-order] repository parameter appears after `+
 			`adapter parameter in constructor "NewThing"`,
-	) {
-		t.Fatalf("expected constructor-order violation, got: %#v", result.Diagnostics)
-	}
+	)
 }
 
 func TestGoStylePassesValidParameterAndConstructorOrder(t *testing.T) {

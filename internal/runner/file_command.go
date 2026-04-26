@@ -10,17 +10,17 @@ func FileCommandArguments(
 	repoRoot string,
 	spec contract.ExecutionSpec,
 ) (arguments []string) {
-	detail, found := spec.FileCommandExecution()
+	execution, found := spec.FileCommandExecution()
 	if !found {
 		return nil
 	}
 
-	arguments = append([]string{}, detail.Arguments...)
-	if detail.ConfigFile != "" {
+	arguments = append([]string{}, execution.Arguments...)
+	if execution.ConfigFile != "" {
 		arguments = append(
 			arguments,
-			detail.ConfigArgument,
-			filepath.Join(repoRoot, detail.ConfigFile),
+			execution.ConfigArgument,
+			filepath.Join(repoRoot, execution.ConfigFile),
 		)
 	}
 

@@ -23,16 +23,13 @@ func Bad(x string) (err error) {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
-	if !hasDiagnosticText(
+	expectDiagnosticMessage(
+		t,
 		result,
 		`[go/naming/single-letter-names] single-letter parameter "x" in function "Bad"`,
-	) {
-		t.Fatalf("expected single-letter parameter violation, got: %#v", result.Diagnostics)
-	}
+	)
 
-	if !hasDiagnosticText(result, `[go/naming/single-letter-names] single-letter variable "y"`) {
-		t.Fatalf("expected single-letter variable violation, got: %#v", result.Diagnostics)
-	}
+	expectDiagnosticMessage(t, result, `[go/naming/single-letter-names] single-letter variable "y"`)
 }
 
 func TestGoStylePassesAllowedSingleLetterNames(t *testing.T) {

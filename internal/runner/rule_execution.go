@@ -3,7 +3,6 @@ package runner
 import (
 	"errors"
 	"fmt"
-	"sort"
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/toolchain"
@@ -26,40 +25,6 @@ type ExecutorRegistry map[contract.ExecutorKind]Executor
 
 func IsBlocked(err error) (blocked bool) {
 	return errors.Is(err, errRuleBlocked)
-}
-
-func ToolIDsForRules(rules []contract.Rule) (toolIDs []string) {
-	seen := make(map[string]bool)
-	for _, rule := range rules {
-		for _, toolID := range rule.ToolIDs() {
-			if seen[toolID] {
-				continue
-			}
-
-			seen[toolID] = true
-			toolIDs = append(toolIDs, toolID)
-		}
-	}
-
-	sort.Strings(toolIDs)
-	return toolIDs
-}
-
-func ToolIDsForFixes(rules []contract.Rule) (toolIDs []string) {
-	seen := make(map[string]bool)
-	for _, rule := range rules {
-		for _, toolID := range rule.FixToolIDs() {
-			if seen[toolID] {
-				continue
-			}
-
-			seen[toolID] = true
-			toolIDs = append(toolIDs, toolID)
-		}
-	}
-
-	sort.Strings(toolIDs)
-	return toolIDs
 }
 
 func RunRule(
@@ -113,36 +78,4 @@ func runRuleSpec(
 	}
 
 	return executor(context, spec, toolStatuses)
-}
-
-func ToolchainExecutor(
-	_ Context,
-	spec contract.ExecutionSpec,
-	toolStatuses map[string]toolchain.Status,
-) (result contract.ExecutionResult, err error) {
-	detail, found := spec.ToolchainExecution()
-	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("toolchain executor received empty spec")
-	}
-
-	diagnostics := make([]contract.Diagnostic, 0, len(detail.ToolIDs))
-	foundFailure := false
-	for _, toolID := range detail.ToolIDs {
-		status, found := toolStatuses[toolID]
-		if !found || status.Valid {
-			continue
-		}
-
-		foundFailure = true
-		diagnostics = append(diagnostics, contract.Diagnostic{
-			Code:    "toolchain/invalid",
-			Message: toolchain.ExplainToolIssues([]string{toolID}, toolStatuses),
-		})
-	}
-
-	if !foundFailure {
-		return contract.ExecutionResult{}, nil
-	}
-
-	return contract.ExecutionResult{Diagnostics: diagnostics}, errRuleViolation
 }

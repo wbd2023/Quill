@@ -62,25 +62,25 @@ func validateTypedExecutionShape(ruleID string, spec contract.ExecutionSpec) (er
 		return fmt.Errorf("rule %q execution spec is missing", ruleID)
 	}
 
-	switch detail := spec.Detail.(type) {
+	switch execution := spec.Detail.(type) {
 	case contract.ToolchainExecution:
-		if len(detail.ToolIDs) == 0 {
+		if len(execution.ToolIDs) == 0 {
 			return fmt.Errorf("rule %q toolchain spec must define tool IDs", ruleID)
 		}
 
 	case contract.ControlPlaneExecution:
-		if detail.Check == "" {
+		if execution.Check == "" {
 			return fmt.Errorf("rule %q control-plane spec must define a check", ruleID)
 		}
 
 	case contract.FileCommandExecution:
-		if detail.ToolID == "" {
+		if execution.ToolID == "" {
 			return fmt.Errorf("rule %q file-command spec must define a tool ID", ruleID)
 		}
-		if detail.FileSet == "" {
+		if execution.FileSet == "" {
 			return fmt.Errorf("rule %q file-command spec must define a file set", ruleID)
 		}
-		if (detail.ConfigArgument == "") != (detail.ConfigFile == "") {
+		if (execution.ConfigArgument == "") != (execution.ConfigFile == "") {
 			return fmt.Errorf(
 				"rule %q file-command config argument and file must appear together",
 				ruleID,
@@ -88,26 +88,26 @@ func validateTypedExecutionShape(ruleID string, spec contract.ExecutionSpec) (er
 		}
 
 	case contract.BackendCommandExecution:
-		if err = validateBackendCommandSpec(ruleID, "backend command", detail); err != nil {
+		if err = validateBackendCommandSpec(ruleID, "backend command", execution); err != nil {
 			return err
 		}
-		if detail.Action == "" {
+		if execution.Action == "" {
 			return fmt.Errorf("rule %q backend command spec must define action", ruleID)
 		}
 
 	case contract.BackendCheckExecution:
-		if len(detail.ToolIDs) == 0 {
+		if len(execution.ToolIDs) == 0 {
 			return fmt.Errorf("rule %q backend check spec must define tool IDs", ruleID)
 		}
-		if detail.Language == "" {
+		if execution.Language == "" {
 			return fmt.Errorf("rule %q backend check spec must define language", ruleID)
 		}
-		if detail.Check == "" {
+		if execution.Check == "" {
 			return fmt.Errorf("rule %q backend check spec must define a check", ruleID)
 		}
 
 	case contract.RepositoryScanExecution:
-		if detail.Scanner == "" {
+		if execution.Scanner == "" {
 			return fmt.Errorf("rule %q repository scan spec must define a scanner", ruleID)
 		}
 
