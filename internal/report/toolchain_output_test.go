@@ -3,10 +3,11 @@ package report
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* -------------------------------------- Toolchain Output -------------------------------------- */
@@ -15,7 +16,7 @@ func TestWriteToolchainText(t *testing.T) {
 	var buffer bytes.Buffer
 
 	allValid, err := WriteToolchain(&buffer, FormatText, NewToolchainView(ToolchainResult{
-		Statuses: []runtime.ToolStatus{
+		Statuses: []toolchain.Status{
 			{
 				Tool:    contract.Tool{Name: "Go"},
 				Version: "1.24.5",
@@ -47,7 +48,7 @@ func TestWriteToolchainJSON(t *testing.T) {
 	var buffer bytes.Buffer
 
 	view := NewToolchainView(ToolchainResult{
-		Statuses: []runtime.ToolStatus{
+		Statuses: []toolchain.Status{
 			{
 				Tool:  contract.Tool{Name: "Go"},
 				Valid: true,
@@ -69,7 +70,15 @@ func TestWriteToolchainJSON(t *testing.T) {
 	}
 
 	var envelope struct {
-		Toolchain ToolchainView `json:"toolchain"`
+		Toolchain struct {
+			AllValid bool `json:"all_valid"`
+			Result   struct {
+				Statuses []struct {
+					Name  string `json:"name"`
+					Valid bool   `json:"valid"`
+				} `json:"statuses"`
+			} `json:"result"`
+		} `json:"toolchain"`
 	}
 	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
 		t.Fatalf("decode toolchain json: %v", err)
@@ -77,5 +86,11 @@ func TestWriteToolchainJSON(t *testing.T) {
 
 	if envelope.Toolchain.AllValid {
 		t.Fatal("expected all_valid=false in JSON output")
+	}
+
+	for _, forbidden := range []string{"install_kind", "module_path", "version_kind"} {
+		if strings.Contains(buffer.String(), forbidden) {
+			t.Fatalf("toolchain JSON leaked internal field %q: %s", forbidden, buffer.String())
+		}
 	}
 }

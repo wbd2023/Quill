@@ -15,12 +15,12 @@ func resolveRepoRoot(path string) (repoRoot string, err error) {
 		return absPath(path)
 	}
 
-	currentDirectory, err := os.Getwd()
+	workingDirectory, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
 
-	return findRepoRoot(currentDirectory)
+	return findRepoRoot(workingDirectory)
 }
 
 func findRepoRoot(start string) (repoRoot string, err error) {

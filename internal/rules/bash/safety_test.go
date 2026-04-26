@@ -1,7 +1,6 @@
-package bashstyle
+package bash
 
 import (
-	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -33,27 +32,34 @@ func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
 			"worker\n",
 	)
 
-	output, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), contract.ScopeTools)
+	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), contract.Scope("tools"))
 	if err == nil {
 		t.Fatal("expected bash safety failure")
 	}
 
-	required := []string{
-		"Bash function names should use lower-case with underscores",
-		"Bash constants and exported variables should use upper-case with underscores",
-		"detect dependencies with command -v, not which",
-		"temporary resources must be created with mktemp",
-		"avoid cmd | while read loops when loop state must survive",
-		"shellcheck suppressions must include rule IDs and a short reason",
-		"non-trivial Bash scripts must keep main() as the bottom-most function",
-		"must end with main \"$@\"",
+	required := []struct {
+		code    string
+		message string
+	}{
+		{"bash/safety/naming", "Bash function names should use lower-case with underscores"},
+		{"bash/safety/naming", "Bash constants and exported variables should use upper-case"},
+		{"bash/safety/script-shape", "detect dependencies with command -v, not which"},
+		{"bash/safety/temp-path", "temporary resources must be created with mktemp"},
+		{"bash/safety/script-shape", "avoid cmd | while read loops when loop state must survive"},
+		{"bash/safety/suppression", "shellcheck suppressions must include rule IDs"},
+		{"bash/safety/script-shape", "non-trivial Bash scripts must keep main()"},
+		{"bash/safety/script-shape", "must end with main \"$@\""},
 	}
-	for _, snippet := range required {
-		if strings.Contains(output, snippet) {
+	for _, expected := range required {
+		if hasDiagnostic(result, expected.code, "", 0, expected.message) {
 			continue
 		}
 
-		t.Fatalf("expected %q in output, got:\n%s", snippet, output)
+		t.Fatalf(
+			"expected diagnostic containing %q, got: %#v",
+			expected.message,
+			result.Diagnostics,
+		)
 	}
 }
 
@@ -78,8 +84,8 @@ func TestCheckSafetyPassesCleanScript(t *testing.T) {
 			"main \"$@\"\n",
 	)
 
-	output, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), contract.ScopeTools)
+	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), contract.Scope("tools"))
 	if err != nil {
-		t.Fatalf("expected bash safety check to pass, output:\n%s", output)
+		t.Fatalf("expected bash safety check to pass, diagnostics: %#v", result.Diagnostics)
 	}
 }

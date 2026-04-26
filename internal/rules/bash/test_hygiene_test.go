@@ -1,7 +1,6 @@
-package bashstyle
+package bash
 
 import (
-	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -18,17 +17,23 @@ func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
 		"#!/bin/bash\nset -euo pipefail\n\ntmp_dir=\"$(mktemp -d)\"\n",
 	)
 
-	output, err := CheckTestHygiene(
+	result, err := CheckTestHygiene(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.ScopeAll,
+		contract.Scope("all"),
 	)
 	if err == nil {
 		t.Fatal("expected bash test hygiene failure")
 	}
 
-	if !strings.Contains(output, "mktemp must install trap-based cleanup") {
-		t.Fatalf("expected trap-cleanup violation, got:\n%s", output)
+	if !hasDiagnostic(
+		result,
+		"bash/test-hygiene/missing-cleanup",
+		"",
+		0,
+		"mktemp must install trap-based cleanup",
+	) {
+		t.Fatalf("expected trap-cleanup diagnostic, got: %#v", result.Diagnostics)
 	}
 }
 
@@ -42,12 +47,12 @@ func TestCheckTestHygieneAcceptsTrapCleanup(t *testing.T) {
 			"trap 'rm -rf \"$tmp_dir\"' EXIT\n",
 	)
 
-	output, err := CheckTestHygiene(
+	result, err := CheckTestHygiene(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.ScopeAll,
+		contract.Scope("all"),
 	)
 	if err != nil {
-		t.Fatalf("expected bash test hygiene fixture to pass, output:\n%s", output)
+		t.Fatalf("expected bash test hygiene fixture to pass, diagnostics: %#v", result.Diagnostics)
 	}
 }

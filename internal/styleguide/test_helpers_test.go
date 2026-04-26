@@ -1,8 +1,6 @@
 package styleguide
 
-import "ciphera/tools/internal/profile"
-
-func extractHeadings(contents string) (headings []documentHeading) {
+func extractHeadings(contents string) (headings []Heading) {
 	document, err := compileDocument([]byte(contents), testStyleGuideConfig())
 	if err != nil {
 		panic(err)
@@ -11,7 +9,7 @@ func extractHeadings(contents string) (headings []documentHeading) {
 	return document.Headings
 }
 
-func extractRequirements(contents string) (requirements []documentRequirement) {
+func extractRequirements(contents string) (requirements []Requirement) {
 	document, err := compileDocument([]byte(contents), testStyleGuideConfig())
 	if err != nil {
 		panic(err)
@@ -20,8 +18,8 @@ func extractRequirements(contents string) (requirements []documentRequirement) {
 	return document.Requirements
 }
 
-func testStyleGuideConfig() (config profile.StyleGuideConfig) {
-	return profile.StyleGuideConfig{
+func testStyleGuideConfig() (config Config) {
+	return Config{
 		Path:                "STYLE.md",
 		RequirementIDFormat: RequirementIDFormatSectionSlug,
 	}

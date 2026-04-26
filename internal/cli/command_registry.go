@@ -1,15 +1,11 @@
 package cli
 
-/* -------------------------------------------- Types ------------------------------------------- */
-
 type Command struct {
 	name    string
 	summary string
 	usage   func() string
 	prepare func(repositoryRootResolver, []string) (Action, error)
 }
-
-/* ------------------------------------- Registered Commands ------------------------------------ */
 
 var commands = []Command{
 	{
@@ -44,8 +40,6 @@ var commands = []Command{
 	},
 }
 
-/* --------------------------------------- Command Lookup --------------------------------------- */
-
 func findCommand(name string) (matched Command, found bool) {
 	for _, command := range commands {
 		if command.name == name {
@@ -55,8 +49,6 @@ func findCommand(name string) (matched Command, found bool) {
 
 	return Command{}, false
 }
-
-/* --------------------------------------- Action Binding --------------------------------------- */
 
 func prepareAction[options any](
 	parse func(repositoryRootResolver, []string) (options, error),

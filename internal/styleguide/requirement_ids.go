@@ -146,15 +146,15 @@ func isRequirementID(value string, format string) (valid bool) {
 	}
 
 	previousHyphen := false
-	for _, runeValue := range slug {
+	for _, character := range slug {
 		switch {
-		case runeValue >= 'a' && runeValue <= 'z':
+		case character >= 'a' && character <= 'z':
 			previousHyphen = false
 
-		case runeValue >= '0' && runeValue <= '9':
+		case character >= '0' && character <= '9':
 			previousHyphen = false
 
-		case runeValue == '-':
+		case character == '-':
 			if previousHyphen {
 				return false
 			}
@@ -178,8 +178,8 @@ func isSectionID(value string) (valid bool) {
 }
 
 func digitsOnly(value string) (digits bool) {
-	for _, runeValue := range value {
-		if runeValue < '0' || runeValue > '9' {
+	for _, character := range value {
+		if character < '0' || character > '9' {
 			return false
 		}
 	}

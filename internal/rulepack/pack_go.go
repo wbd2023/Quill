@@ -1,7 +1,5 @@
 package rulepack
 
-import "ciphera/tools/internal/contract"
-
 /* ------------------------------------------- Go Pack ------------------------------------------ */
 
 func goPack() (pack Pack) {
@@ -9,40 +7,96 @@ func goPack() (pack Pack) {
 		ID:   PackGo,
 		Name: "Go",
 		Tools: selectTools(
-			contract.ToolGo,
-			contract.ToolGoimports,
-			contract.ToolGolangciLint,
+			ToolGo,
+			ToolGoimports,
+			ToolGolangciLint,
 		),
 		Rules: []RuleDefinition{
 			golangciRule(
-				"go/lint-app",
-				"golangci-lint (app)",
-				"go_app",
+				"go/lint",
+				"golangci-lint",
 			),
 			goStyleRule(
-				"go/style-app",
-				"Go style (app)",
-				"go_app",
-			),
-			golangciRule(
-				"go/lint-tools",
-				"golangci-lint (style platform)",
-				"go_tools",
+				"go/comments",
+				"Go comments",
+				GoCheckComments,
 			),
 			goStyleRule(
-				"go/style-tools",
-				"Go style (style platform)",
-				"go_tools",
+				"go/errors",
+				"Go error handling",
+				GoCheckErrors,
 			),
-			repoScanRule(
+			goStyleRule(
+				"go/resources",
+				"Go resource handling",
+				GoCheckResources,
+			),
+			goStyleRule(
+				"go/returns",
+				"Go return style",
+				GoCheckReturns,
+			),
+			goStyleRule(
+				"go/parameters",
+				"Go parameter style",
+				GoCheckParameters,
+			),
+			goStyleRule(
+				"go/domain-identifiers",
+				"Go domain identifiers",
+				GoCheckDomainIdentifiers,
+			),
+			goStyleRule(
+				"go/naming",
+				"Go naming",
+				GoCheckNaming,
+			),
+			goStyleRule(
+				"go/order",
+				"Go declaration and method order",
+				GoCheckOrder,
+			),
+			goStyleRule(
+				"go/logging",
+				"Go logging",
+				GoCheckLogging,
+			),
+			goStyleRule(
+				"go/security",
+				"Go security",
+				GoCheckSecurity,
+			),
+			goStyleRule(
+				"go/process",
+				"Go process execution",
+				GoCheckProcess,
+			),
+			goStyleRule(
+				"go/data",
+				"Go data usage",
+				GoCheckData,
+			),
+			goStyleRule(
+				"go/tests",
+				"Go test hygiene",
+				GoCheckTests,
+			),
+			goStyleRule(
 				"go/guard-clause-spacing",
 				"Guard-clause spacing (Go)",
-				RepositoryScannerGuardClauseSpacing,
+				GoCheckGuardClauseSpacing,
 			),
-			repoScanRule(
+			goStyleRule(
 				"go/switch-case-spacing",
 				"Switch-case spacing (Go)",
-				RepositoryScannerSwitchCaseSpacing,
+				GoCheckSwitchCaseSpacing,
+			),
+			scanRuleWithConfig(
+				"go/architecture-imports",
+				"Architecture imports",
+				RuleGroupLanguage,
+				ScannerArchitecture,
+				ConfigRefArchitecture,
 			),
 		},
 	}

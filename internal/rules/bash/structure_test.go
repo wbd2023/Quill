@@ -1,7 +1,6 @@
-package bashstyle
+package bash
 
 import (
-	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -18,16 +17,16 @@ func TestCheckStructureFindsMissingStrictMode(t *testing.T) {
 		"#!/bin/bash\nprintf 'hello\\n'\n",
 	)
 
-	output, err := CheckStructure(
+	result, err := CheckStructure(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.ScopeTools,
+		contract.Scope("tools"),
 	)
 	if err == nil {
 		t.Fatal("expected bash structure failure")
 	}
 
-	if !strings.Contains(output, "missing set -euo pipefail") {
-		t.Fatalf("expected strict-mode message, got:\n%s", output)
+	if !hasDiagnostic(result, "bash/structure/invalid", "", 0, "missing set -euo pipefail") {
+		t.Fatalf("expected strict-mode diagnostic, got: %#v", result.Diagnostics)
 	}
 }

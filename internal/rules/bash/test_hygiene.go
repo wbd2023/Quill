@@ -1,85 +1,64 @@
-package bashstyle
+package bash
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/profile"
-	repostyle "ciphera/tools/internal/rules/repo"
+	"ciphera/tools/internal/filewalk"
+	"ciphera/tools/internal/policy"
 )
-
-/* ----------------------------------------- Bash Tests ----------------------------------------- */
 
 func CheckTestHygiene(
 	repoRoot string,
-	repository profile.RepositoryConfig,
+	repository policy.RepositoryConfig,
 	scope contract.Scope,
-) (output string, err error) {
-	files, err := repostyle.CollectAllFiles(repoRoot, repository, scope)
+) (result contract.ExecutionResult, err error) {
+	files, err := filewalk.CollectAllFiles(repoRoot, repository, scope)
 	if err != nil {
-		return "", err
+		return contract.ExecutionResult{}, err
 	}
-
-	var builder strings.Builder
-	foundViolation := false
 
 	for _, path := range files {
 		if !isBashTestFile(repoRoot, path) {
 			continue
 		}
 
-		file, openErr := os.Open(path)
-		if openErr != nil {
-			return "", openErr
-		}
-
-		scanner := bufio.NewScanner(file)
 		foundMktemp := false
 		foundTrap := false
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			if strings.Contains(line, "mktemp") {
+		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
+			if strings.Contains(line.Text, "mktemp") {
 				foundMktemp = true
 			}
 
-			if strings.Contains(line, "trap ") {
+			if strings.Contains(line.Text, "trap ") {
 				foundTrap = true
 			}
-		}
 
-		if scanErr := scanner.Err(); scanErr != nil {
-			return "", closeFile(file, scanErr)
-		}
-
-		if closeErr := closeFile(file, nil); closeErr != nil {
-			return "", closeErr
+			return nil
+		})
+		if err != nil {
+			return contract.ExecutionResult{}, err
 		}
 
 		if foundMktemp && !foundTrap {
-			foundViolation = true
-			builder.WriteString(fmt.Sprintf(
-				"%s Bash tests using mktemp must install trap-based cleanup\n",
-				repostyle.RelativePath(repoRoot, path),
-			))
+			result.Diagnostics = append(result.Diagnostics, contract.Diagnostic{
+				Code:    "bash/test-hygiene/missing-cleanup",
+				File:    filewalk.RelativePath(repoRoot, path),
+				Message: "Bash tests using mktemp must install trap-based cleanup",
+			})
 		}
 	}
 
-	if !foundViolation {
-		return "", nil
+	if len(result.Diagnostics) == 0 {
+		return contract.ExecutionResult{}, nil
 	}
 
-	return builder.String(), errViolationsFound
+	return result, contract.ViolationsFound()
 }
 
-/* --------------------------------------- Test Discovery --------------------------------------- */
-
 func isBashTestFile(repoRoot string, path string) (found bool) {
-	relativePath := repostyle.RelativePath(repoRoot, path)
+	relativePath := filewalk.RelativePath(repoRoot, path)
 	base := filepath.Base(relativePath)
 
 	if strings.HasSuffix(base, "_test.sh") || strings.HasSuffix(base, ".bats") {

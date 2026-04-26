@@ -2,10 +2,34 @@ package report
 
 import (
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/coverage"
 	"ciphera/tools/internal/styleguide"
 )
 
 /* ---------------------------------------- View Builders --------------------------------------- */
+
+func NewCheckEntry(
+	rule contract.Rule,
+	status contract.CheckStatus,
+	result contract.ExecutionResult,
+) (entry CheckEntry) {
+	return CheckEntry{
+		Rule:   NewRuleSummary(rule),
+		Status: status,
+		Result: result,
+	}
+}
+
+func NewRuleSummary(rule contract.Rule) (summary RuleSummary) {
+	return RuleSummary{
+		ID:             rule.ID,
+		Name:           rule.Name,
+		Group:          rule.Group,
+		Level:          rule.Level,
+		Scope:          rule.Scope,
+		RequirementIDs: append([]string{}, rule.RequirementIDs...),
+	}
+}
 
 func NewCheckView(result CheckResult) (view CheckView) {
 	view = CheckView{
@@ -14,12 +38,11 @@ func NewCheckView(result CheckResult) (view CheckView) {
 		Groups:  make([]CheckGroup, 0),
 	}
 
-	currentGroup := contract.RuleGroup("")
 	for _, entry := range result.Entries {
-		if len(view.Groups) == 0 || entry.Rule.Group != currentGroup {
-			currentGroup = entry.Rule.Group
+		if len(view.Groups) == 0 ||
+			entry.Rule.Group != view.Groups[len(view.Groups)-1].Group {
 			view.Groups = append(view.Groups, CheckGroup{
-				Group:   currentGroup,
+				Group:   entry.Rule.Group,
 				Entries: make([]CheckEntry, 0),
 			})
 		}
@@ -31,10 +54,10 @@ func NewCheckView(result CheckResult) (view CheckView) {
 	return view
 }
 
-func NewCoverageView(report styleguide.CoverageReport) (view CoverageView) {
+func NewCoverageView(report coverage.Report) (view CoverageView) {
 	view = CoverageView{
 		Report:            report,
-		Outstanding:       make([]styleguide.Requirement, 0),
+		Outstanding:       make([]coverage.Requirement, 0),
 		OutstandingByMode: make(map[string]int),
 	}
 
@@ -58,16 +81,16 @@ func NewCoverageView(report styleguide.CoverageReport) (view CoverageView) {
 
 	for _, section := range report.Sections {
 		switch section.Status {
-		case styleguide.CoverageAutomated:
+		case coverage.StatusAutomated:
 			view.SectionTotals.Automated++
 
-		case styleguide.CoveragePartial:
+		case coverage.StatusPartial:
 			view.SectionTotals.Partial++
 
-		case styleguide.CoverageReviewOnly:
+		case coverage.StatusReviewOnly:
 			view.SectionTotals.ReviewOnly++
 
-		case styleguide.CoverageManual:
+		case coverage.StatusManual:
 			view.SectionTotals.Manual++
 		}
 	}

@@ -5,6 +5,7 @@ import (
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/rulepack"
 )
 
@@ -52,14 +53,14 @@ func TestRegisteredRulesReferenceKnownTools(t *testing.T) {
 }
 
 func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
-	policy := profiles.Current(t)
+	config := profiles.Current(t)
 
-	registry, err := rulepack.DefaultRegistry(policy.RulePacks.Enabled)
+	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	effective, err := policy.Compile(registry)
+	effective, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
@@ -90,26 +91,25 @@ func TestRegisteredRulesUseExpectedExecutors(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	validExecutors := map[string]bool{
-		contract.ExecutorToolchain:      true,
-		contract.ExecutorControlPlane:   true,
-		contract.ExecutorFileCommand:    true,
-		contract.ExecutorGoFormat:       true,
-		contract.ExecutorGolangci:       true,
-		contract.ExecutorGoStyle:        true,
-		contract.ExecutorRepositoryScan: true,
+	validExecutors := map[contract.ExecutorKind]bool{
+		rulepack.ExecutorToolchain:      true,
+		rulepack.ExecutorControlPlane:   true,
+		rulepack.ExecutorFileCommand:    true,
+		rulepack.ExecutorBackendCommand: true,
+		rulepack.ExecutorBackendCheck:   true,
+		rulepack.ExecutorRepositoryScan: true,
 	}
 
 	for _, rule := range registry.Rules() {
-		if !validExecutors[rule.Spec.Executor] {
-			t.Fatalf("rule %q uses unsupported executor %q", rule.ID, rule.Spec.Executor)
+		if !validExecutors[rule.Spec.Kind] {
+			t.Fatalf("rule %q uses unsupported executor %q", rule.ID, rule.Spec.Kind)
 		}
 
-		if rule.FixSpec.Executor == "" || validExecutors[rule.FixSpec.Executor] {
+		if rule.FixSpec.Empty() || validExecutors[rule.FixSpec.Kind] {
 			continue
 		}
 
-		t.Fatalf("rule %q uses unsupported fix executor %q", rule.ID, rule.FixSpec.Executor)
+		t.Fatalf("rule %q uses unsupported fix executor %q", rule.ID, rule.FixSpec.Kind)
 	}
 }
 
@@ -125,10 +125,12 @@ func TestRuleGroupsRemainStable(t *testing.T) {
 	}
 
 	for _, group := range []contract.RuleGroup{
-		contract.RuleGroupControlPlane,
-		contract.RuleGroupExternal,
-		contract.RuleGroupLanguage,
-		contract.RuleGroupRepository,
+		rulepack.RuleGroupControlPlane,
+		rulepack.RuleGroupExternal,
+		rulepack.RuleGroupLanguage,
+		rulepack.RuleGroupText,
+		rulepack.RuleGroupSecurity,
+		rulepack.RuleGroupNaming,
 	} {
 		if seenGroups[group] {
 			continue

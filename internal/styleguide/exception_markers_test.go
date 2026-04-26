@@ -17,14 +17,14 @@ func TestParseExceptionMarkerAcceptsShellAndGoComments(t *testing.T) {
 		`// style: allow-non-ascii because: protocol sample`,
 	}
 
-	for _, current := range testCases {
-		rule, _, found, valid := ParseExceptionMarker(current)
+	for _, line := range testCases {
+		rule, _, found, valid := ParseExceptionMarker(line)
 		if !found || !valid {
-			t.Fatalf("expected valid marker for %q", current)
+			t.Fatalf("expected valid marker for %q", line)
 		}
 
 		if rule == "" {
-			t.Fatalf("expected parsed rule for %q", current)
+			t.Fatalf("expected parsed rule for %q", line)
 		}
 	}
 }

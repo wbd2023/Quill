@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* -------------------------------------- Registry Loading -------------------------------------- */
@@ -16,7 +16,8 @@ func DefaultRegistry(enabled []string) (registry Registry, err error) {
 		markdownPack(),
 		shellPack(),
 		goPack(),
-		repositoryPack(),
+		securityPack(),
+		namingPack(),
 	}
 
 	if len(enabled) > 0 {
@@ -62,7 +63,7 @@ func selectPacks(available []Pack, enabled []string) (selected []Pack, err error
 func buildRegistry(packs []Pack) (registry Registry) {
 	registry.packs = append([]Pack{}, packs...)
 
-	toolByID := make(map[string]contract.Tool)
+	toolByID := make(map[string]toolchain.Capability)
 	for _, pack := range packs {
 		for _, tool := range pack.Tools {
 			toolByID[tool.ID] = tool
@@ -77,9 +78,9 @@ func buildRegistry(packs []Pack) (registry Registry) {
 	}
 	sort.Strings(toolIDs)
 
-	registry.tools = make([]contract.Tool, 0, len(toolIDs))
+	registry.capabilities = make([]toolchain.Capability, 0, len(toolIDs))
 	for _, toolID := range toolIDs {
-		registry.tools = append(registry.tools, toolByID[toolID])
+		registry.capabilities = append(registry.capabilities, toolByID[toolID])
 	}
 
 	return registry
@@ -92,8 +93,8 @@ func validateRegistry(registry Registry) (err error) {
 		return err
 	}
 
-	seenToolIDs := make(map[string]bool, len(registry.tools))
-	for _, tool := range registry.tools {
+	seenToolIDs := make(map[string]bool, len(registry.capabilities))
+	for _, tool := range registry.capabilities {
 		if tool.ID == "" {
 			return fmt.Errorf("rule-pack registry contains an empty tool id")
 		}
@@ -111,7 +112,7 @@ func validateRegistry(registry Registry) (err error) {
 			return fmt.Errorf("rule-pack registry contains an empty rule id")
 		}
 
-		if rule.Spec.Executor == "" {
+		if rule.Spec.Empty() {
 			return fmt.Errorf("rule %q has no executor", rule.ID)
 		}
 
@@ -126,7 +127,7 @@ func validateRegistry(registry Registry) (err error) {
 }
 
 func validatePackToolDefinitions(packs []Pack) (err error) {
-	toolByID := make(map[string]contract.Tool)
+	toolByID := make(map[string]toolchain.Capability)
 	for _, pack := range packs {
 		for _, tool := range pack.Tools {
 			existing, found := toolByID[tool.ID]

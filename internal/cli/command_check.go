@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/toolchain"
 )
 
 /* ---------------------------------------- Check Command --------------------------------------- */
@@ -20,30 +21,33 @@ func runCheck(tool CLI, options checkOptions) (exitCode int) {
 		return 1
 	}
 
-	selected, err := selectedRules(context.Effective.Rules, options.scope, options.profile)
+	selected, err := selectedRules(context.Effective.Rules, context, options.mode)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 	toolStatusList := runtime.InspectToolsWithEnvironment(
 		context.Effective.Tools,
+		context.ToolCapabilities,
 		runner.ToolIDsForRules(selected),
 		context.ToolEnvironment,
 	)
-	toolStatuses := runtime.StatusesByID(toolStatusList)
+	toolStatuses := toolchain.StatusesByID(toolStatusList)
 
 	result := report.CheckResult{
 		Entries: make([]report.CheckEntry, 0, len(selected)),
 	}
 	checkers := executors.Checkers()
 	for _, rule := range selected {
-		output, err := runner.RunRule(rule, context, toolStatuses, checkers)
-		entry := report.CheckEntry{
-			Rule:   rule,
-			Status: statusForRuleResult(rule, err, options.strictRecommendations),
-			Output: output,
-		}
-		result.Entries = append(result.Entries, entry)
+		execution, err := runner.RunRule(rule, context, toolStatuses, checkers)
+		result.Entries = append(
+			result.Entries,
+			report.NewCheckEntry(
+				rule,
+				statusForRuleResult(rule, err, options.strictRecommendations),
+				execution,
+			),
+		)
 	}
 
 	summary, err := writeCheckResult(tool.stdout, result, options)
@@ -69,9 +73,9 @@ func parseCheckOptionsWithResolver(
 ) (options checkOptions, err error) {
 	const summary = "run STYLE.md checks"
 	var scope string
-	var profile string
+	var mode string
 	var format string
-	flagSet := newCheckFlagSet(&options, &scope, &profile, &format)
+	flagSet := newCheckFlagSet(&options, &scope, &mode, &format)
 
 	if err = parseArguments(flagSet, summary, arguments); err != nil {
 		return options, err
@@ -82,7 +86,7 @@ func parseCheckOptionsWithResolver(
 		return options, err
 	}
 
-	options.profile, err = parseProfile(profile)
+	options.mode, err = parseCheckMode(mode)
 	if err != nil {
 		return options, err
 	}
@@ -99,7 +103,7 @@ func parseCheckOptionsWithResolver(
 func newCheckFlagSet(
 	options *checkOptions,
 	scope *string,
-	profile *string,
+	mode *string,
 	format *string,
 ) (flagSet *flag.FlagSet) {
 	flagSet = newFlagSet("check")
@@ -109,12 +113,12 @@ func newCheckFlagSet(
 		"",
 		"repository root (auto-detected when omitted)",
 	)
-	flagSet.StringVar(scope, "scope", string(contract.ScopeAll), "scope: app|tools|all")
+	flagSet.StringVar(scope, "scope", "", "configured scope (profile default when omitted)")
 	flagSet.StringVar(
-		profile,
-		"profile",
-		string(contract.CheckProfileRequired),
-		"profile: required|all",
+		mode,
+		"mode",
+		string(contract.CheckModeRequired),
+		"mode: required|all",
 	)
 	flagSet.BoolVar(
 		&options.strictRecommendations,
@@ -131,24 +135,24 @@ func checkUsageText() (usage string) {
 	const summary = "run STYLE.md checks"
 	var options checkOptions
 	var scope string
-	var profile string
+	var mode string
 	var format string
-	return commandUsage("check", summary, newCheckFlagSet(&options, &scope, &profile, &format))
+	return commandUsage("check", summary, newCheckFlagSet(&options, &scope, &mode, &format))
 }
 
 /* --------------------------------------- Rule Selection --------------------------------------- */
 
 func selectedRules(
 	available []contract.Rule,
-	scope contract.Scope,
-	profile contract.CheckProfile,
+	context runner.Context,
+	mode contract.CheckMode,
 ) (rules []contract.Rule, err error) {
 	for _, rule := range available {
-		if !contract.ScopeCovers(scope, rule.Scope) {
+		if !context.Policy.Repository.ScopesOverlap(context.Scope, rule.Scope) {
 			continue
 		}
 
-		if profile == contract.CheckProfileRequired && rule.Level == contract.LevelRecommendation {
+		if mode == contract.CheckModeRequired && rule.Level == contract.LevelRecommendation {
 			continue
 		}
 
@@ -175,6 +179,6 @@ func statusForRuleResult(
 	rule contract.Rule,
 	err error,
 	strictRecommendations bool,
-) (status report.CheckStatus) {
+) (status contract.CheckStatus) {
 	return runner.CheckStatus(rule, err, strictRecommendations)
 }

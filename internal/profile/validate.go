@@ -4,64 +4,86 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/policy"
 )
 
 /* ----------------------------------------- Validation ----------------------------------------- */
 
-func (policy Profile) Validate() (err error) {
-	if policy.SchemaVersion != SchemaVersion1 {
-		return fmt.Errorf("unsupported style profile version %d", policy.SchemaVersion)
+func Validate(config policy.Config) (err error) {
+	if config.SchemaVersion != policy.SchemaVersion {
+		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
 	}
 
-	if len(policy.RulePacks.Enabled) == 0 {
+	if len(config.RulePacks.Enabled) == 0 {
 		return fmt.Errorf("rule_packs.enabled must not be empty")
 	}
 
-	if len(policy.Repository.RootMarkers) == 0 {
+	if len(config.Repository.RootMarkers) == 0 {
 		return fmt.Errorf("repository.root_markers must not be empty")
 	}
 
-	if len(policy.Repository.AppScanRoots) == 0 {
-		return fmt.Errorf("repository.app_scan_roots must not be empty")
+	if len(config.Repository.Scopes) == 0 {
+		return fmt.Errorf("repository.scopes must not be empty")
 	}
 
-	if len(policy.Repository.ToolsScanRoots) == 0 {
-		return fmt.Errorf("repository.tools_scan_roots must not be empty")
+	if config.Repository.DefaultScope == "" {
+		return fmt.Errorf("repository.default_scope must not be empty")
 	}
 
-	if policy.Repository.GeneratedMarker == "" {
+	if config.Repository.GeneratedMarker == "" {
 		return fmt.Errorf("repository.generated_marker must not be empty")
 	}
 
-	if policy.Repository.GeneratedProbeLimit <= 0 {
+	if config.Repository.GeneratedProbeLimit <= 0 {
 		return fmt.Errorf("repository.generated_probe_limit must be positive")
 	}
 
-	if policy.StyleGuide.Path == "" {
+	if config.StyleGuide.Path == "" {
 		return fmt.Errorf("styleguide.path must not be empty")
 	}
 
-	if policy.StyleGuide.RequirementIDFormat == "" {
+	if config.StyleGuide.RequirementIDFormat == "" {
 		return fmt.Errorf("styleguide.requirement_id_format must not be empty")
 	}
 
-	if policy.StyleGuide.RequirementIDFormat != RequirementIDFormatSectionSlug {
+	if config.StyleGuide.RequirementIDFormat != policy.RequirementIDFormatSectionSlug {
 		return fmt.Errorf(
 			"unsupported styleguide.requirement_id_format %q",
-			policy.StyleGuide.RequirementIDFormat,
+			config.StyleGuide.RequirementIDFormat,
 		)
 	}
 
-	if policy.Imports.LocalPrefix == "" {
-		return fmt.Errorf("imports.local_prefix must not be empty")
-	}
-
-	if err = validateGoDomainIdentifiers(policy.Naming.GoDomainIdentifiers); err != nil {
+	if err = validateFormatting(config.Formatting); err != nil {
 		return err
 	}
 
-	seenFileSets := make(map[string]bool, len(policy.FileSets))
-	for _, fileSet := range policy.FileSets {
+	if config.Imports.LocalPrefix == "" {
+		return fmt.Errorf("imports.local_prefix must not be empty")
+	}
+
+	for scope, roots := range config.Repository.Scopes {
+		if scope == "" {
+			return fmt.Errorf("repository.scopes contains an empty scope")
+		}
+
+		if len(roots) == 0 {
+			return fmt.Errorf("repository.scopes.%s must not be empty", scope)
+		}
+	}
+
+	if !config.Repository.ScopeExists(config.Repository.DefaultScope) {
+		return fmt.Errorf(
+			"repository.default_scope references unknown scope %q",
+			config.Repository.DefaultScope,
+		)
+	}
+
+	if err = validateGoDomainIdentifiers(config.Naming.GoDomainIdentifiers); err != nil {
+		return err
+	}
+
+	seenFileSets := make(map[string]bool, len(config.FileSets))
+	for _, fileSet := range config.FileSets {
 		if fileSet.Name == "" {
 			return fmt.Errorf("file set name must not be empty")
 		}
@@ -71,10 +93,21 @@ func (policy Profile) Validate() (err error) {
 		}
 
 		seenFileSets[fileSet.Name] = true
+		for scope := range fileSet.Files {
+			if !config.Repository.ScopeExists(scope) {
+				return fmt.Errorf("file set %q references unknown scope %q", fileSet.Name, scope)
+			}
+		}
+
+		for scope := range fileSet.Prefixes {
+			if !config.Repository.ScopeExists(scope) {
+				return fmt.Errorf("file set %q references unknown scope %q", fileSet.Name, scope)
+			}
+		}
 	}
 
-	seenLanguageBackends := make(map[string]bool, len(policy.Language.Backends))
-	for _, backend := range policy.Language.Backends {
+	seenLanguageBackends := make(map[string]bool, len(config.Language.Backends))
+	for _, backend := range config.Language.Backends {
 		if backend.Name == "" {
 			return fmt.Errorf("language backend name must not be empty")
 		}
@@ -88,22 +121,30 @@ func (policy Profile) Validate() (err error) {
 		if backend.Language == "" {
 			return fmt.Errorf("language backend %q must define language", backend.Name)
 		}
+
+		if !config.Repository.ScopeExists(backend.Scope) {
+			return fmt.Errorf(
+				"language backend %q references unknown scope %q",
+				backend.Name,
+				backend.Scope,
+			)
+		}
 	}
 
-	if policy.ControlPlane.QualityFile == "" {
+	if config.ControlPlane.QualityFile == "" {
 		return fmt.Errorf("control_plane.quality_file must not be empty")
 	}
 
-	if len(policy.Architecture.Layers) == 0 {
+	if len(config.Architecture.Layers) == 0 {
 		return fmt.Errorf("architecture.layers must not be empty")
 	}
 
-	if len(policy.Rules) == 0 {
+	if len(config.Rules) == 0 {
 		return fmt.Errorf("rules must not be empty")
 	}
 
-	layerNames := make(map[string]bool, len(policy.Architecture.Layers))
-	for _, layer := range policy.Architecture.Layers {
+	layerNames := make(map[string]bool, len(config.Architecture.Layers))
+	for _, layer := range config.Architecture.Layers {
 		if layer.Name == "" {
 			return fmt.Errorf("architecture layer name must not be empty")
 		}
@@ -119,7 +160,7 @@ func (policy Profile) Validate() (err error) {
 		}
 	}
 
-	for _, layer := range policy.Architecture.Layers {
+	for _, layer := range config.Architecture.Layers {
 		for _, allowed := range layer.MayImport {
 			if layerNames[allowed] {
 				continue
@@ -133,8 +174,24 @@ func (policy Profile) Validate() (err error) {
 		}
 	}
 
-	seenRuleIDs := make(map[string]bool, len(policy.Rules))
-	for _, binding := range policy.Rules {
+	seenToolPins := make(map[string]bool, len(config.Tools))
+	for _, tool := range config.Tools {
+		if tool.ID == "" {
+			return fmt.Errorf("tool pin has an empty id")
+		}
+
+		if seenToolPins[tool.ID] {
+			return fmt.Errorf("duplicate tool pin %q", tool.ID)
+		}
+
+		seenToolPins[tool.ID] = true
+		if tool.Version == "" {
+			return fmt.Errorf("tool pin %q must define version", tool.ID)
+		}
+	}
+
+	seenRuleIDs := make(map[string]bool, len(config.Rules))
+	for _, binding := range config.Rules {
 		if binding.RuleID == "" {
 			return fmt.Errorf("rule binding has an empty rule_id")
 		}
@@ -150,10 +207,8 @@ func (policy Profile) Validate() (err error) {
 			return fmt.Errorf("rule %q has invalid level %q", binding.RuleID, binding.Level)
 		}
 
-		switch binding.Scope {
-		case contract.ScopeApp, contract.ScopeTools, contract.ScopeAll:
-		default:
-			return fmt.Errorf("rule %q has invalid scope %q", binding.RuleID, binding.Scope)
+		if !config.Repository.ScopeExists(binding.Scope) {
+			return fmt.Errorf("rule %q references unknown scope %q", binding.RuleID, binding.Scope)
 		}
 
 		if len(binding.RequirementIDs) == 0 {
@@ -181,7 +236,52 @@ func (policy Profile) Validate() (err error) {
 	return nil
 }
 
-func validateGoDomainIdentifiers(identifiers GoDomainIdentifierConfig) (err error) {
+func validateFormatting(formatting policy.FormattingConfig) (err error) {
+	headers := formatting.SectionHeaders
+	if headers.RequiredMinLines <= 0 {
+		return fmt.Errorf("formatting.section_headers.required_min_lines must be positive")
+	}
+
+	if headers.ShortFileMaxLines <= 0 {
+		return fmt.Errorf("formatting.section_headers.short_file_max_lines must be positive")
+	}
+
+	if headers.ShortFileMaxLines >= headers.RequiredMinLines {
+		return fmt.Errorf(
+			"formatting.section_headers.short_file_max_lines must be less than required_min_lines",
+		)
+	}
+
+	if headers.OveruseCount <= 0 {
+		return fmt.Errorf("formatting.section_headers.overuse_header_count must be positive")
+	}
+
+	if len(headers.GenericNames) == 0 {
+		return fmt.Errorf("formatting.section_headers.generic_names must not be empty")
+	}
+
+	seen := make(map[string]bool, len(headers.GenericNames)+len(headers.StructuralNames))
+	for _, names := range [][]string{headers.GenericNames, headers.StructuralNames} {
+		for _, name := range names {
+			if name == "" {
+				return fmt.Errorf("formatting.section_headers contains an empty header name")
+			}
+
+			if seen[name] {
+				return fmt.Errorf(
+					"formatting.section_headers contains duplicate header name %q",
+					name,
+				)
+			}
+
+			seen[name] = true
+		}
+	}
+
+	return nil
+}
+
+func validateGoDomainIdentifiers(identifiers policy.GoDomainIdentifierConfig) (err error) {
 	for typeName, constructors := range identifiers {
 		if typeName == "" {
 			return fmt.Errorf("naming.go_domain_identifiers has an empty type name")

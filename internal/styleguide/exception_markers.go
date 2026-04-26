@@ -2,8 +2,6 @@ package styleguide
 
 import "strings"
 
-/* ------------------------------------------ Constants ----------------------------------------- */
-
 const (
 	ExceptionLongLine = "allow-long-line"
 	ExceptionNonASCII = "allow-non-ascii"
@@ -71,19 +69,15 @@ func ParseExceptionMarker(line string) (rule string, reason string, found bool, 
 	return body, "", true, true
 }
 
-/* --------------------------------------- Marker Queries --------------------------------------- */
-
 // HasExceptionMarker reports whether the line contains a valid marker for the rule.
 func HasExceptionMarker(line string, rule string) (valid bool) {
 	exceptionRule, _, found, ok := ParseExceptionMarker(line)
 	return found && ok && exceptionRule == rule
 }
 
-/* ---------------------------------------- ASCII Checks ---------------------------------------- */
-
 func isASCII(value string) (ascii bool) {
-	for _, runeValue := range value {
-		if runeValue > asciiMaximum {
+	for _, character := range value {
+		if character > asciiMaximum {
 			return false
 		}
 	}
@@ -120,10 +114,10 @@ func isExceptionRule(value string) (valid bool) {
 		return false
 	}
 
-	for _, runeValue := range value[len("allow-"):] {
-		if runeValue == '-' ||
-			('a' <= runeValue && runeValue <= 'z') ||
-			('0' <= runeValue && runeValue <= '9') {
+	for _, character := range value[len("allow-"):] {
+		if character == '-' ||
+			('a' <= character && character <= 'z') ||
+			('0' <= character && character <= '9') {
 			continue
 		}
 
@@ -143,8 +137,8 @@ func indexOutsideQuotedText(line string, token string) (index int) {
 	inBacktick := false
 	escapePrefix := noEscape
 
-	for current := 0; current < len(line); current++ {
-		character := line[current]
+	for index := 0; index < len(line); index++ {
+		character := line[index]
 		switch {
 		case escapePrefix != noEscape:
 			escapePrefix = noEscape
@@ -186,8 +180,8 @@ func indexOutsideQuotedText(line string, token string) (index int) {
 			continue
 		}
 
-		if strings.HasPrefix(line[current:], token) {
-			return current
+		if strings.HasPrefix(line[index:], token) {
+			return index
 		}
 	}
 

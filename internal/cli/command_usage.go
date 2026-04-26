@@ -20,7 +20,7 @@ func commandUsage(name string, summary string, flagSet *flag.FlagSet) (usage str
 	}
 
 	if flagSet != nil {
-		flagText := strings.TrimSpace(flagUsages(flagSet))
+		flagText := strings.Trim(flagUsages(flagSet), "\n")
 		if flagText != "" {
 			lines = append(lines, "", "flags:", indentBlock(flagText, "  "))
 		}
@@ -46,5 +46,5 @@ func flagUsages(flagSet *flag.FlagSet) (usage string) {
 	flagSet.SetOutput(&buffer)
 	flagSet.PrintDefaults()
 	flagSet.SetOutput(io.Discard)
-	return buffer.String()
+	return strings.ReplaceAll(buffer.String(), "\t", "  ")
 }

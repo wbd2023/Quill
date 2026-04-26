@@ -6,17 +6,15 @@ import (
 	"testing"
 )
 
-/* ------------------------------------- Current Repository ------------------------------------- */
-
 func RepoRoot(test *testing.T) (root string) {
 	test.Helper()
 
-	_, currentFile, _, ok := runtime.Caller(0)
+	_, callerFile, _, ok := runtime.Caller(0)
 	if !ok {
 		test.Fatal("runtime.Caller failed")
 	}
 
-	return filepath.Clean(filepath.Join(filepath.Dir(currentFile), "..", "..", ".."))
+	return filepath.Clean(filepath.Join(filepath.Dir(callerFile), "..", "..", ".."))
 }
 
 func ToolsRoot(test *testing.T) (root string) {

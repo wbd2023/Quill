@@ -7,24 +7,20 @@ import (
 	gast "github.com/yuin/goldmark/ast"
 )
 
-/* -------------------------------------------- Types ------------------------------------------- */
-
 type documentWalkState struct {
-	document            documentModel
-	currentSection      string
+	document            Document
+	activeSection       string
 	pendingMetadata     *RequirementMetadata
 	requirementIDFormat string
 	seenHeadings        map[string]bool
 	seenRequirements    map[string]bool
 }
 
-/* ----------------------------------- Walk State Construction ---------------------------------- */
-
 func newDocumentWalkState(requirementIDFormat string) (state documentWalkState) {
 	return documentWalkState{
-		document: documentModel{
-			Headings:     make([]documentHeading, 0),
-			Requirements: make([]documentRequirement, 0),
+		document: Document{
+			Headings:     make([]Heading, 0),
+			Requirements: make([]Requirement, 0),
 		},
 		requirementIDFormat: requirementIDFormat,
 		seenHeadings:        make(map[string]bool),
@@ -80,9 +76,9 @@ func (state *documentWalkState) enterHeading(
 		return gast.WalkStop, fmt.Errorf("duplicate style.md section heading %q", section)
 	}
 
-	state.currentSection = section
+	state.activeSection = section
 	state.seenHeadings[section] = true
-	state.document.Headings = append(state.document.Headings, documentHeading{
+	state.document.Headings = append(state.document.Headings, Heading{
 		Section: section,
 		Title:   title,
 	})
@@ -166,18 +162,18 @@ func (state *documentWalkState) enterListItem(
 		return gast.WalkContinue, nil
 	}
 
-	if state.currentSection == "" {
+	if state.activeSection == "" {
 		return gast.WalkStop, fmt.Errorf(
 			"requirement %q appears before any style.md section heading",
 			requirementID,
 		)
 	}
 
-	if requirementSection(requirementID, state.requirementIDFormat) != state.currentSection {
+	if requirementSection(requirementID, state.requirementIDFormat) != state.activeSection {
 		return gast.WalkStop, fmt.Errorf(
 			"requirement %q appears under section %q",
 			requirementID,
-			state.currentSection,
+			state.activeSection,
 		)
 	}
 
@@ -186,9 +182,9 @@ func (state *documentWalkState) enterListItem(
 	}
 
 	state.seenRequirements[requirementID] = true
-	requirement := documentRequirement{
+	requirement := Requirement{
 		ID:      requirementID,
-		Section: state.currentSection,
+		Section: state.activeSection,
 		Text:    requirementText,
 	}
 	if state.pendingMetadata != nil {
@@ -203,9 +199,9 @@ func (state *documentWalkState) enterListItem(
 
 /* -------------------------------------- Walk Finalisation ------------------------------------- */
 
-func (state *documentWalkState) finish() (document documentModel, err error) {
+func (state *documentWalkState) finish() (document Document, err error) {
 	if state.pendingMetadata != nil {
-		return documentModel{}, fmt.Errorf(
+		return Document{}, fmt.Errorf(
 			"style.md metadata for %q must be followed by a requirement bullet",
 			state.pendingMetadata.ID,
 		)

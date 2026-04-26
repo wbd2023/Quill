@@ -1,26 +1,23 @@
 package runner
 
-import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/report"
-)
+import "ciphera/tools/internal/contract"
 
 func CheckStatus(
 	rule contract.Rule,
 	err error,
 	strictRecommendations bool,
-) (status report.CheckStatus) {
+) (status contract.CheckStatus) {
 	switch {
 	case err == nil:
-		return report.CheckStatusPass
+		return contract.CheckStatusPass
 
 	case IsBlocked(err):
-		return report.CheckStatusSkip
+		return contract.CheckStatusSkip
 
 	case rule.Level == contract.LevelRecommendation && !strictRecommendations:
-		return report.CheckStatusWarn
+		return contract.CheckStatusWarn
 
 	default:
-		return report.CheckStatusFail
+		return contract.CheckStatusFail
 	}
 }

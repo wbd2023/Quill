@@ -6,15 +6,21 @@ import (
 	"path/filepath"
 
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/toolchain"
 )
 
-func installGoTool(layout Layout, writer io.Writer, tool contract.Tool) (err error) {
-	if tool.InstallSource == "" {
+func installGoTool(
+	layout Layout,
+	writer io.Writer,
+	tool contract.Tool,
+	capability toolchain.Capability,
+) (err error) {
+	if capability.InstallSource == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	localPath := filepath.Join(layout.ToolBinDir, tool.Command)
-	localVersion, found, err := inspectLocalToolVersion(tool, localPath)
+	localPath := filepath.Join(layout.ToolBinDir, capability.Command)
+	localVersion, found, err := inspectLocalToolVersion(tool, capability, localPath)
 	if err != nil {
 		return err
 	}
@@ -32,12 +38,16 @@ func installGoTool(layout Layout, writer io.Writer, tool contract.Tool) (err err
 		return err
 	}
 
-	_, err = RunCommand(
+	goCapability := toolchain.Capability{ID: "go", Name: "Go", Command: "go"}
+	goTool := contract.Tool{ID: "go", Name: "Go",
+		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
+	_, err = RunToolCommand(
 		layout.ToolsDir,
 		goInstallEnvironment(layout),
-		"go",
+		goTool,
+		goCapability,
 		"install",
-		tool.InstallSource+"@"+tool.PinnedVersion,
+		capability.InstallSource+"@"+tool.PinnedVersion,
 	)
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)

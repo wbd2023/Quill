@@ -5,38 +5,51 @@ import (
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
+	"ciphera/tools/internal/rulepack"
 )
 
 func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
-	context := testContext(t, fixtures.RepoRoot(t), contract.ScopeApp)
+	context := testContext(t, fixtures.RepoRoot(t), contract.Scope("app"))
 
 	spec := contract.ExecutionSpec{
-		Backend: "go_app",
+		Kind: rulepack.ExecutorBackendCommand,
+		Detail: contract.BackendCommandExecution{
+			ToolIDs:  []string{rulepack.ToolGo, rulepack.ToolGoimports, rulepack.ToolGolangciLint},
+			Action:   rulepack.BackendActionGolangci,
+			Language: rulepack.LanguageGo,
+			Backends: []string{"application_go"},
+		},
 	}
 
-	output, err := golangciExecutor(context, spec, nil)
+	result, err := backendCommandExecutor(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciExecutor(app): %v\n%s", err, output)
+		t.Fatalf("golangciExecutor(app): %v\n%s", err, result.Output)
 	}
 
-	if output != "0 issues.\n" {
-		t.Fatalf("unexpected app lint output: %q", output)
+	if result.Output != "0 issues." {
+		t.Fatalf("unexpected app lint output: %q", result.Output)
 	}
 }
 
 func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
-	context := testContext(t, fixtures.RepoRoot(t), contract.ScopeTools)
+	context := testContext(t, fixtures.RepoRoot(t), contract.Scope("tools"))
 
 	spec := contract.ExecutionSpec{
-		Backend: "go_tools",
+		Kind: rulepack.ExecutorBackendCommand,
+		Detail: contract.BackendCommandExecution{
+			ToolIDs:  []string{rulepack.ToolGo, rulepack.ToolGoimports, rulepack.ToolGolangciLint},
+			Action:   rulepack.BackendActionGolangci,
+			Language: rulepack.LanguageGo,
+			Backends: []string{"tooling_go"},
+		},
 	}
 
-	output, err := golangciExecutor(context, spec, nil)
+	result, err := backendCommandExecutor(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciExecutor(tools): %v\n%s", err, output)
+		t.Fatalf("golangciExecutor(tools): %v\n%s", err, result.Output)
 	}
 
-	if output != "0 issues.\n" {
-		t.Fatalf("unexpected tools lint output: %q", output)
+	if result.Output != "0 issues." {
+		t.Fatalf("unexpected tools lint output: %q", result.Output)
 	}
 }
