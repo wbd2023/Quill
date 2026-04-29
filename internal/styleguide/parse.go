@@ -1,20 +1,55 @@
 package styleguide
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"ciphera/tools/internal/requirementid"
+
 	"github.com/yuin/goldmark"
-	gast "github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
 )
 
-func compileDocument(
-	contents []byte,
-	styleGuide Config,
-) (document Document, err error) {
-	root := goldmark.DefaultParser().Parse(text.NewReader(contents))
-	walkState := newDocumentWalkState(styleGuide.RequirementIDFormat)
-	if err = gast.Walk(root, walkState.walk(contents)); err != nil {
+// Load parses the configured STYLE.md file under root.
+func Load(root string, config Config) (document Document, err error) {
+	if config.Filename == "" {
+		return Document{}, fmt.Errorf("styleguide filename must not be empty")
+	}
+
+	scheme := config.RequirementIDScheme
+	if err := validateRequirementIDScheme(scheme); err != nil {
 		return Document{}, err
 	}
 
-	return walkState.finish()
+	filename := config.Filename
+	path := filepath.Join(root, filename)
+	source, err := os.ReadFile(path)
+	if err != nil {
+		return Document{}, err
+	}
+
+	return parse(newSourceFile(filename, source), scheme)
+}
+
+// Parse parses STYLE.md source bytes.
+func Parse(source []byte, config Config) (document Document, err error) {
+	scheme := config.RequirementIDScheme
+	if err := validateRequirementIDScheme(scheme); err != nil {
+		return Document{}, err
+	}
+
+	filename := config.Filename
+	if filename == "" {
+		filename = defaultFilename
+	}
+
+	return parse(newSourceFile(filename, source), scheme)
+}
+
+func parse(file sourceFile, scheme requirementid.Scheme) (document Document, err error) {
+	tree := goldmark.DefaultParser().Parse(text.NewReader(file.contents))
+	events := scanMarkdown(tree, file)
+	compiler := newDocumentCompiler(file, scheme)
+	return compiler.compile(events)
 }

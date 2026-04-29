@@ -1,5 +1,6 @@
-// Package styleguide parses STYLE.md into requirement metadata.
+// Package styleguide parses STYLE.md headings, metadata, and requirement list items.
 //
-// The pipeline is: Markdown is parsed into a Goldmark AST, headings and
-// metadata are compiled into requirements.
+// It turns Markdown source into a Goldmark AST and returns a document model for coverage checks.
+// It does not evaluate rules or decide requirement coverage. Requirement text is normalised plain
+// text; Markdown formatting is not preserved.
 package styleguide

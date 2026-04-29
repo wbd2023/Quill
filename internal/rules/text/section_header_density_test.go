@@ -70,7 +70,7 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
 	var builder strings.Builder
 	builder.WriteString("package example\n\n")
-	for range 6 {
+	for range 7 {
 		builder.WriteString(header + "\n\n")
 	}
 	fixtures.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
@@ -90,7 +90,7 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 		"text/section-header-density/too-many",
 		"internal/example/example.go",
 		0,
-		"6 section headers",
+		"7 section headers",
 	) {
 		t.Fatalf("expected too-many diagnostic, got: %#v", result.Diagnostics)
 	}

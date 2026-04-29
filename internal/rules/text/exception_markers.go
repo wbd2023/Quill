@@ -3,8 +3,8 @@ package text
 import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
+	"ciphera/tools/internal/markers"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/styleguide/markers"
 )
 
 func CheckExceptionMarkers(
@@ -20,7 +20,7 @@ func CheckExceptionMarkers(
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
 			marker := markers.Parse(line.Text)
-			if marker.Status != markers.Invalid {
+			if marker.Status != markers.StatusInvalid {
 				return nil
 			}
 

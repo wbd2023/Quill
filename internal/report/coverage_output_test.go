@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/styleguide"
 )
 
 /* --------------------------------------- Coverage Output -------------------------------------- */
@@ -20,14 +19,14 @@ func TestWriteCoverageText(t *testing.T) {
 				ID:      "3.2.ctx-first",
 				Section: "3.2",
 				Text:    "`ctx context.Context` MUST be the first parameter when present.",
-				Mode:    styleguide.VerificationAutomated,
+				Mode:    coverage.ModeAutomated,
 				RuleIDs: []string{"go-policy"},
 			},
 			{
 				ID:      "5.1.explain-security-plainly",
 				Section: "5.1",
 				Text:    "Security concepts SHOULD be explained in plain language.",
-				Mode:    styleguide.VerificationReviewOnly,
+				Mode:    coverage.ModeReviewOnly,
 				Reason:  "Plain-language quality is a writing judgement rather than a lint rule.",
 			},
 		},
@@ -68,7 +67,7 @@ func TestWriteCoverageJSON(t *testing.T) {
 			{
 				ID:      "3.2.ctx-first",
 				Section: "3.2",
-				Mode:    styleguide.VerificationAutomated,
+				Mode:    coverage.ModeAutomated,
 			},
 		},
 	})

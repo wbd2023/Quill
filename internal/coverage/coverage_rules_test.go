@@ -3,8 +3,6 @@ package coverage
 import (
 	"slices"
 	"testing"
-
-	"ciphera/tools/internal/styleguide"
 )
 
 func TestAutomatedRequirementsReferenceRules(t *testing.T) {
@@ -16,7 +14,7 @@ func TestAutomatedRequirementsReferenceRules(t *testing.T) {
 
 	report := loadCoverageReport(t)
 	for _, requirement := range report.Requirements {
-		if requirement.Mode != styleguide.VerificationAutomated {
+		if requirement.Mode != ModeAutomated {
 			continue
 		}
 

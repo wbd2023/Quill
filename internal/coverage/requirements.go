@@ -16,15 +16,15 @@ func buildRequirements(
 		ruleIDs := append([]string{}, ruleIDsByRequirement[documentedRequirement.ID]...)
 		sort.Strings(ruleIDs)
 
-		mode := styleguide.VerificationManualDeferred
+		mode := ModeManualDeferred
 		reason := "No automated rule is registered yet for this requirement."
 		if len(ruleIDs) > 0 {
-			mode = styleguide.VerificationAutomated
+			mode = ModeAutomated
 			reason = ""
 		}
-		if documentedRequirement.Mode != "" {
-			mode = documentedRequirement.Mode
-			reason = documentedRequirement.Reason
+		if documentedRequirement.Review.Only {
+			mode = ModeReviewOnly
+			reason = documentedRequirement.Review.Reason
 		}
 
 		requirements = append(requirements, Requirement{

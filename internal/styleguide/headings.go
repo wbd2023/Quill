@@ -1,32 +1,29 @@
 package styleguide
 
-import "strings"
+import (
+	"strings"
 
-func parseHeadingText(value string) (section string, title string, found bool) {
-	value = trimMarkdownHeadingPrefix(value)
-	if value == "" {
-		return "", "", false
+	"ciphera/tools/internal/requirementid"
+)
+
+func parseHeading(text string) (heading Heading, found bool) {
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return Heading{}, false
 	}
 
-	section, remainder, found := strings.Cut(strings.TrimSpace(value), " ")
-	if !found || !isSectionID(section) {
-		return "", "", false
+	section, remainder, found := strings.Cut(text, " ")
+	if !found || !requirementid.ValidSection(section) {
+		return Heading{}, false
 	}
 
-	title = strings.TrimSpace(remainder)
+	title := strings.TrimSpace(remainder)
 	if title == "" {
-		return "", "", false
+		return Heading{}, false
 	}
 
-	return section, title, true
-}
-
-func trimMarkdownHeadingPrefix(value string) (trimmed string) {
-	trimmed = strings.TrimSpace(value)
-	if !strings.HasPrefix(trimmed, "#") {
-		return trimmed
-	}
-
-	trimmed = strings.TrimLeft(trimmed, "#")
-	return strings.TrimSpace(trimmed)
+	return Heading{
+		Section: section,
+		Title:   title,
+	}, true
 }

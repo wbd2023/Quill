@@ -11,5 +11,5 @@ type schemaRepositoryConfig struct {
 
 type schemaStyleGuideConfig struct {
 	Path                string `toml:"path"`
-	RequirementIDFormat string `toml:"requirement_id_format"`
+	RequirementIDScheme string `toml:"requirement_id_scheme"`
 }

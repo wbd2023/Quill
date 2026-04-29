@@ -30,6 +30,6 @@ func repositoryToSchema(repository policy.RepositoryConfig) (schema schemaReposi
 func styleGuideFromSchema(schema schemaStyleGuideConfig) (config policy.StyleGuideConfig) {
 	return policy.StyleGuideConfig{
 		Path:                schema.Path,
-		RequirementIDFormat: schema.RequirementIDFormat,
+		RequirementIDScheme: schema.RequirementIDScheme,
 	}
 }

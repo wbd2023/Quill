@@ -3,207 +3,184 @@ package styleguide
 import (
 	"fmt"
 	"strings"
+
+	"ciphera/tools/internal/requirementid"
 )
 
-/* --------------------------------------- Comment Parsing -------------------------------------- */
+/* ----------------------------------------- Definitions ---------------------------------------- */
 
-func parseMetadataComment(
-	line string,
-	requirementIDFormat string,
-) (metadata RequirementMetadata, found bool, err error) {
-	trimmed := strings.TrimSpace(line)
-	if !strings.Contains(trimmed, "style:") {
-		return RequirementMetadata{}, false, nil
-	}
+const (
+	htmlCommentPrefix = "<!--"
+	htmlCommentSuffix = "-->"
+	metadataPrefix    = "style:"
+)
 
-	if !strings.HasPrefix(trimmed, "<!--") || !strings.HasSuffix(trimmed, "-->") {
-		return RequirementMetadata{}, false, fmt.Errorf(
-			"malformed style metadata comment: %q",
-			trimmed,
-		)
-	}
+const (
+	metadataFieldID     metadataField = "id"
+	metadataFieldMode   metadataField = "mode"
+	metadataFieldReason metadataField = "reason"
+)
 
-	body := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, "<!--"), "-->"))
-	if !strings.HasPrefix(body, "style:") {
-		return RequirementMetadata{}, false, fmt.Errorf(
-			"malformed style metadata comment: %q",
-			body,
-		)
-	}
+const metadataModeReviewOnly = "review_only"
 
-	body = strings.TrimSpace(strings.TrimPrefix(body, "style:"))
-	if strings.Contains(body, "\n") {
-		return parseBlockMetadata(body, requirementIDFormat)
-	}
-
-	return parseInlineMetadata(body, requirementIDFormat)
+type requirementMetadata struct {
+	id     requirementid.ID
+	review Review
+	source position
 }
 
-func parseInlineMetadata(
-	body string,
-	requirementIDFormat string,
-) (metadata RequirementMetadata, found bool, err error) {
-	requirementID, rest, err := parseInlineMetadataID(body)
+type metadataFields struct {
+	id     string
+	mode   string
+	reason string
+}
+
+type metadataField string
+
+/* ------------------------------------------ Comments ------------------------------------------ */
+
+func parseMetadataComment(source string) (fields metadataFields, found bool, err error) {
+	payload, found, err := extractMetadataPayload(source)
+	if !found || err != nil {
+		return metadataFields{}, found, err
+	}
+
+	fields, err = parseMetadataFields(payload)
 	if err != nil {
-		return RequirementMetadata{}, false, err
+		return metadataFields{}, false, err
 	}
 
-	mode, reason, err := parseInlineMetadataReview(rest)
-	if err != nil {
-		return RequirementMetadata{}, false, err
-	}
-
-	return buildMetadata(requirementID, mode, reason, requirementIDFormat)
+	return fields, true, nil
 }
 
-func parseInlineMetadataID(body string) (requirementID string, rest string, err error) {
-	body = strings.TrimSpace(body)
-	if !strings.HasPrefix(body, "id=") {
-		return "", "", malformedMetadata(body)
-	}
-
-	requirementID, rest, _ = strings.Cut(strings.TrimPrefix(body, "id="), " ")
-	if requirementID == "" {
-		return "", "", malformedMetadata(body)
-	}
-
-	return requirementID, strings.TrimSpace(rest), nil
-}
-
-func parseInlineMetadataReview(rest string) (mode string, reason string, err error) {
-	if rest == "" {
-		return "", "", nil
-	}
-
-	modeField, reasonField, hasReason := strings.Cut(rest, " ")
-	mode, found := strings.CutPrefix(modeField, "mode=")
+func extractMetadataPayload(source string) (payload string, found bool, err error) {
+	source = strings.TrimSpace(source)
+	body, found := extractCommentBody(source)
 	if !found {
-		return "", "", malformedMetadata(rest)
+		body = strings.TrimSpace(strings.TrimPrefix(source, htmlCommentPrefix))
+		if strings.HasPrefix(source, metadataPrefix) || strings.HasPrefix(body, metadataPrefix) {
+			return "", false, malformedMetadata(source)
+		}
+
+		return "", false, nil
 	}
 
-	if !hasReason {
-		return mode, "", nil
-	}
+	payload, found = extractStylePayload(body)
+	return payload, found, nil
+}
 
-	reasonSource, found := strings.CutPrefix(strings.TrimSpace(reasonField), `reason="`)
+func extractCommentBody(source string) (body string, found bool) {
+	body, found = strings.CutPrefix(strings.TrimSpace(source), htmlCommentPrefix)
 	if !found {
-		return "", "", malformedMetadata(rest)
+		return "", false
 	}
 
-	reason, tail, found := strings.Cut(reasonSource, `"`)
-	if !found || tail != "" {
-		return "", "", malformedMetadata(rest)
+	body, found = strings.CutSuffix(body, htmlCommentSuffix)
+	if !found {
+		return "", false
 	}
 
-	return mode, reason, nil
+	return strings.TrimSpace(body), true
 }
 
-/* ---------------------------------------- Block Fields ---------------------------------------- */
-
-func parseBlockMetadata(
-	body string,
-	requirementIDFormat string,
-) (metadata RequirementMetadata, found bool, err error) {
-	fields, err := parseMetadataFields(body)
-	if err != nil {
-		return RequirementMetadata{}, false, err
+func extractStylePayload(body string) (payload string, found bool) {
+	payload, found = strings.CutPrefix(body, metadataPrefix)
+	if !found {
+		return "", false
 	}
 
-	return buildMetadata(fields["id"], fields["mode"], fields["reason"], requirementIDFormat)
+	return strings.TrimSpace(payload), true
 }
 
-func parseMetadataFields(body string) (fields map[string]string, err error) {
-	fields = make(map[string]string)
-	fieldKey := ""
-	fieldText := ""
+/* ------------------------------------------- Fields ------------------------------------------- */
 
-	flush := func() error {
-		if fieldKey == "" {
-			return nil
-		}
-
-		if _, exists := fields[fieldKey]; exists {
-			return fmt.Errorf("duplicate %q in style metadata comment", fieldKey)
-		}
-		fields[fieldKey] = strings.TrimSpace(fieldText)
-		return nil
+func parseMetadataFields(payload string) (fields metadataFields, err error) {
+	if strings.Contains(payload, "\n") {
+		return parseBlockMetadata(payload)
 	}
 
-	for _, rawLine := range strings.Split(body, "\n") {
-		line := strings.TrimSpace(rawLine)
-		if line == "" {
-			continue
-		}
-
-		key, value, hasAssignment := strings.Cut(line, "=")
-		key = strings.TrimSpace(key)
-		if hasAssignment && isMetadataFieldKey(key) {
-			if err := flush(); err != nil {
-				return nil, err
-			}
-
-			fieldKey = key
-			fieldText = strings.TrimSpace(value)
-			continue
-		}
-
-		if fieldKey == "" {
-			return nil, fmt.Errorf("malformed style metadata comment near %q", line)
-		}
-
-		fieldText += " " + line
-	}
-
-	if err := flush(); err != nil {
-		return nil, err
-	}
-
-	return fields, nil
+	return parseInlineMetadata(payload)
 }
 
-func isMetadataFieldKey(value string) (found bool) {
-	switch value {
-	case "id", "mode", "reason":
-		return true
+func parseMetadataField(name string) (field metadataField, found bool) {
+	field = metadataField(strings.TrimSpace(name))
+	switch field {
+	case metadataFieldID, metadataFieldMode, metadataFieldReason:
+		return field, true
 	default:
-		return false
+		return "", false
 	}
 }
 
-func malformedMetadata(body string) (err error) {
-	return fmt.Errorf("malformed style metadata comment: %q", body)
+func (fields *metadataFields) setField(field metadataField, value string) (err error) {
+	if strings.TrimSpace(value) == "" {
+		return emptyMetadataField(field)
+	}
+
+	switch field {
+	case metadataFieldID:
+		fields.id = value
+
+	case metadataFieldMode:
+		fields.mode = value
+
+	case metadataFieldReason:
+		fields.reason = value
+
+	default:
+		return unknownMetadataField(field)
+	}
+
+	return nil
 }
 
-/* --------------------------------------- Metadata Values -------------------------------------- */
+/* ------------------------------------ Requirement Metadata ------------------------------------ */
 
-func buildMetadata(
-	requirementID string,
-	mode string,
-	reason string,
-	requirementIDFormat string,
-) (metadata RequirementMetadata, found bool, err error) {
-	if !isRequirementID(requirementID, requirementIDFormat) {
-		return RequirementMetadata{}, false, fmt.Errorf(
-			"invalid requirement id in style metadata comment",
+func buildRequirementMetadata(
+	fields metadataFields,
+	scheme requirementid.Scheme,
+) (metadata requirementMetadata, err error) {
+	id, err := requirementid.Parse(fields.id, scheme)
+	if err != nil {
+		return requirementMetadata{}, fmt.Errorf(
+			"invalid requirement id in style metadata comment: %w",
+			err,
 		)
 	}
 
-	if (mode == "") != (reason == "") {
-		return RequirementMetadata{}, false, fmt.Errorf(
+	hasMode, hasReason := fields.mode != "", fields.reason != ""
+	if hasMode != hasReason {
+		return requirementMetadata{}, fmt.Errorf(
 			"style metadata mode and reason must appear together",
 		)
 	}
 
-	if mode != "" && VerificationMode(mode) != VerificationReviewOnly {
-		return RequirementMetadata{}, false, fmt.Errorf(
+	if hasMode && fields.mode != metadataModeReviewOnly {
+		return requirementMetadata{}, fmt.Errorf(
 			"unsupported style metadata mode %q",
-			mode,
+			fields.mode,
 		)
 	}
 
-	return RequirementMetadata{
-		ID:     requirementID,
-		Mode:   VerificationMode(mode),
-		Reason: reason,
-	}, true, nil
+	return requirementMetadata{
+		id: id,
+		review: Review{
+			Only:   hasMode,
+			Reason: fields.reason,
+		},
+	}, nil
+}
+
+/* ------------------------------------------- Errors ------------------------------------------- */
+
+func malformedMetadata(source string) (err error) {
+	return fmt.Errorf("malformed style metadata comment: %q", source)
+}
+
+func emptyMetadataField(field metadataField) (err error) {
+	return fmt.Errorf("style metadata field %q must not be empty", field)
+}
+
+func unknownMetadataField(field metadataField) (err error) {
+	return fmt.Errorf("unknown style metadata field %q", field)
 }

@@ -44,7 +44,7 @@ func TestParseProfileDecodesSectionHeaderPolicy(t *testing.T) {
 [formatting.section_headers]
 required_min_lines = 100
 short_file_max_lines = 79
-overuse_header_count = 6
+overuse_header_count = 7
 generic_names = ["Check", "Checks"]
 structural_names = ["Types", "Helpers"]
 `)
@@ -55,7 +55,7 @@ structural_names = ["Types", "Helpers"]
 	headers := config.Formatting.SectionHeaders
 	if headers.RequiredMinLines != 100 ||
 		headers.ShortFileMaxLines != 79 ||
-		headers.OveruseCount != 6 ||
+		headers.OveruseCount != 7 ||
 		len(headers.GenericNames) != 2 ||
 		headers.GenericNames[0] != "Check" ||
 		len(headers.StructuralNames) != 2 {
@@ -102,12 +102,12 @@ all = ["."]
 
 [styleguide]
 path = "STYLE.md"
-requirement_id_format = "section_slug"
+requirement_id_scheme = "section_slug"
 
 [formatting.section_headers]
 required_min_lines = 100
 short_file_max_lines = 79
-overuse_header_count = 6
+overuse_header_count = 7
 generic_names = ["Check", "Checks", "Misc", "Other"]
 structural_names = ["Types", "Constants", "Helpers"]
 

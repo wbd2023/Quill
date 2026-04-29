@@ -1,10 +1,13 @@
 package policy
 
-import "ciphera/tools/internal/contract"
+import (
+	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/requirementid"
+)
 
 const SchemaVersion = 1
 
-const RequirementIDFormatSectionSlug = "section_slug"
+const RequirementIDSchemeSectionSlug = string(requirementid.SectionSlug)
 
 type Config struct {
 	SchemaVersion int
@@ -29,7 +32,7 @@ type RulePackConfig struct {
 
 type StyleGuideConfig struct {
 	Path                string
-	RequirementIDFormat string
+	RequirementIDScheme string
 }
 
 type ImportsConfig struct {

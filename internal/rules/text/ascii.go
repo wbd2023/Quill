@@ -5,9 +5,11 @@ import (
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
+	"ciphera/tools/internal/markers"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/styleguide/markers"
 )
+
+const nonASCIIMarker = "allow-non-ascii"
 
 func CheckASCII(
 	repoRoot string,
@@ -21,7 +23,7 @@ func CheckASCII(
 
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
-			if markers.Has(line.Text, markers.NonASCII) {
+			if markers.Has(line.Text, nonASCIIMarker) {
 				return nil
 			}
 

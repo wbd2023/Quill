@@ -1,7 +1,5 @@
 package coverage
 
-import "ciphera/tools/internal/styleguide"
-
 const (
 	StatusAutomated  Status = "automated"
 	StatusPartial    Status = "partial"
@@ -9,13 +7,21 @@ const (
 	StatusManual     Status = "manual"
 )
 
+const (
+	ModeAutomated      Mode = "automated"
+	ModeReviewOnly     Mode = "review_only"
+	ModeManualDeferred Mode = "manual_deferred"
+)
+
 type Status string
+
+type Mode string
 
 type Requirement struct {
 	ID      string
 	Section string
 	Text    string
-	Mode    styleguide.VerificationMode
+	Mode    Mode
 	Reason  string
 	RuleIDs []string
 }
