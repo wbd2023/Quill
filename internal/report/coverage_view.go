@@ -2,7 +2,6 @@ package report
 
 import (
 	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/styleguide"
 )
 
 func NewCoverageView(report coverage.Report) (view CoverageView) {
@@ -14,15 +13,15 @@ func NewCoverageView(report coverage.Report) (view CoverageView) {
 
 	for _, requirement := range report.Requirements {
 		switch requirement.Mode {
-		case styleguide.VerificationAutomated:
+		case coverage.ModeAutomated:
 			view.RequirementTotals.Automated++
-		case styleguide.VerificationReviewOnly:
+		case coverage.ModeReviewOnly:
 			view.RequirementTotals.ReviewOnly++
-		case styleguide.VerificationManualDeferred:
+		case coverage.ModeManualDeferred:
 			view.RequirementTotals.ManualDeferred++
 		}
 
-		if requirement.Mode == styleguide.VerificationAutomated {
+		if requirement.Mode == coverage.ModeAutomated {
 			continue
 		}
 

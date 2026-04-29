@@ -25,11 +25,11 @@ func buildSectionCoverage(
 			entry.RequirementCount++
 
 			switch requirement.Mode {
-			case styleguide.VerificationAutomated:
+			case ModeAutomated:
 				entry.AutomatedCount++
-			case styleguide.VerificationReviewOnly:
+			case ModeReviewOnly:
 				entry.ReviewOnlyCount++
-			case styleguide.VerificationManualDeferred:
+			case ModeManualDeferred:
 				entry.ManualDeferredCount++
 			}
 		}

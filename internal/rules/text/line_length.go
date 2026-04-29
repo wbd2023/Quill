@@ -6,12 +6,13 @@ import (
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/styleguide/markers"
+	"ciphera/tools/internal/markers"
 )
 
 const (
 	lineLengthLimit    = 100
 	lineLengthTabWidth = 4
+	longLineMarker     = "allow-long-line"
 )
 
 func CheckLineLengths(
@@ -21,7 +22,7 @@ func CheckLineLengths(
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
 			if strings.HasSuffix(path, ".sh") &&
-				markers.Has(line.Text, markers.LongLine) {
+				markers.Has(line.Text, longLineMarker) {
 				return nil
 			}
 

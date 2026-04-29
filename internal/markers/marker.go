@@ -3,14 +3,15 @@ package markers
 import "strings"
 
 const (
-	LongLine = "allow-long-line"
-	NonASCII = "allow-non-ascii"
+	markerPrefix    = "style: "
+	reasonSeparator = " because: "
 )
 
 const (
-	Absent  Status = "absent"
-	Invalid Status = "invalid"
-	Valid   Status = "valid"
+	StatusUnknown Status = ""
+	StatusAbsent  Status = "absent"
+	StatusInvalid Status = "invalid"
+	StatusValid   Status = "valid"
 )
 
 type Status string
@@ -26,8 +27,8 @@ func Text(rule string) (marker string) {
 	return markerPrefix + rule
 }
 
-// TextWithReason returns the canonical marker with a short justification.
-func TextWithReason(rule string, reason string) (marker string) {
+// Because returns the canonical inline marker with a short justification.
+func Because(rule string, reason string) (marker string) {
 	reason = strings.TrimSpace(reason)
 	if reason == "" {
 		return Text(rule)

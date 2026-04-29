@@ -52,14 +52,14 @@ func validateStyleGuide(styleGuide policy.StyleGuideConfig) (err error) {
 		return fmt.Errorf("styleguide.path must not be empty")
 	}
 
-	if styleGuide.RequirementIDFormat == "" {
-		return fmt.Errorf("styleguide.requirement_id_format must not be empty")
+	if styleGuide.RequirementIDScheme == "" {
+		return fmt.Errorf("styleguide.requirement_id_scheme must not be empty")
 	}
 
-	if styleGuide.RequirementIDFormat != policy.RequirementIDFormatSectionSlug {
+	if styleGuide.RequirementIDScheme != policy.RequirementIDSchemeSectionSlug {
 		return fmt.Errorf(
-			"unsupported styleguide.requirement_id_format %q",
-			styleGuide.RequirementIDFormat,
+			"unsupported styleguide.requirement_id_scheme %q",
+			styleGuide.RequirementIDScheme,
 		)
 	}
 

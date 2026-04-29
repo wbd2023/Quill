@@ -1,10 +1,6 @@
 package coverage
 
-import (
-	"testing"
-
-	"ciphera/tools/internal/styleguide"
-)
+import "testing"
 
 func TestRequirementsCoverEveryStyleRequirement(t *testing.T) {
 	document := loadDocument(t)
@@ -30,7 +26,7 @@ func TestReviewOnlyRequirementsAreNotAlsoAutomated(t *testing.T) {
 
 	report := loadCoverageReport(t)
 	for _, requirement := range report.Requirements {
-		if requirement.Mode != styleguide.VerificationReviewOnly ||
+		if requirement.Mode != ModeReviewOnly ||
 			len(automated[requirement.ID]) == 0 {
 			continue
 		}
@@ -42,7 +38,7 @@ func TestReviewOnlyRequirementsAreNotAlsoAutomated(t *testing.T) {
 func TestUnannotatedOutstandingRequirementsDefaultToDeferredManual(t *testing.T) {
 	report := loadCoverageReport(t)
 	for _, requirement := range report.Requirements {
-		if requirement.Mode != styleguide.VerificationManualDeferred {
+		if requirement.Mode != ModeManualDeferred {
 			continue
 		}
 

@@ -37,7 +37,7 @@ func schemaFromPolicy(config policy.Config) (schema schemaConfig) {
 		Repository: repositoryToSchema(config.Repository),
 		StyleGuide: schemaStyleGuideConfig{
 			Path:                config.StyleGuide.Path,
-			RequirementIDFormat: config.StyleGuide.RequirementIDFormat,
+			RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
 		},
 		Formatting:   formattingToSchema(config.Formatting),
 		Imports:      schemaImportsConfig{LocalPrefix: config.Imports.LocalPrefix},

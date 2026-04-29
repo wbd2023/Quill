@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
@@ -43,8 +44,12 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 
 func TestStyleGuideRequirementIDsMatchTheirSection(t *testing.T) {
 	for _, requirement := range loadStyleRequirements(t) {
-		expectedSection := styleguide.RequirementSection(requirement.ID)
-		if expectedSection == requirement.Section {
+		id, err := requirementid.Parse(requirement.ID, requirementid.SectionSlug)
+		if err != nil {
+			t.Fatalf("parse requirement ID %q: %v", requirement.ID, err)
+		}
+
+		if id.Section() == requirement.Section {
 			continue
 		}
 
@@ -52,17 +57,17 @@ func TestStyleGuideRequirementIDsMatchTheirSection(t *testing.T) {
 			"requirement %q appears under STYLE.md section %q, expected %q",
 			requirement.ID,
 			requirement.Section,
-			expectedSection,
+			id.Section(),
 		)
 	}
 }
 
 func TestStyleGuideNonAutomatedRequirementsHaveReasons(t *testing.T) {
 	for _, requirement := range loadStyleRequirements(t) {
-		if requirement.Mode == "" {
+		if !requirement.Review.Only {
 			continue
 		}
-		if requirement.Reason != "" {
+		if requirement.Review.Reason != "" {
 			continue
 		}
 
@@ -89,8 +94,8 @@ func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement)
 
 	config := profiles.Current(t)
 	document, err := styleguide.Load(fixtures.RepoRoot(t), styleguide.Config{
-		Path:                config.StyleGuide.Path,
-		RequirementIDFormat: config.StyleGuide.RequirementIDFormat,
+		Filename:            config.StyleGuide.Path,
+		RequirementIDScheme: requirementid.Scheme(config.StyleGuide.RequirementIDScheme),
 	})
 	if err != nil {
 		t.Fatalf("load STYLE.md: %v", err)

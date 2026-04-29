@@ -2,24 +2,48 @@ package styleguide
 
 import "testing"
 
-func TestParseStyleHeading(t *testing.T) {
-	section, title, found := parseHeadingText("### 3.2 Context, resources, and concurrency")
+func TestParseHeadingAcceptsNumberedSection(t *testing.T) {
+	heading, found := parseHeading("3.2 Context, resources, and concurrency")
 	if !found {
 		t.Fatal("expected heading to parse")
 	}
 
-	if section != "3.2" || title != "Context, resources, and concurrency" {
-		t.Fatalf("unexpected heading parse: %q %q", section, title)
+	requireHeading(t, heading, Heading{
+		Section: "3.2",
+		Title:   "Context, resources, and concurrency",
+	})
+}
+
+func TestParseHeadingRejectsMalformedHeadings(t *testing.T) {
+	cases := []struct {
+		name string
+		line string
+	}{
+		{name: "empty heading", line: ""},
+		{name: "missing title", line: "3.2"},
+		{name: "invalid section", line: "3.x Context"},
+		{name: "not a numbered heading", line: "Context"},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			_, found := parseHeading(test.line)
+			if found {
+				t.Fatal("expected malformed heading to be rejected")
+			}
+		})
 	}
 }
 
-func TestExtractStyleHeadingsParsesSectionHeadingsAtAnyMarkdownLevel(t *testing.T) {
-	headings := extractHeadings(t, "## 3.2 Context, resources, and concurrency\n")
-	if len(headings) != 1 {
-		t.Fatalf("expected 1 heading, got %d", len(headings))
-	}
-
-	if headings[0].Section != "3.2" || headings[0].Title != "Context, resources, and concurrency" {
-		t.Fatalf("unexpected heading parse: %+v", headings[0])
-	}
+func TestParseReadsSectionHeadingsAtAnyMarkdownLevel(t *testing.T) {
+	requireHeadings(
+		t,
+		parseHeadings(t, "## 3.2 Context, resources, and concurrency\n"),
+		[]Heading{
+			{
+				Section: "3.2",
+				Title:   "Context, resources, and concurrency",
+			},
+		},
+	)
 }

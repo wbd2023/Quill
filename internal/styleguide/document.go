@@ -1,57 +1,27 @@
 package styleguide
 
-import (
-	"os"
-	"path/filepath"
-)
-
-const (
-	VerificationAutomated      VerificationMode = "automated"
-	VerificationReviewOnly     VerificationMode = "review_only"
-	VerificationManualDeferred VerificationMode = "manual_deferred"
-)
-
-type VerificationMode string
-
-type Config struct {
-	Path                string
-	RequirementIDFormat string
-}
-
+// Document is the parsed STYLE.md model used by coverage checks.
 type Document struct {
 	Headings     []Heading
 	Requirements []Requirement
 }
 
+// Heading is a numbered STYLE.md section heading.
 type Heading struct {
 	Section string
 	Title   string
 }
 
+// Requirement is a documented STYLE.md requirement.
 type Requirement struct {
 	ID      string
 	Section string
 	Text    string
-	Mode    VerificationMode
-	Reason  string
+	Review  Review
 }
 
-type RequirementMetadata struct {
-	ID     string
-	Mode   VerificationMode
+// Review describes review-only metadata for a STYLE.md requirement.
+type Review struct {
+	Only   bool
 	Reason string
-}
-
-func Load(repoRoot string, config Config) (document Document, err error) {
-	stylePath := filepath.Join(repoRoot, config.Path)
-	contents, err := os.ReadFile(stylePath)
-	if err != nil {
-		return Document{}, err
-	}
-
-	return Parse(contents, config)
-}
-
-func Parse(contents []byte, config Config) (document Document, err error) {
-	return compileDocument(contents, config)
 }
