@@ -45,7 +45,7 @@ func alternatePolicyForTest(t *testing.T) (config policy.Config) {
 
 	config = profiles.Current(t)
 	config.Repository.RootMarkers = []string{"STYLE.md", "style.toml", "ALTROOT"}
-	config.Repository.Scopes = map[contract.Scope][]string{
+	config.Repository.ScopeRoots = map[contract.Scope][]string{
 		"app":   {"cmd", "internal"},
 		"tools": {"tools"},
 		"all":   {"."},
@@ -53,16 +53,16 @@ func alternatePolicyForTest(t *testing.T) (config policy.Config) {
 	config.FileSets = replaceFileSet(config.FileSets, policy.FileSetConfig{
 		Name:       "markdown",
 		Extensions: []string{".md"},
-		Files: map[contract.Scope][]string{
+		ExplicitFiles: map[contract.Scope][]string{
 			"app": {"STYLE.md"},
 		},
-		Prefixes: map[contract.Scope][]string{
+		PathPrefixes: map[contract.Scope][]string{
 			"app":   {"cmd/", "internal/"},
 			"tools": {"tools/"},
 		},
 	})
-	config.Imports.LocalPrefix = "example.com/altchat"
-	config.Paths.Classes = map[string][]string{
+	config.Go.LocalImportPrefixes = []string{"example.com/altchat"}
+	config.Paths = policy.PathClasses{
 		"go_source":        {"cmd/", "internal/"},
 		"application_port": {"internal/app/ports/"},
 		"concrete_infra":   {"internal/adapters/"},
@@ -75,55 +75,56 @@ func alternatePolicyForTest(t *testing.T) (config policy.Config) {
 			Name:        "application_go",
 			Language:    "go",
 			Scope:       contract.Scope("app"),
-			Workdir:     ".",
+			WorkDir:     ".",
 			FormatPaths: []string{"cmd", "internal"},
-			StylePaths:  []string{"cmd", "internal"},
+			CheckPaths:  []string{"cmd", "internal"},
 		},
 		{
 			Name:        "tooling_go",
 			Language:    "go",
 			Scope:       contract.Scope("tools"),
-			Workdir:     "tools",
+			WorkDir:     "tools",
 			FormatPaths: []string{"cmd", "internal"},
-			StylePaths:  []string{"tools/cmd", "tools/internal"},
+			CheckPaths:  []string{"cmd", "internal"},
 		},
 	}
-	config.Naming.GoTypeSuffixForbidden = []string{"Repository"}
-	config.Naming.GoTypeSuffixPreferred = "Store"
-	config.Naming.GoIdentifierSuffixForbidden = []string{"Repository"}
-	config.Naming.GoIdentifierSuffixPreferred = "Store"
-	config.Naming.GoParameters.ConstructorCategories = replaceConstructorCategory(
-		config.Naming.GoParameters.ConstructorCategories,
-		policy.GoConstructorCategory{
+	config.Vocabulary.Go.ForbiddenTypeSuffixes = []string{"Repository"}
+	config.Vocabulary.Go.PreferredTypeSuffix = "Store"
+	config.Vocabulary.Go.ForbiddenIdentifierSuffixes = []string{"Repository"}
+	config.Vocabulary.Go.PreferredIdentifierSuffix = "Store"
+	parameters := &config.Go.Parameters
+	parameters.ConstructorOrder = replaceParameterGroup(
+		parameters.ConstructorOrder,
+		policy.GoParameterGroup{
 			Name:        "repository",
 			TypeMarkers: []string{"Store"},
 		},
 	)
-	config.Architecture.Layers = []policy.ArchitectureLayer{
+	config.Go.Architecture.Layers = []policy.GoArchitectureLayer{
 		{
-			Name:         "domain",
-			PackageRoots: []string{"internal/domain"},
-			MayImport:    []string{"domain"},
+			Name:          "domain",
+			PackageRoots:  []string{"internal/domain"},
+			AllowedLayers: []string{"domain"},
 		},
 		{
-			Name:         "port",
-			PackageRoots: []string{"internal/app/ports"},
-			MayImport:    []string{"domain", "port"},
+			Name:          "port",
+			PackageRoots:  []string{"internal/app/ports"},
+			AllowedLayers: []string{"domain", "port"},
 		},
 		{
-			Name:         "service",
-			PackageRoots: []string{"internal/app/services"},
-			MayImport:    []string{"domain", "port", "service"},
+			Name:          "service",
+			PackageRoots:  []string{"internal/app/services"},
+			AllowedLayers: []string{"domain", "port", "service"},
 		},
 		{
-			Name:         "adapter",
-			PackageRoots: []string{"internal/adapters"},
-			MayImport:    []string{"domain", "port", "service", "adapter"},
+			Name:          "adapter",
+			PackageRoots:  []string{"internal/adapters"},
+			AllowedLayers: []string{"domain", "port", "service", "adapter"},
 		},
 		{
-			Name:         "cmd",
-			PackageRoots: []string{"cmd"},
-			MayImport:    []string{"service", "adapter"},
+			Name:          "cmd",
+			PackageRoots:  []string{"cmd"},
+			AllowedLayers: []string{"service", "adapter"},
 		},
 	}
 
@@ -149,13 +150,13 @@ func replaceFileSet(
 	return append(updated, replacement)
 }
 
-func replaceConstructorCategory(
-	categories []policy.GoConstructorCategory,
-	replacement policy.GoConstructorCategory,
-) (updated []policy.GoConstructorCategory) {
-	updated = append([]policy.GoConstructorCategory{}, categories...)
-	for index, category := range updated {
-		if category.Name != replacement.Name {
+func replaceParameterGroup(
+	groups []policy.GoParameterGroup,
+	replacement policy.GoParameterGroup,
+) (updated []policy.GoParameterGroup) {
+	updated = append([]policy.GoParameterGroup{}, groups...)
+	for index, group := range updated {
+		if group.Name != replacement.Name {
 			continue
 		}
 

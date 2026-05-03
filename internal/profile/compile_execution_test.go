@@ -23,7 +23,7 @@ func TestCompileRejectsExecutorSpecFieldMismatch(t *testing.T) {
 			RequirementIDs: []string{"0.4.pin-go"},
 		},
 	}
-	config.Tools = []policy.ToolPin{{ID: rulepack.ToolShfmt, Version: "v3.12.0"}}
+	config.Tools = []policy.PinnedTool{{ID: rulepack.ToolShfmt, Version: "v3.12.0"}}
 	definitions := contract.Definitions{
 		Tools: []contract.Tool{{ID: rulepack.ToolShfmt}},
 		Rules: []contract.RuleDefinition{

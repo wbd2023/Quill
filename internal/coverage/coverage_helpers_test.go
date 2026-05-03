@@ -7,7 +7,6 @@ import (
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
@@ -18,7 +17,7 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	config := profiles.Current(t)
 	document, err := styleguide.Load(fixtures.RepoRoot(t), styleguide.Config{
 		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: requirementid.Scheme(config.StyleGuide.RequirementIDScheme),
+		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
 	})
 	if err != nil {
 		t.Fatalf("styleguide.Load: %v", err)

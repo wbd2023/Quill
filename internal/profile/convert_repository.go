@@ -3,16 +3,17 @@ package profile
 import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/requirementid"
 )
 
 func repositoryFromSchema(schema schemaRepositoryConfig) (repository policy.RepositoryConfig) {
 	return policy.RepositoryConfig{
 		RootMarkers:         append([]string{}, schema.RootMarkers...),
 		DefaultScope:        contract.Scope(schema.DefaultScope),
-		Scopes:              scopeMapFromSchema(schema.Scopes),
+		ScopeRoots:          scopeMapFromSchema(schema.ScopeRoots),
 		GlobalExclusions:    append([]string{}, schema.GlobalExclusions...),
 		GeneratedMarker:     schema.GeneratedMarker,
-		GeneratedProbeLimit: schema.GeneratedProbeLimit,
+		GeneratedProbeBytes: schema.GeneratedProbeBytes,
 	}
 }
 
@@ -20,16 +21,16 @@ func repositoryToSchema(repository policy.RepositoryConfig) (schema schemaReposi
 	return schemaRepositoryConfig{
 		RootMarkers:         append([]string{}, repository.RootMarkers...),
 		DefaultScope:        string(repository.DefaultScope),
-		Scopes:              scopeMapToSchema(repository.Scopes),
+		ScopeRoots:          scopeMapToSchema(repository.ScopeRoots),
 		GlobalExclusions:    append([]string{}, repository.GlobalExclusions...),
 		GeneratedMarker:     repository.GeneratedMarker,
-		GeneratedProbeLimit: repository.GeneratedProbeLimit,
+		GeneratedProbeBytes: repository.GeneratedProbeBytes,
 	}
 }
 
 func styleGuideFromSchema(schema schemaStyleGuideConfig) (config policy.StyleGuideConfig) {
 	return policy.StyleGuideConfig{
 		Path:                schema.Path,
-		RequirementIDScheme: schema.RequirementIDScheme,
+		RequirementIDScheme: requirementid.Scheme(schema.RequirementIDScheme),
 	}
 }

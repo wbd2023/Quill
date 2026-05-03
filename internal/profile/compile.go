@@ -7,8 +7,9 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
-/* ------------------------------------------- Compile ------------------------------------------ */
+/* ----------------------------------------- Compilation ---------------------------------------- */
 
+// Compile resolves a style profile against available rule and tool definitions.
 func Compile(
 	config policy.Config,
 	definitions contract.Definitions,
@@ -17,14 +18,14 @@ func Compile(
 		return contract.EffectiveConfig{}, err
 	}
 
-	tools, err := bindToolPins(config, definitions.Tools)
+	tools, err := bindPinnedTools(config, definitions.Tools)
 	if err != nil {
 		return contract.EffectiveConfig{}, err
 	}
 
 	ruleByID := make(map[string]contract.RuleDefinition, len(definitions.Rules))
-	for _, builtin := range definitions.Rules {
-		ruleByID[builtin.ID] = builtin
+	for _, definition := range definitions.Rules {
+		ruleByID[definition.ID] = definition
 	}
 
 	effective = contract.EffectiveConfig{
@@ -33,42 +34,47 @@ func Compile(
 	}
 
 	for _, binding := range config.Rules {
-		builtin, found := ruleByID[binding.RuleID]
+		definition, found := ruleByID[binding.RuleID]
 		if !found {
-			return contract.EffectiveConfig{}, fmt.Errorf("unknown builtin rule %q", binding.RuleID)
+			return contract.EffectiveConfig{}, fmt.Errorf(
+				"unknown rule definition %q",
+				binding.RuleID,
+			)
 		}
 
-		spec, fixSpec, err := bindRuleSpecs(config, binding, builtin)
+		spec, fixSpec, err := bindRuleSpecs(config, binding, definition)
 		if err != nil {
 			return contract.EffectiveConfig{}, err
 		}
 
-		builtin.Spec = spec
-		builtin.FixSpec = fixSpec
+		definition.Spec = spec
+		definition.FixSpec = fixSpec
 		effective.Rules = append(effective.Rules, contract.Rule{
-			ID:                 builtin.ID,
-			Name:               builtin.Name,
-			Group:              builtin.Group,
-			Spec:               builtin.Spec,
-			FixSpec:            builtin.FixSpec,
-			RequiredConfigRefs: append([]string{}, builtin.RequiredConfigRefs...),
-			Level:              binding.Level,
-			Scope:              binding.Scope,
-			RequirementIDs:     append([]string{}, binding.RequirementIDs...),
-			ConfigRef:          binding.ConfigRef,
-			PathClasses:        append([]string{}, binding.PathClasses...),
+			ID:                       definition.ID,
+			Name:                     definition.Name,
+			Group:                    definition.Group,
+			Spec:                     definition.Spec,
+			FixSpec:                  definition.FixSpec,
+			RequiredConfigReferences: append([]string{}, definition.RequiredConfigReferences...),
+			Level:                    binding.Level,
+			Scope:                    binding.Scope,
+			RequirementIDs:           append([]string{}, binding.RequirementIDs...),
+			ConfigReference:          binding.ConfigReference,
+			PathClasses:              append([]string{}, binding.PathClasses...),
 		})
 	}
 
 	return effective, nil
 }
 
+/* --------------------------------------- Rule Execution --------------------------------------- */
+
 func bindRuleSpecs(
 	config policy.Config,
 	binding policy.RuleBinding,
-	builtin contract.RuleDefinition,
+	definition contract.RuleDefinition,
 ) (spec contract.ExecutionSpec, fixSpec contract.ExecutionSpec, err error) {
-	if err = validateConfigRef(binding, builtin); err != nil {
+	if err = validateConfigReference(binding, definition); err != nil {
 		return contract.ExecutionSpec{}, contract.ExecutionSpec{}, err
 	}
 
@@ -76,18 +82,20 @@ func bindRuleSpecs(
 		return contract.ExecutionSpec{}, contract.ExecutionSpec{}, err
 	}
 
-	if err = validateExecutionSpec(config, binding, builtin.Spec); err != nil {
+	if err = validateExecutionSpec(config, binding, definition.Spec); err != nil {
 		return contract.ExecutionSpec{}, contract.ExecutionSpec{}, err
 	}
 
-	if err = validateExecutionSpec(config, binding, builtin.FixSpec); err != nil {
+	if err = validateExecutionSpec(config, binding, definition.FixSpec); err != nil {
 		return contract.ExecutionSpec{}, contract.ExecutionSpec{}, err
 	}
 
-	spec = bindBackends(binding, builtin.Spec)
-	fixSpec = bindBackends(binding, builtin.FixSpec)
+	spec = bindBackends(binding, definition.Spec)
+	fixSpec = bindBackends(binding, definition.FixSpec)
 	return spec, fixSpec, nil
 }
+
+/* --------------------------------------- Backend Binding -------------------------------------- */
 
 func bindBackends(
 	binding policy.RuleBinding,

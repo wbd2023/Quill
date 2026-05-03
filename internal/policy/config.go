@@ -1,83 +1,29 @@
 package policy
 
-import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/requirementid"
-)
+import "ciphera/tools/internal/requirementid"
 
+// SchemaVersion is the current style profile schema version.
 const SchemaVersion = 1
 
-const RequirementIDSchemeSectionSlug = string(requirementid.SectionSlug)
-
+// Config is a typed style profile.
 type Config struct {
-	SchemaVersion int
-	RulePacks     RulePackConfig
-	Repository    RepositoryConfig
-	StyleGuide    StyleGuideConfig
-	Formatting    FormattingConfig
-	Imports       ImportsConfig
-	Paths         PathClassSet
-	FileSets      []FileSetConfig
-	Language      LanguageConfig
-	Tools         []ToolPin
-	Naming        NamingConfig
-	ControlPlane  ControlPlaneConfig
-	Architecture  ArchitectureConfig
-	Rules         []RuleBinding
+	SchemaVersion  int
+	Repository     RepositoryConfig
+	StyleGuide     StyleGuideConfig
+	Paths          PathClasses
+	FileSets       FileSets
+	Language       LanguageConfig
+	Go             GoConfig
+	Tools          PinnedTools
+	Formatting     FormattingConfig
+	Vocabulary     VocabularyConfig
+	QualitySurface QualitySurfaceConfig
+	RulePacks      RulePackConfig
+	Rules          []RuleBinding
 }
 
-type RulePackConfig struct {
-	Enabled []string
-}
-
+// StyleGuideConfig describes how the style guide is located and how its requirement IDs are parsed.
 type StyleGuideConfig struct {
 	Path                string
-	RequirementIDScheme string
-}
-
-type ImportsConfig struct {
-	LocalPrefix string
-}
-
-type ToolPin struct {
-	ID               string
-	Version          string
-	TimeoutSeconds   int
-	OutputLimitBytes int64
-}
-
-func (config Config) FileSet(name string) (fileSet FileSetConfig, found bool) {
-	for _, fileSet := range config.FileSets {
-		if fileSet.Name == name {
-			return fileSet, true
-		}
-	}
-
-	return FileSetConfig{}, false
-}
-
-func (config Config) LanguageBackend(
-	name string,
-) (backend LanguageBackendConfig, found bool) {
-	for _, backend := range config.Language.Backends {
-		if backend.Name == name {
-			return backend, true
-		}
-	}
-
-	return LanguageBackendConfig{}, false
-}
-
-func (config Config) ToolPin(id string) (pin ToolPin, found bool) {
-	for _, tool := range config.Tools {
-		if tool.ID == id {
-			return tool, true
-		}
-	}
-
-	return ToolPin{}, false
-}
-
-func (config Config) ScopeExists(scope contract.Scope) (found bool) {
-	return config.Repository.ScopeExists(scope)
+	RequirementIDScheme requirementid.Scheme
 }

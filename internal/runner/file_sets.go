@@ -7,7 +7,7 @@ import (
 )
 
 func CollectFileSetFiles(context Context, name string) (files []string, err error) {
-	fileSet, found := context.Policy.FileSet(name)
+	fileSet, found := context.Policy.FileSets.Lookup(name)
 	if !found {
 		return nil, errUnknownFileSet(name)
 	}

@@ -15,7 +15,7 @@ func CollectTypeAwareDomainIdentifierCastViolations(
 	rootDirectories []string,
 	filePaths []string,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violations []Violation, ran bool) {
 	if len(filePaths) == 0 || len(rootDirectories) == 0 {
 		return nil, false
@@ -27,7 +27,7 @@ func CollectTypeAwareDomainIdentifierCastViolations(
 			rootDirectory,
 			requestedFilePaths,
 			classifier,
-			identifiers,
+			constructors,
 		)
 		if !rootRan {
 			continue
@@ -44,7 +44,7 @@ func collectTypeAwareViolationsInRoot(
 	rootDirectory string,
 	requestedFilePaths map[string]bool,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violations []Violation, ran bool) {
 	packageList, err := packages.Load(typeAwarePackageConfig(rootDirectory), "./...")
 	if err != nil || len(packageList) == 0 {
@@ -56,7 +56,7 @@ func collectTypeAwareViolationsInRoot(
 			packageInfo,
 			requestedFilePaths,
 			classifier,
-			identifiers,
+			constructors,
 		)...)
 	}
 
@@ -91,7 +91,7 @@ func collectTypeAwareViolationsInPackage(
 	packageInfo *packages.Package,
 	requestedFilePaths map[string]bool,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violations []Violation) {
 	if packageInfo == nil || packageInfo.TypesInfo == nil || packageInfo.Fset == nil {
 		return nil
@@ -107,7 +107,7 @@ func collectTypeAwareViolationsInPackage(
 			packageInfo,
 			file,
 			classifier,
-			identifiers,
+			constructors,
 		)...)
 	}
 
@@ -118,7 +118,7 @@ func collectTypeAwareViolationsInFile(
 	packageInfo *packages.Package,
 	file *ast.File,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violations []Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {
 		callExpression, ok := node.(*ast.CallExpr)
@@ -130,7 +130,7 @@ func collectTypeAwareViolationsInFile(
 			packageInfo,
 			callExpression,
 			classifier,
-			identifiers,
+			constructors,
 		)
 		if found {
 			violations = append(violations, violation)
@@ -146,7 +146,7 @@ func typeAwareDomainIdentifierViolation(
 	packageInfo *packages.Package,
 	callExpression *ast.CallExpr,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violation Violation, found bool) {
 	functionInfo, ok := packageInfo.TypesInfo.Types[callExpression.Fun]
 	if !ok {
@@ -156,14 +156,14 @@ func typeAwareDomainIdentifierViolation(
 	domainTypeName, found := resolvedDomainIdentifierTypeName(
 		functionInfo.Type,
 		classifier,
-		identifiers,
+		constructors,
 	)
 	if !found {
 		return Violation{}, false
 	}
 
 	recommendedConstructor, _ := recommendedDomainIdentifierConstructor(
-		identifiers,
+		constructors,
 		domainTypeName,
 	)
 	return Violation{

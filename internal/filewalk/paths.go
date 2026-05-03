@@ -2,17 +2,32 @@ package filewalk
 
 import (
 	"path/filepath"
+	"slices"
 
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 )
 
-func scopeRoots(
+func collectScopeRoots(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	scope contract.Scope,
+	scopes []contract.Scope,
 ) (roots []string) {
-	return repository.ScanRoots(repoRoot, scope)
+	seen := make(map[string]bool)
+	for _, scope := range scopes {
+		for _, root := range repository.ResolveScopeRoots(repoRoot, scope) {
+			clean := filepath.Clean(root)
+			if seen[clean] {
+				continue
+			}
+
+			seen[clean] = true
+			roots = append(roots, clean)
+		}
+	}
+
+	slices.Sort(roots)
+	return roots
 }
 
 func RelativePath(repoRoot string, path string) (relative string) {

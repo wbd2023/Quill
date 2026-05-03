@@ -45,7 +45,7 @@ func validateExecutionSpec(
 	}
 
 	if fileSet := spec.FileSetName(); fileSet != "" {
-		if _, found := config.FileSet(fileSet); !found {
+		if _, found := config.FileSets.Lookup(fileSet); !found {
 			return fmt.Errorf(
 				"rule %q references unknown file set %q",
 				binding.RuleID,
@@ -137,21 +137,21 @@ func validateBackendCommandSpec(
 func validateLanguageBackends(
 	config policy.Config,
 	ruleID string,
-	backends []string,
+	backendNames []string,
 	language string,
 ) (err error) {
-	seen := make(map[string]bool, len(backends))
-	for _, backend := range backends {
-		if backend == "" {
+	seen := make(map[string]bool, len(backendNames))
+	for _, backendName := range backendNames {
+		if backendName == "" {
 			return fmt.Errorf("rule %q has an empty backend", ruleID)
 		}
 
-		if seen[backend] {
-			return fmt.Errorf("rule %q duplicates backend %q", ruleID, backend)
+		if seen[backendName] {
+			return fmt.Errorf("rule %q duplicates backend %q", ruleID, backendName)
 		}
 
-		seen[backend] = true
-		if err = validateLanguageBackend(config, ruleID, backend, language); err != nil {
+		seen[backendName] = true
+		if err = validateLanguageBackend(config, ruleID, backendName, language); err != nil {
 			return err
 		}
 	}
@@ -169,7 +169,7 @@ func validateLanguageBackend(
 		return fmt.Errorf("rule %q must define a language backend", ruleID)
 	}
 
-	backend, found := config.LanguageBackend(backendName)
+	backend, found := config.Language.LookupBackend(backendName)
 	if !found {
 		return fmt.Errorf("rule %q references unknown language backend %q", ruleID, backendName)
 	}

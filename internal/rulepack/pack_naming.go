@@ -10,7 +10,7 @@ func namingPack() (pack Pack) {
 				"Naming conventions",
 				RuleGroupNaming,
 				ScannerNaming,
-				ConfigRefNaming,
+				ConfigReferenceVocabulary,
 			),
 		},
 	}

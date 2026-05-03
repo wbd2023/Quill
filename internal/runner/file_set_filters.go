@@ -14,33 +14,38 @@ func fileSetCoversPath(
 	fileSet policy.FileSetConfig,
 	path string,
 ) (covered bool) {
-	if len(fileSet.Files) == 0 && len(fileSet.Prefixes) == 0 {
+	if len(fileSet.ExplicitFiles) == 0 && len(fileSet.PathPrefixes) == 0 {
 		return true
 	}
 
 	foundScope := false
-	for scope, files := range fileSet.Files {
-		if !context.Policy.Repository.ScopesOverlap(context.Scope, scope) {
+	for scope, explicitFiles := range fileSet.ExplicitFiles {
+		if !context.Policy.Repository.HasScopeOverlap(context.Scope, scope) {
 			continue
 		}
 
 		foundScope = true
-		if fileSetCoversRelativePath(context.RepoRoot, path, files, fileSet.Prefixes[scope]) {
+		if fileSetCoversRelativePath(
+			context.RepoRoot,
+			path,
+			explicitFiles,
+			fileSet.PathPrefixes[scope],
+		) {
 			return true
 		}
 	}
 
-	for scope, prefixes := range fileSet.Prefixes {
-		if _, alreadyChecked := fileSet.Files[scope]; alreadyChecked {
+	for scope, pathPrefixes := range fileSet.PathPrefixes {
+		if _, alreadyChecked := fileSet.ExplicitFiles[scope]; alreadyChecked {
 			continue
 		}
 
-		if !context.Policy.Repository.ScopesOverlap(context.Scope, scope) {
+		if !context.Policy.Repository.HasScopeOverlap(context.Scope, scope) {
 			continue
 		}
 
 		foundScope = true
-		if fileSetCoversRelativePath(context.RepoRoot, path, nil, prefixes) {
+		if fileSetCoversRelativePath(context.RepoRoot, path, nil, pathPrefixes) {
 			return true
 		}
 	}
@@ -51,15 +56,16 @@ func fileSetCoversPath(
 func fileSetCoversRelativePath(
 	repoRoot string,
 	path string,
-	files []string,
-	prefixes []string,
+	explicitFiles []string,
+	pathPrefixes []string,
 ) (covered bool) {
-	if len(files) == 0 && len(prefixes) == 0 {
+	if len(explicitFiles) == 0 && len(pathPrefixes) == 0 {
 		return true
 	}
 
 	relativePath := filewalk.RelativePath(repoRoot, path)
-	return slices.Contains(files, relativePath) || hasPrefixedPath(prefixes, relativePath)
+	return slices.Contains(explicitFiles, relativePath) ||
+		hasPrefixedPath(pathPrefixes, relativePath)
 }
 
 func fileSetExcludesPath(fileSet policy.FileSetConfig, path string) (excluded bool) {
@@ -82,8 +88,8 @@ func hasMatchingSuffix(suffixes []string, path string) (found bool) {
 	return false
 }
 
-func hasPrefixedPath(prefixes []string, path string) (found bool) {
-	for _, prefix := range prefixes {
+func hasPrefixedPath(pathPrefixes []string, path string) (found bool) {
+	for _, prefix := range pathPrefixes {
 		if strings.HasPrefix(path, prefix) {
 			return true
 		}

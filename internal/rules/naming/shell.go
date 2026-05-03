@@ -14,9 +14,11 @@ func checkShellNaming(
 	result *contract.ExecutionResult,
 	repoRoot string,
 	path string,
-	naming policy.NamingConfig,
+	vocabulary policy.VocabularyConfig,
 ) (err error) {
-	shellAssignmentPattern := compileShellAssignmentPattern(naming.ShellForbiddenAssignments)
+	shellAssignmentPattern := compileShellAssignmentPattern(
+		vocabulary.Shell.ForbiddenAssignmentNames,
+	)
 
 	return filewalk.ScanLines(path, func(line filewalk.Line) error {
 		name := matchedShellAssignment(shellAssignmentPattern, line.Text)
@@ -30,7 +32,7 @@ func checkShellNaming(
 			Line: line.Number,
 			Message: fmt.Sprintf(
 				"use descriptive constant names in Bash (prefer %s over %s)",
-				naming.ShellPreferredAssignment,
+				vocabulary.Shell.PreferredAssignmentName,
 				name,
 			),
 		})

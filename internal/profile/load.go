@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,8 +12,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const defaultFilename = "style.toml"
+
+// Load reads the default profile file from repoRoot and validates it.
 func Load(repoRoot string) (config policy.Config, err error) {
-	config, err = loadProfileFile(filepath.Join(repoRoot, "style.toml"))
+	config, err = loadFile(filepath.Join(repoRoot, defaultFilename))
 	if err != nil {
 		return policy.Config{}, err
 	}
@@ -21,7 +25,7 @@ func Load(repoRoot string) (config policy.Config, err error) {
 		return policy.Config{}, err
 	}
 
-	if err = config.Repository.ValidateRoot(repoRoot); err != nil {
+	if err = validateRepositoryRoot(repoRoot, config.Repository); err != nil {
 		return policy.Config{}, fmt.Errorf(
 			"repository root does not satisfy profile markers: %w",
 			err,
@@ -31,16 +35,34 @@ func Load(repoRoot string) (config policy.Config, err error) {
 	return config, nil
 }
 
-func loadProfileFile(path string) (config policy.Config, err error) {
+func validateRepositoryRoot(repoRoot string, repository policy.RepositoryConfig) (err error) {
+	for _, marker := range repository.RootMarkers {
+		if marker == "" {
+			return fmt.Errorf("repository root marker must not be empty")
+		}
+
+		if _, statErr := os.Stat(filepath.Join(repoRoot, marker)); statErr != nil {
+			if errors.Is(statErr, os.ErrNotExist) {
+				return fmt.Errorf("repository root missing marker %q: %w", marker, statErr)
+			}
+
+			return fmt.Errorf("repository root marker %q cannot be checked: %w", marker, statErr)
+		}
+	}
+
+	return nil
+}
+
+func loadFile(path string) (config policy.Config, err error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
 		return policy.Config{}, err
 	}
 
-	return parseProfile(string(contents))
+	return parse(string(contents))
 }
 
-func parseProfile(contents string) (config policy.Config, err error) {
+func parse(contents string) (config policy.Config, err error) {
 	var schema schemaConfig
 	metadata, err := toml.Decode(contents, &schema)
 	if err != nil {
@@ -49,13 +71,13 @@ func parseProfile(contents string) (config policy.Config, err error) {
 
 	undecoded := metadata.Undecoded()
 	if len(undecoded) > 0 {
-		return policy.Config{}, fmt.Errorf("unknown style.toml key %q", undecodedKey(undecoded[0]))
+		return policy.Config{}, fmt.Errorf("unknown style.toml key %q", formatTOMLKey(undecoded[0]))
 	}
 
-	return policyFromSchema(schema), nil
+	return configFromSchema(schema), nil
 }
 
-func undecodedKey(key toml.Key) (text string) {
+func formatTOMLKey(key toml.Key) (text string) {
 	parts := make([]string, 0, len(key))
 	for _, part := range key {
 		parts = append(parts, part)

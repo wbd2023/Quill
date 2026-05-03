@@ -25,26 +25,26 @@ func (effective EffectiveConfig) ToolByID(id string) (tool Tool, found bool) {
 }
 
 type RuleDefinition struct {
-	ID                 string
-	Name               string
-	Group              RuleGroup
-	Spec               ExecutionSpec
-	FixSpec            ExecutionSpec
-	RequiredConfigRefs []string
+	ID                       string
+	Name                     string
+	Group                    RuleGroup
+	Spec                     ExecutionSpec
+	FixSpec                  ExecutionSpec
+	RequiredConfigReferences []string
 }
 
 type Rule struct {
-	ID                 string
-	Name               string
-	Group              RuleGroup
-	Spec               ExecutionSpec
-	FixSpec            ExecutionSpec
-	RequiredConfigRefs []string
-	Level              Level
-	Scope              Scope
-	RequirementIDs     []string
-	ConfigRef          string
-	PathClasses        []string
+	ID                       string
+	Name                     string
+	Group                    RuleGroup
+	Spec                     ExecutionSpec
+	FixSpec                  ExecutionSpec
+	RequiredConfigReferences []string
+	Level                    Level
+	Scope                    Scope
+	RequirementIDs           []string
+	ConfigReference          string
+	PathClasses              []string
 }
 
 func (rule RuleDefinition) ToolIDs() (toolIDs []string) {

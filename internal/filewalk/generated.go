@@ -21,7 +21,7 @@ func isGeneratedFile(path string, repository policy.RepositoryConfig) (generated
 		return false
 	}
 
-	buffer := make([]byte, repository.GeneratedProbeLimit)
+	buffer := make([]byte, repository.GeneratedProbeBytes)
 	count, readErr := file.Read(buffer)
 	if readErr != nil && !errors.Is(readErr, io.EOF) {
 		if closeErr := file.Close(); closeErr != nil {

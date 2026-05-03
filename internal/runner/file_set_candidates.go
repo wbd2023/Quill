@@ -3,6 +3,7 @@ package runner
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 
 	"ciphera/tools/internal/contract"
@@ -16,7 +17,8 @@ func collectFileSetCandidates(
 ) (files []string, err error) {
 	scopes := []contract.Scope{context.Scope}
 	if fileSetUsesScopedIncludes(fileSet) {
-		scopes = context.Policy.Repository.OverlappingScopes(
+		scopes = findOverlappingScopes(
+			context.Policy.Repository,
 			context.Scope,
 			fileSetIncludeScopes(fileSet),
 		)
@@ -40,13 +42,34 @@ func collectFileSetCandidates(
 	return dedupeCandidatePaths(files), nil
 }
 
+func findOverlappingScopes(
+	repository policy.RepositoryConfig,
+	scope contract.Scope,
+	candidates []contract.Scope,
+) (scopes []contract.Scope) {
+	seen := make(map[contract.Scope]bool, len(candidates))
+	for _, candidate := range candidates {
+		if seen[candidate] {
+			continue
+		}
+
+		seen[candidate] = true
+		if repository.HasScopeOverlap(scope, candidate) {
+			scopes = append(scopes, candidate)
+		}
+	}
+
+	slices.Sort(scopes)
+	return scopes
+}
+
 func explicitFileCandidates(
 	context Context,
 	fileSet policy.FileSetConfig,
 	scopes []contract.Scope,
 ) (files []string) {
 	for _, scope := range scopes {
-		for _, file := range fileSet.Files[scope] {
+		for _, file := range fileSet.ExplicitFiles[scope] {
 			path := filepath.Join(context.RepoRoot, file)
 			info, err := os.Stat(path)
 			if err != nil || !info.Mode().IsRegular() {

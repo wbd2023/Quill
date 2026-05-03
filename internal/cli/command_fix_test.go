@@ -33,7 +33,7 @@ func TestFixableRulesUsesRulePackFixSpecs(t *testing.T) {
 		Scope: contract.Scope("tools"),
 		Policy: policy.Config{
 			Repository: policy.RepositoryConfig{
-				Scopes: map[contract.Scope][]string{
+				ScopeRoots: map[contract.Scope][]string{
 					"all":   {"."},
 					"tools": {"tools"},
 				},

@@ -25,8 +25,8 @@ func runGolangci(
 	var builder strings.Builder
 	var joined error
 	for _, backend := range backends {
-		workdir := languageBackendWorkdir(context.RepoRoot, backend)
-		output, err := runGoFormatChecks(context, workdir, backend.FormatPaths)
+		workDir := languageBackendWorkDir(context.RepoRoot, backend)
+		output, err := runGoFormatChecks(context, workDir, backend.FormatPaths)
 		if err != nil {
 			appendExecutorOutput(&builder, output)
 			joined = errors.Join(joined, err)
@@ -35,7 +35,7 @@ func runGolangci(
 
 		output, err = runToolByID(
 			context,
-			workdir,
+			workDir,
 			rulepack.ToolGolangciLint,
 			"run",
 			"./...",
@@ -49,7 +49,7 @@ func runGolangci(
 
 func runGoFormatChecks(
 	context runner.Context,
-	workdir string,
+	workDir string,
 	paths []string,
 ) (output string, err error) {
 	if len(paths) == 0 {
@@ -57,7 +57,7 @@ func runGoFormatChecks(
 	}
 
 	if output, err = runCommandOutput(
-		workdir,
+		workDir,
 		context.GoEnvironment,
 		"gofmt",
 		append([]string{"-l"}, paths...)...,
@@ -70,11 +70,12 @@ func runGoFormatChecks(
 			errors.New("gofmt formatting required")
 	}
 
+	localPrefix := joinGoLocalImportPrefixes(context.Policy.Go.LocalImportPrefixes)
 	if output, err = runToolByID(
 		context,
-		workdir,
+		workDir,
 		rulepack.ToolGoimports,
-		append([]string{"-l", "-local", context.Policy.Imports.LocalPrefix}, paths...)...,
+		append([]string{"-l", "-local", localPrefix}, paths...)...,
 	); err != nil {
 		return output, err
 	}

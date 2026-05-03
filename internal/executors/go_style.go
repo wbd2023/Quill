@@ -29,17 +29,18 @@ func runGoStyleCheck(
 	var builder strings.Builder
 	var joined error
 	for _, backend := range backends {
-		if len(backend.StylePaths) == 0 {
+		if len(backend.CheckPaths) == 0 {
 			joined = errors.Join(
 				joined,
-				fmt.Errorf("go style backend %q has no paths", backend.Name),
+				fmt.Errorf("go style backend %q has no check paths", backend.Name),
 			)
 			continue
 		}
 
-		roots := make([]string, 0, len(backend.StylePaths))
-		for _, stylePath := range backend.StylePaths {
-			roots = append(roots, filepath.Join(context.RepoRoot, stylePath))
+		workDir := languageBackendWorkDir(context.RepoRoot, backend)
+		roots := make([]string, 0, len(backend.CheckPaths))
+		for _, checkPath := range backend.CheckPaths {
+			roots = append(roots, filepath.Join(workDir, checkPath))
 		}
 
 		styleResult, err := golang.CheckDirectories(

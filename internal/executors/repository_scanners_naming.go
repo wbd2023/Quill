@@ -16,7 +16,7 @@ func namingRepositoryScanners() (scanners map[string]repositoryScanner) {
 			return naming.CheckNaming(
 				context.RepoRoot,
 				context.Policy.Repository,
-				context.Policy.Naming,
+				context.Policy.Vocabulary,
 				context.Scope,
 			)
 		},

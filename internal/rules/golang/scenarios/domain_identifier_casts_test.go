@@ -84,7 +84,7 @@ func Bad(raw string) (id AppIdentityID, err error) {
 func TestGoStyleUsesProfileDomainIdentifierVocabulary(t *testing.T) {
 	tempDir := t.TempDir()
 	config := profiles.Current(t)
-	config.Naming.GoDomainIdentifiers = policy.GoDomainIdentifierConfig{
+	config.Go.DomainIdentifierConstructors = policy.GoDomainIdentifierConstructors{
 		"SessionKey": {"ParseSessionKey"},
 	}
 

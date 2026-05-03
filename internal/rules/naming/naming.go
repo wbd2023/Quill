@@ -13,7 +13,7 @@ const shellAssignmentMatchLength = 4
 func CheckNaming(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	naming policy.NamingConfig,
+	vocabulary policy.VocabularyConfig,
 	scope contract.Scope,
 ) (result contract.ExecutionResult, err error) {
 	goFiles, err := filewalk.CollectFiles(repoRoot, repository, scope, ".go")
@@ -27,14 +27,14 @@ func CheckNaming(
 	}
 
 	for _, path := range goFiles {
-		err = checkGoNaming(&result, repoRoot, path, naming)
+		err = checkGoNaming(&result, repoRoot, path, vocabulary)
 		if err != nil {
 			return contract.ExecutionResult{}, err
 		}
 	}
 
 	for _, path := range shellFiles {
-		err = checkShellNaming(&result, repoRoot, path, naming)
+		err = checkShellNaming(&result, repoRoot, path, vocabulary)
 		if err != nil {
 			return contract.ExecutionResult{}, err
 		}

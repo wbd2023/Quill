@@ -39,7 +39,7 @@ func CheckSectionHeaderDensity(
 			})
 		}
 
-		if len(headers) >= sectionHeaders.OveruseCount {
+		if len(headers) >= sectionHeaders.OveruseThreshold {
 			result.Diagnostics = append(result.Diagnostics, contract.Diagnostic{
 				Code: "text/section-header-density/too-many",
 				File: relativePath,

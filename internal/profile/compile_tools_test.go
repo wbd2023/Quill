@@ -8,7 +8,7 @@ import (
 	"ciphera/tools/internal/rulepack"
 )
 
-func TestCompileRequiresActiveToolPins(t *testing.T) {
+func TestCompileRequiresActivePinnedTools(t *testing.T) {
 	config, err := Load(projectRoot(t))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -21,18 +21,18 @@ func TestCompileRequiresActiveToolPins(t *testing.T) {
 	}
 
 	_, err = Compile(config, registry.Definitions())
-	if err == nil || !strings.Contains(err.Error(), "missing a tool pin") {
-		t.Fatalf("expected missing tool pin error, got %v", err)
+	if err == nil || !strings.Contains(err.Error(), "missing a pinned tool") {
+		t.Fatalf("expected missing pinned tool error, got %v", err)
 	}
 }
 
-func TestCompileRejectsUnknownToolPins(t *testing.T) {
+func TestCompileRejectsUnknownPinnedTools(t *testing.T) {
 	config, err := Load(projectRoot(t))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
 
-	config.Tools = append(config.Tools, policy.ToolPin{ID: "unknown", Version: "1.0.0"})
+	config.Tools = append(config.Tools, policy.PinnedTool{ID: "unknown", Version: "1.0.0"})
 	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
@@ -40,6 +40,6 @@ func TestCompileRejectsUnknownToolPins(t *testing.T) {
 
 	_, err = Compile(config, registry.Definitions())
 	if err == nil || !strings.Contains(err.Error(), "unknown") {
-		t.Fatalf("expected unknown tool pin error, got %v", err)
+		t.Fatalf("expected unknown pinned tool error, got %v", err)
 	}
 }

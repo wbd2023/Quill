@@ -14,7 +14,7 @@ func CheckDirectDomainIdentifierCasts(
 	file *ast.File,
 	path string,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (violations []Violation) {
 	if classifier.HasClass(path, PathClassDomain) {
 		return nil
@@ -37,7 +37,7 @@ func CheckDirectDomainIdentifierCasts(
 		}
 
 		recommendedConstructor, found := recommendedDomainIdentifierConstructor(
-			identifiers,
+			constructors,
 			selector.Sel.Name,
 		)
 		if !found {

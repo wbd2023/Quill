@@ -9,7 +9,7 @@ import (
 
 func runToolByID(
 	context runner.Context,
-	workdir string,
+	workDir string,
 	toolID string,
 	arguments ...string,
 ) (output string, err error) {
@@ -23,17 +23,17 @@ func runToolByID(
 		return "", fmt.Errorf("unknown tool capability %q", toolID)
 	}
 
-	return runtime.RunToolCommand(workdir, context.GoEnvironment, tool, capability, arguments...)
+	return runtime.RunToolCommand(workDir, context.GoEnvironment, tool, capability, arguments...)
 }
 
 func runCommandOutput(
-	workdir string,
+	workDir string,
 	environment map[string]string,
 	name string,
 	arguments ...string,
 ) (output string, err error) {
 	result, err := runtime.RunCommand(runtime.CommandRequest{
-		Directory:   workdir,
+		Directory:   workDir,
 		Environment: environment,
 		Name:        name,
 		Arguments:   append([]string{}, arguments...),

@@ -11,7 +11,7 @@ import (
 func resolvedDomainIdentifierTypeName(
 	targetType types.Type,
 	classifier PathClassifier,
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 ) (name string, found bool) {
 	namedType, ok := types.Unalias(targetType).(*types.Named)
 	if !ok {
@@ -29,7 +29,7 @@ func resolvedDomainIdentifierTypeName(
 	}
 
 	typeName := typeObject.Name()
-	if _, supported := recommendedDomainIdentifierConstructor(identifiers, typeName); !supported {
+	if _, supported := recommendedDomainIdentifierConstructor(constructors, typeName); !supported {
 		return "", false
 	}
 
@@ -37,15 +37,15 @@ func resolvedDomainIdentifierTypeName(
 }
 
 func recommendedDomainIdentifierConstructor(
-	identifiers policy.GoDomainIdentifierConfig,
+	constructors policy.GoDomainIdentifierConstructors,
 	typeName string,
 ) (constructor string, found bool) {
-	constructors := identifiers[typeName]
-	if len(constructors) == 0 {
+	names := constructors[typeName]
+	if len(names) == 0 {
 		return "", false
 	}
 
-	return strings.Join(constructors, " or "), true
+	return strings.Join(names, " or "), true
 }
 
 func normalisePath(path string) (normalisedPath string) {

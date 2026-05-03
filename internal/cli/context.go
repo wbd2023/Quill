@@ -20,7 +20,7 @@ func loadContext(repoRoot string, scope contract.Scope) (context runner.Context,
 		scope = config.Repository.DefaultScope
 	}
 
-	if !config.Repository.ScopeExists(scope) {
+	if !config.Repository.HasScope(scope) {
 		return runner.Context{}, errUnknownScope(scope)
 	}
 
