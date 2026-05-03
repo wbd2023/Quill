@@ -7,32 +7,32 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
-func validateConfigRef(
+func validateConfigReference(
 	binding policy.RuleBinding,
-	builtin contract.RuleDefinition,
+	definition contract.RuleDefinition,
 ) (err error) {
-	if len(builtin.RequiredConfigRefs) == 0 {
-		if binding.ConfigRef != "" {
+	if len(definition.RequiredConfigReferences) == 0 {
+		if binding.ConfigReference != "" {
 			return fmt.Errorf(
-				"rule %q has unexpected config_ref %q",
+				"rule %q has unexpected config_reference %q",
 				binding.RuleID,
-				binding.ConfigRef,
+				binding.ConfigReference,
 			)
 		}
 
 		return nil
 	}
 
-	for _, configRef := range builtin.RequiredConfigRefs {
-		if binding.ConfigRef == configRef {
+	for _, configReference := range definition.RequiredConfigReferences {
+		if binding.ConfigReference == configReference {
 			return nil
 		}
 	}
 
 	return fmt.Errorf(
-		"rule %q must use config_ref %q",
+		"rule %q must use config_reference %q",
 		binding.RuleID,
-		builtin.RequiredConfigRefs[0],
+		definition.RequiredConfigReferences[0],
 	)
 }
 
@@ -51,7 +51,7 @@ func validatePathClasses(
 		}
 
 		seen[className] = true
-		if len(config.Paths.Patterns(className)) == 0 {
+		if len(config.Paths.LookupPatterns(className)) == 0 {
 			return fmt.Errorf("rule %q references unknown path class %q", binding.RuleID, className)
 		}
 	}

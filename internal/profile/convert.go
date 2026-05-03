@@ -5,50 +5,46 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
-/* ----------------------------------------- Conversion ----------------------------------------- */
-
-func policyFromSchema(schema schemaConfig) (config policy.Config) {
+func configFromSchema(schema schemaConfig) (config policy.Config) {
 	return policy.Config{
-		SchemaVersion: schema.SchemaVersion,
+		SchemaVersion:  schema.SchemaVersion,
+		Repository:     repositoryFromSchema(schema.Repository),
+		StyleGuide:     styleGuideFromSchema(schema.StyleGuide),
+		Paths:          cloneStringSlices(policy.PathClasses(schema.Paths)),
+		FileSets:       fileSetsFromSchema(schema.FileSets),
+		Language:       languageFromSchema(schema.Language),
+		Go:             goFromSchema(schema.Go),
+		Tools:          toolsFromSchema(schema.Tools),
+		Formatting:     formattingFromSchema(schema.Formatting),
+		Vocabulary:     vocabularyFromSchema(schema.Vocabulary),
+		QualitySurface: qualitySurfaceFromSchema(schema.QualitySurface),
 		RulePacks: policy.RulePackConfig{
 			Enabled: append([]string{}, schema.RulePacks.Enabled...),
 		},
-		Repository:   repositoryFromSchema(schema.Repository),
-		StyleGuide:   styleGuideFromSchema(schema.StyleGuide),
-		Formatting:   formattingFromSchema(schema.Formatting),
-		Imports:      policy.ImportsConfig{LocalPrefix: schema.Imports.LocalPrefix},
-		Paths:        policy.PathClassSet{Classes: cloneStringMap(schema.Paths)},
-		FileSets:     fileSetsFromSchema(schema.FileSets),
-		Language:     languageFromSchema(schema.Language),
-		Tools:        toolsFromSchema(schema.Tools),
-		Naming:       namingFromSchema(schema.Naming),
-		ControlPlane: controlPlaneFromSchema(schema.ControlPlane),
-		Architecture: architectureFromSchema(schema.Architecture),
-		Rules:        rulesFromSchema(schema.Rules),
+		Rules: rulesFromSchema(schema.Rules),
 	}
 }
 
-func schemaFromPolicy(config policy.Config) (schema schemaConfig) {
+func schemaFromConfig(config policy.Config) (schema schemaConfig) {
 	return schemaConfig{
 		SchemaVersion: config.SchemaVersion,
+		Repository:    repositoryToSchema(config.Repository),
+		StyleGuide: schemaStyleGuideConfig{
+			Path:                config.StyleGuide.Path,
+			RequirementIDScheme: string(config.StyleGuide.RequirementIDScheme),
+		},
+		Paths:          cloneStringSlices(config.Paths),
+		FileSets:       fileSetsToSchema(config.FileSets),
+		Language:       languageToSchema(config.Language),
+		Go:             goToSchema(config.Go),
+		Tools:          toolsToSchema(config.Tools),
+		Formatting:     formattingToSchema(config.Formatting),
+		Vocabulary:     vocabularyToSchema(config.Vocabulary),
+		QualitySurface: qualitySurfaceToSchema(config.QualitySurface),
 		RulePacks: schemaRulePackConfig{
 			Enabled: append([]string{}, config.RulePacks.Enabled...),
 		},
-		Repository: repositoryToSchema(config.Repository),
-		StyleGuide: schemaStyleGuideConfig{
-			Path:                config.StyleGuide.Path,
-			RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
-		},
-		Formatting:   formattingToSchema(config.Formatting),
-		Imports:      schemaImportsConfig{LocalPrefix: config.Imports.LocalPrefix},
-		Paths:        cloneStringMap(config.Paths.Classes),
-		FileSets:     fileSetsToSchema(config.FileSets),
-		Language:     languageToSchema(config.Language),
-		Tools:        toolsToSchema(config.Tools),
-		Naming:       namingToSchema(config.Naming),
-		ControlPlane: controlPlaneToSchema(config.ControlPlane),
-		Architecture: architectureToSchema(config.Architecture),
-		Rules:        rulesToSchema(config.Rules),
+		Rules: rulesToSchema(config.Rules),
 	}
 }
 
@@ -78,7 +74,7 @@ func scopeMapToSchema(source map[contract.Scope][]string) (target map[string][]s
 	return target
 }
 
-func cloneStringMap[M ~map[string][]string](source M) (target M) {
+func cloneStringSlices[M ~map[string][]string](source M) (target M) {
 	if source == nil {
 		return nil
 	}

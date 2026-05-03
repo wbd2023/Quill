@@ -36,10 +36,10 @@ const (
 )
 
 const (
-	ConfigRefArchitecture = "architecture"
-	ConfigRefControlPlane = "control_plane"
-	ConfigRefNaming       = "naming"
-	ConfigRefRepository   = "repository"
+	ConfigReferenceGo             = "go"
+	ConfigReferenceQualitySurface = "quality_surface"
+	ConfigReferenceRepository     = "repository"
+	ConfigReferenceVocabulary     = "vocabulary"
 )
 
 const LanguageGo = "go"

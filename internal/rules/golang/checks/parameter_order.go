@@ -14,7 +14,7 @@ import (
 /* ------------------------------------------ Constants ----------------------------------------- */
 
 const (
-	categoryUnknown = -1
+	groupUnknown = -1
 )
 
 const minParamFieldSpan = 2
@@ -102,26 +102,26 @@ func CheckConstructorOrder(
 			return true
 		}
 
-		prevCategory := categoryUnknown
+		previousGroup := groupUnknown
 		for _, field := range params {
-			category := classifyParam(field, parameters)
-			if category == categoryUnknown {
+			group := classifyParameter(field, parameters)
+			if group == groupUnknown {
 				continue
 			}
-			if prevCategory != categoryUnknown && category < prevCategory {
+			if previousGroup != groupUnknown && group < previousGroup {
 				violations = append(violations, Violation{
 					Position: fileSet.Position(field.Pos()),
 					Rule:     DiagnosticConstructorCategoryOrder,
 					Message: fmt.Sprintf(
 						"%s parameter appears after %s parameter in constructor %q",
-						parameterCategoryLabel(category, parameters),
-						parameterCategoryLabel(prevCategory, parameters),
+						parameterGroupName(group, parameters),
+						parameterGroupName(previousGroup, parameters),
 						funcDecl.Name.Name,
 					),
 				})
 			}
-			if category > prevCategory {
-				prevCategory = category
+			if group > previousGroup {
+				previousGroup = group
 			}
 		}
 
@@ -145,39 +145,39 @@ func isConstructor(name string) (found bool) {
 	return strings.HasPrefix(name, "New") && len(name) > 3 && unicode.IsUpper(rune(name[3]))
 }
 
-// classifyParam determines the category of a constructor parameter.
-func classifyParam(field *ast.Field, parameters policy.GoParameterConfig) (category int) {
+// classifyParameter determines the constructor-order group for a parameter.
+func classifyParameter(field *ast.Field, parameters policy.GoParameterConfig) (group int) {
 	typeName := typeString(field.Type)
 
-	for index, category := range parameters.ConstructorCategories {
-		if matchesCategory(field, typeName, category, parameters) {
+	for index, group := range parameters.ConstructorOrder {
+		if matchesGroup(field, typeName, group, parameters) {
 			return index
 		}
 	}
 
-	return categoryUnknown
+	return groupUnknown
 }
 
-func matchesCategory(
+func matchesGroup(
 	field *ast.Field,
 	typeName string,
-	category policy.GoConstructorCategory,
+	group policy.GoParameterGroup,
 	parameters policy.GoParameterConfig,
 ) (matches bool) {
-	if containsAny(typeName, category.ExcludedTypeMarkers) {
+	if containsAny(typeName, group.ExcludedTypeMarkers) {
 		return false
 	}
 
-	if containsAny(typeName, category.TypeMarkers) {
+	if containsAny(typeName, group.TypeMarkers) {
 		return true
 	}
 
 	for _, name := range field.Names {
-		if slices.Contains(category.ParameterNames, name.Name) {
+		if slices.Contains(group.ParameterNames, name.Name) {
 			return true
 		}
 
-		if category.UsesSecretNames && isSecretName(name.Name, parameters) {
+		if group.MatchesSecretNames && isSecretName(name.Name, parameters) {
 			return true
 		}
 	}
@@ -185,15 +185,15 @@ func matchesCategory(
 	return false
 }
 
-func parameterCategoryLabel(
-	category int,
+func parameterGroupName(
+	group int,
 	parameters policy.GoParameterConfig,
-) (label string) {
-	if category < 0 || category >= len(parameters.ConstructorCategories) {
+) (name string) {
+	if group < 0 || group >= len(parameters.ConstructorOrder) {
 		return "unknown"
 	}
 
-	return parameters.ConstructorCategories[category].Name
+	return parameters.ConstructorOrder[group].Name
 }
 
 func containsAny(target string, fragments []string) (found bool) {

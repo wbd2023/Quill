@@ -19,7 +19,7 @@ func CollectFiles(
 	scope contract.Scope,
 	extensions ...string,
 ) (paths []string, err error) {
-	roots := scopeRoots(repoRoot, repository, scope)
+	roots := repository.ResolveScopeRoots(repoRoot, scope)
 	return collectFilesInRoots(roots, repository, func(path string) bool {
 		if len(extensions) == 0 {
 			return true
@@ -68,7 +68,7 @@ func CollectFilesInScopes(
 ) (paths []string, err error) {
 	return CollectFilesInRoots(
 		repository,
-		repository.ScanRootsForScopes(repoRoot, scopes),
+		collectScopeRoots(repoRoot, repository, scopes),
 		extensions...,
 	)
 }
@@ -78,7 +78,7 @@ func CollectAllFiles(
 	repository policy.RepositoryConfig,
 	scope contract.Scope,
 ) (paths []string, err error) {
-	roots := scopeRoots(repoRoot, repository, scope)
+	roots := repository.ResolveScopeRoots(repoRoot, scope)
 	return collectFilesInRoots(roots, repository, func(path string) bool {
 		info, statErr := os.Stat(path)
 		if statErr != nil {

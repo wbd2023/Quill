@@ -19,7 +19,7 @@ func runGoArchitectureCheck(
 		return contract.ExecutionResult{Output: packageList}, err
 	}
 
-	return golang.CheckArchitecture(modulePath, packageList, context.Policy.Architecture)
+	return golang.CheckArchitecture(modulePath, packageList, context.Policy.Go.Architecture)
 }
 
 func runGoList(context runner.Context, arguments ...string) (output string, err error) {

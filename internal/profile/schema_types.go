@@ -1,20 +1,19 @@
 package profile
 
 type schemaConfig struct {
-	SchemaVersion int                    `toml:"profile_version"`
-	RulePacks     schemaRulePackConfig   `toml:"rule_packs"`
-	Repository    schemaRepositoryConfig `toml:"repository"`
-	StyleGuide    schemaStyleGuideConfig `toml:"styleguide"`
-	Formatting    schemaFormattingConfig `toml:"formatting"`
-	Imports       schemaImportsConfig    `toml:"imports"`
-	Paths         map[string][]string    `toml:"paths"`
-	FileSets      []schemaFileSetConfig  `toml:"file_sets"`
-	Language      schemaLanguageConfig   `toml:"language"`
-	Tools         []schemaToolPin        `toml:"tools"`
-	Naming        schemaNamingConfig     `toml:"naming"`
-	ControlPlane  schemaControlPlane     `toml:"control_plane"`
-	Architecture  schemaArchitecture     `toml:"architecture"`
-	Rules         []schemaRuleBinding    `toml:"rules"`
+	SchemaVersion  int                    `toml:"profile_version"`
+	Repository     schemaRepositoryConfig `toml:"repository"`
+	StyleGuide     schemaStyleGuideConfig `toml:"styleguide"`
+	Paths          map[string][]string    `toml:"paths"`
+	FileSets       []schemaFileSetConfig  `toml:"file_sets"`
+	Language       schemaLanguageConfig   `toml:"language"`
+	Go             schemaGoConfig         `toml:"go"`
+	Tools          []schemaPinnedTool     `toml:"tools"`
+	Formatting     schemaFormattingConfig `toml:"formatting"`
+	Vocabulary     schemaVocabularyConfig `toml:"vocabulary"`
+	QualitySurface schemaQualitySurface   `toml:"quality_surface"`
+	RulePacks      schemaRulePackConfig   `toml:"rule_packs"`
+	Rules          []schemaRuleBinding    `toml:"rules"`
 }
 
 type schemaRulePackConfig struct {

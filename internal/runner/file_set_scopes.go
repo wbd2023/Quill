@@ -8,14 +8,14 @@ import (
 func fileSetUsesScopedIncludes(
 	fileSet policy.FileSetConfig,
 ) (usesFilters bool) {
-	for _, files := range fileSet.Files {
+	for _, files := range fileSet.ExplicitFiles {
 		if len(files) > 0 {
 			return true
 		}
 	}
 
-	for _, prefixes := range fileSet.Prefixes {
-		if len(prefixes) > 0 {
+	for _, pathPrefixes := range fileSet.PathPrefixes {
+		if len(pathPrefixes) > 0 {
 			return true
 		}
 	}
@@ -25,7 +25,7 @@ func fileSetUsesScopedIncludes(
 
 func fileSetIncludeScopes(fileSet policy.FileSetConfig) (scopes []contract.Scope) {
 	seen := make(map[contract.Scope]bool)
-	for scope, files := range fileSet.Files {
+	for scope, files := range fileSet.ExplicitFiles {
 		if len(files) == 0 || seen[scope] {
 			continue
 		}
@@ -34,8 +34,8 @@ func fileSetIncludeScopes(fileSet policy.FileSetConfig) (scopes []contract.Scope
 		scopes = append(scopes, scope)
 	}
 
-	for scope, prefixes := range fileSet.Prefixes {
-		if len(prefixes) == 0 || seen[scope] {
+	for scope, pathPrefixes := range fileSet.PathPrefixes {
+		if len(pathPrefixes) == 0 || seen[scope] {
 			continue
 		}
 

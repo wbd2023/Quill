@@ -148,7 +148,7 @@ func selectedRules(
 	mode contract.CheckMode,
 ) (rules []contract.Rule, err error) {
 	for _, rule := range available {
-		if !context.Policy.Repository.ScopesOverlap(context.Scope, rule.Scope) {
+		if !context.Policy.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue
 		}
 

@@ -24,14 +24,15 @@ func runGoFormat(
 
 	var builder strings.Builder
 	var joined error
+	localPrefix := joinGoLocalImportPrefixes(context.Policy.Go.LocalImportPrefixes)
 	for _, backend := range backends {
 		if len(backend.FormatPaths) == 0 {
 			continue
 		}
 
-		workdir := languageBackendWorkdir(context.RepoRoot, backend)
+		workDir := languageBackendWorkDir(context.RepoRoot, backend)
 		output, err := runCommandOutput(
-			workdir,
+			workDir,
 			context.GoEnvironment,
 			"gofmt",
 			append([]string{"-w"}, backend.FormatPaths...)...,
@@ -44,10 +45,10 @@ func runGoFormat(
 
 		output, err = runToolByID(
 			context,
-			workdir,
+			workDir,
 			rulepack.ToolGoimports,
 			append(
-				[]string{"-w", "-local", context.Policy.Imports.LocalPrefix},
+				[]string{"-w", "-local", localPrefix},
 				backend.FormatPaths...,
 			)...,
 		)

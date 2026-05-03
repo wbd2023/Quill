@@ -16,10 +16,12 @@ func checkGoNaming(
 	result *contract.ExecutionResult,
 	repoRoot string,
 	path string,
-	naming policy.NamingConfig,
+	vocabulary policy.VocabularyConfig,
 ) (err error) {
-	goTypePattern := compileGoTypeSuffixPattern(naming.GoTypeSuffixForbidden)
-	goIdentifierPattern := compileGoIdentifierSuffixPattern(naming.GoIdentifierSuffixForbidden)
+	goTypePattern := compileGoTypeSuffixPattern(vocabulary.Go.ForbiddenTypeSuffixes)
+	goIdentifierPattern := compileGoIdentifierSuffixPattern(
+		vocabulary.Go.ForbiddenIdentifierSuffixes,
+	)
 
 	return filewalk.ScanLines(path, func(line filewalk.Line) error {
 		if suffix := matchedGoTypeSuffix(goTypePattern, line.Text); suffix != "" {
@@ -29,14 +31,14 @@ func checkGoNaming(
 				Line: line.Number,
 				Message: fmt.Sprintf(
 					"use %s not %s in type names",
-					naming.GoTypeSuffixPreferred,
+					vocabulary.Go.PreferredTypeSuffix,
 					suffix,
 				),
 			})
 		}
 
-		if naming.GoIdentifierSuffixPreferred != "" &&
-			strings.Contains(line.Text, naming.GoIdentifierSuffixPreferred) {
+		if vocabulary.Go.PreferredIdentifierSuffix != "" &&
+			strings.Contains(line.Text, vocabulary.Go.PreferredIdentifierSuffix) {
 			return nil
 		}
 
@@ -51,7 +53,7 @@ func checkGoNaming(
 				Line: line.Number,
 				Message: fmt.Sprintf(
 					"use x%s not x%s",
-					naming.GoIdentifierSuffixPreferred,
+					vocabulary.Go.PreferredIdentifierSuffix,
 					suffix,
 				),
 			})

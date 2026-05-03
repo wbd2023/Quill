@@ -6,13 +6,10 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+// Validate checks config for supported schema version and internal consistency.
 func Validate(config policy.Config) (err error) {
 	if config.SchemaVersion != policy.SchemaVersion {
 		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
-	}
-
-	if len(config.RulePacks.Enabled) == 0 {
-		return fmt.Errorf("rule_packs.enabled must not be empty")
 	}
 
 	if err = validateRepository(config.Repository); err != nil {
@@ -20,14 +17,6 @@ func Validate(config policy.Config) (err error) {
 	}
 
 	if err = validateStyleGuide(config.StyleGuide); err != nil {
-		return err
-	}
-
-	if err = validateFormatting(config.Formatting); err != nil {
-		return err
-	}
-
-	if err = validateImports(config.Imports); err != nil {
 		return err
 	}
 
@@ -39,19 +28,27 @@ func Validate(config policy.Config) (err error) {
 		return err
 	}
 
+	if err = validateGo(config.Go, config.Language); err != nil {
+		return err
+	}
+
 	if err = validateTools(config.Tools); err != nil {
 		return err
 	}
 
-	if err = validateNaming(config.Naming); err != nil {
+	if err = validateFormatting(config.Formatting); err != nil {
 		return err
 	}
 
-	if err = validateControlPlane(config.ControlPlane); err != nil {
+	if err = validateVocabulary(config.Vocabulary); err != nil {
 		return err
 	}
 
-	if err = validateArchitecture(config.Architecture); err != nil {
+	if err = validateQualitySurface(config.QualitySurface); err != nil {
+		return err
+	}
+
+	if err = validateRulePacks(config.RulePacks); err != nil {
 		return err
 	}
 

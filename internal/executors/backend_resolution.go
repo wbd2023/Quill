@@ -19,7 +19,7 @@ func goLanguageBackends(
 			return nil, err
 		}
 
-		if !context.Policy.Repository.ScopesOverlap(context.Scope, backend.Scope) {
+		if !context.Policy.Repository.HasScopeOverlap(context.Scope, backend.Scope) {
 			continue
 		}
 
@@ -33,7 +33,7 @@ func goLanguageBackend(
 	config policy.Config,
 	name string,
 ) (backend policy.LanguageBackendConfig, err error) {
-	backend, found := config.LanguageBackend(name)
+	backend, found := config.Language.LookupBackend(name)
 	if !found {
 		return policy.LanguageBackendConfig{}, fmt.Errorf("unknown Go backend %q", name)
 	}
@@ -49,15 +49,15 @@ func goLanguageBackend(
 	return backend, nil
 }
 
-func languageBackendWorkdir(
+func languageBackendWorkDir(
 	repoRoot string,
 	backend policy.LanguageBackendConfig,
-) (workdir string) {
-	if backend.Workdir == "" || backend.Workdir == "." {
+) (workDir string) {
+	if backend.WorkDir == "" || backend.WorkDir == "." {
 		return repoRoot
 	}
 
-	return filepath.Join(repoRoot, backend.Workdir)
+	return filepath.Join(repoRoot, backend.WorkDir)
 }
 
 func errEmptyBackendAction(action string) (err error) {

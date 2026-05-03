@@ -49,7 +49,7 @@ func TestCompileRejectsUnknownRuleBindingPathClass(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 
-	delete(config.Paths.Classes, "go_source")
+	delete(config.Paths, "go_source")
 	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)

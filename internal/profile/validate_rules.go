@@ -7,6 +7,14 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+func validateRulePacks(rulePacks policy.RulePackConfig) (err error) {
+	if len(rulePacks.Enabled) == 0 {
+		return fmt.Errorf("rule_packs.enabled must not be empty")
+	}
+
+	return nil
+}
+
 func validateRules(
 	repository policy.RepositoryConfig,
 	rules []policy.RuleBinding,
@@ -32,7 +40,7 @@ func validateRules(
 			return fmt.Errorf("rule %q has invalid level %q", binding.RuleID, binding.Level)
 		}
 
-		if !repository.ScopeExists(binding.Scope) {
+		if !repository.HasScope(binding.Scope) {
 			return fmt.Errorf("rule %q references unknown scope %q", binding.RuleID, binding.Scope)
 		}
 

@@ -22,16 +22,17 @@ func controlPack() (pack Pack) {
 				"Enforcement levels",
 				ControlPlaneCheckEnforcementLevels,
 			),
-			controlPlaneRule(
-				"control-plane/quality-targets",
-				"Quality Make targets",
-				ControlPlaneCheckQualityTargets,
+			controlPlaneRuleWithConfig(
+				"control-plane/quality-surface",
+				"Quality surface",
+				ControlPlaneCheckQualitySurface,
+				ConfigReferenceQualitySurface,
 			),
 			controlPlaneRuleWithConfig(
 				"control-plane/global-exclusions",
 				"Global exclusions",
 				ControlPlaneCheckGlobalExclusions,
-				ConfigRefRepository,
+				ConfigReferenceRepository,
 			),
 		},
 	}

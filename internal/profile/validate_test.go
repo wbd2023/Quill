@@ -15,7 +15,7 @@ func TestValidateAllowsProjectOwnedPathClasses(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 
-	config.Paths.Classes["project_specific"] = []string{"internal/project/"}
+	config.Paths["project_specific"] = []string{"internal/project/"}
 	if err := Validate(config); err != nil {
 		t.Fatalf("Validate: %v", err)
 	}
@@ -27,7 +27,7 @@ func TestValidateRejectsDomainIdentifierWithoutConstructor(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 
-	config.Naming.GoDomainIdentifiers["SessionKey"] = nil
+	config.Go.DomainIdentifierConstructors["SessionKey"] = nil
 	if err := Validate(config); err == nil {
 		t.Fatal("expected empty domain identifier constructors to fail")
 	}
@@ -57,6 +57,47 @@ func TestValidateRejectsUnknownDefaultScope(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsEmptyRootMarker(t *testing.T) {
+	config, err := Load(projectRoot(t))
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	config.Repository.RootMarkers = []string{""}
+	err = Validate(config)
+	if err == nil || !strings.Contains(err.Error(), "root_markers contains an empty marker") {
+		t.Fatalf("expected empty root marker error, got %v", err)
+	}
+}
+
+func TestValidateRejectsEmptyScopeRoot(t *testing.T) {
+	cases := []struct {
+		name  string
+		roots []string
+	}{
+		{name: "empty root", roots: []string{""}},
+		{name: "blank root", roots: []string{"  "}},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			config, err := Load(projectRoot(t))
+			if err != nil {
+				t.Fatalf("Load: %v", err)
+			}
+
+			config.Repository.ScopeRoots[contract.Scope("tools")] = test.roots
+			err = Validate(config)
+			if err == nil || !strings.Contains(
+				err.Error(),
+				"repository.scope_roots.tools contains an empty root",
+			) {
+				t.Fatalf("expected empty scope root error, got %v", err)
+			}
+		})
+	}
+}
+
 func TestValidateRejectsInvalidSectionHeaderPolicy(t *testing.T) {
 	config, err := Load(projectRoot(t))
 	if err != nil {
@@ -76,7 +117,7 @@ func TestValidateRejectsUnknownFileSetScope(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 
-	config.FileSets[0].Prefixes[contract.Scope("unknown")] = []string{"unknown/"}
+	config.FileSets[0].PathPrefixes[contract.Scope("unknown")] = []string{"unknown/"}
 	if err := Validate(config); err == nil || !strings.Contains(err.Error(), "unknown scope") {
 		t.Fatalf("expected unknown file-set scope error, got %v", err)
 	}

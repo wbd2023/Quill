@@ -34,8 +34,8 @@ func controlPlaneExecutor(
 	case rulepack.ControlPlaneCheckGlobalExclusions:
 		output, err = checkGlobalExclusions(context.Policy.Repository)
 
-	case rulepack.ControlPlaneCheckQualityTargets:
-		output, err = checkQualityTargets(context.RepoRoot, context.Policy.ControlPlane)
+	case rulepack.ControlPlaneCheckQualitySurface:
+		output, err = checkQualitySurface(context.RepoRoot, context.Policy.QualitySurface)
 
 	default:
 		return contract.ExecutionResult{}, fmt.Errorf(
@@ -81,22 +81,34 @@ func checkGlobalExclusions(repository policy.RepositoryConfig) (output string, e
 	return "", nil
 }
 
-func checkQualityTargets(
-	repoRoot string,
-	controlPlane policy.ControlPlaneConfig,
+func checkQualitySurface(
+	repositoryRoot string,
+	surface policy.QualitySurfaceConfig,
 ) (output string, err error) {
-	contents, err := os.ReadFile(filepath.Join(repoRoot, controlPlane.QualityFile))
+	switch surface.Driver {
+	case policy.QualitySurfaceDriverMake:
+		return checkMakeQualitySurface(repositoryRoot, surface)
+	default:
+		return "", fmt.Errorf("unsupported quality surface driver %q", surface.Driver)
+	}
+}
+
+func checkMakeQualitySurface(
+	repositoryRoot string,
+	surface policy.QualitySurfaceConfig,
+) (output string, err error) {
+	contents, err := os.ReadFile(filepath.Join(repositoryRoot, surface.Make.Path))
 	if err != nil {
 		return "", err
 	}
 
-	surface := parseQualityMakefileSurface(string(contents))
-	for _, variable := range controlPlane.VariableContracts {
-		actual, found := surface.Variables[variable.Name]
+	makefile := parseMakefileSurface(string(contents))
+	for _, variable := range surface.Make.RequiredVariables {
+		actual, found := makefile.Variables[variable.Name]
 		if !found {
 			return fmt.Sprintf(
 				"%s is missing required variable: %s",
-				controlPlane.QualityFile,
+				surface.Make.Path,
 				variable.Name,
 			), errViolationsFound
 		}
@@ -107,19 +119,19 @@ func checkQualityTargets(
 
 		return fmt.Sprintf(
 			"%s variable %s must be %q, got %q",
-			controlPlane.QualityFile,
+			surface.Make.Path,
 			variable.Name,
 			variable.Value,
 			actual,
 		), errViolationsFound
 	}
 
-	for _, requiredTarget := range controlPlane.TargetContracts {
-		target, found := surface.Targets[requiredTarget.Name]
+	for _, requiredTarget := range surface.Make.RequiredTargets {
+		target, found := makefile.Targets[requiredTarget.Name]
 		if !found {
 			return fmt.Sprintf(
 				"%s is missing required target: %s",
-				controlPlane.QualityFile,
+				surface.Make.Path,
 				requiredTarget.Name,
 			), errViolationsFound
 		}
@@ -130,7 +142,7 @@ func checkQualityTargets(
 
 		return fmt.Sprintf(
 			"%s target %s is missing recipe line: %s",
-			controlPlane.QualityFile,
+			surface.Make.Path,
 			requiredTarget.Name,
 			requiredTarget.RecipeLine,
 		), errViolationsFound

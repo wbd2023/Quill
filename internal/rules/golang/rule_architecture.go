@@ -22,7 +22,7 @@ type listedPackage struct {
 func CheckArchitecture(
 	modulePath string,
 	packageList string,
-	architecture policy.ArchitectureConfig,
+	architecture policy.GoArchitectureConfig,
 ) (result contract.ExecutionResult, err error) {
 	modulePath = strings.TrimSpace(modulePath)
 	decoder := json.NewDecoder(strings.NewReader(packageList))
@@ -78,7 +78,7 @@ func CheckArchitecture(
 func classifyPackage(
 	modulePath string,
 	importPath string,
-	architecture policy.ArchitectureConfig,
+	architecture policy.GoArchitectureConfig,
 ) (layerName string) {
 	relativePath, found := trimModulePrefix(modulePath, importPath)
 	if !found {
@@ -121,7 +121,7 @@ func matchesPackageRoots(relativePath string, packageRoots []string) (found bool
 /* ---------------------------------------- Import Rules ---------------------------------------- */
 
 func isAllowedImport(
-	architecture policy.ArchitectureConfig,
+	architecture policy.GoArchitectureConfig,
 	fromLayer string,
 	toLayer string,
 ) (allowed bool) {
@@ -130,7 +130,7 @@ func isAllowedImport(
 			continue
 		}
 
-		return slices.Contains(layer.MayImport, toLayer)
+		return slices.Contains(layer.AllowedLayers, toLayer)
 	}
 
 	return true

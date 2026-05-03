@@ -79,6 +79,32 @@ func TestCollectFilesKeepsProseMentionsOfGeneratedMarker(t *testing.T) {
 	}
 }
 
+func TestCollectFilesInScopesDeduplicatesRoots(t *testing.T) {
+	repoRoot := t.TempDir()
+	commandFile := fixtures.WriteFile(t, repoRoot, "cmd/main.go", "package main\n")
+	internalFile := fixtures.WriteFile(t, repoRoot, "internal/app.go", "package internal\n")
+	toolsFile := fixtures.WriteFile(t, repoRoot, "tools/main.go", "package main\n")
+
+	repository := profiles.RepositoryConfig(t)
+	repository.ScopeRoots = map[contract.Scope][]string{
+		"app":     {"cmd", "internal"},
+		"command": {"cmd"},
+		"tools":   {"tools"},
+	}
+
+	files, err := CollectFilesInScopes(
+		repoRoot,
+		repository,
+		[]contract.Scope{"app", "command", "tools"},
+		".go",
+	)
+	if err != nil {
+		t.Fatalf("collect scoped files: %v", err)
+	}
+
+	requirePaths(t, files, []string{commandFile, internalFile, toolsFile})
+}
+
 func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
 	repoRoot := t.TempDir()
 	configFile := fixtures.WriteFile(
@@ -110,5 +136,13 @@ func TestValidateCollectorPolicyAllowsConfiguredGeneratedMarker(t *testing.T) {
 
 	if err := ValidateCollectorPolicy(repository); err != nil {
 		t.Fatalf("ValidateCollectorPolicy(custom marker): %v", err)
+	}
+}
+
+func requirePaths(t *testing.T, actual []string, expected []string) {
+	t.Helper()
+
+	if slices.Compare(actual, expected) != 0 {
+		t.Fatalf("files = %v, expected %v", actual, expected)
 	}
 }

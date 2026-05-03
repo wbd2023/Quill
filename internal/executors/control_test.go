@@ -14,7 +14,7 @@ func TestCheckGlobalExclusionsPassesCurrentCollectorPolicy(t *testing.T) {
 	}
 }
 
-func TestCheckQualityTargetsAcceptsExpectedShape(t *testing.T) {
+func TestCheckQualitySurfaceAcceptsExpectedShape(t *testing.T) {
 	repoRoot := t.TempDir()
 	fixtures.WriteFile(
 		t,
@@ -43,12 +43,12 @@ style-coverage: $(STYLE_BIN)
 	`,
 	)
 
-	if _, err := checkQualityTargets(repoRoot, profiles.Current(t).ControlPlane); err != nil {
-		t.Fatalf("checkQualityTargets: %v", err)
+	if _, err := checkQualitySurface(repoRoot, profiles.Current(t).QualitySurface); err != nil {
+		t.Fatalf("checkQualitySurface: %v", err)
 	}
 }
 
-func TestCheckQualityTargetsRejectsMissingRequiredRecipe(t *testing.T) {
+func TestCheckQualitySurfaceRejectsMissingRequiredRecipe(t *testing.T) {
 	repoRoot := t.TempDir()
 	fixtures.WriteFile(
 		t,
@@ -61,7 +61,7 @@ lint: $(STYLE_BIN)
 	`,
 	)
 
-	if _, err := checkQualityTargets(repoRoot, profiles.Current(t).ControlPlane); err == nil {
+	if _, err := checkQualitySurface(repoRoot, profiles.Current(t).QualitySurface); err == nil {
 		t.Fatal("expected missing lint-required recipe to fail")
 	}
 }

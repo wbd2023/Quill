@@ -95,7 +95,7 @@ func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement)
 	config := profiles.Current(t)
 	document, err := styleguide.Load(fixtures.RepoRoot(t), styleguide.Config{
 		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: requirementid.Scheme(config.StyleGuide.RequirementIDScheme),
+		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
 	})
 	if err != nil {
 		t.Fatalf("load STYLE.md: %v", err)

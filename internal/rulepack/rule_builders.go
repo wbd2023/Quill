@@ -27,20 +27,10 @@ func controlPlaneRule(
 	name string,
 	check string,
 ) (rule RuleDefinition) {
-	return controlPlaneRuleWithConfig(id, name, check, ConfigRefControlPlane)
-}
-
-func controlPlaneRuleWithConfig(
-	id string,
-	name string,
-	check string,
-	configRef string,
-) (rule RuleDefinition) {
 	return RuleDefinition{
-		ID:                 id,
-		Name:               name,
-		Group:              RuleGroupControlPlane,
-		RequiredConfigRefs: []string{configRef},
+		ID:    id,
+		Name:  name,
+		Group: RuleGroupControlPlane,
 		Spec: contract.ExecutionSpec{
 			Kind: ExecutorControlPlane,
 			Detail: contract.ControlPlaneExecution{
@@ -48,6 +38,17 @@ func controlPlaneRuleWithConfig(
 			},
 		},
 	}
+}
+
+func controlPlaneRuleWithConfig(
+	id string,
+	name string,
+	check string,
+	configReference string,
+) (rule RuleDefinition) {
+	rule = controlPlaneRule(id, name, check)
+	rule.RequiredConfigReferences = []string{configReference}
+	return rule
 }
 
 func fileCommandRule(
@@ -156,13 +157,13 @@ func scanRuleWithConfig(
 	name string,
 	group contract.RuleGroup,
 	scanner string,
-	configRefs ...string,
+	configReferences ...string,
 ) (rule RuleDefinition) {
 	return RuleDefinition{
-		ID:                 id,
-		Name:               name,
-		Group:              group,
-		RequiredConfigRefs: append([]string{}, configRefs...),
+		ID:                       id,
+		Name:                     name,
+		Group:                    group,
+		RequiredConfigReferences: append([]string{}, configReferences...),
 		Spec: contract.ExecutionSpec{
 			Kind: ExecutorRepositoryScan,
 			Detail: contract.RepositoryScanExecution{

@@ -2,19 +2,19 @@ package executors
 
 import "strings"
 
-type qualityMakefileSurface struct {
+type makefileSurface struct {
 	Variables map[string]string
-	Targets   map[string]qualityMakefileTarget
+	Targets   map[string]makefileTarget
 }
 
-type qualityMakefileTarget struct {
+type makefileTarget struct {
 	Recipes []string
 }
 
-func parseQualityMakefileSurface(contents string) (surface qualityMakefileSurface) {
-	surface = qualityMakefileSurface{
+func parseMakefileSurface(contents string) (surface makefileSurface) {
+	surface = makefileSurface{
 		Variables: make(map[string]string),
-		Targets:   make(map[string]qualityMakefileTarget),
+		Targets:   make(map[string]makefileTarget),
 	}
 
 	activeTarget := ""
@@ -41,7 +41,7 @@ func parseQualityMakefileSurface(contents string) (surface qualityMakefileSurfac
 		case strings.Contains(trimmed, ":"):
 			targetName, _, _ := strings.Cut(trimmed, ":")
 			targetName = strings.TrimSpace(targetName)
-			surface.Targets[targetName] = qualityMakefileTarget{}
+			surface.Targets[targetName] = makefileTarget{}
 			activeTarget = targetName
 
 		default:

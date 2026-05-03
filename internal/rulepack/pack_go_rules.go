@@ -71,7 +71,7 @@ func goArchitectureRules() (rules []RuleDefinition) {
 			"Architecture imports",
 			RuleGroupLanguage,
 			ScannerArchitecture,
-			ConfigRefArchitecture,
+			ConfigReferenceGo,
 		),
 	}
 }

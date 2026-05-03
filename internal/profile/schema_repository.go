@@ -3,10 +3,10 @@ package profile
 type schemaRepositoryConfig struct {
 	RootMarkers         []string            `toml:"root_markers"`
 	DefaultScope        string              `toml:"default_scope"`
-	Scopes              map[string][]string `toml:"scopes"`
+	ScopeRoots          map[string][]string `toml:"scope_roots"`
 	GlobalExclusions    []string            `toml:"global_exclusions"`
 	GeneratedMarker     string              `toml:"generated_marker"`
-	GeneratedProbeLimit int                 `toml:"generated_probe_limit"`
+	GeneratedProbeBytes int                 `toml:"generated_probe_bytes"`
 }
 
 type schemaStyleGuideConfig struct {

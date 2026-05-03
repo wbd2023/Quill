@@ -9,12 +9,12 @@ import (
 
 type PathClassifier struct {
 	repoRoot string
-	paths    policy.PathClassSet
+	paths    policy.PathClasses
 }
 
 func NewPathClassifier(
 	repoRoot string,
-	paths policy.PathClassSet,
+	paths policy.PathClasses,
 ) (classifier PathClassifier) {
 	return PathClassifier{
 		repoRoot: filepath.Clean(repoRoot),
@@ -24,7 +24,7 @@ func NewPathClassifier(
 
 func (classifier PathClassifier) HasClass(path string, className string) (found bool) {
 	relativePath := classifier.relativePath(path)
-	for _, pattern := range classifier.paths.Patterns(className) {
+	for _, pattern := range classifier.paths.LookupPatterns(className) {
 		if matchesRelativePathPattern(relativePath, pattern) {
 			return true
 		}
@@ -37,7 +37,7 @@ func (classifier PathClassifier) MatchesImportPath(
 	importPath string,
 	className string,
 ) (found bool) {
-	for _, pattern := range classifier.paths.Patterns(className) {
+	for _, pattern := range classifier.paths.LookupPatterns(className) {
 		trimmedPattern := strings.TrimSuffix(filepath.ToSlash(pattern), "/")
 		if trimmedPattern == "" {
 			continue
@@ -52,7 +52,7 @@ func (classifier PathClassifier) MatchesImportPath(
 }
 
 func (classifier PathClassifier) FirstPattern(className string) (pattern string) {
-	patterns := classifier.paths.Patterns(className)
+	patterns := classifier.paths.LookupPatterns(className)
 	if len(patterns) == 0 {
 		return ""
 	}

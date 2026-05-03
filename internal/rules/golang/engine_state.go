@@ -11,16 +11,16 @@ import (
 )
 
 type analysisState struct {
-	repository     policy.RepositoryConfig
-	goParameters   policy.GoParameterConfig
-	goIdentifiers  policy.GoDomainIdentifierConfig
-	enabledChecks  map[string]bool
-	pathClassifier checks.PathClassifier
-	fileSet        *token.FileSet
-	scannedGoFiles []string
-	violations     []checks.Violation
-	warningWriter  io.Writer
-	orderCollector *order.Collector
+	repository                   policy.RepositoryConfig
+	goParameters                 policy.GoParameterConfig
+	domainIdentifierConstructors policy.GoDomainIdentifierConstructors
+	enabledChecks                map[string]bool
+	pathClassifier               checks.PathClassifier
+	fileSet                      *token.FileSet
+	scannedGoFiles               []string
+	violations                   []checks.Violation
+	warningWriter                io.Writer
+	orderCollector               *order.Collector
 }
 
 func newAnalysisState(
@@ -31,15 +31,15 @@ func newAnalysisState(
 	pathClassifier := checks.NewPathClassifier(repoRoot, config.Paths)
 
 	return &analysisState{
-		repository:     config.Repository,
-		goParameters:   config.Naming.GoParameters,
-		goIdentifiers:  config.Naming.GoDomainIdentifiers,
-		enabledChecks:  enabledGoChecks(checkNames),
-		pathClassifier: pathClassifier,
-		fileSet:        token.NewFileSet(),
-		scannedGoFiles: make([]string, 0),
-		warningWriter:  io.Discard,
-		orderCollector: order.NewCollector(pathClassifier),
+		repository:                   config.Repository,
+		goParameters:                 config.Go.Parameters,
+		domainIdentifierConstructors: config.Go.DomainIdentifierConstructors,
+		enabledChecks:                enabledGoChecks(checkNames),
+		pathClassifier:               pathClassifier,
+		fileSet:                      token.NewFileSet(),
+		scannedGoFiles:               make([]string, 0),
+		warningWriter:                io.Discard,
+		orderCollector:               order.NewCollector(pathClassifier),
 	}
 }
 

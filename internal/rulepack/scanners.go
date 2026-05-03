@@ -3,7 +3,7 @@ package rulepack
 const (
 	ControlPlaneCheckEnforcementLevels = "enforcement_levels"
 	ControlPlaneCheckGlobalExclusions  = "global_exclusions"
-	ControlPlaneCheckQualityTargets    = "quality_targets"
+	ControlPlaneCheckQualitySurface    = "quality_surface"
 )
 
 const (

@@ -8,7 +8,7 @@ func (state *analysisState) addCrossFileViolations(scanRoots []string) {
 			scanRoots,
 			state.scannedGoFiles,
 			state.pathClassifier,
-			state.goIdentifiers,
+			state.domainIdentifierConstructors,
 		)
 		if typeAwareRan {
 			state.violations = append(state.violations, typeAwareViolations...)

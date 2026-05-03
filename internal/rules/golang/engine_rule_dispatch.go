@@ -151,7 +151,7 @@ func (analysis fileAnalysis) addDomainIdentifierViolations() {
 		analysis.file,
 		analysis.path,
 		analysis.state.pathClassifier,
-		analysis.state.goIdentifiers,
+		analysis.state.domainIdentifierConstructors,
 	))
 }
 

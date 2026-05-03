@@ -7,7 +7,6 @@ import (
 	"ciphera/tools/internal/coverage"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
@@ -88,7 +87,7 @@ func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err er
 
 	document, err := styleguide.Load(repoRoot, styleguide.Config{
 		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: requirementid.Scheme(config.StyleGuide.RequirementIDScheme),
+		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
 	})
 	if err != nil {
 		return coverage.Report{}, err
