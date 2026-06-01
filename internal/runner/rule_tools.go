@@ -9,7 +9,7 @@ import (
 func ToolIDsForRules(rules []contract.Rule) (toolIDs []string) {
 	seen := make(map[string]bool)
 	for _, rule := range rules {
-		for _, toolID := range rule.ToolIDs() {
+		for _, toolID := range rule.CheckToolIDs() {
 			if seen[toolID] {
 				continue
 			}

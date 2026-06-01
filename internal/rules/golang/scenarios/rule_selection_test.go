@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/rules/golang"
+	"ciphera/tools/internal/rules/golang/check"
 )
 
 /* --------------------------------------- Rule Selection --------------------------------------- */
@@ -29,7 +30,7 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, golang.GoCheckLogging)
+	result, err := runSelectedGoStyleCheck(t, tempDir, check.Logging)
 	if err == nil {
 		t.Fatalf("expected logging check to fail, result: %+v", result)
 	}
@@ -37,9 +38,9 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 	expectDiagnosticMessage(t, result, "structured log key \"Path\" must be lower-case ASCII")
 	rejectDiagnosticMessage(t, result, "direct cast to domain.IdentityID")
 
-	result, err = runSelectedGoStyleCheck(t, tempDir, golang.GoCheckDomainIdentifiers)
+	result, err = runSelectedGoStyleCheck(t, tempDir, check.DomainValues)
 	if err == nil {
-		t.Fatalf("expected domain identifier check to fail, result: %+v", result)
+		t.Fatalf("expected domain value check to fail, result: %+v", result)
 	}
 
 	expectDiagnosticMessage(t, result, "direct cast to domain.IdentityID")
@@ -64,7 +65,7 @@ func Validate(a int, b int) (err error) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, golang.GoCheckGuardClauseSpacing)
+	result, err := runSelectedGoStyleCheck(t, tempDir, check.GuardClauseSpacing)
 	if err == nil {
 		t.Fatalf("expected guard-clause spacing check to fail, result: %+v", result)
 	}
@@ -96,7 +97,7 @@ func Render(value string) (rendered string) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, golang.GoCheckSwitchCaseSpacing)
+	result, err := runSelectedGoStyleCheck(t, tempDir, check.SwitchCaseSpacing)
 	if err == nil {
 		t.Fatalf("expected switch-case spacing check to fail, result: %+v", result)
 	}
@@ -113,10 +114,13 @@ func runSelectedGoStyleCheck(
 ) (result contract.ExecutionResult, err error) {
 	t.Helper()
 
+	config := profiles.Current(t)
 	result, err = golang.CheckDirectories(
 		targetDirectory,
 		[]string{filepath.Join(targetDirectory, "internal")},
-		profiles.Current(t),
+		config.Repository,
+		config.PathRoles,
+		goConfigForTest(t, config),
 		checkName,
 	)
 	return result, err

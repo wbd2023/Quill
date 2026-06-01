@@ -22,7 +22,7 @@ func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
 	result, err := CheckSectionHeaders(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		profiles.Current(t).Formatting.SectionHeaders,
+		currentSectionHeaders(t),
 		contract.Scope("app"),
 	)
 	if err == nil {
@@ -47,7 +47,7 @@ func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
 	result, err := CheckSectionHeaders(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		profiles.Current(t).Formatting.SectionHeaders,
+		currentSectionHeaders(t),
 		contract.Scope("app"),
 	)
 	if err != nil {
@@ -68,7 +68,7 @@ func TestCheckSectionHeadersCountsTabsAsFourColumns(t *testing.T) {
 	result, err := CheckSectionHeaders(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		profiles.Current(t).Formatting.SectionHeaders,
+		currentSectionHeaders(t),
 		contract.Scope("app"),
 	)
 	if err != nil {

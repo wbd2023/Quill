@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func RepoRoot(test *testing.T) (root string) {
+func RepositoryRoot(test *testing.T) (root string) {
 	test.Helper()
 
 	_, callerFile, _, ok := runtime.Caller(0)
@@ -20,5 +20,5 @@ func RepoRoot(test *testing.T) (root string) {
 func ToolsRoot(test *testing.T) (root string) {
 	test.Helper()
 
-	return filepath.Join(RepoRoot(test), "tools")
+	return filepath.Join(RepositoryRoot(test), "tools")
 }

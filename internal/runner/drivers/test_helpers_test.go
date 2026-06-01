@@ -1,0 +1,55 @@
+package drivers
+
+import (
+	"path/filepath"
+	"testing"
+
+	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/profile/effective"
+	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runtime"
+)
+
+func testContext(
+	t *testing.T,
+	repoRoot string,
+	scope contract.Scope,
+) (context runner.Context) {
+	t.Helper()
+
+	config, err := profile.Load(repoRoot)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	if err != nil {
+		t.Fatalf("DefaultRegistry: %v", err)
+	}
+
+	config, err = effective.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		t.Fatalf("effective.ResolvePacks: %v", err)
+	}
+
+	compiled, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		t.Fatalf("Compile: %v", err)
+	}
+
+	layout := runtime.LayoutForRepository(repoRoot)
+	goEnvironment := layout.GoEnvironment()
+	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDir, "golangci")
+
+	return runner.NewContext(
+		repoRoot,
+		scope,
+		config,
+		compiled,
+		registry.ToolCapabilities(),
+		layout.ToolEnvironment(),
+		goEnvironment,
+	)
+}

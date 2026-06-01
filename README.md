@@ -3,9 +3,9 @@
 This directory is the repo-owned tooling module.
 
 `STYLE.md` remains the human source of truth. `style.toml` is the executable repository profile:
-it enables rule packs, binds checker rules to requirement IDs, declares file sets, and supplies
+it enables Packs, binds checker rules to requirement IDs, declares file sets, and supplies
 project-specific paths. The Go control plane in `tools/` compiles those two inputs into an
-effective rule graph, installs pinned tools from active rule packs, and reports coverage from the
+effective rule graph, installs pinned tools from active Packs, and reports coverage from the
 same graph.
 
 ## Daily Use
@@ -82,15 +82,15 @@ finds the configured profile markers, currently `STYLE.md` and `style.toml`.
 
 - `STYLE.md` is the canonical style guide.
 - `style.toml` is the machine-readable project profile.
-- `style.toml` owns active scopes, file sets, language backends, rule bindings, and tool pins.
+- `style.toml` owns active scopes, file sets, Targets, rule bindings, and tool pins.
 - Requirement IDs live in hidden `<!-- style: id=... -->` metadata comments instead of the prose
   bullets themselves.
 - Hidden `<!-- style: ... -->` metadata comments also declare review-only requirements and other
   machine-only guide metadata.
-- Rule packs define checker capabilities; `style.toml` decides which rule packs and rules are
+- Packs define checker capabilities; `style.toml` decides which Packs and rules are
   active.
 - Rules map to requirement IDs through `style.toml`, not through implementation code.
-- Rule bindings also own project path-class requirements; rule packs do not import project policy.
+- Rule bindings also own project path-class requirements; Packs do not import project policy.
 - Go style diagnostics use checker-owned diagnostic codes instead of hardcoded STYLE.md IDs.
 - Coverage is derived from requirements, not maintained as a hand-written section-status table.
 - `profile_version = 1` is the first unreleased current schema. There is no legacy schema support.
@@ -101,26 +101,43 @@ finds the configured profile markers, currently `STYLE.md` and `style.toml`.
 
 The dependency direction is:
 
-`contract -> policy -> profile -> cli`
+`contract -> policy -> profile/{toml,validation,effective} -> profile -> cli`
 
-`toolchain -> runtime/cli/report`
+`toolchain -> runtime -> installer -> cli`
 
-`rulepack -> cli/executors`
+`toolchain -> report`
+
+`pack/builtin -> runner/drivers -> cli`
 
 `styleguide -> coverage -> cli/report`
 
-`runner -> cli/executors`
+`runner -> runner/drivers -> cli`
 
 Production packages must keep these boundaries:
 
 - `contract` imports no internal package.
 - `policy` imports only `contract`.
-- `profile` imports `contract` and `policy`, not rule packs, runners, executors, rules, or reports.
+- `profile/toml` imports profile policy types, not loaders, Packs, runners, drivers, rules,
+  or reports.
+- `profile/validation` imports profile policy types and contracts, not loaders, Packs,
+  runners, drivers, rules, or reports.
+- `profile/effective` imports profile policy types and contracts, not loaders, Packs, runners,
+  drivers, rules, or reports.
+- `profile` is a facade over profile loading, TOML, validation, and effective compilation. It does
+  not import Packs, runners, drivers, rules, or reports.
 - `toolchain` imports no project policy, runtime, rules, profile, or reporting package.
-- `rulepack` imports `contract` and `toolchain`, not project policy, runtime, rules, or reports.
-- `runner` imports no `profile`, `rulepack`, `runtime`, or `report`.
-- Concrete rule packages import no `profile`; Go rules import no `rulepack`.
-- `report` owns final text and JSON formatting; rules and executors return data.
+- `runtime` owns command execution, tool inspection, environment layout, and no installation
+  orchestration.
+- `installer` imports runtime and tool contracts, not project policy, rules, profiles, reports, or
+  runners.
+- `pack` defines neutral Pack definitions, catalogues, and registries.
+- `pack/builtin` assembles built-in Packs and may import rule packages and Pack-owned policy codecs.
+- `runner` imports no `profile`, `pack/builtin`, `runtime`, or `report`.
+- `runner/drivers` binds generic executor IDs to concrete checks and commands without importing
+  profile, report, or installation packages.
+- Concrete rule packages import no `profile`; Go rules import no `pack/builtin`, and Go
+  rule policy stays separate from rule implementations.
+- `report` owns final text and JSON formatting; rules and drivers return data.
 
 ## File Shape
 
@@ -142,47 +159,55 @@ The style platform uses balanced granularity:
   - Shared style-platform contracts: levels, scopes, check statuses, diagnostics, execution
     results, effective rules, tool policy, and typed execution specs.
 - `internal/policy/`
-  - Project policy value types and profile vocabulary such as scopes, path classes, language
-    backends, naming config, control-plane config, and architecture config.
+  - Project policy value types and profile vocabulary such as scopes, path roles, Targets,
+    Pack configs, and rule bindings.
 - `internal/toolchain/`
   - Installed-tool capability and status values, plus status indexing, sorting, and issue helpers.
+- `internal/runtime/`
+  - Command execution, tool inspection, environment layout, and version detection.
+- `internal/installer/`
+  - Pinned tool installation, downloads, archive extraction, and lockfile validation.
 - `internal/profile/`
-  - Strict `style.toml` schema decoding, policy conversion, validation, rendering for fixtures,
-    and effective rule compilation.
-- `internal/rulepack/`
-  - Builtin rule packs, reusable rule/tool capabilities, opaque executor/scanner IDs, Go check
-    IDs, and safe fix specs.
+  - Style profile facade: loading, parsing, formatting, validation, and effective rule compilation.
+- `internal/profile/toml/`
+  - Persisted `style.toml` schema decoding, encoding, and conversion to policy values.
+- `internal/profile/validation/`
+  - Internal consistency checks for typed profile policy values.
+- `internal/profile/effective/`
+  - Compilation from typed profile policy and rule definitions to effective runtime contracts.
+- `internal/pack/`
+  - Neutral Pack definitions, catalogues, registries, and selection validation.
+- `internal/pack/builtin/`
+  - Built-in Pack catalogue, reusable rule/tool capabilities, opaque executor/scanner IDs,
+    pack-owned policy defaults, and safe fix specs.
 - `internal/coverage/`
   - Pure STYLE.md/profile/rule graph coverage assembly.
 - `internal/styleguide/`
   - Pure STYLE.md parser, requirement metadata, verification modes, and exception-marker helpers.
-- `internal/executors/`
-  - Builtin executor bindings from generic executor/scanner IDs to concrete checks and fixers.
 - `internal/cli/`
   - Command parsing, repository-root resolution, and public CLI UX.
 - `internal/runner/`
-  - Generic rule/fix execution through injected executors, status mapping, and policy-owned
+  - Generic rule/fix execution through injected executor functions, status mapping, and policy-owned
     file-set selection.
+- `internal/runner/drivers/`
+  - Built-in Drivers that map generic executor/scanner IDs to concrete checks and fixers.
 - `internal/filewalk/`
   - Repository file collection and generated-file filtering shared by runners and scanners.
 - `internal/report/`
   - Text and explicit JSON DTO renderers for checks, coverage, and tool status.
 - `internal/rules/golang/`
-  - Go-specific rule engine and rule entrypoints, with `checks/` for per-file AST passes,
-    `order/` for interface and implementation ordering, and `scenarios/` for multi-file
-    scenario tests.
+  - Go rule facade and package family. The root package walks Go files and reports diagnostics;
+    subpackages own check IDs, Go pack policy, shared analysis primitives, syntax checks,
+    structure checks, relationship checks, architecture checks, test checks, and scenario tests.
 - `internal/rules/text/`
   - Text scanners for line length, ASCII, exception markers, maintenance markers, and section
     headers.
 - `internal/rules/security/`
   - Security scanners such as committed-secret detection.
-- `internal/rules/naming/`
-  - Cross-language naming and vocabulary scanners.
+- `internal/rules/vocabulary/`
+  - Cross-language project-term vocabulary scanners.
 - `internal/rules/bash/`
   - Bash-specific script structure, safety, magic-value, and test-hygiene scanners.
-- `internal/runtime/`
-  - Repo-local layout construction, installed-tool inspection, downloads, installs, and subprocess
-    execution through injected toolchain capabilities.
 - `internal/fixtures/`
   - Shared helpers for writing repository-shaped test fixtures.
 

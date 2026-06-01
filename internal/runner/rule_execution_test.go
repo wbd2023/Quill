@@ -12,7 +12,7 @@ func TestRunRuleUsesInjectedExecutor(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := contract.Rule{
 		ID: "test/rule",
-		Spec: contract.ExecutionSpec{
+		Check: contract.ExecutionSpec{
 			Kind: contract.ExecutorKind("test_executor"),
 			Detail: contract.RepositoryScanExecution{
 				Scanner: "test",

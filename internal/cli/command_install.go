@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"ciphera/tools/internal/installer"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runtime"
 )
@@ -16,7 +17,7 @@ func runInstall(tool CLI, options installOptions) (exitCode int) {
 	}
 
 	layout := runtime.LayoutForRepository(context.RepoRoot)
-	if err := runtime.Install(
+	if err := installer.Install(
 		layout,
 		tool.stdout,
 		context.Effective.Tools,

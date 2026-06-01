@@ -12,7 +12,7 @@ import (
 func CheckSectionHeaderNames(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	sectionHeaders policy.SectionHeaderConfig,
+	sectionHeaders SectionHeaderConfig,
 	scope contract.Scope,
 ) (result contract.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()

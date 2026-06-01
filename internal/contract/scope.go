@@ -1,8 +1,8 @@
 package contract
 
 const (
-	LevelRequired       Level = "required"
-	LevelRecommendation Level = "recommendation"
+	EnforcementRequired       Enforcement = "required"
+	EnforcementRecommendation Enforcement = "recommendation"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	CheckStatusSkip CheckStatus = "skip"
 )
 
-type Level string
+type Enforcement string
 
 type CheckMode string
 

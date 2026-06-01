@@ -8,7 +8,7 @@ import (
 
 func TestFileSetsLookup(t *testing.T) {
 	fileSets := policy.FileSets{
-		{Name: "markdown", Extensions: []string{".md"}},
+		{Name: "markdown", Include: policy.FileSetInclude{Extensions: []string{".md"}}},
 	}
 
 	fileSet, found := fileSets.Lookup("markdown")
@@ -17,8 +17,10 @@ func TestFileSetsLookup(t *testing.T) {
 	}
 
 	requireEqual(t, policy.FileSetConfig{
-		Name:       "markdown",
-		Extensions: []string{".md"},
+		Name: "markdown",
+		Include: policy.FileSetInclude{
+			Extensions: []string{".md"},
+		},
 	}, fileSet)
 
 	_, found = fileSets.Lookup("missing")

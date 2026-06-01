@@ -1,0 +1,65 @@
+package drivers
+
+import (
+	"fmt"
+	"path/filepath"
+
+	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/runner"
+)
+
+func goTargets(
+	context runner.Context,
+	spec contract.ExecutionSpec,
+) (targets []policy.TargetConfig, err error) {
+	for _, name := range spec.Targets() {
+		target, err := goTarget(context.Policy, name)
+		if err != nil {
+			return nil, err
+		}
+
+		if !context.Policy.Repository.HasScopeOverlap(context.Scope, target.Scope) {
+			continue
+		}
+
+		targets = append(targets, target)
+	}
+
+	return targets, nil
+}
+
+func goTarget(
+	config policy.Config,
+	name string,
+) (target policy.TargetConfig, err error) {
+	target, found := config.Targets.Lookup(name)
+	if !found {
+		return policy.TargetConfig{}, fmt.Errorf("unknown Go target %q", name)
+	}
+
+	if target.Language != goLanguage {
+		return policy.TargetConfig{}, fmt.Errorf(
+			"target %q is %q, not go",
+			name,
+			target.Language,
+		)
+	}
+
+	return target, nil
+}
+
+func targetWorkDir(
+	repoRoot string,
+	target policy.TargetConfig,
+) (workDir string) {
+	if target.WorkingDirectory == "" || target.WorkingDirectory == "." {
+		return repoRoot
+	}
+
+	return filepath.Join(repoRoot, target.WorkingDirectory)
+}
+
+func errEmptyTargetAction(action string) (err error) {
+	return fmt.Errorf("%s action received empty spec", action)
+}

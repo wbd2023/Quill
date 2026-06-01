@@ -11,13 +11,17 @@ import (
 
 func TestStylePlatformPassesGoStyleChecks(t *testing.T) {
 	toolsRoot := fixtures.ToolsRoot(t)
+	config := profiles.Current(t)
+
 	result, err := golang.CheckDirectories(
 		filepath.Clean(filepath.Join(toolsRoot, "..")),
 		[]string{
 			filepath.Join(toolsRoot, "cmd"),
 			filepath.Join(toolsRoot, "internal"),
 		},
-		profiles.Current(t),
+		config.Repository,
+		config.PathRoles,
+		goConfigForTest(t, config),
 	)
 	if err != nil {
 		t.Fatalf(

@@ -56,7 +56,7 @@ func dedupePaths(values []string) (deduped []string) {
 }
 
 func isExcludedDirectory(repository policy.RepositoryConfig, name string) (excluded bool) {
-	for _, exclusion := range repository.GlobalExclusions {
+	for _, exclusion := range repository.ExcludedDirectories {
 		if exclusion == name {
 			return true
 		}

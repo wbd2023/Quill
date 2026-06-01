@@ -25,40 +25,36 @@ func (effective EffectiveConfig) ToolByID(id string) (tool Tool, found bool) {
 }
 
 type RuleDefinition struct {
-	ID                       string
-	Name                     string
-	Group                    RuleGroup
-	Spec                     ExecutionSpec
-	FixSpec                  ExecutionSpec
-	RequiredConfigReferences []string
+	ID    string
+	Name  string
+	Group RuleGroup
+	Check ExecutionSpec
+	Fix   ExecutionSpec
 }
 
 type Rule struct {
-	ID                       string
-	Name                     string
-	Group                    RuleGroup
-	Spec                     ExecutionSpec
-	FixSpec                  ExecutionSpec
-	RequiredConfigReferences []string
-	Level                    Level
-	Scope                    Scope
-	RequirementIDs           []string
-	ConfigReference          string
-	PathClasses              []string
+	ID             string
+	Name           string
+	Group          RuleGroup
+	Enforcement    Enforcement
+	Scope          Scope
+	RequirementIDs []string
+	Check          ExecutionSpec
+	Fix            ExecutionSpec
 }
 
-func (rule RuleDefinition) ToolIDs() (toolIDs []string) {
-	return rule.Spec.RequiredToolIDs()
+func (rule RuleDefinition) CheckToolIDs() (toolIDs []string) {
+	return rule.Check.RequiredToolIDs()
 }
 
 func (rule RuleDefinition) FixToolIDs() (toolIDs []string) {
-	return rule.FixSpec.RequiredToolIDs()
+	return rule.Fix.RequiredToolIDs()
 }
 
-func (rule Rule) ToolIDs() (toolIDs []string) {
-	return rule.Spec.RequiredToolIDs()
+func (rule Rule) CheckToolIDs() (toolIDs []string) {
+	return rule.Check.RequiredToolIDs()
 }
 
 func (rule Rule) FixToolIDs() (toolIDs []string) {
-	return rule.FixSpec.RequiredToolIDs()
+	return rule.Fix.RequiredToolIDs()
 }

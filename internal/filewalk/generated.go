@@ -9,7 +9,10 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
-const generatedHeaderLineLimit = 12
+const (
+	generatedHeaderLineLimit = 12
+	generatedMarkerScanBytes = 4096
+)
 
 var generatedCommentPrefixes = []string{"//", "#", ";", "--"}
 
@@ -21,7 +24,7 @@ func isGeneratedFile(path string, repository policy.RepositoryConfig) (generated
 		return false
 	}
 
-	buffer := make([]byte, repository.GeneratedProbeBytes)
+	buffer := make([]byte, generatedMarkerScanBytes)
 	count, readErr := file.Read(buffer)
 	if readErr != nil && !errors.Is(readErr, io.EOF) {
 		if closeErr := file.Close(); closeErr != nil {

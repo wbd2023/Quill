@@ -12,7 +12,7 @@ import (
 
 func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 	requirementIDPattern := regexp.MustCompile(`\b[0-9]+\.[0-9]+\.[a-z][a-z0-9-]*\b`)
-	repoRoot := fixtures.RepoRoot(t)
+	repoRoot := fixtures.RepositoryRoot(t)
 	internalRoot := filepath.Join(repoRoot, "tools", "internal")
 
 	err := filepath.WalkDir(

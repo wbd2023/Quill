@@ -6,40 +6,46 @@ import (
 	"io"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/rules/golang/checks"
-	"ciphera/tools/internal/rules/golang/order"
+	"ciphera/tools/internal/rules/golang/analysis"
+	"ciphera/tools/internal/rules/golang/check"
+	gopolicy "ciphera/tools/internal/rules/golang/policy"
+	"ciphera/tools/internal/rules/golang/relationships"
 )
 
 type analysisState struct {
-	repository                   policy.RepositoryConfig
-	goParameters                 policy.GoParameterConfig
-	domainIdentifierConstructors policy.GoDomainIdentifierConstructors
-	enabledChecks                map[string]bool
-	pathClassifier               checks.PathClassifier
-	fileSet                      *token.FileSet
-	scannedGoFiles               []string
-	violations                   []checks.Violation
-	warningWriter                io.Writer
-	orderCollector               *order.Collector
+	repository              policy.RepositoryConfig
+	goParameters            gopolicy.ParameterConfig
+	goConstructors          gopolicy.ConstructorConfig
+	domainValueConstructors gopolicy.DomainValueConstructors
+	enabledChecks           map[string]bool
+	pathClassifier          analysis.PathClassifier
+	fileSet                 *token.FileSet
+	scannedGoFiles          []string
+	violations              []analysis.Violation
+	warningWriter           io.Writer
+	orderCollector          *relationships.Collector
 }
 
 func newAnalysisState(
 	repoRoot string,
-	config policy.Config,
+	repository policy.RepositoryConfig,
+	paths policy.PathRoles,
+	goConfig gopolicy.Config,
 	checkNames []string,
 ) (state *analysisState) {
-	pathClassifier := checks.NewPathClassifier(repoRoot, config.Paths)
+	pathClassifier := analysis.NewPathClassifier(repoRoot, paths)
 
 	return &analysisState{
-		repository:                   config.Repository,
-		goParameters:                 config.Go.Parameters,
-		domainIdentifierConstructors: config.Go.DomainIdentifierConstructors,
-		enabledChecks:                enabledGoChecks(checkNames),
-		pathClassifier:               pathClassifier,
-		fileSet:                      token.NewFileSet(),
-		scannedGoFiles:               make([]string, 0),
-		warningWriter:                io.Discard,
-		orderCollector:               order.NewCollector(pathClassifier),
+		repository:              repository,
+		goParameters:            goConfig.Parameters,
+		goConstructors:          goConfig.Constructors,
+		domainValueConstructors: goConfig.DomainValues.RequiredConstructors,
+		enabledChecks:           enabledGoChecks(checkNames),
+		pathClassifier:          pathClassifier,
+		fileSet:                 token.NewFileSet(),
+		scannedGoFiles:          make([]string, 0),
+		warningWriter:           io.Discard,
+		orderCollector:          relationships.NewCollector(pathClassifier),
 	}
 }
 
@@ -61,7 +67,7 @@ func (state *analysisState) enabled(checkName string) (enabled bool) {
 }
 
 func (state *analysisState) collectOrder() (collect bool) {
-	return state.enabled(GoCheckOrder)
+	return state.enabled(check.Order)
 }
 
 func (state *analysisState) writeWarning(format string, arguments ...any) {

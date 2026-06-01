@@ -8,7 +8,7 @@ import (
 )
 
 func TestCheckStatusRequiredViolationsFail(t *testing.T) {
-	rule := contract.Rule{Level: contract.LevelRequired}
+	rule := contract.Rule{Enforcement: contract.EnforcementRequired}
 
 	status := CheckStatus(rule, errors.New("violation"), false)
 	if status != contract.CheckStatusFail {
@@ -17,7 +17,7 @@ func TestCheckStatusRequiredViolationsFail(t *testing.T) {
 }
 
 func TestCheckStatusRecommendationsWarnByDefault(t *testing.T) {
-	rule := contract.Rule{Level: contract.LevelRecommendation}
+	rule := contract.Rule{Enforcement: contract.EnforcementRecommendation}
 
 	status := CheckStatus(rule, errors.New("violation"), false)
 	if status != contract.CheckStatusWarn {
@@ -26,7 +26,7 @@ func TestCheckStatusRecommendationsWarnByDefault(t *testing.T) {
 }
 
 func TestCheckStatusStrictRecommendationsFail(t *testing.T) {
-	rule := contract.Rule{Level: contract.LevelRecommendation}
+	rule := contract.Rule{Enforcement: contract.EnforcementRecommendation}
 
 	status := CheckStatus(rule, errors.New("violation"), true)
 	if status != contract.CheckStatusFail {
@@ -35,7 +35,7 @@ func TestCheckStatusStrictRecommendationsFail(t *testing.T) {
 }
 
 func TestCheckStatusBlockedRulesSkip(t *testing.T) {
-	rule := contract.Rule{Level: contract.LevelRequired}
+	rule := contract.Rule{Enforcement: contract.EnforcementRequired}
 
 	status := CheckStatus(rule, errRuleBlocked, false)
 	if status != contract.CheckStatusSkip {

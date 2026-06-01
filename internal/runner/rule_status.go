@@ -14,7 +14,7 @@ func CheckStatus(
 	case IsBlocked(err):
 		return contract.CheckStatusSkip
 
-	case rule.Level == contract.LevelRecommendation && !strictRecommendations:
+	case rule.Enforcement == contract.EnforcementRecommendation && !strictRecommendations:
 		return contract.CheckStatusWarn
 
 	default:

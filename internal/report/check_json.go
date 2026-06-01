@@ -41,7 +41,7 @@ func checkEntryListJSON(entries []CheckEntry) (payload []checkEntryJSON) {
 			RuleID:       entry.Rule.ID,
 			Name:         entry.Rule.Name,
 			Group:        entry.Rule.Group,
-			Level:        entry.Rule.Level,
+			Enforcement:  entry.Rule.Enforcement,
 			Scope:        entry.Rule.Scope,
 			Status:       entry.Status,
 			Requirements: append([]string{}, entry.Rule.RequirementIDs...),

@@ -5,9 +5,10 @@ import (
 
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/requirementid"
-	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -21,17 +22,22 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 
 	config := profiles.Current(t)
 
-	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
+	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	effective, err := profile.Compile(config, registry.Definitions())
+	config, err = effective.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		t.Fatalf("effective.ResolvePacks: %v", err)
+	}
+
+	compiled, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	for _, rule := range effective.Rules {
+	for _, rule := range compiled.Rules {
 		for _, requirementID := range rule.RequirementIDs {
 			if requirements[requirementID] {
 				continue
@@ -93,9 +99,9 @@ func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement)
 	t.Helper()
 
 	config := profiles.Current(t)
-	document, err := styleguide.Load(fixtures.RepoRoot(t), styleguide.Config{
-		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
+	document, err := styleguide.Load(fixtures.RepositoryRoot(t), styleguide.Config{
+		Filename: config.StyleGuide.Path,
+		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		t.Fatalf("load STYLE.md: %v", err)

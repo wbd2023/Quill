@@ -1,0 +1,27 @@
+package policy
+
+import "ciphera/tools/internal/contract"
+
+// TargetConfigs defines the targets available to rule bindings.
+type TargetConfigs []TargetConfig
+
+// TargetConfig binds a language executor to a repository scope.
+type TargetConfig struct {
+	Name             string
+	Language         string
+	Scope            contract.Scope
+	WorkingDirectory string
+	FormatPaths      []string
+	CheckPaths       []string
+}
+
+// Lookup returns the named target.
+func (targets TargetConfigs) Lookup(name string) (target TargetConfig, found bool) {
+	for _, candidate := range targets {
+		if candidate.Name == name {
+			return candidate, true
+		}
+	}
+
+	return TargetConfig{}, false
+}

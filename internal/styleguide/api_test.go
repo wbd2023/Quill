@@ -22,7 +22,7 @@ func TestParseExposesDocumentModelThroughPublicAPI(t *testing.T) {
 			"<!-- style: id=1.1.example -->",
 			"* Public parsing should expose requirements.",
 		)),
-		styleguide.Config{RequirementIDScheme: requirementid.SectionSlug},
+		styleguide.Config{IDScheme: requirementid.SectionSlug},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -53,7 +53,7 @@ func TestParseExposesReviewMetadataThroughPublicAPI(t *testing.T) {
 			`<!-- style: id=1.1.example mode=review_only reason="Review this manually." -->`,
 			"* Public parsing should expose review metadata.",
 		)),
-		styleguide.Config{RequirementIDScheme: requirementid.SectionSlug},
+		styleguide.Config{IDScheme: requirementid.SectionSlug},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -94,7 +94,7 @@ func TestParseRejectsInvalidConfig(t *testing.T) {
 		{
 			name: "unsupported requirement id scheme",
 			config: styleguide.Config{
-				RequirementIDScheme: "section",
+				IDScheme: "section",
 			},
 			expected: "unsupported styleguide requirement id scheme",
 		},
@@ -128,8 +128,8 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 	}
 
 	document, err := styleguide.Load(root, styleguide.Config{
-		Filename:            filename,
-		RequirementIDScheme: requirementid.SectionSlug,
+		Filename: filename,
+		IDScheme: requirementid.SectionSlug,
 	})
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -154,7 +154,7 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 
 func TestLoadRejectsMissingFilename(t *testing.T) {
 	_, err := styleguide.Load(t.TempDir(), styleguide.Config{
-		RequirementIDScheme: requirementid.SectionSlug,
+		IDScheme: requirementid.SectionSlug,
 	})
 	requireErrorContains(t, err, "styleguide filename must not be empty")
 }

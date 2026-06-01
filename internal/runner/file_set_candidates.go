@@ -31,7 +31,7 @@ func collectFileSetCandidates(
 		context.RepoRoot,
 		context.Policy.Repository,
 		scopes,
-		fileSet.Extensions...,
+		fileSet.Include.Extensions...,
 	)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func explicitFileCandidates(
 	scopes []contract.Scope,
 ) (files []string) {
 	for _, scope := range scopes {
-		for _, file := range fileSet.ExplicitFiles[scope] {
+		for _, file := range fileSet.Include.Files[scope] {
 			path := filepath.Join(context.RepoRoot, file)
 			info, err := os.Stat(path)
 			if err != nil || !info.Mode().IsRegular() {

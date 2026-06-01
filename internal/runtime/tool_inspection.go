@@ -39,7 +39,7 @@ func InspectToolsWithEnvironment(
 			statuses = append(statuses, toolchain.Status{
 				Tool:  contract.Tool{ID: toolID, Name: toolID},
 				Valid: false,
-				Issue: "tool is not defined in the active rule packs",
+				Issue: "tool is not defined in the active Packs",
 			})
 			continue
 		}
@@ -49,7 +49,7 @@ func InspectToolsWithEnvironment(
 			statuses = append(statuses, toolchain.Status{
 				Tool:  tool,
 				Valid: false,
-				Issue: "tool capability is not defined in the active rule packs",
+				Issue: "tool capability is not defined in the active Packs",
 			})
 			continue
 		}
