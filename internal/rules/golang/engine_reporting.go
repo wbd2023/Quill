@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"sort"
 
-	"ciphera/tools/internal/rules/golang/checks"
+	"ciphera/tools/internal/rules/golang/analysis"
 )
 
-func sortViolations(violations []checks.Violation) {
+func sortViolations(violations []analysis.Violation) {
 	sort.Slice(violations, func(i int, j int) bool {
 		if violations[i].Position.Filename == violations[j].Position.Filename {
 			return violations[i].Position.Line < violations[j].Position.Line
@@ -17,9 +17,9 @@ func sortViolations(violations []checks.Violation) {
 	})
 }
 
-func dedupeViolations(violations []checks.Violation) (deduped []checks.Violation) {
+func dedupeViolations(violations []analysis.Violation) (deduped []analysis.Violation) {
 	seen := make(map[string]bool)
-	deduped = make([]checks.Violation, 0, len(violations))
+	deduped = make([]analysis.Violation, 0, len(violations))
 
 	for _, violation := range violations {
 		key := fmt.Sprintf(

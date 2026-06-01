@@ -19,7 +19,7 @@ func NewRuleSummary(rule contract.Rule) (summary RuleSummary) {
 		ID:             rule.ID,
 		Name:           rule.Name,
 		Group:          rule.Group,
-		Level:          rule.Level,
+		Enforcement:    rule.Enforcement,
 		Scope:          rule.Scope,
 		RequirementIDs: append([]string{}, rule.RequirementIDs...),
 	}

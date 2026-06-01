@@ -102,7 +102,7 @@ func TestResolveRepoRootAutoDetectsRepository(t *testing.T) {
 		t.Fatalf("resolveRepoRoot: %v", err)
 	}
 
-	if repositoryRoot != fixtures.RepoRoot(t) {
+	if repositoryRoot != fixtures.RepositoryRoot(t) {
 		t.Fatalf("unexpected repo root %q", repositoryRoot)
 	}
 }

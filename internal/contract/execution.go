@@ -1,5 +1,16 @@
 package contract
 
+/* --------------------------------------- Executor Kinds --------------------------------------- */
+
+const (
+	ExecutorToolchain      ExecutorKind = "toolchain"
+	ExecutorProject        ExecutorKind = "project"
+	ExecutorFileCommand    ExecutorKind = "file_command"
+	ExecutorTargetCommand  ExecutorKind = "target_command"
+	ExecutorTargetCheck    ExecutorKind = "target_check"
+	ExecutorRepositoryScan ExecutorKind = "repository_scan"
+)
+
 /* -------------------------------------------- Types ------------------------------------------- */
 
 type ExecutionSpec struct {
@@ -15,7 +26,7 @@ type ToolchainExecution struct {
 	ToolIDs []string
 }
 
-type ControlPlaneExecution struct {
+type ProjectExecution struct {
 	Check string
 }
 
@@ -27,18 +38,18 @@ type FileCommandExecution struct {
 	ConfigFile     string
 }
 
-type BackendCommandExecution struct {
+type TargetCommandExecution struct {
 	ToolIDs  []string
 	Action   string
 	Language string
-	Backends []string
+	Targets  []string
 }
 
-type BackendCheckExecution struct {
+type TargetCheckExecution struct {
 	ToolIDs  []string
 	Check    string
 	Language string
-	Backends []string
+	Targets  []string
 }
 
 type RepositoryScanExecution struct {
@@ -56,13 +67,13 @@ type CommandResult struct {
 
 func (ToolchainExecution) executionDetail() {}
 
-func (ControlPlaneExecution) executionDetail() {}
+func (ProjectExecution) executionDetail() {}
 
 func (FileCommandExecution) executionDetail() {}
 
-func (BackendCommandExecution) executionDetail() {}
+func (TargetCommandExecution) executionDetail() {}
 
-func (BackendCheckExecution) executionDetail() {}
+func (TargetCheckExecution) executionDetail() {}
 
 func (RepositoryScanExecution) executionDetail() {}
 
@@ -79,8 +90,8 @@ func (spec ExecutionSpec) ToolchainExecution() (execution ToolchainExecution, fo
 	return execution, found
 }
 
-func (spec ExecutionSpec) ControlPlaneExecution() (execution ControlPlaneExecution, found bool) {
-	execution, found = spec.Detail.(ControlPlaneExecution)
+func (spec ExecutionSpec) ProjectExecution() (execution ProjectExecution, found bool) {
+	execution, found = spec.Detail.(ProjectExecution)
 	return execution, found
 }
 
@@ -89,16 +100,16 @@ func (spec ExecutionSpec) FileCommandExecution() (execution FileCommandExecution
 	return execution, found
 }
 
-func (spec ExecutionSpec) BackendCommandExecution() (
-	execution BackendCommandExecution,
+func (spec ExecutionSpec) TargetCommandExecution() (
+	execution TargetCommandExecution,
 	found bool,
 ) {
-	execution, found = spec.Detail.(BackendCommandExecution)
+	execution, found = spec.Detail.(TargetCommandExecution)
 	return execution, found
 }
 
-func (spec ExecutionSpec) BackendCheckExecution() (execution BackendCheckExecution, found bool) {
-	execution, found = spec.Detail.(BackendCheckExecution)
+func (spec ExecutionSpec) TargetCheckExecution() (execution TargetCheckExecution, found bool) {
+	execution, found = spec.Detail.(TargetCheckExecution)
 	return execution, found
 }
 
@@ -123,10 +134,10 @@ func (spec ExecutionSpec) RequiredToolIDs() (toolIDs []string) {
 		}
 		return []string{execution.ToolID}
 
-	case BackendCommandExecution:
+	case TargetCommandExecution:
 		return append([]string{}, execution.ToolIDs...)
 
-	case BackendCheckExecution:
+	case TargetCheckExecution:
 		return append([]string{}, execution.ToolIDs...)
 
 	default:
@@ -145,37 +156,51 @@ func (spec ExecutionSpec) FileSetName() (name string) {
 	}
 }
 
-func (spec ExecutionSpec) BackendLanguage() (language string) {
+func (spec ExecutionSpec) UsesTargets() (uses bool) {
+	switch spec.Detail.(type) {
+	case TargetCommandExecution, TargetCheckExecution:
+		return true
+	default:
+		return false
+	}
+}
+
+func (spec ExecutionSpec) TargetLanguage() (language string) {
 	switch execution := spec.Detail.(type) {
-	case BackendCommandExecution:
+	case TargetCommandExecution:
 		return execution.Language
-	case BackendCheckExecution:
+	case TargetCheckExecution:
 		return execution.Language
 	}
 
 	return ""
 }
 
-func (spec ExecutionSpec) Backends() (backends []string) {
+func (spec ExecutionSpec) RequiresTargetCheckPaths() (requires bool) {
+	_, requires = spec.Detail.(TargetCheckExecution)
+	return requires
+}
+
+func (spec ExecutionSpec) Targets() (targets []string) {
 	switch execution := spec.Detail.(type) {
-	case BackendCommandExecution:
-		return append([]string{}, execution.Backends...)
-	case BackendCheckExecution:
-		return append([]string{}, execution.Backends...)
+	case TargetCommandExecution:
+		return append([]string{}, execution.Targets...)
+	case TargetCheckExecution:
+		return append([]string{}, execution.Targets...)
 	}
 
 	return nil
 }
 
-func (spec ExecutionSpec) WithBackends(backends []string) (bound ExecutionSpec) {
+func (spec ExecutionSpec) WithTargets(targets []string) (bound ExecutionSpec) {
 	bound = spec
 	switch execution := spec.Detail.(type) {
-	case BackendCommandExecution:
-		execution.Backends = append([]string{}, backends...)
+	case TargetCommandExecution:
+		execution.Targets = append([]string{}, targets...)
 		bound.Detail = execution
 
-	case BackendCheckExecution:
-		execution.Backends = append([]string{}, backends...)
+	case TargetCheckExecution:
+		execution.Targets = append([]string{}, targets...)
 		bound.Detail = execution
 	}
 

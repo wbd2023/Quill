@@ -13,8 +13,8 @@ import (
 
 func testStyleGuideConfig() (config Config) {
 	return Config{
-		Filename:            "STYLE.md",
-		RequirementIDScheme: requirementid.SectionSlug,
+		Filename: "STYLE.md",
+		IDScheme: requirementid.SectionSlug,
 	}
 }
 

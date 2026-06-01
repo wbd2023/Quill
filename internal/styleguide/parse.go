@@ -17,8 +17,8 @@ func Load(root string, config Config) (document Document, err error) {
 		return Document{}, fmt.Errorf("styleguide filename must not be empty")
 	}
 
-	scheme := config.RequirementIDScheme
-	if err := validateRequirementIDScheme(scheme); err != nil {
+	scheme := config.IDScheme
+	if err := validateIDScheme(scheme); err != nil {
 		return Document{}, err
 	}
 
@@ -34,8 +34,8 @@ func Load(root string, config Config) (document Document, err error) {
 
 // Parse parses STYLE.md source bytes.
 func Parse(source []byte, config Config) (document Document, err error) {
-	scheme := config.RequirementIDScheme
-	if err := validateRequirementIDScheme(scheme); err != nil {
+	scheme := config.IDScheme
+	if err := validateIDScheme(scheme); err != nil {
 		return Document{}, err
 	}
 

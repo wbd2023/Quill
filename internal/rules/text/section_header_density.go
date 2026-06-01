@@ -11,7 +11,7 @@ import (
 func CheckSectionHeaderDensity(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	sectionHeaders policy.SectionHeaderConfig,
+	sectionHeaders SectionHeaderConfig,
 	scope contract.Scope,
 ) (result contract.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
@@ -27,7 +27,7 @@ func CheckSectionHeaderDensity(
 		}
 
 		relativePath := filewalk.RelativePath(repoRoot, path)
-		if lineCount <= sectionHeaders.ShortFileMaxLines && len(headers) > 0 {
+		if lineCount <= sectionHeaders.ShortMaxLines && len(headers) > 0 {
 			result.Diagnostics = append(result.Diagnostics, contract.Diagnostic{
 				Code: "text/section-header-density/short-file",
 				File: relativePath,
@@ -39,7 +39,7 @@ func CheckSectionHeaderDensity(
 			})
 		}
 
-		if len(headers) >= sectionHeaders.OveruseThreshold {
+		if len(headers) > sectionHeaders.MaxHeaderCount {
 			result.Diagnostics = append(result.Diagnostics, contract.Diagnostic{
 				Code: "text/section-header-density/too-many",
 				File: relativePath,

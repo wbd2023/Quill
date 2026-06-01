@@ -1,0 +1,18 @@
+package builtin
+
+const (
+	ScannerArchitecture         = "architecture"
+	ScannerASCII                = "ascii"
+	ScannerBashMagicValues      = "bash_magic_values"
+	ScannerBashSafety           = "bash_safety"
+	ScannerBashStructure        = "bash_structure"
+	ScannerBashTestHygiene      = "bash_test_hygiene"
+	ScannerExceptionMarkers     = "exception_markers"
+	ScannerLineLength           = "line_length"
+	ScannerMaintenanceMarkers   = "maintenance_markers"
+	ScannerVocabulary           = "vocabulary"
+	ScannerSecrets              = "secrets"
+	ScannerSectionHeaderDensity = "section_header_density"
+	ScannerSectionHeaderNames   = "section_header_names"
+	ScannerSectionHeaders       = "section_headers"
+)

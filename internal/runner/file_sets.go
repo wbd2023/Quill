@@ -26,7 +26,7 @@ func CollectFileSetFiles(context Context, name string) (files []string, err erro
 			continue
 		}
 
-		if fileSet.SkipBinary && filewalk.IsBinaryFile(path) {
+		if filewalk.IsBinaryFile(path) {
 			continue
 		}
 

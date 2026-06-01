@@ -36,7 +36,7 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 	}
 }
 
-func TestRetiredHelperFilesStayRetired(t *testing.T) {
+func TestRetiredPathsStayRetired(t *testing.T) {
 	t.Parallel()
 
 	toolsRoot := importBoundaryRoot(t)
@@ -44,13 +44,23 @@ func TestRetiredHelperFilesStayRetired(t *testing.T) {
 		"internal/rules/bash/results.go",
 		"internal/rules/text/results.go",
 		"internal/rules/security/results.go",
-		"internal/rules/naming/results.go",
+		"internal/rules/vocabulary/results.go",
+		"internal/rules/golang/check_ids.go",
+		"internal/rules/golang/checks",
+		"internal/rules/golang/diagnostic_test.go",
+		"internal/rules/golang/order",
+		"internal/rules/golang/rule_architecture.go",
+		"internal/rules/golang/rule_guard_clause_spacing.go",
+		"internal/rules/golang/rule_guard_clause_spacing_test.go",
+		"internal/rules/golang/rule_switch_case_spacing.go",
+		"internal/rules/golang/rule_switch_case_spacing_test.go",
 		"internal/rules/golang/scenarios/behaviour_harness_test.go",
+		"internal/rules/golang/scenarios/domain_identifier_casts_test.go",
 	}
 
 	for _, path := range retired {
 		if _, err := os.Stat(filepath.Join(toolsRoot, path)); err == nil {
-			t.Fatalf("retired helper file still exists: %s", path)
+			t.Fatalf("retired path still exists: %s", path)
 		}
 	}
 }

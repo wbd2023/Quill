@@ -11,7 +11,7 @@ import (
 func Current(test *testing.T) (config policy.Config) {
 	test.Helper()
 
-	config, err := profile.Load(fixtures.RepoRoot(test))
+	config, err := profile.Load(fixtures.RepositoryRoot(test))
 	if err != nil {
 		test.Fatalf("profile.Load: %v", err)
 	}
@@ -28,17 +28,17 @@ func RepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
 func Write(test *testing.T, root string, config policy.Config) {
 	test.Helper()
 
-	styleGuide := fixtures.ReadFile(test, fixtures.RepoRoot(test), "STYLE.md")
+	styleGuide := fixtures.ReadFile(test, fixtures.RepositoryRoot(test), "STYLE.md")
 	fixtures.WriteFile(test, root, config.StyleGuide.Path, styleGuide)
-	fixtures.WriteFile(test, root, "style.toml", Render(test, config))
+	fixtures.WriteFile(test, root, "style.toml", Format(test, config))
 }
 
-func Render(test *testing.T, config policy.Config) (contents string) {
+func Format(test *testing.T, config policy.Config) (contents string) {
 	test.Helper()
 
-	contents, err := profile.Render(config)
+	contents, err := profile.Format(config)
 	if err != nil {
-		test.Fatalf("render profile TOML: %v", err)
+		test.Fatalf("format profile TOML: %v", err)
 	}
 
 	return contents

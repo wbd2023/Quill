@@ -73,7 +73,7 @@ func NewThing(relayClient *RelayClient, userRepository UserRepository) (thing *T
 	)
 }
 
-func TestGoStylePassesValidParameterAndConstructorOrder(t *testing.T) {
+func TestGoStylePassesValidParameterRules(t *testing.T) {
 	tempDir := t.TempDir()
 	sourcePath := filepath.Join(tempDir, "sample.go")
 	sourceCode := `package sample

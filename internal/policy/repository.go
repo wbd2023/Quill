@@ -12,9 +12,8 @@ type RepositoryConfig struct {
 	RootMarkers         []string
 	ScopeRoots          map[contract.Scope][]string
 	DefaultScope        contract.Scope
-	GlobalExclusions    []string
+	ExcludedDirectories []string
 	GeneratedMarker     string
-	GeneratedProbeBytes int
 }
 
 // HasScope reports whether the repository defines the named scope.

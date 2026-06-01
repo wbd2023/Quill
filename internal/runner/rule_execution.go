@@ -33,7 +33,7 @@ func RunRule(
 	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
 ) (result contract.ExecutionResult, err error) {
-	return runRuleSpec(rule.ID, rule.Spec, rule.ToolIDs(), context, toolStatuses, executors)
+	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, executors)
 }
 
 func RunFix(
@@ -42,18 +42,18 @@ func RunFix(
 	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
 ) (result contract.ExecutionResult, err error) {
-	return runRuleSpec(rule.ID, rule.FixSpec, rule.FixToolIDs(), context, toolStatuses, executors)
+	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, executors)
 }
 
-func runRuleSpec(
+func runExecution(
 	ruleID string,
-	spec contract.ExecutionSpec,
+	execution contract.ExecutionSpec,
 	toolIDs []string,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
 	executors ExecutorRegistry,
 ) (result contract.ExecutionResult, err error) {
-	if spec.Empty() {
+	if execution.Empty() {
 		return contract.ExecutionResult{}, nil
 	}
 
@@ -68,14 +68,14 @@ func runRuleSpec(
 		}, errRuleBlocked
 	}
 
-	executor, found := executors[spec.Kind]
+	executor, found := executors[execution.Kind]
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf(
 			"rule %s uses unknown executor %q",
 			ruleID,
-			spec.Executor(),
+			execution.Executor(),
 		)
 	}
 
-	return executor(context, spec, toolStatuses)
+	return executor(context, execution, toolStatuses)
 }

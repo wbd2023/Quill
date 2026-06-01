@@ -6,8 +6,9 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/rulepack"
+	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -15,9 +16,9 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	t.Helper()
 
 	config := profiles.Current(t)
-	document, err := styleguide.Load(fixtures.RepoRoot(t), styleguide.Config{
-		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
+	document, err := styleguide.Load(fixtures.RepositoryRoot(t), styleguide.Config{
+		Filename: config.StyleGuide.Path,
+		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		t.Fatalf("styleguide.Load: %v", err)
@@ -26,21 +27,26 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	return document
 }
 
-func loadEffectiveConfig(t *testing.T) (effective contract.EffectiveConfig) {
+func loadEffectiveConfig(t *testing.T) (compiled contract.EffectiveConfig) {
 	t.Helper()
 
 	config := profiles.Current(t)
-	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
+	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	effective, err = profile.Compile(config, registry.Definitions())
+	config, err = effective.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		t.Fatalf("effective.ResolvePacks: %v", err)
+	}
+
+	compiled, err = profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	return effective
+	return compiled
 }
 
 func loadCoverageReport(t *testing.T) (report Report) {

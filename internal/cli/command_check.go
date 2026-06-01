@@ -5,9 +5,9 @@ import (
 	"io"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/executors"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/toolchain"
 )
@@ -37,7 +37,7 @@ func runCheck(tool CLI, options checkOptions) (exitCode int) {
 	result := report.CheckResult{
 		Entries: make([]report.CheckEntry, 0, len(selected)),
 	}
-	checkers := executors.Checkers()
+	checkers := drivers.Checkers()
 	for _, rule := range selected {
 		execution, err := runner.RunRule(rule, context, toolStatuses, checkers)
 		result.Entries = append(
@@ -152,7 +152,8 @@ func selectedRules(
 			continue
 		}
 
-		if mode == contract.CheckModeRequired && rule.Level == contract.LevelRecommendation {
+		if mode == contract.CheckModeRequired &&
+			rule.Enforcement == contract.EnforcementRecommendation {
 			continue
 		}
 

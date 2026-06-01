@@ -20,7 +20,7 @@ func TestWriteCheckText(t *testing.T) {
 				Rule: NewRuleSummary(contract.Rule{
 					ID:             "toolchain",
 					Name:           "Pinned toolchain",
-					Group:          contract.RuleGroup("control_plane"),
+					Group:          contract.RuleGroup("project"),
 					RequirementIDs: []string{"0.1.security-first"},
 				}),
 				Status: contract.CheckStatusPass,
@@ -62,7 +62,7 @@ func TestWriteCheckJSON(t *testing.T) {
 				Rule: NewRuleSummary(contract.Rule{
 					ID:             "toolchain",
 					Name:           "Pinned toolchain",
-					Group:          contract.RuleGroup("control_plane"),
+					Group:          contract.RuleGroup("project"),
 					RequirementIDs: []string{"0.1.security-first"},
 				}),
 				Status: contract.CheckStatusPass,

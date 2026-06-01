@@ -30,9 +30,5 @@ func ValidateCollectorPolicy(repository policy.RepositoryConfig) (err error) {
 		return fmt.Errorf("collector generated-file marker must not be empty")
 	}
 
-	if repository.GeneratedProbeBytes <= 0 {
-		return fmt.Errorf("collector generated-file probe limit must be positive")
-	}
-
 	return nil
 }

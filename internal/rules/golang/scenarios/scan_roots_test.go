@@ -11,11 +11,14 @@ import (
 
 func TestGoStyleRejectsMissingScanRoot(t *testing.T) {
 	missingRoot := filepath.Join(t.TempDir(), "missing")
+	config := profiles.Current(t)
 
 	if _, err := golang.CheckDirectories(
-		fixtures.RepoRoot(t),
+		fixtures.RepositoryRoot(t),
 		[]string{missingRoot},
-		profiles.Current(t),
+		config.Repository,
+		config.PathRoles,
+		goConfigForTest(t, config),
 	); err == nil {
 		t.Fatal("expected missing scan root error")
 	}

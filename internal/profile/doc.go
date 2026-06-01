@@ -1,2 +1,2 @@
-// Package profile loads, validates, renders, and compiles style profile configuration.
+// Package profile loads, validates, formats, and compiles style profile configuration.
 package profile

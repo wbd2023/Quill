@@ -4,21 +4,21 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/runner"
 )
 
-func TestFixableRulesUsesRulePackFixSpecs(t *testing.T) {
+func TestFixableRulesUsePackFixes(t *testing.T) {
 	rules := []contract.Rule{
 		{
 			ID: "go/lint",
-			FixSpec: contract.ExecutionSpec{
-				Kind: rulepack.ExecutorBackendCommand,
-				Detail: contract.BackendCommandExecution{
-					ToolIDs:  []string{rulepack.ToolGo},
-					Action:   rulepack.BackendActionGoFormat,
-					Language: rulepack.LanguageGo,
+			Fix: contract.ExecutionSpec{
+				Kind: contract.ExecutorTargetCommand,
+				Detail: contract.TargetCommandExecution{
+					ToolIDs:  []string{builtin.ToolGo},
+					Action:   builtin.TargetActionGoFormat,
+					Language: builtin.LanguageGo,
 				},
 			},
 			Scope: contract.Scope("tools"),

@@ -14,7 +14,7 @@ type RuleSummary struct {
 	ID             string
 	Name           string
 	Group          contract.RuleGroup
-	Level          contract.Level
+	Enforcement    contract.Enforcement
 	Scope          contract.Scope
 	RequirementIDs []string
 }
@@ -62,7 +62,7 @@ type checkEntryJSON struct {
 	RuleID       string               `json:"rule_id"`
 	Name         string               `json:"name"`
 	Group        contract.RuleGroup   `json:"group"`
-	Level        contract.Level       `json:"level"`
+	Enforcement  contract.Enforcement `json:"enforcement"`
 	Scope        contract.Scope       `json:"scope"`
 	Status       contract.CheckStatus `json:"status"`
 	Requirements []string             `json:"requirements"`

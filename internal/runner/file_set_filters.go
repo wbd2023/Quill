@@ -9,17 +9,19 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+/* ------------------------------------------ Inclusion ----------------------------------------- */
+
 func fileSetCoversPath(
 	context Context,
 	fileSet policy.FileSetConfig,
 	path string,
 ) (covered bool) {
-	if len(fileSet.ExplicitFiles) == 0 && len(fileSet.PathPrefixes) == 0 {
+	if len(fileSet.Include.Files) == 0 && len(fileSet.Include.Paths) == 0 {
 		return true
 	}
 
 	foundScope := false
-	for scope, explicitFiles := range fileSet.ExplicitFiles {
+	for scope, explicitFiles := range fileSet.Include.Files {
 		if !context.Policy.Repository.HasScopeOverlap(context.Scope, scope) {
 			continue
 		}
@@ -29,14 +31,14 @@ func fileSetCoversPath(
 			context.RepoRoot,
 			path,
 			explicitFiles,
-			fileSet.PathPrefixes[scope],
+			fileSet.Include.Paths[scope],
 		) {
 			return true
 		}
 	}
 
-	for scope, pathPrefixes := range fileSet.PathPrefixes {
-		if _, alreadyChecked := fileSet.ExplicitFiles[scope]; alreadyChecked {
+	for scope, pathPrefixes := range fileSet.Include.Paths {
+		if _, alreadyChecked := fileSet.Include.Files[scope]; alreadyChecked {
 			continue
 		}
 
@@ -68,14 +70,35 @@ func fileSetCoversRelativePath(
 		hasPrefixedPath(pathPrefixes, relativePath)
 }
 
+/* ------------------------------------------ Exclusion ----------------------------------------- */
+
 func fileSetExcludesPath(fileSet policy.FileSetConfig, path string) (excluded bool) {
 	base := filepath.Base(path)
-	if hasMatchingSuffix(fileSet.ExcludedExtensions, path) {
+	if hasMatchingSuffix(fileSet.Exclude.Extensions, path) {
 		return true
 	}
 
-	return slices.Contains(fileSet.ExcludedNames, base) ||
-		hasPrefixedPath(fileSet.ExcludedNamePrefixes, base)
+	return hasMatchingFilePattern(fileSet.Exclude.Files, base, path)
+}
+
+/* -------------------------------------- Matching Helpers -------------------------------------- */
+
+func hasMatchingFilePattern(patterns []string, base string, path string) (found bool) {
+	for _, pattern := range patterns {
+		target := base
+		if strings.Contains(pattern, string(filepath.Separator)) ||
+			strings.Contains(pattern, "/") {
+			target = filepath.ToSlash(path)
+			pattern = filepath.ToSlash(pattern)
+		}
+
+		matched, err := filepath.Match(pattern, target)
+		if err == nil && matched {
+			return true
+		}
+	}
+
+	return false
 }
 
 func hasMatchingSuffix(suffixes []string, path string) (found bool) {

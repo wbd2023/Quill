@@ -1,225 +1,249 @@
 package golang
 
-import "ciphera/tools/internal/rules/golang/checks"
+import (
+	"ciphera/tools/internal/rules/golang/analysis"
+	"ciphera/tools/internal/rules/golang/check"
+	"ciphera/tools/internal/rules/golang/structure"
+	"ciphera/tools/internal/rules/golang/syntax"
+	"ciphera/tools/internal/rules/golang/test"
+)
 
 /* ---------------------------------------- Rule Dispatch --------------------------------------- */
 
-func (analysis fileAnalysis) addLoggingViolations() {
-	if !analysis.enabled(GoCheckLogging) {
+func (scan fileScan) addLoggingViolations() {
+	if !scan.enabled(check.Logging) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckStructuredLogging(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.state.pathClassifier,
-		analysis.state.goParameters,
+	scan.addViolations(syntax.CheckStructuredLogging(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.state.pathClassifier,
+		scan.state.goParameters,
 	))
 }
 
-func (analysis fileAnalysis) addSecurityViolations() {
-	if !analysis.enabled(GoCheckSecurity) {
+func (scan fileScan) addSecurityViolations() {
+	if !scan.enabled(check.Security) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckSensitiveDataLiterals(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
-		analysis.state.goParameters,
+	scan.addViolations(syntax.CheckSensitiveDataLiterals(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
+		scan.state.goParameters,
 	))
-	analysis.addViolations(checks.CheckCryptographySafety(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
+	scan.addViolations(syntax.CheckCryptographySafety(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
 	))
 }
 
-func (analysis fileAnalysis) addProcessViolations() {
-	if !analysis.enabled(GoCheckProcess) {
+func (scan fileScan) addProcessViolations() {
+	if !scan.enabled(check.Process) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckProcessExecutionSafety(
-		analysis.state.fileSet,
-		analysis.file,
+	scan.addViolations(syntax.CheckProcessExecutionSafety(
+		scan.state.fileSet,
+		scan.file,
 	))
 }
 
-func (analysis fileAnalysis) addResourceViolations() {
-	if !analysis.enabled(GoCheckResources) {
+func (scan fileScan) addResourceViolations() {
+	if !scan.enabled(check.Resources) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckContextAndResourceSafety(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
+	scan.addViolations(syntax.CheckContextAndResourceSafety(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
 	))
 }
 
-func (analysis fileAnalysis) addDataViolations() {
-	if !analysis.enabled(GoCheckData) {
+func (scan fileScan) addDataViolations() {
+	if !scan.enabled(check.Data) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckDataUsage(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
+	scan.addViolations(syntax.CheckDataUsage(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
 	))
 }
 
-func (analysis fileAnalysis) addReturnViolations() {
-	if !analysis.enabled(GoCheckReturns) {
+func (scan fileScan) addReturnViolations() {
+	if !scan.enabled(check.Returns) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckNamedReturns(analysis.state.fileSet, analysis.file))
-	analysis.addViolations(checks.CheckNakedReturns(analysis.state.fileSet, analysis.file))
+	scan.addViolations(syntax.CheckNamedReturns(scan.state.fileSet, scan.file))
+	scan.addViolations(syntax.CheckNakedReturns(scan.state.fileSet, scan.file))
 }
 
-func (analysis fileAnalysis) addParameterViolations() {
-	if !analysis.enabled(GoCheckParameters) {
+func (scan fileScan) addParameterViolations() {
+	if !scan.enabled(check.Parameters) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckTypeElision(analysis.state.fileSet, analysis.file))
-	analysis.addViolations(checks.CheckParameterOrder(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.state.goParameters,
+	scan.addViolations(syntax.CheckTypeElision(scan.state.fileSet, scan.file))
+	scan.addViolations(syntax.CheckParameterOrder(
+		scan.state.fileSet,
+		scan.file,
+		scan.state.goParameters,
 	))
-	analysis.addViolations(checks.CheckConstructorOrder(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.state.goParameters,
-	))
-}
-
-func (analysis fileAnalysis) addErrorViolations() {
-	if !analysis.enabled(GoCheckErrors) {
-		return
-	}
-
-	analysis.addViolations(checks.CheckErrorHandlingStyle(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
-		analysis.state.goParameters,
-	))
-	analysis.addViolations(checks.CheckAdapterErrorWrapping(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
-		analysis.state.pathClassifier,
+	scan.addViolations(syntax.CheckConstructorOrder(
+		scan.state.fileSet,
+		scan.file,
+		scan.state.goConstructors,
+		scan.state.goParameters,
 	))
 }
 
-func (analysis fileAnalysis) addCommentViolations() {
-	if !analysis.enabled(GoCheckComments) {
+func (scan fileScan) addErrorViolations() {
+	if !scan.enabled(check.Errors) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckInlineCommentStyle(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.state.pathClassifier,
+	scan.addViolations(syntax.CheckErrorHandlingStyle(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
+		scan.state.goParameters,
+	))
+	scan.addViolations(syntax.CheckAdapterErrorWrapping(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
+		scan.state.pathClassifier,
 	))
 }
 
-func (analysis fileAnalysis) addDomainIdentifierViolations() {
-	if !analysis.enabled(GoCheckDomainIdentifiers) {
+func (scan fileScan) addCommentViolations() {
+	if !scan.enabled(check.Comments) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckDirectDomainIdentifierCasts(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.state.pathClassifier,
-		analysis.state.domainIdentifierConstructors,
+	scan.addViolations(syntax.CheckInlineCommentStyle(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.state.pathClassifier,
 	))
 }
 
-func (analysis fileAnalysis) addOrderViolations() {
-	if !analysis.enabled(GoCheckOrder) {
+func (scan fileScan) addDomainValueViolations() {
+	if !scan.enabled(check.DomainValues) {
 		return
 	}
 
-	if !analysis.isTestFile {
-		analysis.addViolations(checks.CheckFileStructureOrder(
-			analysis.state.fileSet,
-			analysis.file,
+	scan.addViolations(syntax.CheckDirectDomainValueCasts(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.state.pathClassifier,
+		scan.state.domainValueConstructors,
+	))
+}
+
+func (scan fileScan) addOrderViolations() {
+	if !scan.enabled(check.Order) {
+		return
+	}
+
+	if !scan.isTestFile {
+		scan.addViolations(structure.CheckStructureOrder(
+			scan.state.fileSet,
+			scan.file,
 		))
-		analysis.addViolations(checks.CheckScannerEntrypointOrder(
-			analysis.state.fileSet,
-			analysis.file,
-			analysis.path,
+		scan.addViolations(structure.CheckScannerEntrypointOrder(
+			scan.state.fileSet,
+			scan.file,
+			scan.path,
 		))
 	}
 
-	analysis.addViolations(checks.CheckCRUDLOrder(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.state.pathClassifier,
+	scan.addViolations(structure.CheckCRUDLOrder(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.state.pathClassifier,
 	))
-	analysis.state.orderCollector.Collect(analysis.state.fileSet, analysis.file, analysis.path)
+	scan.state.orderCollector.Collect(scan.state.fileSet, scan.file, scan.path)
 }
 
-func (analysis fileAnalysis) addNamingViolations() {
-	if !analysis.enabled(GoCheckNaming) || analysis.isTestFile {
+func (scan fileScan) addNamingViolations() {
+	if !scan.enabled(check.Naming) || scan.isTestFile {
 		return
 	}
 
-	analysis.addViolations(checks.CheckSingleLetterVars(analysis.state.fileSet, analysis.file))
+	scan.addViolations(syntax.CheckSingleLetterVars(scan.state.fileSet, scan.file))
 }
 
-func (analysis fileAnalysis) addTestViolations() {
-	if !analysis.enabled(GoCheckTests) || !analysis.isTestFile {
+func (scan fileScan) addTestViolations() {
+	if !scan.enabled(check.Tests) || !scan.isTestFile {
 		return
 	}
 
-	analysis.addViolations(checks.CheckTestHygiene(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
+	scan.addViolations(test.CheckHygiene(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
 	))
 }
 
-func (analysis fileAnalysis) addFileShapeViolations() {
-	if !analysis.enabled(GoCheckFileShape) {
+func (scan fileScan) addFileShapeViolations() {
+	if !scan.enabled(check.FileShape) {
 		return
 	}
 
-	analysis.addViolations(checks.CheckFileShape(
-		analysis.state.fileSet,
-		analysis.file,
-		analysis.path,
-		analysis.isTestFile,
+	scan.addViolations(structure.CheckShape(
+		scan.state.fileSet,
+		scan.file,
+		scan.path,
+		scan.isTestFile,
 	))
+}
+
+func (scan fileScan) addSpacingViolations() {
+	if scan.enabled(check.GuardClauseSpacing) {
+		scan.addViolations(structure.CheckGuardClauseSpacing(
+			scan.state.fileSet,
+			scan.file,
+		))
+	}
+
+	if scan.enabled(check.SwitchCaseSpacing) {
+		scan.addViolations(structure.CheckSwitchCaseSpacing(
+			scan.state.fileSet,
+			scan.file,
+			scan.lines,
+		))
+	}
 }
 
 /* -------------------------------------- Dispatch Helpers -------------------------------------- */
 
-func (analysis fileAnalysis) enabled(checkName string) (enabled bool) {
-	return analysis.state.enabled(checkName)
+func (scan fileScan) enabled(checkName string) (enabled bool) {
+	return scan.state.enabled(checkName)
 }
 
-func (analysis fileAnalysis) addViolations(violations []checks.Violation) {
-	analysis.state.violations = append(analysis.state.violations, violations...)
+func (scan fileScan) addViolations(violations []analysis.Violation) {
+	scan.state.violations = append(scan.state.violations, violations...)
 }

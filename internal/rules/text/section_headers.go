@@ -28,7 +28,7 @@ type sectionHeaderPatterns struct {
 func CheckSectionHeaders(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	sectionHeaders policy.SectionHeaderConfig,
+	sectionHeaders SectionHeaderConfig,
 	scope contract.Scope,
 ) (result contract.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
@@ -44,13 +44,13 @@ func CheckSectionHeaders(
 		}
 
 		result.Diagnostics = append(result.Diagnostics, diagnostics...)
-		if lineCount >= sectionHeaders.RequiredMinLines && len(headers) == 0 {
+		if lineCount >= sectionHeaders.LargeMinLines && len(headers) == 0 {
 			result.Diagnostics = append(result.Diagnostics, contract.Diagnostic{
 				Code: "text/section-headers/missing",
 				File: filewalk.RelativePath(repoRoot, path),
 				Message: fmt.Sprintf(
 					"missing section headers in %d+ line file",
-					sectionHeaders.RequiredMinLines,
+					sectionHeaders.LargeMinLines,
 				),
 			})
 		}

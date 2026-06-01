@@ -4,9 +4,9 @@ import (
 	"flag"
 
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/executors"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -42,7 +42,7 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 	}
 
 	statusIndex := toolchain.StatusesByID(statuses)
-	fixers := executors.Fixers()
+	fixers := drivers.Fixers()
 	for _, rule := range rules {
 		result, err := runner.RunFix(rule, context, statusIndex, fixers)
 		if err != nil {
@@ -111,7 +111,7 @@ func fixableRules(
 			continue
 		}
 
-		if rule.FixSpec.Empty() {
+		if rule.Fix.Empty() {
 			continue
 		}
 

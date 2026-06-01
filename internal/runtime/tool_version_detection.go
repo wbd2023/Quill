@@ -2,12 +2,9 @@ package runtime
 
 import (
 	"debug/buildinfo"
-	"errors"
 	"fmt"
-	"os"
 	"strings"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -84,25 +81,4 @@ func detectCommandVersion(
 	}
 
 	return parse(output)
-}
-
-func inspectLocalToolVersion(
-	tool contract.Tool,
-	capability toolchain.Capability,
-	path string,
-) (version string, found bool, err error) {
-	if _, err = os.Stat(path); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return "", false, nil
-		}
-
-		return "", false, err
-	}
-
-	version, err = detectVersion(tool, capability, path, nil)
-	if err != nil {
-		return "", false, nil
-	}
-
-	return version, true, nil
 }

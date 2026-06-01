@@ -16,11 +16,11 @@ type Config struct {
 	// Load requires it; Parse uses it only in diagnostics and defaults to STYLE.md.
 	Filename string
 
-	// RequirementIDScheme selects the grammar used for requirement IDs.
-	RequirementIDScheme requirementid.Scheme
+	// IDScheme selects the grammar used for requirement IDs.
+	IDScheme requirementid.Scheme
 }
 
-func validateRequirementIDScheme(scheme requirementid.Scheme) (err error) {
+func validateIDScheme(scheme requirementid.Scheme) (err error) {
 	if scheme == "" {
 		return fmt.Errorf("styleguide requirement id scheme must not be empty")
 	}

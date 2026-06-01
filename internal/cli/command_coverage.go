@@ -5,9 +5,10 @@ import (
 	"io"
 
 	"ciphera/tools/internal/coverage"
+	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/rulepack"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -86,24 +87,29 @@ func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err er
 	}
 
 	document, err := styleguide.Load(repoRoot, styleguide.Config{
-		Filename:            config.StyleGuide.Path,
-		RequirementIDScheme: config.StyleGuide.RequirementIDScheme,
+		Filename: config.StyleGuide.Path,
+		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		return coverage.Report{}, err
 	}
 
-	registry, err := rulepack.DefaultRegistry(config.RulePacks.Enabled)
+	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		return coverage.Report{}, err
 	}
 
-	effective, err := profile.Compile(config, registry.Definitions())
+	config, err = effective.ResolvePacks(config, registry.Packs())
 	if err != nil {
 		return coverage.Report{}, err
 	}
 
-	return coverage.Build(document, effective.Rules), nil
+	compiled, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		return coverage.Report{}, err
+	}
+
+	return coverage.Build(document, compiled.Rules), nil
 }
 
 /* ------------------------------------------ Rendering ----------------------------------------- */

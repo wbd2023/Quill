@@ -22,7 +22,7 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 	result, err := CheckSectionHeaderNames(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		profiles.Current(t).Formatting.SectionHeaders,
+		currentSectionHeaders(t),
 		contract.Scope("app"),
 	)
 	if err == nil {
@@ -53,7 +53,7 @@ func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 	result, err := CheckSectionHeaderNames(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		profiles.Current(t).Formatting.SectionHeaders,
+		currentSectionHeaders(t),
 		contract.Scope("app"),
 	)
 	if err != nil {
@@ -64,8 +64,8 @@ func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + " Local " + strings.Repeat("-", 43) + " */"
-	config := profiles.Current(t)
-	config.Formatting.SectionHeaders.GenericNames = []string{"Local"}
+	headers := currentSectionHeaders(t)
+	headers.GenericNames = []string{"Local"}
 	fixtures.WriteFile(
 		t,
 		repoRoot,
@@ -76,7 +76,7 @@ func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 	result, err := CheckSectionHeaderNames(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		config.Formatting.SectionHeaders,
+		headers,
 		contract.Scope("app"),
 	)
 	if err == nil {
