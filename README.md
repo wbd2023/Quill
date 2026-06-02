@@ -101,7 +101,11 @@ finds the configured profile markers, currently `STYLE.md` and `style.toml`.
 
 The dependency direction is:
 
-`contract -> policy -> profile/{toml,validation,effective} -> profile -> cli`
+`contract -> policy -> profile/toml`
+
+`contract -> policy -> profile/internal/validation -> profile`
+
+`contract -> policy -> pack -> profile/internal/effective -> profile -> cli`
 
 `toolchain -> runtime -> installer -> cli`
 
@@ -117,14 +121,15 @@ Production packages must keep these boundaries:
 
 - `contract` imports no internal package.
 - `policy` imports only `contract`.
-- `profile/toml` imports profile policy types, not loaders, Packs, runners, drivers, rules,
-  or reports.
-- `profile/validation` imports profile policy types and contracts, not loaders, Packs,
+- `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not
+  loaders, validators, Packs, runners, drivers, rules, or reports.
+- `profile/internal/validation` imports profile policy types and contracts, not loaders, Packs,
   runners, drivers, rules, or reports.
-- `profile/effective` imports profile policy types and contracts, not loaders, Packs, runners,
-  drivers, rules, or reports.
-- `profile` is a facade over profile loading, TOML, validation, and effective compilation. It does
-  not import Packs, runners, drivers, rules, or reports.
+- `profile/internal/effective` imports profile policy types, contracts, and neutral Pack
+  definitions, not loaders, Shipped Packs, runners, drivers, rules, or reports.
+- `profile` is the public facade over profile loading, TOML, validation, Pack default
+  resolution, and Effective Profile compilation. It may import neutral Pack registries, but not
+  Shipped Packs, runners, drivers, rules, or reports.
 - `toolchain` imports no project policy, runtime, rules, profile, or reporting package.
 - `runtime` owns command execution, tool inspection, environment layout, and no installation
   orchestration.
@@ -170,13 +175,14 @@ The style platform uses balanced granularity:
 - `internal/installer/`
   - Pinned tool installation, downloads, archive extraction, and lockfile validation.
 - `internal/profile/`
-  - Style profile facade: loading, parsing, formatting, validation, and effective rule compilation.
+  - Style Profile facade: loading, parsing, formatting, validation, and Effective Profile
+    compilation.
 - `internal/profile/toml/`
   - Persisted `style.toml` schema decoding, encoding, and conversion to policy values.
-- `internal/profile/validation/`
-  - Internal consistency checks for typed profile policy values.
-- `internal/profile/effective/`
-  - Compilation from typed profile policy and rule definitions to effective runtime contracts.
+- `internal/profile/internal/validation/`
+  - Internal consistency checks for typed Profile policy values.
+- `internal/profile/internal/effective/`
+  - Effective Profile compilation from resolved Profile policy and Pack registry contracts.
 - `internal/pack/`
   - Neutral Pack definitions, catalogues, registries, and selection validation.
 - `internal/pack/builtin/`

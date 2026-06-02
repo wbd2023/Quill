@@ -13,7 +13,7 @@ func vocabularyRepositoryScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			_ contract.ExecutionSpec,
 		) (contract.ExecutionResult, error) {
-			pack, found := context.Policy.PackConfigs.Lookup(builtin.PackVocabulary)
+			pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
 			if !found {
 				return contract.ExecutionResult{}, errMissingPackConfig(builtin.PackVocabulary)
 			}
@@ -25,7 +25,7 @@ func vocabularyRepositoryScanners() (scanners map[string]repositoryScanner) {
 
 			return vocabulary.CheckVocabulary(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				config,
 				context.Scope,
 			)

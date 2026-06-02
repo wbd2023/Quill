@@ -51,8 +51,8 @@ func runGoStyleCheck(
 		styleResult, err := golang.CheckDirectories(
 			context.RepoRoot,
 			roots,
-			context.Policy.Repository,
-			context.Policy.PathRoles,
+			context.Profile.Repository,
+			context.Profile.PathRoles,
 			goConfig,
 			execution.Check,
 		)

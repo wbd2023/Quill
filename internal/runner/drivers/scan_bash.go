@@ -15,7 +15,7 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return bash.CheckMagicValues(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},
@@ -23,7 +23,7 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			_ contract.ExecutionSpec,
 		) (contract.ExecutionResult, error) {
-			return bash.CheckSafety(context.RepoRoot, context.Policy.Repository, context.Scope)
+			return bash.CheckSafety(context.RepoRoot, context.Profile.Repository, context.Scope)
 		},
 		builtin.ScannerBashStructure: func(
 			context runner.Context,
@@ -31,7 +31,7 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return bash.CheckStructure(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},
@@ -41,7 +41,7 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return bash.CheckTestHygiene(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},

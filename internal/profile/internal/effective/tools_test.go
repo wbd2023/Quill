@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/effective"
+	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/fixture"
 )
 

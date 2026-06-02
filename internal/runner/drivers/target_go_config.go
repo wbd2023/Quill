@@ -7,7 +7,7 @@ import (
 )
 
 func decodeGoConfig(context runner.Context) (config gopolicy.Config, err error) {
-	pack, found := context.Policy.PackConfigs.Lookup(builtin.PackGo)
+	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackGo)
 	if !found {
 		return gopolicy.Config{}, errMissingPackConfig(builtin.PackGo)
 	}

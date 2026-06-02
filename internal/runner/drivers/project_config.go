@@ -7,7 +7,7 @@ import (
 )
 
 func decodeProjectConfig(context runner.Context) (config project.Config, err error) {
-	pack, found := context.Policy.PackConfigs.Lookup(builtin.PackProject)
+	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackProject)
 	if !found {
 		return project.Config{}, errMissingPackConfig(builtin.PackProject)
 	}

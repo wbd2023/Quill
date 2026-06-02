@@ -33,7 +33,7 @@ func projectExecutor(
 		output, err = checkEnforcementLevels()
 
 	case builtin.ProjectCheckExcludedDirectories:
-		output, err = checkExcludedDirectories(context.Policy.Repository)
+		output, err = checkExcludedDirectories(context.Profile.Repository)
 
 	case builtin.ProjectCheckCommands:
 		projectConfig, decodeErr := decodeProjectConfig(context)

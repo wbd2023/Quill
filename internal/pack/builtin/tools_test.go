@@ -11,7 +11,6 @@ import (
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 )
 
 /* ------------------------------------------- Tooling ------------------------------------------ */
@@ -118,17 +117,12 @@ func toolByID(t *testing.T, toolID string) (tool contract.Tool) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		t.Fatalf("effective.ResolvePacks: %v", err)
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	tool, found := compiled.ToolByID(toolID)
+	tool, found := compiled.Effective.ToolByID(toolID)
 	if !found {
 		t.Fatalf("missing %s tool in registry", toolID)
 	}

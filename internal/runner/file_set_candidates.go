@@ -18,7 +18,7 @@ func collectFileSetCandidates(
 	scopes := []contract.Scope{context.Scope}
 	if fileSetUsesScopedIncludes(fileSet) {
 		scopes = findOverlappingScopes(
-			context.Policy.Repository,
+			context.Profile.Repository,
 			context.Scope,
 			fileSetIncludeScopes(fileSet),
 		)
@@ -29,7 +29,7 @@ func collectFileSetCandidates(
 
 	files, err = filewalk.CollectFilesInScopes(
 		context.RepoRoot,
-		context.Policy.Repository,
+		context.Profile.Repository,
 		scopes,
 		fileSet.Include.Extensions...,
 	)

@@ -2,18 +2,40 @@ package profile
 
 import (
 	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/effective"
+	"ciphera/tools/internal/profile/internal/effective"
 )
 
-// Compile validates config and resolves it against available rule and tool definitions.
+// EffectiveProfile is the resolved Profile and executable rule/tool configuration.
+type EffectiveProfile struct {
+	Profile   policy.Config
+	Effective contract.EffectiveConfig
+}
+
+// Compile validates config, applies Pack defaults, and builds an Effective Profile.
 func Compile(
 	config policy.Config,
-	definitions contract.Definitions,
-) (compiled contract.EffectiveConfig, err error) {
+	registry pack.Registry,
+) (compiled EffectiveProfile, err error) {
 	if err := Validate(config); err != nil {
-		return contract.EffectiveConfig{}, err
+		return EffectiveProfile{}, err
 	}
 
-	return effective.Compile(config, definitions)
+	config, err = effective.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		return EffectiveProfile{}, err
+	}
+
+	if err := Validate(config); err != nil {
+		return EffectiveProfile{}, err
+	}
+
+	compiled.Effective, err = effective.Compile(config, registry.Definitions())
+	if err != nil {
+		return EffectiveProfile{}, err
+	}
+
+	compiled.Profile = config
+	return compiled, nil
 }

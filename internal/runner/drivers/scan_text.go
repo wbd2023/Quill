@@ -15,7 +15,7 @@ func textRepositoryScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			_ contract.ExecutionSpec,
 		) (contract.ExecutionResult, error) {
-			return text.CheckASCII(context.RepoRoot, context.Policy.Repository, context.Scope)
+			return text.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
 		},
 		builtin.ScannerExceptionMarkers: func(
 			context runner.Context,
@@ -23,7 +23,7 @@ func textRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return text.CheckExceptionMarkers(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},
@@ -39,7 +39,7 @@ func textRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return text.CheckMaintenanceMarkers(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},

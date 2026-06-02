@@ -41,7 +41,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 		},
 		{
 			name:      "profile validation depends only on policy and contracts",
-			directory: "internal/profile/validation",
+			directory: "internal/profile/internal/validation",
 			forbidden: []string{
 				"ciphera/tools/internal/cli",
 				"ciphera/tools/internal/coverage",
@@ -60,7 +60,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 		},
 		{
 			name:      "profile effective compiler may use pack definitions",
-			directory: "internal/profile/effective",
+			directory: "internal/profile/internal/effective",
 			forbidden: []string{
 				"ciphera/tools/internal/cli",
 				"ciphera/tools/internal/coverage",

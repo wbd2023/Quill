@@ -6,7 +6,6 @@ import (
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 )
 
 func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
@@ -22,23 +21,22 @@ func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		t.Fatalf("effective.ResolvePacks: %v", err)
-	}
-
 	definitions := registry.Definitions()
 
-	compiled, err := profile.Compile(config, definitions)
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	if len(compiled.Rules) != len(definitions.Rules) {
+	if len(compiled.Effective.Rules) != len(definitions.Rules) {
 		t.Fatalf(
 			"expected %d effective rules, got %d",
 			len(definitions.Rules),
-			len(compiled.Rules),
+			len(compiled.Effective.Rules),
 		)
+	}
+
+	if _, found := compiled.Profile.FileSets.Lookup("bash"); !found {
+		t.Fatal("expected compiled profile to include Pack default file sets")
 	}
 }
