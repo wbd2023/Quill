@@ -18,7 +18,7 @@ func Bad(value string, ctx Context) (err error) {
 	return nil
 }
 
-func Worse(token string, value string) (err error) {
+func Worse(secretToken string, value string) (err error) {
 	return nil
 }
 `
@@ -39,6 +39,29 @@ func Worse(token string, value string) (err error) {
 		t,
 		result,
 		`[go/parameters/secrets-last] secret parameters must be last in "Worse"`,
+	)
+}
+
+func TestGoStyleReportsTypeElision(t *testing.T) {
+	tempDir := t.TempDir()
+	sourcePath := filepath.Join(tempDir, "sample.go")
+	sourceCode := `package sample
+
+func Bad(left, right string) (err error) {
+	return nil
+}
+`
+	writeSourceFile(t, sourcePath, sourceCode)
+
+	result, err := runGoStyleResult(t, tempDir)
+	if err == nil {
+		t.Fatalf("expected type-elision failure, diagnostics: %#v", result.Diagnostics)
+	}
+
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/parameters/no-type-elision] type elision: parameters left, right share a type`,
 	)
 }
 
@@ -89,17 +112,17 @@ func NewThing(
 	mailService MailService,
 	relayClient *RelayClient,
 	relayURL string,
-	token string,
+	secretToken string,
 ) (thing *Thing) {
 	_ = userRepository
 	_ = mailService
 	_ = relayClient
 	_ = relayURL
-	_ = token
+	_ = secretToken
 	return &Thing{}
 }
 
-func Good(ctx Context, value string, token string) (err error) {
+func Good(ctx Context, value string, secretToken string) (err error) {
 	_ = value
 	return nil
 }

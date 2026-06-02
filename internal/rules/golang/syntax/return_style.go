@@ -81,41 +81,6 @@ func checkFuncReturns(
 	return violations
 }
 
-// CheckTypeElision ensures each parameter has its own type declaration.
-func CheckTypeElision(fileSet *token.FileSet, file *ast.File) (violations []analysis.Violation) {
-	ast.Inspect(file, func(node ast.Node) bool {
-		funcType, ok := node.(*ast.FuncType)
-		if !ok {
-			return true
-		}
-
-		if funcType.Params == nil {
-			return true
-		}
-
-		for _, field := range funcType.Params.List {
-			if len(field.Names) > 1 {
-				names := make([]string, len(field.Names))
-				for index, name := range field.Names {
-					names[index] = name.Name
-				}
-				violations = append(violations, analysis.Violation{
-					Position: fileSet.Position(field.Pos()),
-					Rule:     analysis.DiagnosticNoTypeElision,
-					Message: fmt.Sprintf(
-						"type elision: parameters %s share a type",
-						strings.Join(names, ", "),
-					),
-				})
-			}
-		}
-
-		return true
-	})
-
-	return violations
-}
-
 // CheckNakedReturns reports naked returns in functions that declare named return values.
 func CheckNakedReturns(fileSet *token.FileSet, file *ast.File) (violations []analysis.Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {

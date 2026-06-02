@@ -30,58 +30,28 @@ func CheckSensitiveDataLiterals(
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch typedNode := node.(type) {
 		case *ast.ValueSpec:
-			for index, name := range typedNode.Names {
-				if !containsSecretLikeName(name.Name, parameters.SecretNames) ||
-					index >= len(typedNode.Values) {
-					continue
-				}
-
-				if !expressionContainsSensitiveStringLiteral(typedNode.Values[index]) {
-					continue
-				}
-
-				violations = append(violations, analysis.Violation{
-					Position: fileSet.Position(typedNode.Values[index].Pos()),
-					Rule:     analysis.DiagnosticNoSecretsInRepository,
-					Message:  "source code must not hard-code secret-like string literals",
-				})
-			}
+			violations = append(violations, secretValueSpecViolations(
+				fileSet,
+				typedNode,
+				parameters.SecretNames,
+			)...)
 
 		case *ast.AssignStmt:
-			for index, lhsExpression := range typedNode.Lhs {
-				if index >= len(typedNode.Rhs) {
-					continue
-				}
-
-				name, found := assignedName(lhsExpression)
-				if !found || !containsSecretLikeName(name, parameters.SecretNames) {
-					continue
-				}
-				if !expressionContainsSensitiveStringLiteral(typedNode.Rhs[index]) {
-					continue
-				}
-
-				violations = append(violations, analysis.Violation{
-					Position: fileSet.Position(typedNode.Rhs[index].Pos()),
-					Rule:     analysis.DiagnosticNoSecretsInRepository,
-					Message:  "source code must not hard-code secret-like string literals",
-				})
-			}
+			violations = append(violations, secretAssignmentViolations(
+				fileSet,
+				typedNode,
+				parameters.SecretNames,
+			)...)
 
 		case *ast.KeyValueExpr:
-			keyName, found := keyedFieldName(typedNode.Key)
-			if !found || !containsSecretLikeName(keyName, parameters.SecretNames) {
-				return true
+			violation, found := secretFieldViolation(
+				fileSet,
+				typedNode,
+				parameters.SecretNames,
+			)
+			if found {
+				violations = append(violations, violation)
 			}
-			if !expressionContainsSensitiveStringLiteral(typedNode.Value) {
-				return true
-			}
-
-			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(typedNode.Value.Pos()),
-				Rule:     analysis.DiagnosticNoSecretsInRepository,
-				Message:  "source code must not hard-code secret-like string literals",
-			})
 		}
 
 		return true
@@ -90,30 +60,114 @@ func CheckSensitiveDataLiterals(
 	return violations
 }
 
+/* --------------------------------------- AST Node Scans --------------------------------------- */
+
+func secretValueSpecViolations(
+	fileSet *token.FileSet,
+	valueSpec *ast.ValueSpec,
+	secretNames []string,
+) (violations []analysis.Violation) {
+	for index, name := range valueSpec.Names {
+		if index >= len(valueSpec.Values) || !containsSecretLikeName(name.Name, secretNames) {
+			continue
+		}
+
+		literal, found := secretStringLiteral(valueSpec.Values[index])
+		if !found {
+			continue
+		}
+
+		violations = append(violations, secretLiteralViolation(fileSet, literal))
+	}
+
+	return violations
+}
+
+func secretAssignmentViolations(
+	fileSet *token.FileSet,
+	assignment *ast.AssignStmt,
+	secretNames []string,
+) (violations []analysis.Violation) {
+	for index, lhsExpression := range assignment.Lhs {
+		if index >= len(assignment.Rhs) {
+			continue
+		}
+
+		name, found := rightmostName(lhsExpression)
+		if !found || !containsSecretLikeName(name, secretNames) {
+			continue
+		}
+
+		literal, found := secretStringLiteral(assignment.Rhs[index])
+		if !found {
+			continue
+		}
+
+		violations = append(violations, secretLiteralViolation(fileSet, literal))
+	}
+
+	return violations
+}
+
+func secretFieldViolation(
+	fileSet *token.FileSet,
+	field *ast.KeyValueExpr,
+	secretNames []string,
+) (violation analysis.Violation, found bool) {
+	keyName, found := rightmostName(field.Key)
+	if !found || !containsSecretLikeName(keyName, secretNames) {
+		return analysis.Violation{}, false
+	}
+
+	literal, found := secretStringLiteral(field.Value)
+	if !found {
+		return analysis.Violation{}, false
+	}
+
+	return secretLiteralViolation(fileSet, literal), true
+}
+
+func secretLiteralViolation(
+	fileSet *token.FileSet,
+	expression ast.Expr,
+) (violation analysis.Violation) {
+	return analysis.Violation{
+		Position: fileSet.Position(expression.Pos()),
+		Rule:     analysis.DiagnosticNoSecretsInRepository,
+		Message:  "source code must not hard-code secret-like string literals",
+	}
+}
+
 /* -------------------------------------- Expression Scans -------------------------------------- */
 
 func expressionContainsSensitiveStringLiteral(expression ast.Expr) (found bool) {
+	_, found = secretStringLiteral(expression)
+	return found
+}
+
+func secretStringLiteral(expression ast.Expr) (literal ast.Expr, found bool) {
 	ast.Inspect(expression, func(node ast.Node) bool {
-		literal, ok := node.(*ast.BasicLit)
-		if !ok || literal.Kind != token.STRING {
+		basicLiteral, ok := node.(*ast.BasicLit)
+		if !ok || basicLiteral.Kind != token.STRING {
 			return true
 		}
 
-		value, ok := literalString(literal)
-		if !ok || !looksSensitiveLiteral(value) {
+		value, ok := literalString(basicLiteral)
+		if !ok || !looksSecretLiteral(value) {
 			return true
 		}
 
+		literal = basicLiteral
 		found = true
 		return false
 	})
 
-	return found
+	return literal, found
 }
 
 /* ----------------------------------- Literal Classification ----------------------------------- */
 
-func looksSensitiveLiteral(value string) (found bool) {
+func looksSecretLiteral(value string) (found bool) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
 		return false
@@ -130,30 +184,6 @@ func looksSensitiveLiteral(value string) (found bool) {
 	return len(trimmed) >= minSensitiveLiteralLength &&
 		containsLetter(trimmed) &&
 		containsDigit(trimmed)
-}
-
-/* --------------------------------------- Name Extraction -------------------------------------- */
-
-func assignedName(expression ast.Expr) (name string, found bool) {
-	switch typedExpression := expression.(type) {
-	case *ast.Ident:
-		return typedExpression.Name, true
-	case *ast.SelectorExpr:
-		return typedExpression.Sel.Name, true
-	default:
-		return "", false
-	}
-}
-
-func keyedFieldName(expression ast.Expr) (name string, found bool) {
-	switch typedExpression := expression.(type) {
-	case *ast.Ident:
-		return typedExpression.Name, true
-	case *ast.SelectorExpr:
-		return typedExpression.Sel.Name, true
-	default:
-		return "", false
-	}
 }
 
 /* ------------------------------------ String Classification ----------------------------------- */
