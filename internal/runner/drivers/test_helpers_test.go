@@ -7,7 +7,6 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
 )
@@ -29,12 +28,7 @@ func testContext(
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		t.Fatalf("effective.ResolvePacks: %v", err)
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
@@ -46,8 +40,8 @@ func testContext(
 	return runner.NewContext(
 		repoRoot,
 		scope,
-		config,
-		compiled,
+		compiled.Profile,
+		compiled.Effective,
 		registry.ToolCapabilities(),
 		layout.ToolEnvironment(),
 		goEnvironment,

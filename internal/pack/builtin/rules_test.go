@@ -6,7 +6,6 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 )
 
 /* --------------------------------------- Rule Contracts --------------------------------------- */
@@ -60,21 +59,20 @@ func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		t.Fatalf("effective.ResolvePacks: %v", err)
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	if len(compiled.Rules) != len(registry.Rules()) {
-		t.Fatalf("expected %d active rules, got %d", len(registry.Rules()), len(compiled.Rules))
+	if len(compiled.Effective.Rules) != len(registry.Rules()) {
+		t.Fatalf(
+			"expected %d active rules, got %d",
+			len(registry.Rules()),
+			len(compiled.Effective.Rules),
+		)
 	}
 
-	for _, rule := range compiled.Rules {
+	for _, rule := range compiled.Effective.Rules {
 		if len(rule.RequirementIDs) == 0 {
 			t.Fatalf("rule %q must reference at least one STYLE.md requirement", rule.ID)
 		}

@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"ciphera/tools/internal/profile/effective"
+	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/fixture"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/fixture"
-	"ciphera/tools/internal/profile/validation"
+	"ciphera/tools/internal/profile/internal/validation"
 )
 
 func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {

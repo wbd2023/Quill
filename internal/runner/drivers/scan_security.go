@@ -15,7 +15,7 @@ func securityRepositoryScanners() (scanners map[string]repositoryScanner) {
 		) (contract.ExecutionResult, error) {
 			return security.CheckSecrets(
 				context.RepoRoot,
-				context.Policy.Repository,
+				context.Profile.Repository,
 				context.Scope,
 			)
 		},

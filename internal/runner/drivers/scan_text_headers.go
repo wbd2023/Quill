@@ -17,7 +17,7 @@ func runSectionHeadersScanner(
 
 	return text.CheckSectionHeaders(
 		context.RepoRoot,
-		context.Policy.Repository,
+		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,
 	)
@@ -33,7 +33,7 @@ func runSectionHeaderDensityScanner(
 
 	return text.CheckSectionHeaderDensity(
 		context.RepoRoot,
-		context.Policy.Repository,
+		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,
 	)
@@ -49,14 +49,14 @@ func runSectionHeaderNamesScanner(
 
 	return text.CheckSectionHeaderNames(
 		context.RepoRoot,
-		context.Policy.Repository,
+		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,
 	)
 }
 
 func decodeTextConfig(context runner.Context) (config text.Config, err error) {
-	pack, found := context.Policy.PackConfigs.Lookup(builtin.PackText)
+	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackText)
 	if !found {
 		return text.Config{}, errMissingPackConfig(builtin.PackText)
 	}

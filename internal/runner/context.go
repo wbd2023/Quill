@@ -9,7 +9,7 @@ import (
 type Context struct {
 	RepoRoot         string
 	Scope            contract.Scope
-	Policy           policy.Config
+	Profile          policy.Config
 	Effective        contract.EffectiveConfig
 	ToolCapabilities map[string]toolchain.Capability
 	ToolEnvironment  map[string]string
@@ -28,7 +28,7 @@ func NewContext(
 	return Context{
 		RepoRoot:         repoRoot,
 		Scope:            scope,
-		Policy:           config,
+		Profile:          config,
 		Effective:        effective,
 		ToolCapabilities: toolchain.CapabilitiesByID(capabilities),
 		ToolEnvironment:  toolEnvironment,

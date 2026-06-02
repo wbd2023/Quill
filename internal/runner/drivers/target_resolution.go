@@ -14,12 +14,12 @@ func goTargets(
 	spec contract.ExecutionSpec,
 ) (targets []policy.TargetConfig, err error) {
 	for _, name := range spec.Targets() {
-		target, err := goTarget(context.Policy, name)
+		target, err := goTarget(context.Profile, name)
 		if err != nil {
 			return nil, err
 		}
 
-		if !context.Policy.Repository.HasScopeOverlap(context.Scope, target.Scope) {
+		if !context.Profile.Repository.HasScopeOverlap(context.Scope, target.Scope) {
 			continue
 		}
 

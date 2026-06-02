@@ -31,7 +31,7 @@ func TestFixableRulesUsePackFixes(t *testing.T) {
 
 	context := runner.Context{
 		Scope: contract.Scope("tools"),
-		Policy: policy.Config{
+		Profile: policy.Config{
 			Repository: policy.RepositoryConfig{
 				ScopeRoots: map[contract.Scope][]string{
 					"all":   {"."},

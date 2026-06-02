@@ -22,7 +22,7 @@ func fileSetCoversPath(
 
 	foundScope := false
 	for scope, explicitFiles := range fileSet.Include.Files {
-		if !context.Policy.Repository.HasScopeOverlap(context.Scope, scope) {
+		if !context.Profile.Repository.HasScopeOverlap(context.Scope, scope) {
 			continue
 		}
 
@@ -42,7 +42,7 @@ func fileSetCoversPath(
 			continue
 		}
 
-		if !context.Policy.Repository.HasScopeOverlap(context.Scope, scope) {
+		if !context.Profile.Repository.HasScopeOverlap(context.Scope, scope) {
 			continue
 		}
 

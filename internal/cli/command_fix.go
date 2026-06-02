@@ -107,7 +107,7 @@ func fixableRules(
 	context runner.Context,
 ) (rules []contract.Rule) {
 	for _, rule := range available {
-		if !context.Policy.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
+		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue
 		}
 

@@ -7,7 +7,6 @@ import (
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/styleguide"
 )
@@ -27,17 +26,12 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		t.Fatalf("effective.ResolvePacks: %v", err)
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	for _, rule := range compiled.Rules {
+	for _, rule := range compiled.Effective.Rules {
 		for _, requirementID := range rule.RequirementIDs {
 			if requirements[requirementID] {
 				continue

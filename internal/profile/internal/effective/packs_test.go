@@ -6,7 +6,7 @@ import (
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/effective"
+	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/rules/text"
 	"ciphera/tools/internal/rules/vocabulary"
 )

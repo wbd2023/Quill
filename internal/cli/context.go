@@ -6,7 +6,6 @@ import (
 	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/profile/effective"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
 )
@@ -30,12 +29,7 @@ func loadContext(repoRoot string, scope contract.Scope) (context runner.Context,
 		return runner.Context{}, err
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		return runner.Context{}, err
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
+	compiled, err := profile.Compile(config, registry)
 	if err != nil {
 		return runner.Context{}, err
 	}
@@ -47,8 +41,8 @@ func loadContext(repoRoot string, scope contract.Scope) (context runner.Context,
 	return runner.NewContext(
 		repoRoot,
 		scope,
-		config,
-		compiled,
+		compiled.Profile,
+		compiled.Effective,
 		registry.ToolCapabilities(),
 		layout.ToolEnvironment(),
 		goEnvironment,
