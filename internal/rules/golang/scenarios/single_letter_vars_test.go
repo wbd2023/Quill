@@ -15,6 +15,12 @@ func Bad(x string) (err error) {
 	_ = y
 	return nil
 }
+
+func AlsoBad(i string) (err error) {
+	k := i
+	_ = k
+	return nil
+}
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
@@ -30,6 +36,14 @@ func Bad(x string) (err error) {
 	)
 
 	expectDiagnosticMessage(t, result, `[go/naming/single-letter-names] single-letter variable "y"`)
+
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/naming/single-letter-names] single-letter parameter "i" in function "AlsoBad"`,
+	)
+
+	expectDiagnosticMessage(t, result, `[go/naming/single-letter-names] single-letter variable "k"`)
 }
 
 func TestGoStylePassesAllowedSingleLetterNames(t *testing.T) {
@@ -40,6 +54,14 @@ func TestGoStylePassesAllowedSingleLetterNames(t *testing.T) {
 func Good(values []int) (err error) {
 	for i := range values {
 		_ = i
+	}
+
+	for j := 0; j < len(values); j++ {
+		_ = values[j]
+	}
+
+	for var k = 0; k < len(values); k++ {
+		_ = values[k]
 	}
 
 	return nil

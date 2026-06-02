@@ -22,6 +22,41 @@ const minParamFieldSpan = 2
 
 /* --------------------------------------- Ordering Rules --------------------------------------- */
 
+// CheckTypeElision ensures each parameter has its own type declaration.
+func CheckTypeElision(fileSet *token.FileSet, file *ast.File) (violations []analysis.Violation) {
+	ast.Inspect(file, func(node ast.Node) bool {
+		funcType, ok := node.(*ast.FuncType)
+		if !ok {
+			return true
+		}
+
+		if funcType.Params == nil {
+			return true
+		}
+
+		for _, field := range funcType.Params.List {
+			if len(field.Names) > 1 {
+				names := make([]string, len(field.Names))
+				for index, name := range field.Names {
+					names[index] = name.Name
+				}
+				violations = append(violations, analysis.Violation{
+					Position: fileSet.Position(field.Pos()),
+					Rule:     analysis.DiagnosticNoTypeElision,
+					Message: fmt.Sprintf(
+						"type elision: parameters %s share a type",
+						strings.Join(names, ", "),
+					),
+				})
+			}
+		}
+
+		return true
+	})
+
+	return violations
+}
+
 // CheckParameterOrder ensures ctx is first and secrets are last.
 func CheckParameterOrder(
 	fileSet *token.FileSet,
@@ -58,7 +93,7 @@ func CheckParameterOrder(
 		for fieldIndex, field := range params {
 			isSecret := false
 			for _, name := range field.Names {
-				if isSecretName(name.Name, parameters) {
+				if isSecretParameterName(name.Name, parameters) {
 					isSecret = true
 				}
 			}
@@ -134,9 +169,9 @@ func CheckConstructorOrder(
 
 /* ---------------------------------- Parameter Classification ---------------------------------- */
 
-// isSecretName returns true if the parameter name represents a secret.
-func isSecretName(name string, parameters gopolicy.ParameterConfig) (found bool) {
-	return slices.Contains(parameters.SecretNames, name)
+// isSecretParameterName reports whether name contains a configured secret-name fragment.
+func isSecretParameterName(name string, parameters gopolicy.ParameterConfig) (found bool) {
+	return containsSecretLikeName(name, parameters.SecretNames)
 }
 
 // isConstructor returns true if the function name follows the NewXxx pattern.
@@ -179,7 +214,7 @@ func matchesGroup(
 			return true
 		}
 
-		if group.MatchesSecretNames && isSecretName(name.Name, parameters) {
+		if group.MatchesSecretNames && isSecretParameterName(name.Name, parameters) {
 			return true
 		}
 	}
