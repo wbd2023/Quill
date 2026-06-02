@@ -1,2 +1,2 @@
-// Package builtin assembles the built-in Ciphera Packs.
+// Package builtin assembles the Shipped Pack catalogue.
 package builtin

@@ -27,22 +27,22 @@ func ruleBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "go syntax checks do not import built-in packs",
+			name:      "go syntax checks do not import Shipped Packs",
 			directory: "internal/rules/golang/syntax",
 			forbidden: []string{"ciphera/tools/internal/pack/builtin"},
 		},
 		{
-			name:      "go structure checks do not import built-in packs",
+			name:      "go structure checks do not import Shipped Packs",
 			directory: "internal/rules/golang/structure",
 			forbidden: []string{"ciphera/tools/internal/pack/builtin"},
 		},
 		{
-			name:      "go relationship checks do not import built-in packs",
+			name:      "go relationship checks do not import Shipped Packs",
 			directory: "internal/rules/golang/relationships",
 			forbidden: []string{"ciphera/tools/internal/pack/builtin"},
 		},
 		{
-			name:      "go test checks do not import built-in packs",
+			name:      "go test checks do not import Shipped Packs",
 			directory: "internal/rules/golang/test",
 			forbidden: []string{"ciphera/tools/internal/pack/builtin"},
 		},

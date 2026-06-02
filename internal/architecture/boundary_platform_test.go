@@ -95,7 +95,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "pack definitions avoid built-in pack implementations",
+			name:      "pack definitions avoid Shipped Pack implementations",
 			directory: "internal/pack",
 			forbidden: []string{
 				"ciphera/tools/internal/architecture",
@@ -191,8 +191,9 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "built-in packs assemble shipped checks",
+			name:      "shipped Pack modules avoid execution orchestration",
 			directory: "internal/pack/builtin",
+			recursive: true,
 			forbidden: []string{
 				"ciphera/tools/internal/architecture",
 				"ciphera/tools/internal/cli",
@@ -215,7 +216,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "styleguide does not import profile or built-in packs",
+			name:      "styleguide does not import profile or Shipped Packs",
 			directory: "internal/styleguide",
 			forbidden: []string{
 				"ciphera/tools/internal/profile",

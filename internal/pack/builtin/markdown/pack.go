@@ -1,0 +1,85 @@
+package markdown
+
+import (
+	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack"
+	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/toolchain"
+)
+
+const (
+	PackID = "markdown"
+
+	ToolMarkdownlint = "markdownlint"
+)
+
+const ruleGroupExternal contract.RuleGroup = "external_tools"
+
+// Pack returns the Markdown Shipped Pack definition.
+func Pack(tools []toolchain.Capability) (definition pack.Definition) {
+	return pack.Definition{
+		ID:       PackID,
+		Name:     "Markdown",
+		Tools:    append([]toolchain.Capability{}, tools...),
+		FileSets: fileSets(),
+		Rules: []contract.RuleDefinition{
+			fileCommandRuleWithConfig(
+				"markdown/style",
+				"Markdown style",
+				ToolMarkdownlint,
+				"markdown",
+				nil,
+				"-c",
+				".markdownlint.jsonc",
+			),
+		},
+	}
+}
+
+func fileSets() (fileSets policy.FileSets) {
+	return append(fileSets, policy.FileSetConfig{
+		Name: "markdown",
+		Include: policy.FileSetInclude{
+			Extensions: []string{".md"},
+		},
+	})
+}
+
+func fileCommandRuleWithConfig(
+	id string,
+	name string,
+	toolID string,
+	fileSet string,
+	arguments []string,
+	configArgument string,
+	configFile string,
+) (rule contract.RuleDefinition) {
+	rule = fileCommandRule(id, name, toolID, fileSet, arguments)
+	execution := rule.Check.Detail.(contract.FileCommandExecution)
+	execution.ConfigArgument = configArgument
+	execution.ConfigFile = configFile
+	rule.Check.Detail = execution
+	return rule
+}
+
+func fileCommandRule(
+	id string,
+	name string,
+	toolID string,
+	fileSet string,
+	arguments []string,
+) (rule contract.RuleDefinition) {
+	return contract.RuleDefinition{
+		ID:    id,
+		Name:  name,
+		Group: ruleGroupExternal,
+		Check: contract.ExecutionSpec{
+			Kind: contract.ExecutorFileCommand,
+			Detail: contract.FileCommandExecution{
+				ToolID:    toolID,
+				FileSet:   fileSet,
+				Arguments: append([]string{}, arguments...),
+			},
+		},
+	}
+}

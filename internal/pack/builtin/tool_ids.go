@@ -1,15 +1,21 @@
 package builtin
 
-import "ciphera/tools/internal/toolchain"
+import (
+	"ciphera/tools/internal/pack/builtin/bash"
+	"ciphera/tools/internal/pack/builtin/golang"
+	"ciphera/tools/internal/pack/builtin/markdown"
+	"ciphera/tools/internal/pack/builtin/text"
+	"ciphera/tools/internal/toolchain"
+)
 
 const (
-	ToolGo           = "go"
-	ToolGoimports    = "goimports"
-	ToolMisspell     = "misspell"
-	ToolGolangciLint = "golangci-lint"
-	ToolShfmt        = "shfmt"
-	ToolShellcheck   = "shellcheck"
-	ToolMarkdownlint = "markdownlint"
+	ToolGo           = golang.ToolGo
+	ToolGoimports    = golang.ToolGoimports
+	ToolMisspell     = text.ToolMisspell
+	ToolGolangciLint = golang.ToolGolangciLint
+	ToolShfmt        = bash.ToolShfmt
+	ToolShellcheck   = bash.ToolShellcheck
+	ToolMarkdownlint = markdown.ToolMarkdownlint
 )
 
 const (
