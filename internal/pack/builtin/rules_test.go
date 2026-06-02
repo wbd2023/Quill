@@ -129,14 +129,16 @@ func TestRuleGroupsRemainStable(t *testing.T) {
 		seenGroups[rule.Group] = true
 	}
 
-	for _, group := range []contract.RuleGroup{
-		RuleGroupProject,
-		RuleGroupExternal,
-		RuleGroupLanguage,
-		RuleGroupText,
-		RuleGroupSecurity,
-		RuleGroupVocabulary,
-	} {
+	expectedGroups := []contract.RuleGroup{
+		"project",
+		"external_tools",
+		"language",
+		"text_scanners",
+		"security_scanners",
+		"vocabulary_scanners",
+	}
+
+	for _, group := range expectedGroups {
 		if seenGroups[group] {
 			continue
 		}

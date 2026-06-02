@@ -1,18 +1,26 @@
 package builtin
 
+import (
+	"ciphera/tools/internal/pack/builtin/bash"
+	"ciphera/tools/internal/pack/builtin/golang"
+	"ciphera/tools/internal/pack/builtin/security"
+	"ciphera/tools/internal/pack/builtin/text"
+	"ciphera/tools/internal/pack/builtin/vocabulary"
+)
+
 const (
-	ScannerArchitecture         = "architecture"
-	ScannerASCII                = "ascii"
-	ScannerBashMagicValues      = "bash_magic_values"
-	ScannerBashSafety           = "bash_safety"
-	ScannerBashStructure        = "bash_structure"
-	ScannerBashTestHygiene      = "bash_test_hygiene"
-	ScannerExceptionMarkers     = "exception_markers"
-	ScannerLineLength           = "line_length"
-	ScannerMaintenanceMarkers   = "maintenance_markers"
-	ScannerVocabulary           = "vocabulary"
-	ScannerSecrets              = "secrets"
-	ScannerSectionHeaderDensity = "section_header_density"
-	ScannerSectionHeaderNames   = "section_header_names"
-	ScannerSectionHeaders       = "section_headers"
+	ScannerArchitecture         = golang.ScannerArchitecture
+	ScannerASCII                = text.ScannerASCII
+	ScannerBashMagicValues      = bash.ScannerMagicValues
+	ScannerBashSafety           = bash.ScannerSafety
+	ScannerBashStructure        = bash.ScannerStructure
+	ScannerBashTestHygiene      = bash.ScannerTestHygiene
+	ScannerExceptionMarkers     = text.ScannerExceptionMarkers
+	ScannerLineLength           = text.ScannerLineLength
+	ScannerMaintenanceMarkers   = text.ScannerMaintenanceMarkers
+	ScannerVocabulary           = vocabulary.ScannerVocabulary
+	ScannerSecrets              = security.ScannerSecrets
+	ScannerSectionHeaderDensity = text.ScannerSectionHeaderDensity
+	ScannerSectionHeaderNames   = text.ScannerSectionHeaderNames
+	ScannerSectionHeaders       = text.ScannerSectionHeaders
 )

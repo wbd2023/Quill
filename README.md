@@ -107,7 +107,7 @@ The dependency direction is:
 
 `toolchain -> report`
 
-`pack/builtin -> runner/drivers -> cli`
+`pack/builtin/<pack> -> pack/builtin -> runner/drivers -> cli`
 
 `styleguide -> coverage -> cli/report`
 
@@ -131,7 +131,9 @@ Production packages must keep these boundaries:
 - `installer` imports runtime and tool contracts, not project policy, rules, profiles, reports, or
   runners.
 - `pack` defines neutral Pack definitions, catalogues, and registries.
-- `pack/builtin` assembles built-in Packs and may import rule packages and Pack-owned policy codecs.
+- `pack/builtin` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
+- `pack/builtin/<pack>` modules own declaration-time Pack concepts and may import rule packages
+  and Pack-owned policy codecs, but not runners, drivers, reports, profiles, or installers.
 - `runner` imports no `profile`, `pack/builtin`, `runtime`, or `report`.
 - `runner/drivers` binds generic executor IDs to concrete checks and commands without importing
   profile, report, or installation packages.
@@ -178,8 +180,10 @@ The style platform uses balanced granularity:
 - `internal/pack/`
   - Neutral Pack definitions, catalogues, registries, and selection validation.
 - `internal/pack/builtin/`
-  - Built-in Pack catalogue, reusable rule/tool capabilities, opaque executor/scanner IDs,
-    pack-owned policy defaults, and safe fix specs.
+  - Shipped Pack catalogue facade, shared shipped IDs, and reusable tool capabilities.
+- `internal/pack/builtin/<pack>/`
+  - Shipped Pack definitions, rule declarations, tool needs, file-set defaults, and Pack policy
+    wiring.
 - `internal/coverage/`
   - Pure STYLE.md/profile/rule graph coverage assembly.
 - `internal/styleguide/`
