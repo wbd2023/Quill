@@ -19,7 +19,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 			{
 				ID: "custom/rule",
 				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutorFileCommand,
+					Kind: contract.ExecutionFileCommand,
 					Detail: contract.FileCommandExecution{
 						Arguments: []string{"-w"},
 					},

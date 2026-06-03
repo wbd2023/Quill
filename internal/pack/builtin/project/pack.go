@@ -86,7 +86,7 @@ func toolchainRule(
 		Name:  name,
 		Group: ruleGroupProject,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorToolchain,
+			Kind: contract.ExecutionToolchain,
 			Detail: contract.ToolchainExecution{
 				ToolIDs: append([]string{}, toolIDs...),
 			},
@@ -104,7 +104,7 @@ func projectRule(
 		Name:  name,
 		Group: ruleGroupProject,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorProject,
+			Kind: contract.ExecutionProject,
 			Detail: contract.ProjectExecution{
 				Check: check,
 			},

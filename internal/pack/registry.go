@@ -140,7 +140,7 @@ func validateRegistry(registry Registry) (err error) {
 		}
 
 		if rule.Check.Empty() {
-			return fmt.Errorf("rule %q has no executor", rule.ID)
+			return fmt.Errorf("rule %q has no check execution", rule.ID)
 		}
 
 		if seenRuleIDs[rule.ID] {

@@ -43,7 +43,7 @@ func runGoFormat(
 			append([]string{"-w"}, target.FormatPaths...)...,
 		)
 		if err != nil {
-			appendExecutorOutput(&builder, output)
+			appendDriverOutput(&builder, output)
 			joined = errors.Join(joined, err)
 			continue
 		}
@@ -57,7 +57,7 @@ func runGoFormat(
 				target.FormatPaths...,
 			)...,
 		)
-		appendExecutorOutput(&builder, output)
+		appendDriverOutput(&builder, output)
 		joined = errors.Join(joined, err)
 	}
 

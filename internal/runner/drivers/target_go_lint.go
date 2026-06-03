@@ -41,7 +41,7 @@ func runGolangci(
 			localPrefix,
 		)
 		if err != nil {
-			appendExecutorOutput(&builder, output)
+			appendDriverOutput(&builder, output)
 			joined = errors.Join(joined, err)
 			continue
 		}
@@ -53,7 +53,7 @@ func runGolangci(
 			"run",
 			"./...",
 		)
-		appendExecutorOutput(&builder, output)
+		appendDriverOutput(&builder, output)
 		joined = errors.Join(joined, err)
 	}
 

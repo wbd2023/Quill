@@ -47,7 +47,7 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 	rejectDiagnosticMessage(t, result, "structured log key")
 }
 
-func TestGoStyleExecutorReportsGuardSpacingRule(t *testing.T) {
+func TestGoStyleDriverReportsGuardSpacingRule(t *testing.T) {
 	tempDir := t.TempDir()
 	sourcePath := filepath.Join(tempDir, "internal", "example", "guards.go")
 	sourceCode := `package example
@@ -77,7 +77,7 @@ func Validate(a int, b int) (err error) {
 	)
 }
 
-func TestGoStyleExecutorReportsSwitchSpacingRule(t *testing.T) {
+func TestGoStyleDriverReportsSwitchSpacingRule(t *testing.T) {
 	tempDir := t.TempDir()
 	sourcePath := filepath.Join(tempDir, "internal", "example", "switches.go")
 	sourceCode := `package example

@@ -74,7 +74,7 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorFileCommand,
+			Kind: contract.ExecutionFileCommand,
 			Detail: contract.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,

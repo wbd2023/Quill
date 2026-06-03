@@ -5,7 +5,7 @@ import "ciphera/tools/internal/contract"
 // TargetConfigs defines the targets available to rule bindings.
 type TargetConfigs []TargetConfig
 
-// TargetConfig binds a language executor to a repository scope.
+// TargetConfig binds language-specific target settings to a repository scope.
 type TargetConfig struct {
 	Name             string
 	Language         string

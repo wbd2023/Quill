@@ -9,14 +9,14 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func fileCommandExecutor(
+func fileCommandDriver(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
 	execution, found := spec.FileCommandExecution()
 	if !found {
-		return contract.ExecutionResult{}, errors.New("file-command executor received empty spec")
+		return contract.ExecutionResult{}, errors.New("file-command driver received empty spec")
 	}
 
 	files, err := runner.CollectFileSetFiles(context, execution.FileSet)

@@ -83,7 +83,7 @@ func golangciRule(
 		Name:  name,
 		Group: ruleGroupLanguage,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorTargetCommand,
+			Kind: contract.ExecutionTargetCommand,
 			Detail: contract.TargetCommandExecution{
 				ToolIDs: []string{
 					ToolGo,
@@ -95,7 +95,7 @@ func golangciRule(
 			},
 		},
 		Fix: contract.ExecutionSpec{
-			Kind: contract.ExecutorTargetCommand,
+			Kind: contract.ExecutionTargetCommand,
 			Detail: contract.TargetCommandExecution{
 				ToolIDs: []string{
 					ToolGo,
@@ -118,7 +118,7 @@ func styleRule(
 		Name:  name,
 		Group: ruleGroupLanguage,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorTargetCheck,
+			Kind: contract.ExecutionTargetCheck,
 			Detail: contract.TargetCheckExecution{
 				ToolIDs:  []string{ToolGo},
 				Check:    checkID,
@@ -134,7 +134,7 @@ func architectureRule() (rule contract.RuleDefinition) {
 		Name:  "Architecture imports",
 		Group: ruleGroupLanguage,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorRepositoryScan,
+			Kind: contract.ExecutionRepositoryScan,
 			Detail: contract.RepositoryScanExecution{
 				Scanner: ScannerArchitecture,
 			},

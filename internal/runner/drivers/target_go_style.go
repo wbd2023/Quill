@@ -57,7 +57,7 @@ func runGoStyleCheck(
 			execution.Check,
 		)
 		diagnostics = append(diagnostics, styleResult.Diagnostics...)
-		appendExecutorOutput(&builder, styleResult.Output)
+		appendDriverOutput(&builder, styleResult.Output)
 		joined = errors.Join(joined, err)
 	}
 

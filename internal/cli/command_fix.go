@@ -42,7 +42,7 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 	}
 
 	statusIndex := toolchain.StatusesByID(statuses)
-	fixers := drivers.Fixers()
+	fixers := drivers.FixDrivers()
 	for _, rule := range rules {
 		result, err := runner.RunFix(rule, context, statusIndex, fixers)
 		if err != nil {

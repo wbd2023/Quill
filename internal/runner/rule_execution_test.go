@@ -8,12 +8,12 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func TestRunRuleUsesInjectedExecutor(t *testing.T) {
+func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := contract.Rule{
 		ID: "test/rule",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorKind("test_executor"),
+			Kind: contract.ExecutionKind("test_execution"),
 			Detail: contract.RepositoryScanExecution{
 				Scanner: "test",
 			},
@@ -28,8 +28,8 @@ func TestRunRuleUsesInjectedExecutor(t *testing.T) {
 		nil,
 		nil,
 	)
-	executors := ExecutorRegistry{
-		"test_executor": func(
+	drivers := DriverRegistry{
+		"test_execution": func(
 			_ Context,
 			_ contract.ExecutionSpec,
 			_ map[string]toolchain.Status,
@@ -38,7 +38,7 @@ func TestRunRuleUsesInjectedExecutor(t *testing.T) {
 		},
 	}
 
-	result, err := RunRule(rule, context, nil, executors)
+	result, err := RunRule(rule, context, nil, drivers)
 	if err != nil {
 		t.Fatalf("RunRule: %v", err)
 	}

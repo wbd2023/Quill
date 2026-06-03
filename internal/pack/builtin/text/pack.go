@@ -131,7 +131,7 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorFileCommand,
+			Kind: contract.ExecutionFileCommand,
 			Detail: contract.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,
@@ -160,7 +160,7 @@ func scanRule(
 		Name:  name,
 		Group: group,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorRepositoryScan,
+			Kind: contract.ExecutionRepositoryScan,
 			Detail: contract.RepositoryScanExecution{
 				Scanner: scanner,
 			},

@@ -8,7 +8,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func repositoryScanExecutor(
+func repositoryScanDriver(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
@@ -16,7 +16,7 @@ func repositoryScanExecutor(
 	execution, found := spec.RepositoryScanExecution()
 	if !found {
 		return contract.ExecutionResult{},
-			errors.New("repository-scan executor received empty spec")
+			errors.New("repository-scan driver received empty spec")
 	}
 
 	scanner, found := repositoryScanners()[execution.Scanner]

@@ -62,8 +62,8 @@ func (validator ruleExecutionValidator) validate(execution contract.ExecutionSpe
 }
 
 func (validator ruleExecutionValidator) validateExecutionKind(
-	actual contract.ExecutorKind,
-	expected contract.ExecutorKind,
+	actual contract.ExecutionKind,
+	expected contract.ExecutionKind,
 ) (err error) {
 	if actual == expected {
 		return nil
@@ -71,14 +71,14 @@ func (validator ruleExecutionValidator) validateExecutionKind(
 
 	if isBlank(string(actual)) {
 		return fmt.Errorf(
-			"rule definition %q %s must define an executor kind",
+			"rule definition %q %s must define an execution kind",
 			validator.ruleID,
 			validator.label,
 		)
 	}
 
 	return fmt.Errorf(
-		"rule definition %q %s uses executor kind %q, expected %q",
+		"rule definition %q %s uses execution kind %q, expected %q",
 		validator.ruleID,
 		validator.label,
 		actual,
@@ -89,10 +89,10 @@ func (validator ruleExecutionValidator) validateExecutionKind(
 /* -------------------------------------- Execution Details ------------------------------------- */
 
 func (validator ruleExecutionValidator) validateToolchainExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.ToolchainExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorToolchain); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionToolchain); err != nil {
 		return err
 	}
 
@@ -100,10 +100,10 @@ func (validator ruleExecutionValidator) validateToolchainExecution(
 }
 
 func (validator ruleExecutionValidator) validateProjectExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.ProjectExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorProject); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionProject); err != nil {
 		return err
 	}
 
@@ -119,10 +119,10 @@ func (validator ruleExecutionValidator) validateProjectExecution(
 }
 
 func (validator ruleExecutionValidator) validateFileCommandExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.FileCommandExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorFileCommand); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionFileCommand); err != nil {
 		return err
 	}
 
@@ -158,10 +158,10 @@ func (validator ruleExecutionValidator) validateFileCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCommandExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.TargetCommandExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorTargetCommand); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionTargetCommand); err != nil {
 		return err
 	}
 
@@ -189,10 +189,10 @@ func (validator ruleExecutionValidator) validateTargetCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCheckExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.TargetCheckExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorTargetCheck); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionTargetCheck); err != nil {
 		return err
 	}
 
@@ -220,10 +220,10 @@ func (validator ruleExecutionValidator) validateTargetCheckExecution(
 }
 
 func (validator ruleExecutionValidator) validateRepositoryScanExecution(
-	kind contract.ExecutorKind,
+	kind contract.ExecutionKind,
 	execution contract.RepositoryScanExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, contract.ExecutorRepositoryScan); err != nil {
+	if err = validator.validateExecutionKind(kind, contract.ExecutionRepositoryScan); err != nil {
 		return err
 	}
 

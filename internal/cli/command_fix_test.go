@@ -14,7 +14,7 @@ func TestFixableRulesUsePackFixes(t *testing.T) {
 		{
 			ID: "go/lint",
 			Fix: contract.ExecutionSpec{
-				Kind: contract.ExecutorTargetCommand,
+				Kind: contract.ExecutionTargetCommand,
 				Detail: contract.TargetCommandExecution{
 					ToolIDs:  []string{builtin.ToolGo},
 					Action:   builtin.TargetActionGoFormat,

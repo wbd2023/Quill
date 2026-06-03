@@ -37,7 +37,7 @@ func runCheck(tool CLI, options checkOptions) (exitCode int) {
 	result := report.CheckResult{
 		Entries: make([]report.CheckEntry, 0, len(selected)),
 	}
-	checkers := drivers.Checkers()
+	checkers := drivers.CheckDrivers()
 	for _, rule := range selected {
 		execution, err := runner.RunRule(rule, context, toolStatuses, checkers)
 		result.Entries = append(

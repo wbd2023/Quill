@@ -27,7 +27,7 @@ func Pack() (definition pack.Definition) {
 				Name:  "Project vocabulary",
 				Group: ruleGroupVocabulary,
 				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutorRepositoryScan,
+					Kind: contract.ExecutionRepositoryScan,
 					Detail: contract.RepositoryScanExecution{
 						Scanner: ScannerVocabulary,
 					},

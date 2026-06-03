@@ -140,7 +140,7 @@ Production packages must keep these boundaries:
 - `pack/builtin/<pack>` modules own declaration-time Pack concepts and may import rule packages
   and Pack-owned policy codecs, but not runners, drivers, reports, profiles, or installers.
 - `runner` imports no `profile`, `pack/builtin`, `runtime`, or `report`.
-- `runner/drivers` binds generic executor IDs to concrete checks and commands without importing
+- `runner/drivers` binds generic Execution Kinds to concrete Drivers without importing
   profile, report, or installation packages.
 - Concrete rule packages import no `profile`; Go rules import no `pack/builtin`, and Go
   rule policy stays separate from rule implementations.
@@ -197,10 +197,11 @@ The style platform uses balanced granularity:
 - `internal/cli/`
   - Command parsing, repository-root resolution, and public CLI UX.
 - `internal/runner/`
-  - Generic rule/fix execution through injected executor functions, status mapping, and policy-owned
-    file-set selection.
+  - Generic rule/fix execution through injected Drivers, status mapping, and policy-owned file-set
+    selection.
 - `internal/runner/drivers/`
-  - Built-in Drivers that map generic executor/scanner IDs to concrete checks and fixers.
+  - Built-in Drivers that map Execution Kinds, scanner IDs, and target actions to concrete checks
+    and fixers.
 - `internal/filewalk/`
   - Repository file collection and generated-file filtering shared by runners and scanners.
 - `internal/report/`

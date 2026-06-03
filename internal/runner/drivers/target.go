@@ -11,7 +11,7 @@ import (
 
 const goLanguage = "go"
 
-func targetCommandExecutor(
+func targetCommandDriver(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
@@ -19,7 +19,7 @@ func targetCommandExecutor(
 	execution, found := spec.TargetCommandExecution()
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf(
-			"target command executor received empty spec",
+			"target command driver received empty spec",
 		)
 	}
 
@@ -36,14 +36,14 @@ func targetCommandExecutor(
 	}
 }
 
-func targetCheckExecutor(
+func targetCheckDriver(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
 	execution, found := spec.TargetCheckExecution()
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("target check executor received empty spec")
+		return contract.ExecutionResult{}, fmt.Errorf("target check driver received empty spec")
 	}
 
 	switch execution.Language {
