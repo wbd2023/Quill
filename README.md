@@ -141,7 +141,8 @@ Production packages must keep these boundaries:
   and Pack-owned policy codecs, but not runners, drivers, reports, profiles, or installers.
 - `runner` imports no `profile`, `pack/builtin`, `runtime`, or `report`.
 - `runner/drivers` binds generic Execution Kinds to concrete Drivers without importing
-  profile, report, or installation packages.
+  profile, report, or installation packages. Its command, project, scan, and target subpackages
+  stay behind the top-level facade.
 - Concrete rule packages import no `profile`; Go rules import no `pack/builtin`, and Go
   rule policy stays separate from rule implementations.
 - `report` owns final text and JSON formatting; rules and drivers return data.
@@ -200,8 +201,10 @@ The style platform uses balanced granularity:
   - Generic rule/fix execution through injected Drivers, status mapping, and policy-owned file-set
     selection.
 - `internal/runner/drivers/`
-  - Built-in Drivers that map Execution Kinds, scanner IDs, and target actions to concrete checks
-    and fixers.
+  - Built-in Driver facade that maps Execution Kinds, scanner IDs, and target actions to concrete
+    checks and fixers.
+- `internal/runner/drivers/{command,project,scan,target}/`
+  - Execution-family Driver implementations owned behind the `runner/drivers` facade.
 - `internal/filewalk/`
   - Repository file collection and generated-file filtering shared by runners and scanners.
 - `internal/report/`
