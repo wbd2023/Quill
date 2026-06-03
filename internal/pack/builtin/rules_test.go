@@ -88,31 +88,31 @@ func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
 	}
 }
 
-func TestRegisteredRulesUseExpectedExecutors(t *testing.T) {
+func TestRegisteredRulesUseExpectedExecutionKinds(t *testing.T) {
 	registry, err := DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	validExecutors := map[contract.ExecutorKind]bool{
-		contract.ExecutorToolchain:      true,
-		contract.ExecutorProject:        true,
-		contract.ExecutorFileCommand:    true,
-		contract.ExecutorTargetCommand:  true,
-		contract.ExecutorTargetCheck:    true,
-		contract.ExecutorRepositoryScan: true,
+	validExecutionKinds := map[contract.ExecutionKind]bool{
+		contract.ExecutionToolchain:      true,
+		contract.ExecutionProject:        true,
+		contract.ExecutionFileCommand:    true,
+		contract.ExecutionTargetCommand:  true,
+		contract.ExecutionTargetCheck:    true,
+		contract.ExecutionRepositoryScan: true,
 	}
 
 	for _, rule := range registry.Rules() {
-		if !validExecutors[rule.Check.Kind] {
-			t.Fatalf("rule %q uses unsupported executor %q", rule.ID, rule.Check.Kind)
+		if !validExecutionKinds[rule.Check.Kind] {
+			t.Fatalf("rule %q uses unsupported execution kind %q", rule.ID, rule.Check.Kind)
 		}
 
-		if rule.Fix.Empty() || validExecutors[rule.Fix.Kind] {
+		if rule.Fix.Empty() || validExecutionKinds[rule.Fix.Kind] {
 			continue
 		}
 
-		t.Fatalf("rule %q uses unsupported fix executor %q", rule.ID, rule.Fix.Kind)
+		t.Fatalf("rule %q uses unsupported fix execution kind %q", rule.ID, rule.Fix.Kind)
 	}
 }
 

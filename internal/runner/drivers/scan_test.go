@@ -15,19 +15,19 @@ import (
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("tools"))
 
-	if _, err := repositoryScanExecutor(
+	if _, err := repositoryScanDriver(
 		context,
 		repositoryScanSpec(builtin.ScannerASCII),
 		nil,
 	); err != nil {
-		t.Fatalf("repositoryScanExecutor(ascii): %v", err)
+		t.Fatalf("repositoryScanDriver(ascii): %v", err)
 	}
 }
 
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
 	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("all"))
 
-	if _, err := repositoryScanExecutor(
+	if _, err := repositoryScanDriver(
 		context,
 		repositoryScanSpec("unknown"),
 		nil,
@@ -83,15 +83,15 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	)
 
 	context := testContext(t, fixtureRoot, contract.Scope("all"))
-	if result, err := repositoryScanExecutor(
+	if result, err := repositoryScanDriver(
 		context,
 		repositoryScanSpec(builtin.ScannerArchitecture),
 		nil,
 	); err != nil {
-		t.Fatalf("repositoryScanExecutor(architecture): %v\n%s", err, result.Output)
+		t.Fatalf("repositoryScanDriver(architecture): %v\n%s", err, result.Output)
 	}
 
-	result, err := repositoryScanExecutor(
+	result, err := repositoryScanDriver(
 		context,
 		repositoryScanSpec(builtin.ScannerVocabulary),
 		nil,
@@ -113,7 +113,7 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 
 func repositoryScanSpec(scanner string) (spec contract.ExecutionSpec) {
 	return contract.ExecutionSpec{
-		Kind: contract.ExecutorRepositoryScan,
+		Kind: contract.ExecutionRepositoryScan,
 		Detail: contract.RepositoryScanExecution{
 			Scanner: scanner,
 		},

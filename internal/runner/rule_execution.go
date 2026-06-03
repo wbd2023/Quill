@@ -15,13 +15,13 @@ var (
 	errRuleViolation = errors.New("rule violations found")
 )
 
-type Executor func(
+type Driver func(
 	context Context,
 	spec contract.ExecutionSpec,
 	toolStatuses map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error)
 
-type ExecutorRegistry map[contract.ExecutorKind]Executor
+type DriverRegistry map[contract.ExecutionKind]Driver
 
 func IsBlocked(err error) (blocked bool) {
 	return errors.Is(err, errRuleBlocked)
@@ -31,18 +31,18 @@ func RunRule(
 	rule contract.Rule,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
-	executors ExecutorRegistry,
+	drivers DriverRegistry,
 ) (result contract.ExecutionResult, err error) {
-	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, executors)
+	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, drivers)
 }
 
 func RunFix(
 	rule contract.Rule,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
-	executors ExecutorRegistry,
+	drivers DriverRegistry,
 ) (result contract.ExecutionResult, err error) {
-	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, executors)
+	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, drivers)
 }
 
 func runExecution(
@@ -51,7 +51,7 @@ func runExecution(
 	toolIDs []string,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
-	executors ExecutorRegistry,
+	drivers DriverRegistry,
 ) (result contract.ExecutionResult, err error) {
 	if execution.Empty() {
 		return contract.ExecutionResult{}, nil
@@ -68,14 +68,14 @@ func runExecution(
 		}, errRuleBlocked
 	}
 
-	executor, found := executors[execution.Kind]
+	driver, found := drivers[execution.Kind]
 	if !found {
 		return contract.ExecutionResult{}, fmt.Errorf(
-			"rule %s uses unknown executor %q",
+			"rule %s uses unknown execution kind %q",
 			ruleID,
-			execution.Executor(),
+			string(execution.Kind),
 		)
 	}
 
-	return executor(context, execution, toolStatuses)
+	return driver(context, execution, toolStatuses)
 }

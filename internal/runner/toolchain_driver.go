@@ -7,14 +7,14 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func ToolchainExecutor(
+func ToolchainDriver(
 	_ Context,
 	spec contract.ExecutionSpec,
 	toolStatuses map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
 	execution, found := spec.ToolchainExecution()
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("toolchain executor received empty spec")
+		return contract.ExecutionResult{}, fmt.Errorf("toolchain driver received empty spec")
 	}
 
 	diagnostics := make([]contract.Diagnostic, 0, len(execution.ToolIDs))

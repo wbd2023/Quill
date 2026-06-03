@@ -7,17 +7,17 @@ import (
 	"ciphera/tools/internal/rules/golang/check"
 )
 
-func TestBuiltinPackExecutorsHaveDrivers(t *testing.T) {
+func TestBuiltinPackExecutionKindsHaveDrivers(t *testing.T) {
 	registry, err := builtin.DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	checkers := Checkers()
-	fixers := Fixers()
+	checkers := CheckDrivers()
+	fixers := FixDrivers()
 	for _, rule := range registry.Rules() {
 		if _, found := checkers[rule.Check.Kind]; !found {
-			t.Fatalf("rule %q uses executor %q without a checker driver", rule.ID, rule.Check.Kind)
+			t.Fatalf("rule %q uses driver %q without a checker driver", rule.ID, rule.Check.Kind)
 		}
 
 		if rule.Fix.Empty() {
@@ -25,7 +25,7 @@ func TestBuiltinPackExecutorsHaveDrivers(t *testing.T) {
 		}
 
 		if _, found := fixers[rule.Fix.Kind]; !found {
-			t.Fatalf("rule %q uses executor %q without a fixer driver", rule.ID, rule.Fix.Kind)
+			t.Fatalf("rule %q uses driver %q without a fixer driver", rule.ID, rule.Fix.Kind)
 		}
 	}
 }

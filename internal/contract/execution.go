@@ -1,20 +1,20 @@
 package contract
 
-/* --------------------------------------- Executor Kinds --------------------------------------- */
+/* --------------------------------------- Execution Kinds -------------------------------------- */
 
 const (
-	ExecutorToolchain      ExecutorKind = "toolchain"
-	ExecutorProject        ExecutorKind = "project"
-	ExecutorFileCommand    ExecutorKind = "file_command"
-	ExecutorTargetCommand  ExecutorKind = "target_command"
-	ExecutorTargetCheck    ExecutorKind = "target_check"
-	ExecutorRepositoryScan ExecutorKind = "repository_scan"
+	ExecutionToolchain      ExecutionKind = "toolchain"
+	ExecutionProject        ExecutionKind = "project"
+	ExecutionFileCommand    ExecutionKind = "file_command"
+	ExecutionTargetCommand  ExecutionKind = "target_command"
+	ExecutionTargetCheck    ExecutionKind = "target_check"
+	ExecutionRepositoryScan ExecutionKind = "repository_scan"
 )
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
 type ExecutionSpec struct {
-	Kind   ExecutorKind
+	Kind   ExecutionKind
 	Detail ExecutionDetail
 }
 
@@ -79,10 +79,6 @@ func (RepositoryScanExecution) executionDetail() {}
 
 func (spec ExecutionSpec) Empty() (empty bool) {
 	return spec.Kind == "" && spec.Detail == nil
-}
-
-func (spec ExecutionSpec) Executor() (executor string) {
-	return string(spec.Kind)
 }
 
 func (spec ExecutionSpec) ToolchainExecution() (execution ToolchainExecution, found bool) {

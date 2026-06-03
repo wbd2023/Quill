@@ -2,7 +2,7 @@ package contract
 
 type RuleGroup string
 
-type ExecutorKind string
+type ExecutionKind string
 
 type Definitions struct {
 	Tools []Tool

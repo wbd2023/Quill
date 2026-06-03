@@ -17,14 +17,14 @@ import (
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
-func projectExecutor(
+func projectDriver(
 	context runner.Context,
 	spec contract.ExecutionSpec,
 	_ map[string]toolchain.Status,
 ) (result contract.ExecutionResult, err error) {
 	execution, found := spec.ProjectExecution()
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("project executor received empty spec")
+		return contract.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
 	}
 
 	var output string

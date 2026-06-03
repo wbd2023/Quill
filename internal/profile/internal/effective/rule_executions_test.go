@@ -17,7 +17,7 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 	err := compileRuleDefinition(t, contract.RuleDefinition{
 		ID: "test/bad-file-command",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorFileCommand,
+			Kind: contract.ExecutionFileCommand,
 			Detail: contract.FileCommandExecution{
 				ToolID: fixture.Tool,
 			},
@@ -41,7 +41,7 @@ func TestCompileRejectsMismatchedExecutionKind(t *testing.T) {
 	err := compileRuleDefinition(t, contract.RuleDefinition{
 		ID: "test/mismatched-kind",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorFileCommand,
+			Kind: contract.ExecutionFileCommand,
 			Detail: contract.ToolchainExecution{
 				ToolIDs: []string{fixture.Tool},
 			},
@@ -56,7 +56,7 @@ func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, contract.RuleDefinition{
 		ID: "test/blank-tool",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorToolchain,
+			Kind: contract.ExecutionToolchain,
 			Detail: contract.ToolchainExecution{
 				ToolIDs: []string{" "},
 			},
@@ -71,7 +71,7 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, contract.RuleDefinition{
 		ID: "test/duplicate-tool",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorToolchain,
+			Kind: contract.ExecutionToolchain,
 			Detail: contract.ToolchainExecution{
 				ToolIDs: []string{
 					fixture.Tool,
@@ -89,7 +89,7 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, contract.RuleDefinition{
 		ID: "test/unknown-tool",
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorToolchain,
+			Kind: contract.ExecutionToolchain,
 			Detail: contract.ToolchainExecution{
 				ToolIDs: []string{"unknown"},
 			},

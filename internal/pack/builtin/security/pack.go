@@ -22,7 +22,7 @@ func Pack() (definition pack.Definition) {
 				Name:  "Committed secrets",
 				Group: ruleGroupSecurity,
 				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutorRepositoryScan,
+					Kind: contract.ExecutionRepositoryScan,
 					Detail: contract.RepositoryScanExecution{
 						Scanner: ScannerSecrets,
 					},

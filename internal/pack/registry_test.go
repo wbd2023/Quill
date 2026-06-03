@@ -20,7 +20,7 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "first",
 					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutorRepositoryScan,
+						Kind: contract.ExecutionRepositoryScan,
 						Detail: contract.RepositoryScanExecution{
 							Scanner: "test",
 						},
@@ -36,7 +36,7 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "second",
 					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutorRepositoryScan,
+						Kind: contract.ExecutionRepositoryScan,
 						Detail: contract.RepositoryScanExecution{
 							Scanner: "test",
 						},
@@ -50,18 +50,18 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 	}
 }
 
-func TestRegistryRejectsMissingExecutor(t *testing.T) {
+func TestRegistryRejectsMissingCheckExecution(t *testing.T) {
 	err := validateRegistry(buildRegistry([]Definition{
 		{
 			ID:   "broken",
 			Name: "broken",
 			Rules: []contract.RuleDefinition{
-				{ID: "missing/executor", Name: "missing executor"},
+				{ID: "missing/driver", Name: "missing driver"},
 			},
 		},
 	}))
 	if err == nil {
-		t.Fatal("expected missing executor to be rejected")
+		t.Fatal("expected missing driver to be rejected")
 	}
 }
 
@@ -164,7 +164,7 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 					ID:   "custom/rule",
 					Name: "Custom rule",
 					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutorFileCommand,
+						Kind: contract.ExecutionFileCommand,
 						Detail: contract.FileCommandExecution{
 							Arguments: []string{"-w"},
 						},
@@ -194,7 +194,7 @@ func testPack(id string) (definition Definition) {
 				ID:   id + "/rule",
 				Name: id + " rule",
 				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutorRepositoryScan,
+					Kind: contract.ExecutionRepositoryScan,
 					Detail: contract.RepositoryScanExecution{
 						Scanner: "test",
 					},

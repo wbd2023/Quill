@@ -12,7 +12,7 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("app"))
 
 	spec := contract.ExecutionSpec{
-		Kind: contract.ExecutorTargetCommand,
+		Kind: contract.ExecutionTargetCommand,
 		Detail: contract.TargetCommandExecution{
 			ToolIDs:  []string{builtin.ToolGo, builtin.ToolGoimports, builtin.ToolGolangciLint},
 			Action:   builtin.TargetActionGolangci,
@@ -21,9 +21,9 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 		},
 	}
 
-	result, err := targetCommandExecutor(context, spec, nil)
+	result, err := targetCommandDriver(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciExecutor(app): %v\n%s", err, result.Output)
+		t.Fatalf("golangciDriver(app): %v\n%s", err, result.Output)
 	}
 
 	if result.Output != "0 issues." {
@@ -35,7 +35,7 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("tools"))
 
 	spec := contract.ExecutionSpec{
-		Kind: contract.ExecutorTargetCommand,
+		Kind: contract.ExecutionTargetCommand,
 		Detail: contract.TargetCommandExecution{
 			ToolIDs:  []string{builtin.ToolGo, builtin.ToolGoimports, builtin.ToolGolangciLint},
 			Action:   builtin.TargetActionGolangci,
@@ -44,9 +44,9 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 		},
 	}
 
-	result, err := targetCommandExecutor(context, spec, nil)
+	result, err := targetCommandDriver(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciExecutor(tools): %v\n%s", err, result.Output)
+		t.Fatalf("golangciDriver(tools): %v\n%s", err, result.Output)
 	}
 
 	if result.Output != "0 issues." {

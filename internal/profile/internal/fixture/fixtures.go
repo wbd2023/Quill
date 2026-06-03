@@ -116,7 +116,7 @@ func Definitions() (definitions contract.Definitions) {
 				Name:  "Test rule",
 				Group: "test",
 				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutorRepositoryScan,
+					Kind: contract.ExecutionRepositoryScan,
 					Detail: contract.RepositoryScanExecution{
 						Scanner: "test",
 					},
@@ -130,7 +130,7 @@ func Definitions() (definitions contract.Definitions) {
 func FileCommandDefinitions() (definitions contract.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutorFileCommand,
+		Kind: contract.ExecutionFileCommand,
 		Detail: contract.FileCommandExecution{
 			ToolID:  Tool,
 			FileSet: FileSet,
@@ -143,7 +143,7 @@ func FileCommandDefinitions() (definitions contract.Definitions) {
 func TargetCommandDefinitions() (definitions contract.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutorTargetCommand,
+		Kind: contract.ExecutionTargetCommand,
 		Detail: contract.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "test",
@@ -151,7 +151,7 @@ func TargetCommandDefinitions() (definitions contract.Definitions) {
 		},
 	}
 	definitions.Rules[0].Fix = contract.ExecutionSpec{
-		Kind: contract.ExecutorTargetCommand,
+		Kind: contract.ExecutionTargetCommand,
 		Detail: contract.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "fix",
@@ -165,7 +165,7 @@ func TargetCommandDefinitions() (definitions contract.Definitions) {
 func TargetCheckDefinitions() (definitions contract.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutorTargetCheck,
+		Kind: contract.ExecutionTargetCheck,
 		Detail: contract.TargetCheckExecution{
 			ToolIDs:  []string{Tool},
 			Check:    "test",

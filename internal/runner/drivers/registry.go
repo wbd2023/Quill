@@ -9,20 +9,20 @@ import (
 
 var errViolationsFound = errors.New("violations found")
 
-func Checkers() (registry runner.ExecutorRegistry) {
-	return runner.ExecutorRegistry{
-		contract.ExecutorToolchain:      runner.ToolchainExecutor,
-		contract.ExecutorProject:        projectExecutor,
-		contract.ExecutorFileCommand:    fileCommandExecutor,
-		contract.ExecutorTargetCommand:  targetCommandExecutor,
-		contract.ExecutorTargetCheck:    targetCheckExecutor,
-		contract.ExecutorRepositoryScan: repositoryScanExecutor,
+func CheckDrivers() (registry runner.DriverRegistry) {
+	return runner.DriverRegistry{
+		contract.ExecutionToolchain:      runner.ToolchainDriver,
+		contract.ExecutionProject:        projectDriver,
+		contract.ExecutionFileCommand:    fileCommandDriver,
+		contract.ExecutionTargetCommand:  targetCommandDriver,
+		contract.ExecutionTargetCheck:    targetCheckDriver,
+		contract.ExecutionRepositoryScan: repositoryScanDriver,
 	}
 }
 
-func Fixers() (registry runner.ExecutorRegistry) {
-	return runner.ExecutorRegistry{
-		contract.ExecutorFileCommand:   fileCommandExecutor,
-		contract.ExecutorTargetCommand: targetCommandExecutor,
+func FixDrivers() (registry runner.DriverRegistry) {
+	return runner.DriverRegistry{
+		contract.ExecutionFileCommand:   fileCommandDriver,
+		contract.ExecutionTargetCommand: targetCommandDriver,
 	}
 }

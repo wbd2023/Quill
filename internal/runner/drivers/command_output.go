@@ -2,7 +2,7 @@ package drivers
 
 import "strings"
 
-func appendExecutorOutput(builder *strings.Builder, output string) {
+func appendDriverOutput(builder *strings.Builder, output string) {
 	output = strings.TrimSpace(output)
 	if output == "" {
 		return

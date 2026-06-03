@@ -48,7 +48,7 @@ func rules() (rules []contract.RuleDefinition) {
 		[]string{"-d"},
 	)
 	shfmtRule.Fix = contract.ExecutionSpec{
-		Kind: contract.ExecutorFileCommand,
+		Kind: contract.ExecutionFileCommand,
 		Detail: contract.FileCommandExecution{
 			ToolID:    ToolShfmt,
 			FileSet:   "bash",
@@ -111,7 +111,7 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorFileCommand,
+			Kind: contract.ExecutionFileCommand,
 			Detail: contract.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,
@@ -131,7 +131,7 @@ func scannerRule(
 		Name:  name,
 		Group: ruleGroupText,
 		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutorRepositoryScan,
+			Kind: contract.ExecutionRepositoryScan,
 			Detail: contract.RepositoryScanExecution{
 				Scanner: scanner,
 			},
