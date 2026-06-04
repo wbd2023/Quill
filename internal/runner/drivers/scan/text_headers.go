@@ -7,7 +7,7 @@ import (
 	"ciphera/tools/internal/runner"
 )
 
-func runSectionHeadersScanner(
+func scanSectionHeaders(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextConfig(context)
@@ -23,7 +23,7 @@ func runSectionHeadersScanner(
 	)
 }
 
-func runSectionHeaderDensityScanner(
+func scanSectionHeaderDensity(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextConfig(context)
@@ -39,7 +39,7 @@ func runSectionHeaderDensityScanner(
 	)
 }
 
-func runSectionHeaderNamesScanner(
+func scanSectionHeaderNames(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextConfig(context)

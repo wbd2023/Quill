@@ -9,26 +9,28 @@ import (
 
 func vocabularyPackScanners() (scanners map[string]repositoryScanner) {
 	return map[string]repositoryScanner{
-		builtin.ScannerVocabulary: func(
-			context runner.Context,
-			_ contract.RepositoryScanExecution,
-		) (contract.ExecutionResult, error) {
-			pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
-			if !found {
-				return contract.ExecutionResult{}, errMissingPackConfig(builtin.PackVocabulary)
-			}
-
-			config, err := vocabulary.DecodeConfig(pack)
-			if err != nil {
-				return contract.ExecutionResult{}, err
-			}
-
-			return vocabulary.CheckVocabulary(
-				context.RepoRoot,
-				context.Profile.Repository,
-				config,
-				context.Scope,
-			)
-		},
+		builtin.ScannerVocabulary: scanVocabulary,
 	}
+}
+
+func scanVocabulary(
+	context runner.Context,
+	_ contract.RepositoryScanExecution,
+) (result contract.ExecutionResult, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
+	if !found {
+		return contract.ExecutionResult{}, errMissingPackConfig(builtin.PackVocabulary)
+	}
+
+	config, err := vocabulary.DecodeConfig(pack)
+	if err != nil {
+		return contract.ExecutionResult{}, err
+	}
+
+	return vocabulary.CheckVocabulary(
+		context.RepoRoot,
+		context.Profile.Repository,
+		config,
+		context.Scope,
+	)
 }
