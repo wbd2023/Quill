@@ -29,7 +29,7 @@ func textPackScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			execution contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
-			return runLineLengthScanner(context, execution)
+			return scanLineLengths(context, execution)
 		},
 		builtin.ScannerMaintenanceMarkers: func(
 			context runner.Context,
@@ -45,24 +45,24 @@ func textPackScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
-			return runSectionHeaderNamesScanner(context)
+			return scanSectionHeaderNames(context)
 		},
 		builtin.ScannerSectionHeaderDensity: func(
 			context runner.Context,
 			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
-			return runSectionHeaderDensityScanner(context)
+			return scanSectionHeaderDensity(context)
 		},
 		builtin.ScannerSectionHeaders: func(
 			context runner.Context,
 			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
-			return runSectionHeadersScanner(context)
+			return scanSectionHeaders(context)
 		},
 	}
 }
 
-func runLineLengthScanner(
+func scanLineLengths(
 	context runner.Context,
 	execution contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {

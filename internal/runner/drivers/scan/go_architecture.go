@@ -7,7 +7,7 @@ import (
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 )
 
-func runGoArchitectureCheck(
+func scanGoArchitecture(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
 	modulePath, err := runGoList(context, "-m", "-f", "{{.Path}}")

@@ -12,7 +12,7 @@ func goPackScanners() (scanners map[string]repositoryScanner) {
 			context runner.Context,
 			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
-			return runGoArchitectureCheck(context)
+			return scanGoArchitecture(context)
 		},
 	}
 }
