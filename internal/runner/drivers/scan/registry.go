@@ -26,7 +26,3 @@ func addRepositoryScanners(
 		scanners[scannerID] = scanner
 	}
 }
-
-func errMissingPackConfig(packID string) (err error) {
-	return fmt.Errorf("packs.%s must be configured", packID)
-}

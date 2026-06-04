@@ -20,7 +20,7 @@ func scanGoArchitecture(
 		return contract.ExecutionResult{Output: packageList}, err
 	}
 
-	goConfig, err := decodeGoConfig(context)
+	goConfig, err := decodeGoPackConfig(context)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}

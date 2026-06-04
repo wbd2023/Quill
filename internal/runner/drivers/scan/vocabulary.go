@@ -17,12 +17,7 @@ func scanVocabulary(
 	context runner.Context,
 	_ contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
-	if !found {
-		return contract.ExecutionResult{}, errMissingPackConfig(builtin.PackVocabulary)
-	}
-
-	config, err := vocabulary.DecodeConfig(pack)
+	config, err := decodeVocabularyPackConfig(context)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}

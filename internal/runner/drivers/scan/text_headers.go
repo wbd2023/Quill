@@ -2,7 +2,6 @@ package scan
 
 import (
 	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/rules/text"
 	"ciphera/tools/internal/runner"
 )
@@ -10,7 +9,7 @@ import (
 func scanSectionHeaders(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextConfig(context)
+	config, err := decodeTextPackConfig(context)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}
@@ -26,7 +25,7 @@ func scanSectionHeaders(
 func scanSectionHeaderDensity(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextConfig(context)
+	config, err := decodeTextPackConfig(context)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}
@@ -42,7 +41,7 @@ func scanSectionHeaderDensity(
 func scanSectionHeaderNames(
 	context runner.Context,
 ) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextConfig(context)
+	config, err := decodeTextPackConfig(context)
 	if err != nil {
 		return contract.ExecutionResult{}, err
 	}
@@ -53,13 +52,4 @@ func scanSectionHeaderNames(
 		config.SectionHeaders,
 		context.Scope,
 	)
-}
-
-func decodeTextConfig(context runner.Context) (config text.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackText)
-	if !found {
-		return text.Config{}, errMissingPackConfig(builtin.PackText)
-	}
-
-	return text.DecodeConfig(pack)
 }
