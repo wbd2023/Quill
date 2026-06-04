@@ -7,11 +7,11 @@ import (
 	"ciphera/tools/internal/runner"
 )
 
-func vocabularyRepositoryScanners() (scanners map[string]repositoryScanner) {
+func vocabularyPackScanners() (scanners map[string]repositoryScanner) {
 	return map[string]repositoryScanner{
 		builtin.ScannerVocabulary: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
 			if !found {

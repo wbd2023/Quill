@@ -2,6 +2,7 @@ package scan
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -27,12 +28,17 @@ func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
 	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("all"))
 
-	if _, err := repositoryScanDriver(
+	_, err := repositoryScanDriver(
 		context,
 		repositoryScanSpec("unknown"),
 		nil,
-	); err == nil {
+	)
+	if err == nil {
 		t.Fatal("expected unknown scanner to be rejected")
+	}
+
+	if !strings.Contains(err.Error(), `"unknown"`) {
+		t.Fatalf("error = %q, want scanner ID", err)
 	}
 }
 

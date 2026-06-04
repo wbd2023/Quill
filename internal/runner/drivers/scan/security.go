@@ -7,11 +7,11 @@ import (
 	"ciphera/tools/internal/runner"
 )
 
-func securityRepositoryScanners() (scanners map[string]repositoryScanner) {
+func securityPackScanners() (scanners map[string]repositoryScanner) {
 	return map[string]repositoryScanner{
 		builtin.ScannerSecrets: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return security.CheckSecrets(
 				context.RepoRoot,
