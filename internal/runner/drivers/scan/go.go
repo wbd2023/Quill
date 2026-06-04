@@ -6,11 +6,11 @@ import (
 	"ciphera/tools/internal/runner"
 )
 
-func goRepositoryScanners() (scanners map[string]repositoryScanner) {
+func goPackScanners() (scanners map[string]repositoryScanner) {
 	return map[string]repositoryScanner{
 		builtin.ScannerArchitecture: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return runGoArchitectureCheck(context)
 		},

@@ -7,11 +7,11 @@ import (
 	"ciphera/tools/internal/runner"
 )
 
-func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
+func bashPackScanners() (scanners map[string]repositoryScanner) {
 	return map[string]repositoryScanner{
 		builtin.ScannerBashMagicValues: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return bash.CheckMagicValues(
 				context.RepoRoot,
@@ -21,13 +21,13 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 		},
 		builtin.ScannerBashSafety: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return bash.CheckSafety(context.RepoRoot, context.Profile.Repository, context.Scope)
 		},
 		builtin.ScannerBashStructure: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return bash.CheckStructure(
 				context.RepoRoot,
@@ -37,7 +37,7 @@ func bashRepositoryScanners() (scanners map[string]repositoryScanner) {
 		},
 		builtin.ScannerBashTestHygiene: func(
 			context runner.Context,
-			_ contract.ExecutionSpec,
+			_ contract.RepositoryScanExecution,
 		) (contract.ExecutionResult, error) {
 			return bash.CheckTestHygiene(
 				context.RepoRoot,
