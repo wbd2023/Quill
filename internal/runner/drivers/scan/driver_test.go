@@ -44,7 +44,7 @@ func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
 
 func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	fixtureRoot := t.TempDir()
-	alternateProfile := alternatePolicyForTest(t)
+	alternateProfile := buildScanDriverPolicyFixture(t)
 	profiles.Write(t, fixtureRoot, alternateProfile)
 	fixtures.WriteFile(t, fixtureRoot, "ALTROOT", "")
 	fixtures.WriteFile(
@@ -106,7 +106,7 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		t.Fatal("expected alternate vocabulary policy to reject Repository suffixes")
 	}
 
-	if !hasDiagnostic(
+	if !hasDiagnosticMatching(
 		result,
 		"vocabulary/project-terms/go-type-suffix",
 		"internal/app/services/message_service.go",
