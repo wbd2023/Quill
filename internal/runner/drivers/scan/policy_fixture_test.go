@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"strings"
 	"testing"
 
 	"ciphera/tools/internal/contract"
@@ -12,38 +11,9 @@ import (
 	"ciphera/tools/internal/rules/vocabulary"
 )
 
-/* ----------------------------------------- Diagnostics ---------------------------------------- */
+/* --------------------------------------- Policy Fixture --------------------------------------- */
 
-func hasDiagnostic(
-	result contract.ExecutionResult,
-	code string,
-	file string,
-	line int,
-	messageFragment string,
-) (found bool) {
-	for _, diagnostic := range result.Diagnostics {
-		if diagnostic.Code != code {
-			continue
-		}
-		if file != "" && diagnostic.File != file {
-			continue
-		}
-		if line != 0 && diagnostic.Line != line {
-			continue
-		}
-		if messageFragment != "" && !strings.Contains(diagnostic.Message, messageFragment) {
-			continue
-		}
-
-		return true
-	}
-
-	return false
-}
-
-/* -------------------------------------- Alternate Profile ------------------------------------- */
-
-func alternatePolicyForTest(t *testing.T) (config policy.Config) {
+func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 	t.Helper()
 
 	config = profiles.Current(t)
