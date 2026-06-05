@@ -9,6 +9,7 @@ import (
 
 func scanGoArchitecture(
 	context runner.Context,
+	_ contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {
 	modulePath, err := runGoList(context, "-m", "-f", "{{.Path}}")
 	if err != nil {
