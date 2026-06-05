@@ -8,6 +8,7 @@ import (
 
 func scanSectionHeaders(
 	context runner.Context,
+	_ contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextPackConfig(context)
 	if err != nil {
@@ -24,6 +25,7 @@ func scanSectionHeaders(
 
 func scanSectionHeaderDensity(
 	context runner.Context,
+	_ contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextPackConfig(context)
 	if err != nil {
@@ -40,6 +42,7 @@ func scanSectionHeaderDensity(
 
 func scanSectionHeaderNames(
 	context runner.Context,
+	_ contract.RepositoryScanExecution,
 ) (result contract.ExecutionResult, err error) {
 	config, err := decodeTextPackConfig(context)
 	if err != nil {
