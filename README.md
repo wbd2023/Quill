@@ -101,17 +101,19 @@ finds the configured profile markers, currently `STYLE.md` and `style.toml`.
 
 The dependency direction is:
 
-`contract -> policy -> profile/toml`
+`style -> policy -> profile/toml`
 
-`contract -> policy -> profile/internal/validation -> profile`
+`style -> policy -> profile/internal/validation -> profile`
 
-`contract -> policy -> pack -> profile/internal/effective -> profile -> cli`
+`style -> policy -> pack -> profile/internal/effective -> profile -> cli`
 
 `toolchain -> runtime -> installer -> cli`
 
 `toolchain -> report`
 
-`pack/builtin/<pack> -> pack/builtin -> runner/drivers -> cli`
+`pack/shipped/<pack> -> pack/shipped -> profile/internal/effective -> profile -> cli`
+
+`pack/shipped/bindings -> runner/drivers -> cli`
 
 `styleguide -> coverage -> cli/report`
 
@@ -119,33 +121,38 @@ The dependency direction is:
 
 Production packages must keep these boundaries:
 
-- `contract` imports no internal package.
-- `policy` imports only `contract`.
+- `style` imports no internal package.
+- `policy` imports only `style`.
 - `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not
-  loaders, validators, Packs, runners, drivers, rules, or reports.
-- `profile/internal/validation` imports profile policy types and contracts, not loaders, Packs,
-  runners, drivers, rules, or reports.
-- `profile/internal/effective` imports profile policy types, contracts, and neutral Pack
-  definitions, not loaders, Shipped Packs, runners, drivers, rules, or reports.
+  loaders, validators, Packs, runners, drivers, checks, or reports.
+- `profile/internal/validation` imports profile policy types and style vocabulary, not loaders, Packs,
+  runners, drivers, checks, or reports.
+- `profile/internal/effective` imports profile policy types, style vocabulary, and neutral Pack
+  definitions, not loaders, Shipped Packs, runners, drivers, checks, or reports.
 - `profile` is the public facade over profile loading, TOML, validation, Pack default
   resolution, and Effective Profile compilation. It may import neutral Pack registries, but not
-  Shipped Packs, runners, drivers, rules, or reports.
-- `toolchain` imports no project policy, runtime, rules, profile, or reporting package.
-- `runtime` owns command execution, tool inspection, environment layout, and no installation
-  orchestration.
-- `installer` imports runtime and tool contracts, not project policy, rules, profiles, reports, or
+  Shipped Packs, runners, drivers, checks, or reports.
+- `toolchain` owns Tool capability, health, status, command lookup, and version detection. It imports
+  no project policy, runtime, checks, profile, or reporting package.
+- `runtime` owns command execution, command environment layout, and no installation
+  orchestration or Tool health policy.
+- `installer` imports runtime and style tool types, not project policy, checks, profiles, reports, or
   runners.
 - `pack` defines neutral Pack definitions, catalogues, and registries.
-- `pack/builtin` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
-- `pack/builtin/<pack>` modules own declaration-time Pack concepts and may import rule packages
+- `pack/shipped` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
+- `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages
   and Pack-owned policy codecs, but not runners, drivers, reports, profiles, or installers.
-- `runner` imports no `profile`, `pack/builtin`, `runtime`, or `report`.
-- `runner/drivers` binds generic Execution Kinds to concrete Drivers without importing
-  profile, report, or installation packages. Its command, project, scan, and target subpackages
-  stay behind the top-level facade.
-- Concrete rule packages import no `profile`; Go rules import no `pack/builtin`, and Go
-  rule policy stays separate from rule implementations.
-- `report` owns final text and JSON formatting; rules and drivers return data.
+- `pack/shipped/tool` owns reusable shipped tool capabilities, tool IDs, install kinds, and
+  version kinds.
+- `pack/shipped/bindings` owns Shipped Pack Runtime Bindings and may import only the
+  top-level `runner/drivers` facade, not driver-family subpackages.
+- `runner` imports no `profile`, `pack/shipped`, `runtime`, or `report`.
+- `runner/drivers` binds generic Execution Kinds to concrete Drivers from explicit
+  `drivers.Bindings` without importing Shipped Packs, profiles, reports, or installation packages.
+  Its command, project, scan, and target subpackages stay behind the top-level facade.
+- Concrete Check packages import no `profile`; Go Checks import no `pack/shipped`, and Go
+  Check policy stays separate from Check implementations.
+- `report` owns final text and JSON formatting; Checks and drivers return data.
 
 ## File Shape
 
@@ -163,16 +170,17 @@ The style platform uses balanced granularity:
 
 - `cmd/style/`
   - Go CLI entrypoint for `bin/style`.
-- `internal/contract/`
-  - Shared style-platform contracts: levels, scopes, check statuses, diagnostics, execution
+- `internal/style/`
+  - Shared style-platform vocabulary: levels, scopes, check statuses, diagnostics, execution
     results, effective rules, tool policy, and typed execution specs.
 - `internal/policy/`
   - Project policy value types and profile vocabulary such as scopes, path roles, Targets,
     Pack configs, and rule bindings.
 - `internal/toolchain/`
-  - Installed-tool capability and status values, plus status indexing, sorting, and issue helpers.
+  - Installed-tool capability and status values, status indexing, command lookup, Tool health
+    inspection, version detection, sorting, and issue helpers.
 - `internal/runtime/`
-  - Command execution, tool inspection, environment layout, and version detection.
+  - Command execution, command environment layout, and repository-local tool directories.
 - `internal/installer/`
   - Pinned tool installation, downloads, archive extraction, and lockfile validation.
 - `internal/profile/`
@@ -183,14 +191,19 @@ The style platform uses balanced granularity:
 - `internal/profile/internal/validation/`
   - Internal consistency checks for typed Profile policy values.
 - `internal/profile/internal/effective/`
-  - Effective Profile compilation from resolved Profile policy and Pack registry contracts.
+  - Effective Profile compilation from resolved Profile policy and Pack registry style definitions.
 - `internal/pack/`
   - Neutral Pack definitions, catalogues, registries, and selection validation.
-- `internal/pack/builtin/`
-  - Shipped Pack catalogue facade, shared shipped IDs, and reusable tool capabilities.
-- `internal/pack/builtin/<pack>/`
+- `internal/pack/shipped/`
+  - Shipped Pack catalogue facade and default registry assembly.
+- `internal/pack/shipped/<pack>/`
   - Shipped Pack definitions, rule declarations, tool needs, file-set defaults, and Pack policy
     wiring.
+- `internal/pack/shipped/tool/`
+  - Reusable shipped tool IDs, capabilities, install kinds, and version kinds.
+- `internal/pack/shipped/bindings/`
+  - Shipped Runtime Binding table from scanner IDs, target actions, target-check languages, and
+    project check IDs to the generic `runner/drivers` facade.
 - `internal/coverage/`
   - Pure STYLE.md/profile/rule graph coverage assembly.
 - `internal/styleguide/`
@@ -201,29 +214,29 @@ The style platform uses balanced granularity:
   - Generic rule/fix execution through injected Drivers, status mapping, and policy-owned file-set
     selection.
 - `internal/runner/drivers/`
-  - Built-in Driver facade that maps Execution Kinds, scanner IDs, and target actions to concrete
-    checks and fixers.
+  - Driver facade that maps Execution Kinds to generic driver families and accepts explicit
+    Runtime Bindings for scanner IDs, target actions, target-check languages, and project checks.
 - `internal/runner/drivers/{command,project,scan,target}/`
   - Execution-family Driver implementations owned behind the `runner/drivers` facade.
 - `internal/filewalk/`
   - Repository file collection and generated-file filtering shared by runners and scanners.
 - `internal/report/`
   - Text and explicit JSON DTO renderers for checks, coverage, and tool status.
-- `internal/rules/golang/`
-  - Go rule facade and package family. The root package walks Go files and reports diagnostics;
+- `internal/checks/golang/`
+  - Go Check facade and package family. The root package walks Go files and reports diagnostics;
     subpackages own check IDs, Go pack policy, shared analysis primitives, syntax checks,
     structure checks, relationship checks, architecture checks, test checks, and scenario tests.
-- `internal/rules/text/`
+- `internal/checks/text/`
   - Text scanners for line length, ASCII, exception markers, maintenance markers, and section
     headers.
-- `internal/rules/security/`
+- `internal/checks/security/`
   - Security scanners such as committed-secret detection.
-- `internal/rules/vocabulary/`
+- `internal/checks/vocabulary/`
   - Cross-language project-term vocabulary scanners.
-- `internal/rules/bash/`
+- `internal/checks/bash/`
   - Bash-specific script structure, safety, magic-value, and test-hygiene scanners.
 - `internal/fixtures/`
   - Shared helpers for writing repository-shaped test fixtures.
 
 There is no longer a shell registry, shell-script control plane, nested `tools/style/` module, or
-single overloaded package mixing platform contracts with STYLE.md parsing.
+single overloaded package mixing style-platform vocabulary with STYLE.md parsing.

@@ -1,18 +1,19 @@
 package scan
 
 import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/rules/text"
+	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/style"
 )
 
 func scanSectionHeaders(
 	context runner.Context,
-	_ contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context)
+	_ style.RepositoryScanExecution,
+	textPackID string,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, textPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return text.CheckSectionHeaders(
@@ -25,11 +26,12 @@ func scanSectionHeaders(
 
 func scanSectionHeaderDensity(
 	context runner.Context,
-	_ contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context)
+	_ style.RepositoryScanExecution,
+	textPackID string,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, textPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return text.CheckSectionHeaderDensity(
@@ -42,11 +44,12 @@ func scanSectionHeaderDensity(
 
 func scanSectionHeaderNames(
 	context runner.Context,
-	_ contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context)
+	_ style.RepositoryScanExecution,
+	textPackID string,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, textPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return text.CheckSectionHeaderNames(

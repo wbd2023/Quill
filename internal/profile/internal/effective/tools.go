@@ -3,15 +3,15 @@ package effective
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 func pinTools(
 	config policy.Config,
-	definitions []contract.Tool,
-	availableTools map[string]contract.Tool,
-) (tools []contract.Tool, err error) {
+	definitions []style.Tool,
+	availableTools map[string]style.Tool,
+) (tools []style.Tool, err error) {
 	for _, pinnedTool := range config.Tools {
 		if _, found := availableTools[pinnedTool.ID]; !found {
 			return nil, fmt.Errorf(
@@ -21,7 +21,7 @@ func pinTools(
 		}
 	}
 
-	tools = make([]contract.Tool, 0, len(definitions))
+	tools = make([]style.Tool, 0, len(definitions))
 	for _, definition := range definitions {
 		pinnedTool, found := config.Tools.Lookup(definition.ID)
 		if !found {

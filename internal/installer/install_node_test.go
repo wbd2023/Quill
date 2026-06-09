@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -31,7 +31,7 @@ func TestValidatePackageLockRejectsProfileVersionMismatch(t *testing.T) {
 		t.Fatalf("write package lock: %v", err)
 	}
 
-	err := validatePackageLock(lockPath, contract.Tool{
+	err := validatePackageLock(lockPath, style.Tool{
 		PinnedVersion: "0.45.0",
 	}, toolchain.Capability{
 		InstallSource: "markdownlint-cli",

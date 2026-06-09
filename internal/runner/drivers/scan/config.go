@@ -3,26 +3,25 @@ package scan
 import (
 	"fmt"
 
-	"ciphera/tools/internal/pack/builtin"
-	gopolicy "ciphera/tools/internal/rules/golang/policy"
-	"ciphera/tools/internal/rules/text"
-	"ciphera/tools/internal/rules/vocabulary"
+	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/text"
+	"ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/runner"
 )
 
-func decodeGoPackConfig(context runner.Context) (config gopolicy.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackGo)
+func decodeGoPackConfig(context runner.Context, packID string) (config gopolicy.Config, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
 	if !found {
-		return gopolicy.Config{}, errMissingPackConfig(builtin.PackGo)
+		return gopolicy.Config{}, errMissingPackConfig(packID)
 	}
 
 	return gopolicy.DecodeConfig(pack)
 }
 
-func decodeTextPackConfig(context runner.Context) (config text.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackText)
+func decodeTextPackConfig(context runner.Context, packID string) (config text.Config, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
 	if !found {
-		return text.Config{}, errMissingPackConfig(builtin.PackText)
+		return text.Config{}, errMissingPackConfig(packID)
 	}
 
 	return text.DecodeConfig(pack)
@@ -30,10 +29,11 @@ func decodeTextPackConfig(context runner.Context) (config text.Config, err error
 
 func decodeVocabularyPackConfig(
 	context runner.Context,
+	packID string,
 ) (config vocabulary.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackVocabulary)
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
 	if !found {
-		return vocabulary.Config{}, errMissingPackConfig(builtin.PackVocabulary)
+		return vocabulary.Config{}, errMissingPackConfig(packID)
 	}
 
 	return vocabulary.DecodeConfig(pack)

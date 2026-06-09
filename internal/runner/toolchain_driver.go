@@ -3,21 +3,21 @@ package runner
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func ToolchainDriver(
 	_ Context,
-	spec contract.ExecutionSpec,
+	spec style.ExecutionSpec,
 	toolStatuses map[string]toolchain.Status,
-) (result contract.ExecutionResult, err error) {
+) (result style.ExecutionResult, err error) {
 	execution, found := spec.ToolchainExecution()
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("toolchain driver received empty spec")
+		return style.ExecutionResult{}, fmt.Errorf("toolchain driver received empty spec")
 	}
 
-	diagnostics := make([]contract.Diagnostic, 0, len(execution.ToolIDs))
+	diagnostics := make([]style.Diagnostic, 0, len(execution.ToolIDs))
 	foundFailure := false
 	for _, toolID := range execution.ToolIDs {
 		status, found := toolStatuses[toolID]
@@ -26,15 +26,15 @@ func ToolchainDriver(
 		}
 
 		foundFailure = true
-		diagnostics = append(diagnostics, contract.Diagnostic{
+		diagnostics = append(diagnostics, style.Diagnostic{
 			Code:    "toolchain/invalid",
 			Message: toolchain.ExplainToolIssues([]string{toolID}, toolStatuses),
 		})
 	}
 
 	if !foundFailure {
-		return contract.ExecutionResult{}, nil
+		return style.ExecutionResult{}, nil
 	}
 
-	return contract.ExecutionResult{Diagnostics: diagnostics}, errRuleViolation
+	return style.ExecutionResult{Diagnostics: diagnostics}, errRuleViolation
 }

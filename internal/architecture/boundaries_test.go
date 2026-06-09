@@ -9,6 +9,7 @@ type importBoundaryCase struct {
 
 func importBoundaryCases() (testCases []importBoundaryCase) {
 	testCases = append(testCases, platformBoundaryCases()...)
-	testCases = append(testCases, ruleBoundaryCases()...)
+	testCases = append(testCases, shippedPackModuleBoundaryCases()...)
+	testCases = append(testCases, checkBoundaryCases()...)
 	return testCases
 }

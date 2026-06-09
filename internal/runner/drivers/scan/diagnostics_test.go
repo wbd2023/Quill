@@ -3,11 +3,11 @@ package scan
 import (
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 func hasDiagnosticMatching(
-	result contract.ExecutionResult,
+	result style.ExecutionResult,
 	code string,
 	file string,
 	line int,

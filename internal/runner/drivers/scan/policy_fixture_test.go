@@ -3,12 +3,13 @@ package scan
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
+	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	vocabularyrules "ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped/golang"
+	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/policy"
-	gopolicy "ciphera/tools/internal/rules/golang/policy"
-	"ciphera/tools/internal/rules/vocabulary"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Policy Fixture --------------------------------------- */
@@ -18,7 +19,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 
 	config = profiles.Current(t)
 	config.Repository.RootMarkers = []string{"STYLE.md", "style.toml", "ALTROOT"}
-	config.Repository.ScopeRoots = map[contract.Scope][]string{
+	config.Repository.ScopeRoots = map[style.Scope][]string{
 		"app":   {"cmd", "internal"},
 		"tools": {"tools"},
 		"all":   {"."},
@@ -27,16 +28,16 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 		Name: "markdown",
 		Include: policy.FileSetInclude{
 			Extensions: []string{".md"},
-			Files: map[contract.Scope][]string{
+			Files: map[style.Scope][]string{
 				"app": {"STYLE.md"},
 			},
-			Paths: map[contract.Scope][]string{
+			Paths: map[style.Scope][]string{
 				"app":   {"cmd/", "internal/"},
 				"tools": {"tools/"},
 			},
 		},
 	})
-	goConfig, err := gopolicy.DecodeConfig(config.PackConfigs[builtin.PackGo])
+	goConfig, err := gopolicy.DecodeConfig(config.PackConfigs[golang.PackID])
 	if err != nil {
 		t.Fatalf("Decode Go config: %v", err)
 	}
@@ -53,7 +54,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 		{
 			Name:             "app_go",
 			Language:         "go",
-			Scope:            contract.Scope("app"),
+			Scope:            style.Scope("app"),
 			WorkingDirectory: ".",
 			FormatPaths:      []string{"cmd", "internal"},
 			CheckPaths:       []string{"cmd", "internal"},
@@ -61,13 +62,13 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 		{
 			Name:             "tools_go",
 			Language:         "go",
-			Scope:            contract.Scope("tools"),
+			Scope:            style.Scope("tools"),
 			WorkingDirectory: "tools",
 			FormatPaths:      []string{"cmd", "internal"},
 			CheckPaths:       []string{"cmd", "internal"},
 		},
 	}
-	vocabularyConfig, err := vocabulary.DecodeConfig(config.PackConfigs[builtin.PackVocabulary])
+	vocabularyConfig, err := vocabularyrules.DecodeConfig(config.PackConfigs[vocabulary.PackID])
 	if err != nil {
 		t.Fatalf("Decode vocabulary config: %v", err)
 	}
@@ -75,7 +76,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 	vocabularyConfig.Go.PreferredTypeSuffix = "Store"
 	vocabularyConfig.Go.ForbiddenIdentifierSuffixes = []string{"Repository"}
 	vocabularyConfig.Go.PreferredIdentifierSuffix = "Store"
-	config.PackConfigs[builtin.PackVocabulary] = vocabulary.EncodeConfig(vocabularyConfig)
+	config.PackConfigs[vocabulary.PackID] = vocabularyrules.EncodeConfig(vocabularyConfig)
 	parameters := &goConfig.Constructors
 	parameters.ParameterOrder = replaceParameterGroup(
 		parameters.ParameterOrder,
@@ -111,7 +112,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 			AllowedLayers: []string{"service", "adapter"},
 		},
 	}
-	config.PackConfigs[builtin.PackGo] = gopolicy.EncodeConfig(goConfig)
+	config.PackConfigs[golang.PackID] = gopolicy.EncodeConfig(goConfig)
 
 	return config
 }

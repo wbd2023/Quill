@@ -3,39 +3,39 @@ package command
 import (
 	"errors"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func fileCommandDriver(
 	context runner.Context,
-	spec contract.ExecutionSpec,
+	spec style.ExecutionSpec,
 	_ map[string]toolchain.Status,
-) (result contract.ExecutionResult, err error) {
+) (result style.ExecutionResult, err error) {
 	execution, found := spec.FileCommandExecution()
 	if !found {
-		return contract.ExecutionResult{}, errors.New("file-command driver received empty spec")
+		return style.ExecutionResult{}, errors.New("file-command driver received empty spec")
 	}
 
 	files, err := runner.CollectFileSetFiles(context, execution.FileSet)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	if len(files) == 0 {
-		return contract.ExecutionResult{}, nil
+		return style.ExecutionResult{}, nil
 	}
 
 	tool, found := context.Effective.ToolByID(execution.ToolID)
 	if !found {
-		return contract.ExecutionResult{}, errUnknownTool(execution.ToolID)
+		return style.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
 
 	capability, found := context.ToolCapabilities[execution.ToolID]
 	if !found {
-		return contract.ExecutionResult{}, errUnknownTool(execution.ToolID)
+		return style.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
 
 	arguments := runner.FileCommandArguments(context.RepoRoot, spec)
@@ -48,9 +48,9 @@ func fileCommandDriver(
 		arguments...,
 	)
 	output, err := runtime.CommandOutput(commandResult, err)
-	return contract.ExecutionResult{
+	return style.ExecutionResult{
 		Output:  output,
-		Command: runtime.ContractCommandResult(commandResult),
+		Command: runtime.BuildStyleCommandResult(commandResult),
 	}, err
 }
 

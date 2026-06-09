@@ -1,11 +1,11 @@
 package report
 
-import "ciphera/tools/internal/contract"
+import "ciphera/tools/internal/style"
 
 func NewCheckEntry(
-	rule contract.Rule,
-	status contract.CheckStatus,
-	result contract.ExecutionResult,
+	rule style.Rule,
+	status style.CheckStatus,
+	result style.ExecutionResult,
 ) (entry CheckEntry) {
 	return CheckEntry{
 		Rule:   NewRuleSummary(rule),
@@ -14,7 +14,7 @@ func NewCheckEntry(
 	}
 }
 
-func NewRuleSummary(rule contract.Rule) (summary RuleSummary) {
+func NewRuleSummary(rule style.Rule) (summary RuleSummary) {
 	return RuleSummary{
 		ID:             rule.ID,
 		Name:           rule.Name,

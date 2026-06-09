@@ -5,11 +5,11 @@ import (
 	"sort"
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 type Status struct {
-	Tool    contract.Tool
+	Tool    style.Tool
 	Path    string
 	Version string
 	Valid   bool

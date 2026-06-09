@@ -3,37 +3,38 @@ package cli
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped/golang"
+	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/style"
 )
 
 func TestFixableRulesUsePackFixes(t *testing.T) {
-	rules := []contract.Rule{
+	rules := []style.Rule{
 		{
 			ID: "go/lint",
-			Fix: contract.ExecutionSpec{
-				Kind: contract.ExecutionTargetCommand,
-				Detail: contract.TargetCommandExecution{
-					ToolIDs:  []string{builtin.ToolGo},
-					Action:   builtin.TargetActionGoFormat,
-					Language: builtin.LanguageGo,
+			Fix: style.ExecutionSpec{
+				Kind: style.ExecutionTargetCommand,
+				Detail: style.TargetCommandExecution{
+					ToolIDs:  []string{tool.Go},
+					Action:   golang.TargetActionGoFormat,
+					Language: golang.Language,
 				},
 			},
-			Scope: contract.Scope("tools"),
+			Scope: style.Scope("tools"),
 		},
 		{
 			ID:    "security/secrets",
-			Scope: contract.Scope("all"),
+			Scope: style.Scope("all"),
 		},
 	}
 
 	context := runner.Context{
-		Scope: contract.Scope("tools"),
+		Scope: style.Scope("tools"),
 		Profile: policy.Config{
 			Repository: policy.RepositoryConfig{
-				ScopeRoots: map[contract.Scope][]string{
+				ScopeRoots: map[style.Scope][]string{
 					"all":   {"."},
 					"tools": {"tools"},
 				},

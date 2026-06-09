@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -20,7 +20,7 @@ const nodeToolchainDir = "toolchain/npm"
 func installNodeTool(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	if capability.InstallSource == "" {
@@ -50,7 +50,7 @@ func installNodeTool(
 		return err
 	}
 
-	npmTool := contract.Tool{ID: "npm", Name: "npm",
+	npmTool := style.Tool{ID: "npm", Name: "npm",
 		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
 	npmCapability := toolchain.Capability{ID: "npm", Name: "npm", Command: "npm"}
 	_, err = runtime.RunToolCommand(
@@ -74,7 +74,7 @@ func installNodeTool(
 
 func prepareLockedNodeInstall(
 	layout runtime.Layout,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	sourceDir := filepath.Join(layout.ToolsDir, nodeToolchainDir)

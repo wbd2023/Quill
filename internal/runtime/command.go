@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"time"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -39,7 +39,7 @@ type CommandResult struct {
 /* -------------------------------------- Command Execution ------------------------------------- */
 
 func RunCommand(request CommandRequest) (result CommandResult, err error) {
-	commandPath, err := lookupCommandPath(request.Name, request.Environment)
+	commandPath, err := toolchain.ResolveCommandPath(request.Name, request.Environment)
 	if err != nil {
 		return CommandResult{}, err
 	}
@@ -78,7 +78,7 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 func RunToolCommand(
 	directory string,
 	environment map[string]string,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 	arguments ...string,
 ) (output string, err error) {
@@ -95,7 +95,7 @@ func RunToolCommand(
 func RunToolCommandResult(
 	directory string,
 	environment map[string]string,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 	arguments ...string,
 ) (result CommandResult, err error) {
@@ -109,8 +109,8 @@ func RunToolCommandResult(
 	})
 }
 
-func ContractCommandResult(result CommandResult) (contractResult contract.CommandResult) {
-	return contract.CommandResult{
+func BuildStyleCommandResult(result CommandResult) (commandResult style.CommandResult) {
+	return style.CommandResult{
 		ExitCode:  result.ExitCode,
 		TimedOut:  result.TimedOut,
 		Truncated: result.Truncated,

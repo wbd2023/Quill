@@ -3,8 +3,8 @@ package pack
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -15,13 +15,13 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 		{
 			ID:   "one",
 			Name: "one",
-			Rules: []contract.RuleDefinition{
+			Rules: []style.RuleDefinition{
 				{
 					ID:   "duplicate",
 					Name: "first",
-					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutionRepositoryScan,
-						Detail: contract.RepositoryScanExecution{
+					Check: style.ExecutionSpec{
+						Kind: style.ExecutionRepositoryScan,
+						Detail: style.RepositoryScanExecution{
 							Scanner: "test",
 						},
 					},
@@ -31,13 +31,13 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 		{
 			ID:   "two",
 			Name: "two",
-			Rules: []contract.RuleDefinition{
+			Rules: []style.RuleDefinition{
 				{
 					ID:   "duplicate",
 					Name: "second",
-					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutionRepositoryScan,
-						Detail: contract.RepositoryScanExecution{
+					Check: style.ExecutionSpec{
+						Kind: style.ExecutionRepositoryScan,
+						Detail: style.RepositoryScanExecution{
 							Scanner: "test",
 						},
 					},
@@ -55,7 +55,7 @@ func TestRegistryRejectsMissingCheckExecution(t *testing.T) {
 		{
 			ID:   "broken",
 			Name: "broken",
-			Rules: []contract.RuleDefinition{
+			Rules: []style.RuleDefinition{
 				{ID: "missing/driver", Name: "missing driver"},
 			},
 		},
@@ -159,13 +159,13 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 		{
 			ID:   "custom",
 			Name: "Custom",
-			Rules: []contract.RuleDefinition{
+			Rules: []style.RuleDefinition{
 				{
 					ID:   "custom/rule",
 					Name: "Custom rule",
-					Check: contract.ExecutionSpec{
-						Kind: contract.ExecutionFileCommand,
-						Detail: contract.FileCommandExecution{
+					Check: style.ExecutionSpec{
+						Kind: style.ExecutionFileCommand,
+						Detail: style.FileCommandExecution{
 							Arguments: []string{"-w"},
 						},
 					},
@@ -175,11 +175,11 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 	})
 
 	rules := registry.Rules()
-	execution := rules[0].Check.Detail.(contract.FileCommandExecution)
+	execution := rules[0].Check.Detail.(style.FileCommandExecution)
 	execution.Arguments[0] = "-changed"
 
 	rules = registry.Rules()
-	execution = rules[0].Check.Detail.(contract.FileCommandExecution)
+	execution = rules[0].Check.Detail.(style.FileCommandExecution)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("registry rule argument = %q, want -w", got)
 	}
@@ -189,13 +189,13 @@ func testPack(id string) (definition Definition) {
 	return Definition{
 		ID:   id,
 		Name: id,
-		Rules: []contract.RuleDefinition{
+		Rules: []style.RuleDefinition{
 			{
 				ID:   id + "/rule",
 				Name: id + " rule",
-				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutionRepositoryScan,
-					Detail: contract.RepositoryScanExecution{
+				Check: style.ExecutionSpec{
+					Kind: style.ExecutionRepositoryScan,
+					Detail: style.RepositoryScanExecution{
 						Scanner: "test",
 					},
 				},

@@ -1,8 +1,8 @@
 package toml
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 type schemaRepositoryConfig struct {
@@ -16,7 +16,7 @@ type schemaRepositoryConfig struct {
 func decodeRepository(schema schemaRepositoryConfig) (repository policy.RepositoryConfig) {
 	return policy.RepositoryConfig{
 		RootMarkers:         append([]string{}, schema.RootMarkers...),
-		DefaultScope:        contract.Scope(schema.DefaultScope),
+		DefaultScope:        style.Scope(schema.DefaultScope),
 		ScopeRoots:          decodeScopeMap(schema.ScopeRoots),
 		ExcludedDirectories: append([]string{}, schema.ExcludedDirectories...),
 		GeneratedMarker:     schema.GeneratedMarker,

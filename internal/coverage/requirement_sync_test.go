@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/styleguide"
@@ -21,7 +21,7 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 
 	config := profiles.Current(t)
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

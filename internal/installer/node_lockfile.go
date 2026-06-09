@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func validatePackageLock(
 	path string,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	contents, err := os.ReadFile(path)

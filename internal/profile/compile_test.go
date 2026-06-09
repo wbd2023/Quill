@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 )
 
@@ -16,7 +16,7 @@ func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 		t.Fatalf("Load: %v", err)
 	}
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

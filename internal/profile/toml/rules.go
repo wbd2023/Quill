@@ -1,15 +1,15 @@
 package toml
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 type schemaRuleBinding struct {
-	ID             string               `toml:"id"`
-	Enforcement    contract.Enforcement `toml:"enforcement"`
-	Scope          string               `toml:"scope"`
-	RequirementIDs []string             `toml:"requirement_ids"`
+	ID             string            `toml:"id"`
+	Enforcement    style.Enforcement `toml:"enforcement"`
+	Scope          string            `toml:"scope"`
+	RequirementIDs []string          `toml:"requirement_ids"`
 }
 
 func decodeRules(schemas []schemaRuleBinding) (rules []policy.RuleBinding) {
@@ -18,7 +18,7 @@ func decodeRules(schemas []schemaRuleBinding) (rules []policy.RuleBinding) {
 		rules = append(rules, policy.RuleBinding{
 			RuleID:         rule.ID,
 			Enforcement:    rule.Enforcement,
-			Scope:          contract.Scope(rule.Scope),
+			Scope:          style.Scope(rule.Scope),
 			RequirementIDs: append([]string{}, rule.RequirementIDs...),
 		})
 	}

@@ -41,6 +41,7 @@ func TestRetiredPathsStayRetired(t *testing.T) {
 
 	toolsRoot := importBoundaryRoot(t)
 	retired := []string{
+		"internal/rules",
 		"internal/rules/bash/results.go",
 		"internal/rules/text/results.go",
 		"internal/rules/security/results.go",
@@ -56,6 +57,15 @@ func TestRetiredPathsStayRetired(t *testing.T) {
 		"internal/rules/golang/rule_switch_case_spacing_test.go",
 		"internal/rules/golang/scenarios/behaviour_harness_test.go",
 		"internal/rules/golang/scenarios/domain_identifier_casts_test.go",
+		"internal/pack/shipped/go_target_ids.go",
+		"internal/pack/shipped/pack_ids.go",
+		"internal/pack/shipped/project_check_ids.go",
+		"internal/pack/shipped/scanner_ids.go",
+		"internal/runtime/handlers_test.go",
+		"internal/runtime/tool_inspection.go",
+		"internal/runtime/tool_version.go",
+		"internal/runtime/tool_version_detection.go",
+		"internal/runtime/version_normalisation.go",
 	}
 
 	for _, path := range retired {

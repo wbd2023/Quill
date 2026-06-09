@@ -6,32 +6,41 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/rules/golang"
+	"ciphera/tools/internal/checks/golang"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
+	"ciphera/tools/internal/style"
 )
+
+func CheckGoStyle(goPackID string, goLanguage string) (check binding.TargetCheck) {
+	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
+		return runGoStyleCheck(context, spec, goPackID, goLanguage)
+	}
+}
 
 func runGoStyleCheck(
 	context runner.Context,
-	spec contract.ExecutionSpec,
-) (result contract.ExecutionResult, err error) {
+	spec style.ExecutionSpec,
+	goPackID string,
+	goLanguage string,
+) (result style.ExecutionResult, err error) {
 	execution, found := spec.TargetCheckExecution()
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("go style check received empty spec")
+		return style.ExecutionResult{}, fmt.Errorf("go style check received empty spec")
 	}
 
-	targets, err := goTargets(context, spec)
+	targets, err := goTargets(context, spec, goLanguage)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
-	goConfig, err := decodeGoConfig(context)
+	goConfig, err := decodeGoConfig(context, goPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
-	diagnostics := make([]contract.Diagnostic, 0)
+	diagnostics := make([]style.Diagnostic, 0)
 	var builder strings.Builder
 	var joined error
 	for _, target := range targets {
@@ -62,7 +71,7 @@ func runGoStyleCheck(
 		joined = errors.Join(joined, err)
 	}
 
-	return contract.ExecutionResult{
+	return style.ExecutionResult{
 		Diagnostics: diagnostics,
 		Output:      strings.TrimSpace(builder.String()),
 	}, joined

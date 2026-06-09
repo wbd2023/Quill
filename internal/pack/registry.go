@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"sort"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 /* ------------------------------------------ Registry ------------------------------------------ */
 
-// Registry stores selected Pack definitions as runtime rule and tool contracts.
+// Registry stores selected Pack definitions as runtime rule and tool definitions.
 type Registry struct {
 	packs        []Definition
 	capabilities []toolchain.Capability
-	rules        []contract.RuleDefinition
+	rules        []style.RuleDefinition
 }
 
 // Packs returns the packs registered in the registry.
@@ -27,19 +27,19 @@ func (registry Registry) ToolCapabilities() (capabilities []toolchain.Capability
 	return append([]toolchain.Capability{}, registry.capabilities...)
 }
 
-// Tools returns the tool contracts registered in the registry.
-func (registry Registry) Tools() (tools []contract.Tool) {
+// Tools returns the tool definitions registered in the registry.
+func (registry Registry) Tools() (tools []style.Tool) {
 	return toolchain.Policies(registry.capabilities)
 }
 
 // Rules returns the rule definitions registered in the registry.
-func (registry Registry) Rules() (rules []contract.RuleDefinition) {
+func (registry Registry) Rules() (rules []style.RuleDefinition) {
 	return CloneRules(registry.rules)
 }
 
-// Definitions returns the registered tool and rule contracts.
-func (registry Registry) Definitions() (definitions contract.Definitions) {
-	return contract.Definitions{
+// Definitions returns the registered tool and rule definitions.
+func (registry Registry) Definitions() (definitions style.Definitions) {
+	return style.Definitions{
 		Tools: registry.Tools(),
 		Rules: registry.Rules(),
 	}

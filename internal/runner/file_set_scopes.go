@@ -1,8 +1,8 @@
 package runner
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 func fileSetUsesScopedIncludes(
@@ -23,8 +23,8 @@ func fileSetUsesScopedIncludes(
 	return false
 }
 
-func fileSetIncludeScopes(fileSet policy.FileSetConfig) (scopes []contract.Scope) {
-	seen := make(map[contract.Scope]bool)
+func fileSetIncludeScopes(fileSet policy.FileSetConfig) (scopes []style.Scope) {
+	seen := make(map[style.Scope]bool)
 	for scope, files := range fileSet.Include.Files {
 		if len(files) == 0 || seen[scope] {
 			continue

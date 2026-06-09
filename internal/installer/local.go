@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func hasPinnedLocalTool(
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 	path string,
 ) (installed bool, err error) {
@@ -25,11 +25,12 @@ func hasPinnedLocalTool(
 
 	local := capability
 	local.Command = path
-	statuses := runtime.InspectToolsWithEnvironment(
-		[]contract.Tool{tool},
+	statuses := toolchain.InspectToolsWithEnvironment(
+		[]style.Tool{tool},
 		map[string]toolchain.Capability{tool.ID: local},
 		[]string{tool.ID},
 		nil,
+		runtime.RunToolchainCommand,
 	)
 	if len(statuses) != 1 {
 		return false, fmt.Errorf("inspect local tool %s: missing status", tool.ID)

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	goruntime "runtime"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -20,7 +20,7 @@ const (
 func installShellcheckTool(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	localPath := filepath.Join(layout.ToolBinDir, capability.Command)

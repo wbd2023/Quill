@@ -5,20 +5,24 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped/golang"
+	"ciphera/tools/internal/pack/shipped/text"
+	"ciphera/tools/internal/pack/shipped/vocabulary"
+	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
 /* ------------------------------------- Repository Scanners ------------------------------------ */
 
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("tools"))
+	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("tools"))
 
-	if _, err := repositoryScanDriver(
+	if _, err := testRepositoryScanDriver()(
 		context,
-		repositoryScanSpec(builtin.ScannerASCII),
+		repositoryScanSpec(text.ScannerASCII),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanDriver(ascii): %v", err)
@@ -26,9 +30,9 @@ func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 }
 
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), contract.Scope("all"))
+	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("all"))
 
-	_, err := repositoryScanDriver(
+	_, err := testRepositoryScanDriver()(
 		context,
 		repositoryScanSpec("unknown"),
 		nil,
@@ -88,18 +92,18 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		"package domain\n\ntype Message struct{}\n",
 	)
 
-	context := testContext(t, fixtureRoot, contract.Scope("all"))
-	if result, err := repositoryScanDriver(
+	context := testContext(t, fixtureRoot, style.Scope("all"))
+	if result, err := testRepositoryScanDriver()(
 		context,
-		repositoryScanSpec(builtin.ScannerArchitecture),
+		repositoryScanSpec(golang.ScannerArchitecture),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanDriver(architecture): %v\n%s", err, result.Output)
 	}
 
-	result, err := repositoryScanDriver(
+	result, err := testRepositoryScanDriver()(
 		context,
-		repositoryScanSpec(builtin.ScannerVocabulary),
+		repositoryScanSpec(vocabulary.ScannerVocabulary),
 		nil,
 	)
 	if err == nil {
@@ -117,11 +121,19 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	}
 }
 
-func repositoryScanSpec(scanner string) (spec contract.ExecutionSpec) {
-	return contract.ExecutionSpec{
-		Kind: contract.ExecutionRepositoryScan,
-		Detail: contract.RepositoryScanExecution{
+func repositoryScanSpec(scanner string) (spec style.ExecutionSpec) {
+	return style.ExecutionSpec{
+		Kind: style.ExecutionRepositoryScan,
+		Detail: style.RepositoryScanExecution{
 			Scanner: scanner,
 		},
 	}
+}
+
+func testRepositoryScanDriver() (driver runner.Driver) {
+	scanners := binding.NewRepositoryScanners()
+	scanners.Add(text.ScannerASCII, CheckASCII())
+	scanners.Add(golang.ScannerArchitecture, CheckGoArchitecture(golang.PackID))
+	scanners.Add(vocabulary.ScannerVocabulary, CheckVocabulary(vocabulary.PackID))
+	return repositoryScanDriver(scanners)
 }

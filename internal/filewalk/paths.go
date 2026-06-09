@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"slices"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 func collectScopeRoots(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	scopes []contract.Scope,
+	scopes []style.Scope,
 ) (roots []string) {
 	seen := make(map[string]bool)
 	for _, scope := range scopes {

@@ -1,19 +1,23 @@
 package target
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func CheckDrivers() (registry runner.DriverRegistry) {
+func CheckDrivers(
+	commands binding.TargetCommands,
+	checks binding.TargetChecks,
+) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		contract.ExecutionTargetCommand: targetCommandDriver,
-		contract.ExecutionTargetCheck:   targetCheckDriver,
+		style.ExecutionTargetCommand: targetCommandDriver(commands),
+		style.ExecutionTargetCheck:   targetCheckDriver(checks),
 	}
 }
 
-func FixDrivers() (registry runner.DriverRegistry) {
+func FixDrivers(commands binding.TargetCommands) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		contract.ExecutionTargetCommand: targetCommandDriver,
+		style.ExecutionTargetCommand: targetCommandDriver(commands),
 	}
 }

@@ -1,6 +1,6 @@
 package policy
 
-import "ciphera/tools/internal/contract"
+import "ciphera/tools/internal/style"
 
 // FileSets defines the configured file sets.
 type FileSets []FileSetConfig
@@ -16,8 +16,8 @@ type FileSetConfig struct {
 // FileSetInclude defines files selected into a file set.
 type FileSetInclude struct {
 	Extensions []string
-	Files      map[contract.Scope][]string
-	Paths      map[contract.Scope][]string
+	Files      map[style.Scope][]string
+	Paths      map[style.Scope][]string
 }
 
 // FileSetExclude defines files removed from a file set.
@@ -67,12 +67,12 @@ func (fileSet FileSetConfig) Clone() (clone FileSetConfig) {
 	}
 }
 
-func cloneScopePaths(source map[contract.Scope][]string) (clone map[contract.Scope][]string) {
+func cloneScopePaths(source map[style.Scope][]string) (clone map[style.Scope][]string) {
 	if source == nil {
 		return nil
 	}
 
-	clone = make(map[contract.Scope][]string, len(source))
+	clone = make(map[style.Scope][]string, len(source))
 	for scope, paths := range source {
 		clone[scope] = append([]string{}, paths...)
 	}

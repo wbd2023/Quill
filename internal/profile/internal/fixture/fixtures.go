@@ -1,9 +1,9 @@
 package fixture
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 	// Rule is the default rule ID fixture.
 	Rule = "test/rule"
 	// Scope is the default repository scope fixture.
-	Scope = contract.Scope("test")
+	Scope = style.Scope("test")
 	// Tool is the default tool ID fixture.
 	Tool = "test/tool"
 )
@@ -48,7 +48,7 @@ func Config() (config policy.Config) {
 		Rules: []policy.RuleBinding{
 			{
 				RuleID:         Rule,
-				Enforcement:    contract.EnforcementRequired,
+				Enforcement:    style.EnforcementRequired,
 				Scope:          Scope,
 				RequirementIDs: []string{Requirement},
 			},
@@ -61,7 +61,7 @@ func baselineRepository() (repository policy.RepositoryConfig) {
 		RootMarkers: []string{
 			"PROJECT.marker",
 		},
-		ScopeRoots: map[contract.Scope][]string{
+		ScopeRoots: map[style.Scope][]string{
 			Scope: {"."},
 		},
 		DefaultScope:    Scope,
@@ -74,7 +74,7 @@ func baselineFileSets() (fileSets policy.FileSets) {
 		Name: FileSet,
 		Include: policy.FileSetInclude{
 			Extensions: []string{".go"},
-			Paths: map[contract.Scope][]string{
+			Paths: map[style.Scope][]string{
 				Scope: {"internal/"},
 			},
 		},
@@ -105,19 +105,19 @@ func baselineTools() (tools policy.PinnedTools) {
 }
 
 // Definitions returns rule and tool definitions that match Config.
-func Definitions() (definitions contract.Definitions) {
-	return contract.Definitions{
-		Tools: []contract.Tool{
+func Definitions() (definitions style.Definitions) {
+	return style.Definitions{
+		Tools: []style.Tool{
 			{ID: Tool, Name: "Test tool"},
 		},
-		Rules: []contract.RuleDefinition{
+		Rules: []style.RuleDefinition{
 			{
 				ID:    Rule,
 				Name:  "Test rule",
 				Group: "test",
-				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutionRepositoryScan,
-					Detail: contract.RepositoryScanExecution{
+				Check: style.ExecutionSpec{
+					Kind: style.ExecutionRepositoryScan,
+					Detail: style.RepositoryScanExecution{
 						Scanner: "test",
 					},
 				},
@@ -127,11 +127,11 @@ func Definitions() (definitions contract.Definitions) {
 }
 
 // FileCommandDefinitions returns definitions with a file-command rule.
-func FileCommandDefinitions() (definitions contract.Definitions) {
+func FileCommandDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
-	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutionFileCommand,
-		Detail: contract.FileCommandExecution{
+	definitions.Rules[0].Check = style.ExecutionSpec{
+		Kind: style.ExecutionFileCommand,
+		Detail: style.FileCommandExecution{
 			ToolID:  Tool,
 			FileSet: FileSet,
 		},
@@ -140,19 +140,19 @@ func FileCommandDefinitions() (definitions contract.Definitions) {
 }
 
 // TargetCommandDefinitions returns definitions with target check and fix executions.
-func TargetCommandDefinitions() (definitions contract.Definitions) {
+func TargetCommandDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
-	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutionTargetCommand,
-		Detail: contract.TargetCommandExecution{
+	definitions.Rules[0].Check = style.ExecutionSpec{
+		Kind: style.ExecutionTargetCommand,
+		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "test",
 			Language: Language,
 		},
 	}
-	definitions.Rules[0].Fix = contract.ExecutionSpec{
-		Kind: contract.ExecutionTargetCommand,
-		Detail: contract.TargetCommandExecution{
+	definitions.Rules[0].Fix = style.ExecutionSpec{
+		Kind: style.ExecutionTargetCommand,
+		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "fix",
 			Language: Language,
@@ -162,11 +162,11 @@ func TargetCommandDefinitions() (definitions contract.Definitions) {
 }
 
 // TargetCheckDefinitions returns definitions with a target check execution.
-func TargetCheckDefinitions() (definitions contract.Definitions) {
+func TargetCheckDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
-	definitions.Rules[0].Check = contract.ExecutionSpec{
-		Kind: contract.ExecutionTargetCheck,
-		Detail: contract.TargetCheckExecution{
+	definitions.Rules[0].Check = style.ExecutionSpec{
+		Kind: style.ExecutionTargetCheck,
+		Detail: style.TargetCheckExecution{
 			ToolIDs:  []string{Tool},
 			Check:    "test",
 			Language: Language,

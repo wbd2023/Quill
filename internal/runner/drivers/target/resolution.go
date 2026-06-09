@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/style"
 )
 
 func goTargets(
 	context runner.Context,
-	spec contract.ExecutionSpec,
+	spec style.ExecutionSpec,
+	goLanguage string,
 ) (targets []policy.TargetConfig, err error) {
 	for _, name := range spec.Targets() {
-		target, err := goTarget(context.Profile, name)
+		target, err := goTarget(context.Profile, name, goLanguage)
 		if err != nil {
 			return nil, err
 		}
@@ -32,6 +33,7 @@ func goTargets(
 func goTarget(
 	config policy.Config,
 	name string,
+	goLanguage string,
 ) (target policy.TargetConfig, err error) {
 	target, found := config.Targets.Lookup(name)
 	if !found {

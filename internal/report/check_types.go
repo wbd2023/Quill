@@ -1,21 +1,21 @@
 package report
 
-import "ciphera/tools/internal/contract"
+import "ciphera/tools/internal/style"
 
 /* ---------------------------------------- Check Entries --------------------------------------- */
 
 type CheckEntry struct {
 	Rule   RuleSummary
-	Status contract.CheckStatus
-	Result contract.ExecutionResult
+	Status style.CheckStatus
+	Result style.ExecutionResult
 }
 
 type RuleSummary struct {
 	ID             string
 	Name           string
-	Group          contract.RuleGroup
-	Enforcement    contract.Enforcement
-	Scope          contract.Scope
+	Group          style.RuleGroup
+	Enforcement    style.Enforcement
+	Scope          style.Scope
 	RequirementIDs []string
 }
 
@@ -31,7 +31,7 @@ type CheckSummary struct {
 }
 
 type CheckGroup struct {
-	Group   contract.RuleGroup
+	Group   style.RuleGroup
 	Entries []CheckEntry
 }
 
@@ -54,21 +54,21 @@ type checkResultJSON struct {
 }
 
 type checkGroupJSON struct {
-	Group   contract.RuleGroup `json:"group"`
-	Entries []checkEntryJSON   `json:"entries"`
+	Group   style.RuleGroup  `json:"group"`
+	Entries []checkEntryJSON `json:"entries"`
 }
 
 type checkEntryJSON struct {
-	RuleID       string               `json:"rule_id"`
-	Name         string               `json:"name"`
-	Group        contract.RuleGroup   `json:"group"`
-	Enforcement  contract.Enforcement `json:"enforcement"`
-	Scope        contract.Scope       `json:"scope"`
-	Status       contract.CheckStatus `json:"status"`
-	Requirements []string             `json:"requirements"`
-	Diagnostics  []diagnosticJSON     `json:"diagnostics"`
-	Output       string               `json:"output,omitempty"`
-	Command      *commandResultJSON   `json:"command,omitempty"`
+	RuleID       string             `json:"rule_id"`
+	Name         string             `json:"name"`
+	Group        style.RuleGroup    `json:"group"`
+	Enforcement  style.Enforcement  `json:"enforcement"`
+	Scope        style.Scope        `json:"scope"`
+	Status       style.CheckStatus  `json:"status"`
+	Requirements []string           `json:"requirements"`
+	Diagnostics  []diagnosticJSON   `json:"diagnostics"`
+	Output       string             `json:"output,omitempty"`
+	Command      *commandResultJSON `json:"command,omitempty"`
 }
 
 type diagnosticJSON struct {
@@ -90,16 +90,16 @@ type commandResultJSON struct {
 func (result CheckResult) Summary() (summary CheckSummary) {
 	for _, entry := range result.Entries {
 		switch entry.Status {
-		case contract.CheckStatusPass:
+		case style.CheckStatusPass:
 			summary.Passed++
 
-		case contract.CheckStatusWarn:
+		case style.CheckStatusWarn:
 			summary.Warned++
 
-		case contract.CheckStatusFail:
+		case style.CheckStatusFail:
 			summary.Failed++
 
-		case contract.CheckStatusSkip:
+		case style.CheckStatusSkip:
 			summary.Skipped++
 		}
 	}

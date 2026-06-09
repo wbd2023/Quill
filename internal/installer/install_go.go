@@ -5,15 +5,15 @@ import (
 	"io"
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func installGoTool(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	if capability.InstallSource == "" {
@@ -40,7 +40,7 @@ func installGoTool(
 	}
 
 	goCapability := toolchain.Capability{ID: "go", Name: "Go", Command: "go"}
-	goTool := contract.Tool{ID: "go", Name: "Go",
+	goTool := style.Tool{ID: "go", Name: "Go",
 		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
 	_, err = runtime.RunToolCommand(
 		layout.ToolsDir,

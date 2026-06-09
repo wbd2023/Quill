@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/style"
 )
 
 func TestNewContextLoadsCurrentProfileFixture(t *testing.T) {
@@ -26,7 +26,7 @@ func TestNewContextLoadsCurrentProfileFixture(t *testing.T) {
 		"package messages\n\ntype MessageRepository interface { ListMessages() }\n",
 	)
 
-	context := testContext(t, fixtureRoot, contract.Scope("all"))
+	context := testContext(t, fixtureRoot, style.Scope("all"))
 
 	if len(context.Effective.Rules) == 0 {
 		t.Fatal("expected effective rules to be loaded for fixture")

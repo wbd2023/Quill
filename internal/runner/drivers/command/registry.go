@@ -1,18 +1,18 @@
 package command
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/style"
 )
 
 func CheckDrivers() (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		contract.ExecutionFileCommand: fileCommandDriver,
+		style.ExecutionFileCommand: fileCommandDriver,
 	}
 }
 
 func FixDrivers() (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		contract.ExecutionFileCommand: fileCommandDriver,
+		style.ExecutionFileCommand: fileCommandDriver,
 	}
 }

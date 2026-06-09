@@ -3,10 +3,10 @@ package validation_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/fixture"
 	"ciphera/tools/internal/profile/internal/validation"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Profile Version -------------------------------------- */
@@ -60,7 +60,7 @@ func TestCheckRejectsEmptyScopeRoot(t *testing.T) {
 
 			config := fixture.Config()
 
-			config.Repository.ScopeRoots[contract.Scope("tools")] = test.roots
+			config.Repository.ScopeRoots[style.Scope("tools")] = test.roots
 			err := validation.Check(config)
 			requireErrorContains(
 				t,
@@ -99,7 +99,7 @@ func TestCheckRejectsUnknownFileSetScope(t *testing.T) {
 
 	config := fixture.Config()
 
-	config.FileSets[0].Include.Paths[contract.Scope("unknown")] = []string{"unknown/"}
+	config.FileSets[0].Include.Paths[style.Scope("unknown")] = []string{"unknown/"}
 	err := validation.Check(config)
 	requireErrorContains(t, err, "unknown scope")
 }

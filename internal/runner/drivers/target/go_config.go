@@ -3,15 +3,17 @@ package target
 import (
 	"fmt"
 
-	"ciphera/tools/internal/pack/builtin"
-	gopolicy "ciphera/tools/internal/rules/golang/policy"
+	gopolicy "ciphera/tools/internal/checks/golang/policy"
 	"ciphera/tools/internal/runner"
 )
 
-func decodeGoConfig(context runner.Context) (config gopolicy.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackGo)
+func decodeGoConfig(
+	context runner.Context,
+	packID string,
+) (config gopolicy.Config, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
 	if !found {
-		return gopolicy.Config{}, errMissingPackConfig(builtin.PackGo)
+		return gopolicy.Config{}, errMissingPackConfig(packID)
 	}
 
 	return gopolicy.DecodeConfig(pack)

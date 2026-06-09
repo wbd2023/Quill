@@ -4,10 +4,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	projectrules "ciphera/tools/internal/checks/project"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/pack/builtin"
-	projectrules "ciphera/tools/internal/rules/project"
+	projectpack "ciphera/tools/internal/pack/shipped/project"
 )
 
 func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
@@ -71,7 +71,7 @@ lint: $(STYLE_BIN)
 func currentCommands(t *testing.T) (commands projectrules.CommandsConfig) {
 	t.Helper()
 
-	pack, found := profiles.Current(t).PackConfigs.Lookup(builtin.PackProject)
+	pack, found := profiles.Current(t).PackConfigs.Lookup(projectpack.PackID)
 	if !found {
 		t.Fatal("missing project pack config")
 	}

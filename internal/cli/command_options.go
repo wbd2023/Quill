@@ -1,14 +1,14 @@
 package cli
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/report"
+	"ciphera/tools/internal/style"
 )
 
 type checkOptions struct {
 	repoRoot              string
-	scope                 contract.Scope
-	mode                  contract.CheckMode
+	scope                 style.Scope
+	mode                  style.CheckMode
 	format                report.OutputFormat
 	strictRecommendations bool
 	verbose               bool
@@ -16,7 +16,7 @@ type checkOptions struct {
 
 type fixOptions struct {
 	repoRoot string
-	scope    contract.Scope
+	scope    style.Scope
 }
 
 type doctorOptions struct {

@@ -1,6 +1,6 @@
 package policy
 
-import "ciphera/tools/internal/contract"
+import "ciphera/tools/internal/style"
 
 // TargetConfigs defines the targets available to rule bindings.
 type TargetConfigs []TargetConfig
@@ -9,7 +9,7 @@ type TargetConfigs []TargetConfig
 type TargetConfig struct {
 	Name             string
 	Language         string
-	Scope            contract.Scope
+	Scope            style.Scope
 	WorkingDirectory string
 	FormatPaths      []string
 	CheckPaths       []string

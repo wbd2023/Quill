@@ -6,16 +6,16 @@ import (
 	"slices"
 	"sort"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 func collectFileSetCandidates(
 	context Context,
 	fileSet policy.FileSetConfig,
 ) (files []string, err error) {
-	scopes := []contract.Scope{context.Scope}
+	scopes := []style.Scope{context.Scope}
 	if fileSetUsesScopedIncludes(fileSet) {
 		scopes = findOverlappingScopes(
 			context.Profile.Repository,
@@ -44,10 +44,10 @@ func collectFileSetCandidates(
 
 func findOverlappingScopes(
 	repository policy.RepositoryConfig,
-	scope contract.Scope,
-	candidates []contract.Scope,
-) (scopes []contract.Scope) {
-	seen := make(map[contract.Scope]bool, len(candidates))
+	scope style.Scope,
+	candidates []style.Scope,
+) (scopes []style.Scope) {
+	seen := make(map[style.Scope]bool, len(candidates))
 	for _, candidate := range candidates {
 		if seen[candidate] {
 			continue
@@ -66,7 +66,7 @@ func findOverlappingScopes(
 func explicitFileCandidates(
 	context Context,
 	fileSet policy.FileSetConfig,
-	scopes []contract.Scope,
+	scopes []style.Scope,
 ) (files []string) {
 	for _, scope := range scopes {
 		for _, file := range fileSet.Include.Files[scope] {
