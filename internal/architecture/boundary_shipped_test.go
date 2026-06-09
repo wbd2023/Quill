@@ -1,7 +1,5 @@
 package architecture
 
-/* -------------------------------- Shipped Pack Module Boundaries ------------------------------- */
-
 func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 	for _, directory := range []string{
 		"internal/pack/shipped/bash",

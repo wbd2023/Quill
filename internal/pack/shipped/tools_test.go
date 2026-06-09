@@ -39,14 +39,20 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
+	supportedInstallKinds := map[toolchain.InstallKind]bool{
+		tool.InstallNone:              true,
+		tool.InstallGoBinary:          true,
+		tool.InstallNodePackage:       true,
+		tool.InstallShellcheckArchive: true,
+	}
+
 	for _, capability := range registry.ToolCapabilities() {
-		switch capability.InstallKind {
-		case tool.InstallNone,
-			tool.InstallGoBinary,
-			tool.InstallNodePackage,
-			tool.InstallShellcheckArchive:
-		default:
-			t.Fatalf("tool %q uses unsupported install strategy %q", capability.ID, capability.InstallKind)
+		if !supportedInstallKinds[capability.InstallKind] {
+			t.Fatalf(
+				"tool %q uses unsupported install strategy %q",
+				capability.ID,
+				capability.InstallKind,
+			)
 		}
 
 		switch capability.InstallKind {

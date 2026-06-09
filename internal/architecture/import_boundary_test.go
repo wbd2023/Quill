@@ -41,6 +41,8 @@ func TestRetiredPathsStayRetired(t *testing.T) {
 
 	toolsRoot := importBoundaryRoot(t)
 	retired := []string{
+		"internal/contract",
+		"internal/pack/builtin",
 		"internal/rules",
 		"internal/rules/bash/results.go",
 		"internal/rules/text/results.go",
@@ -61,6 +63,9 @@ func TestRetiredPathsStayRetired(t *testing.T) {
 		"internal/pack/shipped/pack_ids.go",
 		"internal/pack/shipped/project_check_ids.go",
 		"internal/pack/shipped/scanner_ids.go",
+		"internal/pack/shipped/tool_builders.go",
+		"internal/pack/shipped/tool_ids.go",
+		"internal/pack/shipped/tools.go",
 		"internal/runtime/handlers_test.go",
 		"internal/runtime/tool_inspection.go",
 		"internal/runtime/tool_version.go",

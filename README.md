@@ -125,19 +125,19 @@ Production packages must keep these boundaries:
 - `policy` imports only `style`.
 - `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not
   loaders, validators, Packs, runners, drivers, checks, or reports.
-- `profile/internal/validation` imports profile policy types and style vocabulary, not loaders, Packs,
-  runners, drivers, checks, or reports.
+- `profile/internal/validation` imports profile policy types and style
+  vocabulary, not loaders, Packs, runners, drivers, checks, or reports.
 - `profile/internal/effective` imports profile policy types, style vocabulary, and neutral Pack
   definitions, not loaders, Shipped Packs, runners, drivers, checks, or reports.
 - `profile` is the public facade over profile loading, TOML, validation, Pack default
   resolution, and Effective Profile compilation. It may import neutral Pack registries, but not
   Shipped Packs, runners, drivers, checks, or reports.
-- `toolchain` owns Tool capability, health, status, command lookup, and version detection. It imports
-  no project policy, runtime, checks, profile, or reporting package.
+- `toolchain` owns Tool capability, health, status, command lookup, and version
+  detection. It imports no project policy, runtime, checks, profile, or reporting package.
 - `runtime` owns command execution, command environment layout, and no installation
   orchestration or Tool health policy.
-- `installer` imports runtime and style tool types, not project policy, checks, profiles, reports, or
-  runners.
+- `installer` imports runtime and style tool types, not project policy, checks, profiles,
+  reports, or runners.
 - `pack` defines neutral Pack definitions, catalogues, and registries.
 - `pack/shipped` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
 - `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages
