@@ -83,7 +83,11 @@ func RunGolangci(
 	return targetdrivers.RunGolangci(goPackID, golangciLintToolID, goimportsToolID, goLanguage)
 }
 
-func RunGoFormat(goPackID string, goimportsToolID string, goLanguage string) (command TargetCommand) {
+func RunGoFormat(
+	goPackID string,
+	goimportsToolID string,
+	goLanguage string,
+) (command TargetCommand) {
 	return targetdrivers.RunGoFormat(goPackID, goimportsToolID, goLanguage)
 }
 

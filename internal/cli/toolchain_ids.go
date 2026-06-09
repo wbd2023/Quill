@@ -20,7 +20,13 @@ func inspectToolchain(
 	toolIDs []string,
 	environment map[string]string,
 ) (statuses []toolchain.Status, allValid bool) {
-	statuses = toolchain.InspectToolsWithEnvironment(tools, capabilities, toolIDs, environment, runtime.RunToolchainCommand)
+	statuses = toolchain.InspectToolsWithEnvironment(
+		tools,
+		capabilities,
+		toolIDs,
+		environment,
+		runtime.RunToolchainCommand,
+	)
 	statusIndex := toolchain.StatusesByID(statuses)
 	allValid = toolchain.AllToolsValid(toolIDs, statusIndex)
 	return statuses, allValid

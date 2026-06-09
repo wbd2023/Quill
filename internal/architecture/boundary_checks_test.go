@@ -1,6 +1,6 @@
 package architecture
 
-/* --------------------------------------- Check Boundaries -------------------------------------- */
+/* -------------------------------------- Check Boundaries -------------------------------------- */
 
 func checkBoundaryCases() (testCases []importBoundaryCase) {
 	return []importBoundaryCase{

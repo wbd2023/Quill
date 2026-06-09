@@ -7,6 +7,8 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+/* ----------------------------------------- Registries ----------------------------------------- */
+
 type RepositoryScanner func(
 	context runner.Context,
 	execution style.RepositoryScanExecution,
@@ -95,7 +97,14 @@ func (registry ProjectChecks) Lookup(id string) (check ProjectCheck, found bool)
 	return check, found
 }
 
-func addBinding[T any](entries map[string]T, kind string, id string, entry T) (updated map[string]T) {
+/* ------------------------------------------- Helpers ------------------------------------------ */
+
+func addBinding[T any](
+	entries map[string]T,
+	kind string,
+	id string,
+	entry T,
+) (updated map[string]T) {
 	if entries == nil {
 		entries = map[string]T{}
 	}
