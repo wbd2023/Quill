@@ -3,16 +3,16 @@ package effective
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 /* -------------------------------------- Rule Definitions -------------------------------------- */
 
 func indexRuleDefinitions(
-	definitions []contract.RuleDefinition,
-	availableTools map[string]contract.Tool,
-) (availableRules map[string]contract.RuleDefinition, err error) {
-	availableRules = make(map[string]contract.RuleDefinition, len(definitions))
+	definitions []style.RuleDefinition,
+	availableTools map[string]style.Tool,
+) (availableRules map[string]style.RuleDefinition, err error) {
+	availableRules = make(map[string]style.RuleDefinition, len(definitions))
 	for _, definition := range definitions {
 		if err = validateRuleDefinition(definition, availableTools); err != nil {
 			return nil, err
@@ -29,8 +29,8 @@ func indexRuleDefinitions(
 }
 
 func validateRuleDefinition(
-	definition contract.RuleDefinition,
-	availableTools map[string]contract.Tool,
+	definition style.RuleDefinition,
+	availableTools map[string]style.Tool,
 ) (err error) {
 	if isBlank(definition.ID) {
 		return fmt.Errorf("rule definition has an empty id")
@@ -67,9 +67,9 @@ func validateRuleDefinition(
 /* -------------------------------------- Tool Definitions -------------------------------------- */
 
 func indexToolDefinitions(
-	definitions []contract.Tool,
-) (availableTools map[string]contract.Tool, err error) {
-	availableTools = make(map[string]contract.Tool, len(definitions))
+	definitions []style.Tool,
+) (availableTools map[string]style.Tool, err error) {
+	availableTools = make(map[string]style.Tool, len(definitions))
 	for _, definition := range definitions {
 		if isBlank(definition.ID) {
 			return nil, fmt.Errorf("tool definition has an empty id")

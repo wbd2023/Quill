@@ -3,8 +3,8 @@ package validation
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 /* ------------------------------------------ File Sets ----------------------------------------- */
@@ -109,7 +109,7 @@ func validateFileSetPaths(
 	repository policy.RepositoryConfig,
 	fileSetName string,
 	field string,
-	paths map[contract.Scope][]string,
+	paths map[style.Scope][]string,
 ) (err error) {
 	for scope, values := range paths {
 		if isBlank(string(scope)) {

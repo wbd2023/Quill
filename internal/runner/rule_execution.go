@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -17,49 +17,49 @@ var (
 
 type Driver func(
 	context Context,
-	spec contract.ExecutionSpec,
+	spec style.ExecutionSpec,
 	toolStatuses map[string]toolchain.Status,
-) (result contract.ExecutionResult, err error)
+) (result style.ExecutionResult, err error)
 
-type DriverRegistry map[contract.ExecutionKind]Driver
+type DriverRegistry map[style.ExecutionKind]Driver
 
 func IsBlocked(err error) (blocked bool) {
 	return errors.Is(err, errRuleBlocked)
 }
 
 func RunRule(
-	rule contract.Rule,
+	rule style.Rule,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
 	drivers DriverRegistry,
-) (result contract.ExecutionResult, err error) {
+) (result style.ExecutionResult, err error) {
 	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, drivers)
 }
 
 func RunFix(
-	rule contract.Rule,
+	rule style.Rule,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
 	drivers DriverRegistry,
-) (result contract.ExecutionResult, err error) {
+) (result style.ExecutionResult, err error) {
 	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, drivers)
 }
 
 func runExecution(
 	ruleID string,
-	execution contract.ExecutionSpec,
+	execution style.ExecutionSpec,
 	toolIDs []string,
 	context Context,
 	toolStatuses map[string]toolchain.Status,
 	drivers DriverRegistry,
-) (result contract.ExecutionResult, err error) {
+) (result style.ExecutionResult, err error) {
 	if execution.Empty() {
-		return contract.ExecutionResult{}, nil
+		return style.ExecutionResult{}, nil
 	}
 
 	if len(toolIDs) > 0 && !toolchain.AllToolsValid(toolIDs, toolStatuses) {
-		return contract.ExecutionResult{
-			Diagnostics: []contract.Diagnostic{
+		return style.ExecutionResult{
+			Diagnostics: []style.Diagnostic{
 				{
 					Code:    "toolchain/blocked",
 					Message: toolchain.ExplainToolIssues(toolIDs, toolStatuses),
@@ -70,7 +70,7 @@ func runExecution(
 
 	driver, found := drivers[execution.Kind]
 	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf(
+		return style.ExecutionResult{}, fmt.Errorf(
 			"rule %s uses unknown execution kind %q",
 			ruleID,
 			string(execution.Kind),

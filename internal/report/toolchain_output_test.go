@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -18,12 +18,12 @@ func TestWriteToolchainText(t *testing.T) {
 	allValid, err := WriteToolchain(&buffer, FormatText, NewToolchainView(ToolchainResult{
 		Statuses: []toolchain.Status{
 			{
-				Tool:    contract.Tool{Name: "Go"},
+				Tool:    style.Tool{Name: "Go"},
 				Version: "1.24.5",
 				Valid:   true,
 			},
 			{
-				Tool:    contract.Tool{Name: "markdownlint"},
+				Tool:    style.Tool{Name: "markdownlint"},
 				Version: "0.48.0",
 				Valid:   false,
 				Issue:   "requires pinned version 0.45.0",
@@ -50,11 +50,11 @@ func TestWriteToolchainJSON(t *testing.T) {
 	view := NewToolchainView(ToolchainResult{
 		Statuses: []toolchain.Status{
 			{
-				Tool:  contract.Tool{Name: "Go"},
+				Tool:  style.Tool{Name: "Go"},
 				Valid: true,
 			},
 			{
-				Tool:  contract.Tool{Name: "markdownlint"},
+				Tool:  style.Tool{Name: "markdownlint"},
 				Valid: false,
 				Issue: "requires pinned version 0.45.0",
 			},

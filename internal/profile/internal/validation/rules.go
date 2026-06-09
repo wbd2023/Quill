@@ -3,9 +3,9 @@ package validation
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 func validateRules(
@@ -29,7 +29,7 @@ func validateRules(
 		seenRules[binding.RuleID] = true
 
 		switch binding.Enforcement {
-		case contract.EnforcementRequired, contract.EnforcementRecommendation:
+		case style.EnforcementRequired, style.EnforcementRecommendation:
 
 		default:
 			return fmt.Errorf(

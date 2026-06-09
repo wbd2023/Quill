@@ -4,11 +4,12 @@ import (
 	"flag"
 	"io"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack/shipped/bindings"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -26,18 +27,19 @@ func runCheck(tool CLI, options checkOptions) (exitCode int) {
 		tool.writeError(err)
 		return 1
 	}
-	toolStatusList := runtime.InspectToolsWithEnvironment(
+	toolStatusList := toolchain.InspectToolsWithEnvironment(
 		context.Effective.Tools,
 		context.ToolCapabilities,
 		runner.ToolIDsForRules(selected),
 		context.ToolEnvironment,
+		runtime.RunToolchainCommand,
 	)
 	toolStatuses := toolchain.StatusesByID(toolStatusList)
 
 	result := report.CheckResult{
 		Entries: make([]report.CheckEntry, 0, len(selected)),
 	}
-	checkers := drivers.CheckDrivers()
+	checkers := drivers.CheckDrivers(bindings.Build())
 	for _, rule := range selected {
 		execution, err := runner.RunRule(rule, context, toolStatuses, checkers)
 		result.Entries = append(
@@ -117,7 +119,7 @@ func newCheckFlagSet(
 	flagSet.StringVar(
 		mode,
 		"mode",
-		string(contract.CheckModeRequired),
+		string(style.CheckModeRequired),
 		"mode: required|all",
 	)
 	flagSet.BoolVar(
@@ -143,17 +145,17 @@ func checkUsageText() (usage string) {
 /* --------------------------------------- Rule Selection --------------------------------------- */
 
 func selectedRules(
-	available []contract.Rule,
+	available []style.Rule,
 	context runner.Context,
-	mode contract.CheckMode,
-) (rules []contract.Rule, err error) {
+	mode style.CheckMode,
+) (rules []style.Rule, err error) {
 	for _, rule := range available {
 		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue
 		}
 
-		if mode == contract.CheckModeRequired &&
-			rule.Enforcement == contract.EnforcementRecommendation {
+		if mode == style.CheckModeRequired &&
+			rule.Enforcement == style.EnforcementRecommendation {
 			continue
 		}
 
@@ -177,9 +179,9 @@ func writeCheckResult(
 /* --------------------------------------- Status Mapping --------------------------------------- */
 
 func statusForRuleResult(
-	rule contract.Rule,
+	rule style.Rule,
 	err error,
 	strictRecommendations bool,
-) (status contract.CheckStatus) {
+) (status style.CheckStatus) {
 	return runner.CheckStatus(rule, err, strictRecommendations)
 }

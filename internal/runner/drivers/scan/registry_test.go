@@ -3,49 +3,43 @@ package scan
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func TestBuiltinPackScannersHaveDrivers(t *testing.T) {
-	registry, err := builtin.DefaultRegistry(nil)
-	if err != nil {
-		t.Fatalf("DefaultRegistry: %v", err)
-	}
-
-	for _, rule := range registry.Rules() {
-		execution, found := rule.Check.RepositoryScanExecution()
-		if !found {
-			continue
-		}
-
-		if _, found := scanners[execution.Scanner]; !found {
-			t.Fatalf(
-				"rule %q uses scanner %q without a driver",
-				rule.ID,
-				execution.Scanner,
-			)
-		}
+func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
+	driver := repositoryScanDriver(binding.NewRepositoryScanners())
+	_, err := driver(
+		runner.Context{},
+		style.ExecutionSpec{
+			Kind: style.ExecutionRepositoryScan,
+			Detail: style.RepositoryScanExecution{
+				Scanner: "missing",
+			},
+		},
+		nil,
+	)
+	if err == nil {
+		t.Fatal("expected missing scanner error")
 	}
 }
 
-func TestAddRepositoryScannersRejectsDuplicateScannerID(t *testing.T) {
+func TestRepositoryScannersRejectDuplicateScannerID(t *testing.T) {
 	scanner := func(
 		_ runner.Context,
-		_ contract.RepositoryScanExecution,
-	) (contract.ExecutionResult, error) {
-		return contract.ExecutionResult{}, nil
+		_ style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return style.ExecutionResult{}, nil
 	}
 
+	registry := binding.NewRepositoryScanners()
+	registry.Add("duplicate", scanner)
 	defer func() {
 		if recovered := recover(); recovered == nil {
 			t.Fatal("expected duplicate scanner ID to panic")
 		}
 	}()
 
-	addRepositoryScanners(
-		map[string]repositoryScanner{"duplicate": scanner},
-		map[string]repositoryScanner{"duplicate": scanner},
-	)
+	registry.Add("duplicate", scanner)
 }

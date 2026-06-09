@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 /* ----------------------------------------- Text Output ---------------------------------------- */
@@ -74,7 +74,7 @@ func writeCheckText(
 /* ---------------------------------------- Rule Details ---------------------------------------- */
 
 func writeRuleDetails(writer io.Writer, entry CheckEntry, verbose bool) (err error) {
-	if entry.Status == contract.CheckStatusPass {
+	if entry.Status == style.CheckStatusPass {
 		return nil
 	}
 

@@ -1,16 +1,16 @@
 package runner
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 type Context struct {
 	RepoRoot         string
-	Scope            contract.Scope
+	Scope            style.Scope
 	Profile          policy.Config
-	Effective        contract.EffectiveConfig
+	Effective        style.EffectiveConfig
 	ToolCapabilities map[string]toolchain.Capability
 	ToolEnvironment  map[string]string
 	GoEnvironment    map[string]string
@@ -18,9 +18,9 @@ type Context struct {
 
 func NewContext(
 	repoRoot string,
-	scope contract.Scope,
+	scope style.Scope,
 	config policy.Config,
-	effective contract.EffectiveConfig,
+	effective style.EffectiveConfig,
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,

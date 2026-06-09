@@ -6,12 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
+	projectrules "ciphera/tools/internal/checks/project"
 	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/policy"
-	projectrules "ciphera/tools/internal/rules/project"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -19,61 +19,83 @@ var errViolationsFound = errors.New("violations found")
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
-func projectDriver(
-	context runner.Context,
-	spec contract.ExecutionSpec,
-	_ map[string]toolchain.Status,
-) (result contract.ExecutionResult, err error) {
-	execution, found := spec.ProjectExecution()
-	if !found {
-		return contract.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
-	}
-
-	var output string
-	switch execution.Check {
-	case builtin.ProjectCheckEnforcementLevels:
-		output, err = checkEnforcementLevels()
-
-	case builtin.ProjectCheckExcludedDirectories:
-		output, err = checkExcludedDirectories(context.Profile.Repository)
-
-	case builtin.ProjectCheckCommands:
-		projectConfig, decodeErr := decodeProjectConfig(context)
-		if decodeErr != nil {
-			return contract.ExecutionResult{}, decodeErr
+func projectDriver(checks binding.ProjectChecks) (driver runner.Driver) {
+	return func(
+		context runner.Context,
+		spec style.ExecutionSpec,
+		_ map[string]toolchain.Status,
+	) (result style.ExecutionResult, err error) {
+		execution, found := spec.ProjectExecution()
+		if !found {
+			return style.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
 		}
 
-		output, err = checkCommands(context.RepoRoot, projectConfig.Commands)
+		check, found := checks.Lookup(execution.Check)
+		if !found {
+			return style.ExecutionResult{}, fmt.Errorf(
+				"unknown project check %q",
+				execution.Check,
+			)
+		}
 
-	default:
-		return contract.ExecutionResult{}, fmt.Errorf(
-			"unknown project check %q",
-			execution.Check,
-		)
+		return check(context, execution)
 	}
+}
 
-	return contract.ExecutionResult{Output: output}, err
+func CheckEnforcementLevels() (check binding.ProjectCheck) {
+	return func(
+		_ runner.Context,
+		_ style.ProjectExecution,
+	) (result style.ExecutionResult, err error) {
+		output, err := checkEnforcementLevels()
+		return style.ExecutionResult{Output: output}, err
+	}
+}
+
+func CheckExcludedDirectories() (check binding.ProjectCheck) {
+	return func(
+		context runner.Context,
+		_ style.ProjectExecution,
+	) (result style.ExecutionResult, err error) {
+		output, err := checkExcludedDirectories(context.Profile.Repository)
+		return style.ExecutionResult{Output: output}, err
+	}
+}
+
+func CheckCommands(projectPackID string) (check binding.ProjectCheck) {
+	return func(
+		context runner.Context,
+		_ style.ProjectExecution,
+	) (result style.ExecutionResult, err error) {
+		projectConfig, err := decodeProjectConfig(context, projectPackID)
+		if err != nil {
+			return style.ExecutionResult{}, err
+		}
+
+		output, err := checkCommands(context.RepoRoot, projectConfig.Commands)
+		return style.ExecutionResult{Output: output}, err
+	}
 }
 
 func checkEnforcementLevels() (output string, err error) {
-	requiredRule := contract.Rule{Enforcement: contract.EnforcementRequired}
-	recommendationRule := contract.Rule{Enforcement: contract.EnforcementRecommendation}
+	requiredRule := style.Rule{Enforcement: style.EnforcementRequired}
+	recommendationRule := style.Rule{Enforcement: style.EnforcementRecommendation}
 	violation := errors.New("violation")
 
 	switch runner.CheckStatus(requiredRule, violation, false) {
-	case contract.CheckStatusFail:
+	case style.CheckStatusFail:
 	default:
 		return "required rules must fail on violations", errViolationsFound
 	}
 
 	switch runner.CheckStatus(recommendationRule, violation, false) {
-	case contract.CheckStatusWarn:
+	case style.CheckStatusWarn:
 	default:
 		return "recommendation rules must warn by default", errViolationsFound
 	}
 
 	switch runner.CheckStatus(recommendationRule, violation, true) {
-	case contract.CheckStatusFail:
+	case style.CheckStatusFail:
 	default:
 		return "strict recommendations must fail on recommendation violations", errViolationsFound
 	}

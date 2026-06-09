@@ -3,7 +3,7 @@ package coverage
 import (
 	"sort"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -40,7 +40,7 @@ func buildRequirements(
 	return requirements
 }
 
-func ruleIDsByRequirement(rules []contract.Rule) (grouped map[string][]string) {
+func ruleIDsByRequirement(rules []style.Rule) (grouped map[string][]string) {
 	grouped = make(map[string][]string)
 	for _, rule := range rules {
 		for _, requirementID := range rule.RequirementIDs {

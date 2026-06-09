@@ -4,7 +4,7 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 func writeCheckJSON(writer io.Writer, view CheckView) (summary CheckSummary, err error) {
@@ -54,7 +54,7 @@ func checkEntryListJSON(entries []CheckEntry) (payload []checkEntryJSON) {
 	return payload
 }
 
-func diagnosticListJSON(diagnostics []contract.Diagnostic) (payload []diagnosticJSON) {
+func diagnosticListJSON(diagnostics []style.Diagnostic) (payload []diagnosticJSON) {
 	payload = make([]diagnosticJSON, 0, len(diagnostics))
 	for _, diagnostic := range diagnostics {
 		payload = append(payload, diagnosticJSON{
@@ -69,7 +69,7 @@ func diagnosticListJSON(diagnostics []contract.Diagnostic) (payload []diagnostic
 	return payload
 }
 
-func commandResultJSONFor(command contract.CommandResult) (payload *commandResultJSON) {
+func commandResultJSONFor(command style.CommandResult) (payload *commandResultJSON) {
 	if !commandMetadataPresent(command) {
 		return nil
 	}
@@ -81,6 +81,6 @@ func commandResultJSONFor(command contract.CommandResult) (payload *commandResul
 	}
 }
 
-func commandMetadataPresent(command contract.CommandResult) (present bool) {
-	return command != contract.CommandResult{}
+func commandMetadataPresent(command style.CommandResult) (present bool) {
+	return command != style.CommandResult{}
 }

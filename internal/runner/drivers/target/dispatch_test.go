@@ -3,12 +3,13 @@ package target
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack/builtin"
-	"ciphera/tools/internal/rules/golang/check"
+	"ciphera/tools/internal/checks/golang/check"
+	"ciphera/tools/internal/pack/shipped"
+	"ciphera/tools/internal/pack/shipped/golang"
 )
 
-func TestBuiltinPackGoChecksHaveDispatch(t *testing.T) {
-	registry, err := builtin.DefaultRegistry([]string{builtin.PackGo})
+func TestShippedPackGoChecksHaveDispatch(t *testing.T) {
+	registry, err := shipped.DefaultRegistry([]string{golang.PackID})
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

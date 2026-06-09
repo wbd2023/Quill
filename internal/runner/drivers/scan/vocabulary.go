@@ -1,25 +1,29 @@
 package scan
 
 import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
-	"ciphera/tools/internal/rules/vocabulary"
+	"ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func vocabularyPackScanners() (scanners map[string]repositoryScanner) {
-	return map[string]repositoryScanner{
-		builtin.ScannerVocabulary: scanVocabulary,
+func CheckVocabulary(vocabularyPackID string) (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		execution style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return scanVocabulary(context, execution, vocabularyPackID)
 	}
 }
 
 func scanVocabulary(
 	context runner.Context,
-	_ contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
-	config, err := decodeVocabularyPackConfig(context)
+	_ style.RepositoryScanExecution,
+	vocabularyPackID string,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeVocabularyPackConfig(context, vocabularyPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return vocabulary.CheckVocabulary(

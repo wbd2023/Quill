@@ -1,29 +1,30 @@
 package scan
 
 import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/rules/golang/architecture"
+	"ciphera/tools/internal/checks/golang/architecture"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
+	"ciphera/tools/internal/style"
 )
 
 func scanGoArchitecture(
 	context runner.Context,
-	_ contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
+	_ style.RepositoryScanExecution,
+	goPackID string,
+) (result style.ExecutionResult, err error) {
 	modulePath, err := runGoList(context, "-m", "-f", "{{.Path}}")
 	if err != nil {
-		return contract.ExecutionResult{Output: modulePath}, err
+		return style.ExecutionResult{Output: modulePath}, err
 	}
 
 	packageList, err := runGoList(context, "-json", "./...")
 	if err != nil {
-		return contract.ExecutionResult{Output: packageList}, err
+		return style.ExecutionResult{Output: packageList}, err
 	}
 
-	goConfig, err := decodeGoPackConfig(context)
+	goConfig, err := decodeGoPackConfig(context, goPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return architecture.CheckImports(modulePath, packageList, goConfig.Architecture)

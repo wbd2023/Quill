@@ -4,17 +4,17 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 )
 
 func testContext(
 	t *testing.T,
 	repoRoot string,
-	scope contract.Scope,
+	scope style.Scope,
 ) (context runner.Context) {
 	t.Helper()
 
@@ -23,7 +23,7 @@ func testContext(
 		t.Fatalf("Load: %v", err)
 	}
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

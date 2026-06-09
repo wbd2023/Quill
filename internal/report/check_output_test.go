@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 /* ---------------------------------------- Check Output ---------------------------------------- */
@@ -17,23 +17,23 @@ func TestWriteCheckText(t *testing.T) {
 	result := CheckResult{
 		Entries: []CheckEntry{
 			{
-				Rule: NewRuleSummary(contract.Rule{
+				Rule: NewRuleSummary(style.Rule{
 					ID:             "toolchain",
 					Name:           "Pinned toolchain",
-					Group:          contract.RuleGroup("project"),
+					Group:          style.RuleGroup("project"),
 					RequirementIDs: []string{"0.1.security-first"},
 				}),
-				Status: contract.CheckStatusPass,
+				Status: style.CheckStatusPass,
 			},
 			{
-				Rule: NewRuleSummary(contract.Rule{
+				Rule: NewRuleSummary(style.Rule{
 					ID:             "markdown",
 					Name:           "markdownlint",
-					Group:          contract.RuleGroup("external_tools"),
+					Group:          style.RuleGroup("external_tools"),
 					RequirementIDs: []string{"5.2.concise-and-clear"},
 				}),
-				Status: contract.CheckStatusFail,
-				Result: contract.ExecutionResult{Output: "missing from PATH"},
+				Status: style.CheckStatusFail,
+				Result: style.ExecutionResult{Output: "missing from PATH"},
 			},
 		},
 	}
@@ -59,13 +59,13 @@ func TestWriteCheckJSON(t *testing.T) {
 	view := NewCheckView(CheckResult{
 		Entries: []CheckEntry{
 			{
-				Rule: NewRuleSummary(contract.Rule{
+				Rule: NewRuleSummary(style.Rule{
 					ID:             "toolchain",
 					Name:           "Pinned toolchain",
-					Group:          contract.RuleGroup("project"),
+					Group:          style.RuleGroup("project"),
 					RequirementIDs: []string{"0.1.security-first"},
 				}),
-				Status: contract.CheckStatusPass,
+				Status: style.CheckStatusPass,
 			},
 		},
 	})

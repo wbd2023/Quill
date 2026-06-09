@@ -4,9 +4,9 @@ import (
 	"slices"
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- File Collection -------------------------------------- */
@@ -36,7 +36,7 @@ func TestCollectFilesSkipsExcludedDirectoriesAndGeneratedFiles(t *testing.T) {
 	files, err := CollectFiles(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.Scope("all"),
+		style.Scope("all"),
 		".go",
 	)
 	if err != nil {
@@ -67,7 +67,7 @@ func TestCollectFilesKeepsProseMentionsOfGeneratedMarker(t *testing.T) {
 	files, err := CollectFiles(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.Scope("all"),
+		style.Scope("all"),
 		".md",
 	)
 	if err != nil {
@@ -86,7 +86,7 @@ func TestCollectFilesInScopesDeduplicatesRoots(t *testing.T) {
 	toolsFile := fixtures.WriteFile(t, repoRoot, "tools/main.go", "package main\n")
 
 	repository := profiles.RepositoryConfig(t)
-	repository.ScopeRoots = map[contract.Scope][]string{
+	repository.ScopeRoots = map[style.Scope][]string{
 		"app":     {"cmd", "internal"},
 		"command": {"cmd"},
 		"tools":   {"tools"},
@@ -95,7 +95,7 @@ func TestCollectFilesInScopesDeduplicatesRoots(t *testing.T) {
 	files, err := CollectFilesInScopes(
 		repoRoot,
 		repository,
-		[]contract.Scope{"app", "command", "tools"},
+		[]style.Scope{"app", "command", "tools"},
 		".go",
 	)
 	if err != nil {
@@ -117,7 +117,7 @@ func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
 	files, err := CollectAllFiles(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		contract.Scope("all"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("collect all files: %v", err)

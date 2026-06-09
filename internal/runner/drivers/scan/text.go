@@ -1,54 +1,85 @@
 package scan
 
 import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
-	"ciphera/tools/internal/rules/text"
+	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func textPackScanners() (scanners map[string]repositoryScanner) {
-	return map[string]repositoryScanner{
-		builtin.ScannerASCII: func(
-			context runner.Context,
-			_ contract.RepositoryScanExecution,
-		) (contract.ExecutionResult, error) {
-			return text.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
-		},
-		builtin.ScannerExceptionMarkers: func(
-			context runner.Context,
-			_ contract.RepositoryScanExecution,
-		) (contract.ExecutionResult, error) {
-			return text.CheckExceptionMarkers(
-				context.RepoRoot,
-				context.Profile.Repository,
-				context.Scope,
-			)
-		},
-		builtin.ScannerLineLength: scanLineLengths,
-		builtin.ScannerMaintenanceMarkers: func(
-			context runner.Context,
-			_ contract.RepositoryScanExecution,
-		) (contract.ExecutionResult, error) {
-			return text.CheckMaintenanceMarkers(
-				context.RepoRoot,
-				context.Profile.Repository,
-				context.Scope,
-			)
-		},
-		builtin.ScannerSectionHeaderNames:   scanSectionHeaderNames,
-		builtin.ScannerSectionHeaderDensity: scanSectionHeaderDensity,
-		builtin.ScannerSectionHeaders:       scanSectionHeaders,
+func CheckASCII() (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		_ style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return text.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
+	}
+}
+
+func CheckExceptionMarkers() (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		_ style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return text.CheckExceptionMarkers(
+			context.RepoRoot,
+			context.Profile.Repository,
+			context.Scope,
+		)
+	}
+}
+
+func CheckLineLengths() (scanner binding.RepositoryScanner) {
+	return scanLineLengths
+}
+
+func CheckMaintenanceMarkers() (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		_ style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return text.CheckMaintenanceMarkers(
+			context.RepoRoot,
+			context.Profile.Repository,
+			context.Scope,
+		)
+	}
+}
+
+func CheckSectionHeaderNames(textPackID string) (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		execution style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return scanSectionHeaderNames(context, execution, textPackID)
+	}
+}
+
+func CheckSectionHeaderDensity(textPackID string) (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		execution style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return scanSectionHeaderDensity(context, execution, textPackID)
+	}
+}
+
+func CheckSectionHeaders(textPackID string) (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		execution style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return scanSectionHeaders(context, execution, textPackID)
 	}
 }
 
 func scanLineLengths(
 	context runner.Context,
-	execution contract.RepositoryScanExecution,
-) (result contract.ExecutionResult, err error) {
+	execution style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
 	files, err := runner.CollectFileSetFiles(context, execution.FileSet)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	return text.CheckLineLengths(context.RepoRoot, files)

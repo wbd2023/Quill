@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -28,7 +28,7 @@ const (
 type installHandler func(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) error
 
@@ -37,7 +37,7 @@ type installHandler func(
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
-	tools []contract.Tool,
+	tools []style.Tool,
 	capabilities map[string]toolchain.Capability,
 ) (err error) {
 	if err = ensureLayout(layout); err != nil {
@@ -61,7 +61,7 @@ func Install(
 func installTool(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool contract.Tool,
+	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
 	handler, found := installHandlers()[capability.InstallKind]
@@ -88,7 +88,7 @@ func installHandlers() (handlers map[toolchain.InstallKind]installHandler) {
 func skipInstall(
 	_ runtime.Layout,
 	_ io.Writer,
-	_ contract.Tool,
+	_ style.Tool,
 	_ toolchain.Capability,
 ) (err error) {
 	return nil

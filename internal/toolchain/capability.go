@@ -1,6 +1,6 @@
 package toolchain
 
-import "ciphera/tools/internal/contract"
+import "ciphera/tools/internal/style"
 
 type VersionKind string
 
@@ -16,15 +16,15 @@ type Capability struct {
 	InstallSource string
 }
 
-func (capability Capability) Tool() (tool contract.Tool) {
-	return contract.Tool{
+func (capability Capability) Tool() (tool style.Tool) {
+	return style.Tool{
 		ID:   capability.ID,
 		Name: capability.Name,
 	}
 }
 
-func Policies(capabilities []Capability) (tools []contract.Tool) {
-	tools = make([]contract.Tool, 0, len(capabilities))
+func Policies(capabilities []Capability) (tools []style.Tool) {
+	tools = make([]style.Tool, 0, len(capabilities))
 	for _, capability := range capabilities {
 		tools = append(tools, capability.Tool())
 	}

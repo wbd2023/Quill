@@ -3,15 +3,17 @@ package project
 import (
 	"fmt"
 
-	"ciphera/tools/internal/pack/builtin"
-	projectrules "ciphera/tools/internal/rules/project"
+	projectrules "ciphera/tools/internal/checks/project"
 	"ciphera/tools/internal/runner"
 )
 
-func decodeProjectConfig(context runner.Context) (config projectrules.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(builtin.PackProject)
+func decodeProjectConfig(
+	context runner.Context,
+	packID string,
+) (config projectrules.Config, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
 	if !found {
-		return projectrules.Config{}, errMissingPackConfig(builtin.PackProject)
+		return projectrules.Config{}, errMissingPackConfig(packID)
 	}
 
 	return projectrules.DecodeConfig(pack)

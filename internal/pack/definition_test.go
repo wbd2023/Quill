@@ -3,8 +3,8 @@ package pack
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -15,12 +15,12 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		Tools: []toolchain.Capability{
 			{ID: "tool", Command: "tool"},
 		},
-		Rules: []contract.RuleDefinition{
+		Rules: []style.RuleDefinition{
 			{
 				ID: "custom/rule",
-				Check: contract.ExecutionSpec{
-					Kind: contract.ExecutionFileCommand,
-					Detail: contract.FileCommandExecution{
+				Check: style.ExecutionSpec{
+					Kind: style.ExecutionFileCommand,
+					Detail: style.FileCommandExecution{
 						Arguments: []string{"-w"},
 					},
 				},
@@ -40,7 +40,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 	clone.Tools[0].Command = "changed"
 	clone.FileSets[0].Include.Extensions[0] = ".txt"
 
-	execution := clone.Rules[0].Check.Detail.(contract.FileCommandExecution)
+	execution := clone.Rules[0].Check.Detail.(style.FileCommandExecution)
 	execution.Arguments[0] = "-changed"
 
 	if got := original.Tools[0].Command; got != "tool" {
@@ -51,7 +51,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		t.Fatalf("original file set extension = %q, want .go", got)
 	}
 
-	execution = original.Rules[0].Check.Detail.(contract.FileCommandExecution)
+	execution = original.Rules[0].Check.Detail.(style.FileCommandExecution)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("original rule argument = %q, want -w", got)
 	}

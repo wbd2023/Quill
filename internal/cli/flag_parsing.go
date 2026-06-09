@@ -7,8 +7,8 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/report"
+	"ciphera/tools/internal/style"
 )
 
 /* ------------------------------------------ Flag Sets ----------------------------------------- */
@@ -38,22 +38,22 @@ func parseArguments(flagSet *flag.FlagSet, summary string, arguments []string) (
 
 /* ---------------------------------------- Value Parsing --------------------------------------- */
 
-func parseScope(value string) (scope contract.Scope, err error) {
+func parseScope(value string) (scope style.Scope, err error) {
 	if strings.TrimSpace(value) == "" {
 		return "", nil
 	}
 
-	return contract.Scope(value), nil
+	return style.Scope(value), nil
 }
 
-func errUnknownScope(scope contract.Scope) (err error) {
+func errUnknownScope(scope style.Scope) (err error) {
 	return fmt.Errorf("unknown scope %q in style profile", scope)
 }
 
-func parseCheckMode(value string) (mode contract.CheckMode, err error) {
-	switch contract.CheckMode(value) {
-	case contract.CheckModeRequired, contract.CheckModeAll:
-		return contract.CheckMode(value), nil
+func parseCheckMode(value string) (mode style.CheckMode, err error) {
+	switch style.CheckMode(value) {
+	case style.CheckModeRequired, style.CheckModeAll:
+		return style.CheckMode(value), nil
 	default:
 		return "", fmt.Errorf("invalid mode %q: must be required or all", value)
 	}

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
-func formatDiagnostic(diagnostic contract.Diagnostic) (line string) {
+func formatDiagnostic(diagnostic style.Diagnostic) (line string) {
 	location := diagnostic.File
 	if diagnostic.Line > 0 {
 		location = fmt.Sprintf("%s:%d", location, diagnostic.Line)
@@ -23,7 +23,7 @@ func formatDiagnostic(diagnostic contract.Diagnostic) (line string) {
 	return fmt.Sprintf("%s: [%s] %s", location, diagnostic.Code, diagnostic.Message)
 }
 
-func groupLabel(group contract.RuleGroup) (label string) {
+func groupLabel(group style.RuleGroup) (label string) {
 	words := strings.FieldsFunc(string(group), func(rune rune) bool {
 		return rune == '_' || rune == '-' || rune == '/'
 	})

@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/styleguide"
@@ -93,7 +93,7 @@ func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err er
 		return coverage.Report{}, err
 	}
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		return coverage.Report{}, err
 	}

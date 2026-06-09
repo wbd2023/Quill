@@ -3,10 +3,10 @@ package runner
 import (
 	"sort"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
-func ToolIDsForRules(rules []contract.Rule) (toolIDs []string) {
+func ToolIDsForRules(rules []style.Rule) (toolIDs []string) {
 	seen := make(map[string]bool)
 	for _, rule := range rules {
 		for _, toolID := range rule.CheckToolIDs() {
@@ -23,7 +23,7 @@ func ToolIDsForRules(rules []contract.Rule) (toolIDs []string) {
 	return toolIDs
 }
 
-func ToolIDsForFixes(rules []contract.Rule) (toolIDs []string) {
+func ToolIDsForFixes(rules []style.Rule) (toolIDs []string) {
 	seen := make(map[string]bool)
 	for _, rule := range rules {
 		for _, toolID := range rule.FixToolIDs() {

@@ -4,28 +4,37 @@ import (
 	"errors"
 	"strings"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
+	"ciphera/tools/internal/style"
 )
+
+func RunGoFormat(goPackID string, goimportsToolID string, goLanguage string) (command binding.TargetCommand) {
+	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
+		return runGoFormat(context, spec, goPackID, goimportsToolID, goLanguage)
+	}
+}
 
 func runGoFormat(
 	context runner.Context,
-	spec contract.ExecutionSpec,
-) (result contract.ExecutionResult, err error) {
+	spec style.ExecutionSpec,
+	goPackID string,
+	goimportsToolID string,
+	goLanguage string,
+) (result style.ExecutionResult, err error) {
 	if _, found := spec.TargetCommandExecution(); !found {
-		return contract.ExecutionResult{}, errEmptyTargetAction("go format")
+		return style.ExecutionResult{}, errEmptyTargetAction("go format")
 	}
 
-	targets, err := goTargets(context, spec)
+	targets, err := goTargets(context, spec, goLanguage)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
-	goConfig, err := decodeGoConfig(context)
+	goConfig, err := decodeGoConfig(context, goPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	var builder strings.Builder
@@ -52,7 +61,7 @@ func runGoFormat(
 		output, err = commandrun.ToolByID(
 			context,
 			workDir,
-			builtin.ToolGoimports,
+			goimportsToolID,
 			append(
 				[]string{"-w", "-local", localPrefix},
 				target.FormatPaths...,
@@ -62,5 +71,5 @@ func runGoFormat(
 		joined = errors.Join(joined, err)
 	}
 
-	return contract.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
+	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
 }

@@ -3,8 +3,8 @@ package effective
 import (
 	"fmt"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 /* ----------------------------------- Rule Execution Bindings ---------------------------------- */
@@ -12,7 +12,7 @@ import (
 func validateRuleExecutionBinding(
 	config policy.Config,
 	binding policy.RuleBinding,
-	execution contract.ExecutionSpec,
+	execution style.ExecutionSpec,
 ) (err error) {
 	if execution.Empty() {
 		return nil
@@ -34,7 +34,7 @@ func validateRuleExecutionBinding(
 func resolveTargets(
 	config policy.Config,
 	binding policy.RuleBinding,
-	execution contract.ExecutionSpec,
+	execution style.ExecutionSpec,
 ) (targets []string, err error) {
 	if !execution.UsesTargets() {
 		return nil, nil
@@ -52,7 +52,7 @@ func resolveTargets(
 func inferTargets(
 	config policy.Config,
 	ruleID string,
-	scope contract.Scope,
+	scope style.Scope,
 	language string,
 	requiresCheckPaths bool,
 ) (targets []string, err error) {

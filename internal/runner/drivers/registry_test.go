@@ -3,19 +3,20 @@ package drivers
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/style"
 )
 
-func TestBuiltinPackExecutionKindsHaveDrivers(t *testing.T) {
-	registry, err := builtin.DefaultRegistry(nil)
+func TestShippedPackExecutionKindsHaveDrivers(t *testing.T) {
+	registry, err := shipped.DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	checkers := CheckDrivers()
-	fixers := FixDrivers()
+	bindings := NewBindings()
+	checkers := CheckDrivers(bindings)
+	fixers := FixDrivers(bindings)
 	for _, rule := range registry.Rules() {
 		if _, found := checkers[rule.Check.Kind]; !found {
 			t.Fatalf("rule %q uses driver %q without a checker driver", rule.ID, rule.Check.Kind)
@@ -32,7 +33,7 @@ func TestBuiltinPackExecutionKindsHaveDrivers(t *testing.T) {
 }
 
 func TestMergeDriversRejectsDuplicateExecutionKind(t *testing.T) {
-	driver := CheckDrivers()[contract.ExecutionToolchain]
+	driver := CheckDrivers(NewBindings())[style.ExecutionToolchain]
 	defer func() {
 		if recovered := recover(); recovered == nil {
 			t.Fatal("expected duplicate execution kind to panic")
@@ -40,7 +41,7 @@ func TestMergeDriversRejectsDuplicateExecutionKind(t *testing.T) {
 	}()
 
 	mergeDrivers(
-		runner.DriverRegistry{contract.ExecutionToolchain: driver},
-		runner.DriverRegistry{contract.ExecutionToolchain: driver},
+		runner.DriverRegistry{style.ExecutionToolchain: driver},
+		runner.DriverRegistry{style.ExecutionToolchain: driver},
 	)
 }

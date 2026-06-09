@@ -3,23 +3,23 @@ package toml
 import (
 	"sort"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
-func decodeScopeMap(source map[string][]string) (target map[contract.Scope][]string) {
+func decodeScopeMap(source map[string][]string) (target map[style.Scope][]string) {
 	if source == nil {
 		return nil
 	}
 
-	target = make(map[contract.Scope][]string, len(source))
+	target = make(map[style.Scope][]string, len(source))
 	for scope, values := range source {
-		target[contract.Scope(scope)] = append([]string{}, values...)
+		target[style.Scope(scope)] = append([]string{}, values...)
 	}
 
 	return target
 }
 
-func encodeScopeMap(source map[contract.Scope][]string) (target map[string][]string) {
+func encodeScopeMap(source map[style.Scope][]string) (target map[string][]string) {
 	if source == nil {
 		return nil
 	}

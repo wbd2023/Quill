@@ -1,8 +1,8 @@
 package pack
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -11,7 +11,7 @@ type Definition struct {
 	ID       string
 	Name     string
 	Tools    []toolchain.Capability
-	Rules    []contract.RuleDefinition
+	Rules    []style.RuleDefinition
 	FileSets policy.FileSets
 	Config   Config
 }
@@ -42,8 +42,8 @@ func CloneDefinition(definition Definition) (clone Definition) {
 }
 
 // CloneRules returns deep copies of the supplied rule definitions.
-func CloneRules(rules []contract.RuleDefinition) (clones []contract.RuleDefinition) {
-	clones = make([]contract.RuleDefinition, 0, len(rules))
+func CloneRules(rules []style.RuleDefinition) (clones []style.RuleDefinition) {
+	clones = make([]style.RuleDefinition, 0, len(rules))
 	for _, rule := range rules {
 		clones = append(clones, cloneRule(rule))
 	}
@@ -51,35 +51,35 @@ func CloneRules(rules []contract.RuleDefinition) (clones []contract.RuleDefiniti
 	return clones
 }
 
-func cloneRule(rule contract.RuleDefinition) (clone contract.RuleDefinition) {
+func cloneRule(rule style.RuleDefinition) (clone style.RuleDefinition) {
 	clone = rule
 	clone.Check = cloneExecutionSpec(rule.Check)
 	clone.Fix = cloneExecutionSpec(rule.Fix)
 	return clone
 }
 
-func cloneExecutionSpec(spec contract.ExecutionSpec) (clone contract.ExecutionSpec) {
+func cloneExecutionSpec(spec style.ExecutionSpec) (clone style.ExecutionSpec) {
 	clone = spec
 	clone.Detail = cloneExecutionDetail(spec.Detail)
 	return clone
 }
 
-func cloneExecutionDetail(detail contract.ExecutionDetail) (clone contract.ExecutionDetail) {
+func cloneExecutionDetail(detail style.ExecutionDetail) (clone style.ExecutionDetail) {
 	switch execution := detail.(type) {
-	case contract.ToolchainExecution:
+	case style.ToolchainExecution:
 		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
 		return execution
 
-	case contract.FileCommandExecution:
+	case style.FileCommandExecution:
 		execution.Arguments = append([]string{}, execution.Arguments...)
 		return execution
 
-	case contract.TargetCommandExecution:
+	case style.TargetCommandExecution:
 		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
 		execution.Targets = append([]string{}, execution.Targets...)
 		return execution
 
-	case contract.TargetCheckExecution:
+	case style.TargetCheckExecution:
 		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
 		execution.Targets = append([]string{}, execution.Targets...)
 		return execution

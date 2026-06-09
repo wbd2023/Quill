@@ -3,12 +3,12 @@ package runner
 import (
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 func FileCommandArguments(
 	repoRoot string,
-	spec contract.ExecutionSpec,
+	spec style.ExecutionSpec,
 ) (arguments []string) {
 	execution, found := spec.FileCommandExecution()
 	if !found {

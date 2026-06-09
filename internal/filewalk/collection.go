@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 /* ----------------------------------------- Collection ----------------------------------------- */
@@ -16,7 +16,7 @@ import (
 func CollectFiles(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	scope contract.Scope,
+	scope style.Scope,
 	extensions ...string,
 ) (paths []string, err error) {
 	roots := repository.ResolveScopeRoots(repoRoot, scope)
@@ -63,7 +63,7 @@ func CollectFilesInRoots(
 func CollectFilesInScopes(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	scopes []contract.Scope,
+	scopes []style.Scope,
 	extensions ...string,
 ) (paths []string, err error) {
 	return CollectFilesInRoots(
@@ -76,7 +76,7 @@ func CollectFilesInScopes(
 func CollectAllFiles(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	scope contract.Scope,
+	scope style.Scope,
 ) (paths []string, err error) {
 	roots := repository.ResolveScopeRoots(repoRoot, scope)
 	return collectFilesInRoots(roots, repository, func(path string) bool {

@@ -4,30 +4,45 @@ import (
 	"errors"
 	"strings"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Lint Execution --------------------------------------- */
 
+func RunGolangci(
+	goPackID string,
+	golangciLintToolID string,
+	goimportsToolID string,
+	goLanguage string,
+) (command binding.TargetCommand) {
+	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
+		return runGolangci(context, spec, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
+	}
+}
+
 func runGolangci(
 	context runner.Context,
-	spec contract.ExecutionSpec,
-) (result contract.ExecutionResult, err error) {
+	spec style.ExecutionSpec,
+	goPackID string,
+	golangciLintToolID string,
+	goimportsToolID string,
+	goLanguage string,
+) (result style.ExecutionResult, err error) {
 	if _, found := spec.TargetCommandExecution(); !found {
-		return contract.ExecutionResult{}, errEmptyTargetAction("golangci")
+		return style.ExecutionResult{}, errEmptyTargetAction("golangci")
 	}
 
-	targets, err := goTargets(context, spec)
+	targets, err := goTargets(context, spec, goLanguage)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
-	goConfig, err := decodeGoConfig(context)
+	goConfig, err := decodeGoConfig(context, goPackID)
 	if err != nil {
-		return contract.ExecutionResult{}, err
+		return style.ExecutionResult{}, err
 	}
 
 	var builder strings.Builder
@@ -40,6 +55,7 @@ func runGolangci(
 			workDir,
 			target.FormatPaths,
 			localPrefix,
+			goimportsToolID,
 		)
 		if err != nil {
 			commandrun.AppendOutput(&builder, output)
@@ -50,7 +66,7 @@ func runGolangci(
 		output, err = commandrun.ToolByID(
 			context,
 			workDir,
-			builtin.ToolGolangciLint,
+			golangciLintToolID,
 			"run",
 			"./...",
 		)
@@ -58,7 +74,7 @@ func runGolangci(
 		joined = errors.Join(joined, err)
 	}
 
-	return contract.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
+	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
 }
 
 /* ---------------------------------------- Format Checks --------------------------------------- */
@@ -68,6 +84,7 @@ func runGoFormatChecks(
 	workDir string,
 	paths []string,
 	localPrefix string,
+	goimportsToolID string,
 ) (output string, err error) {
 	if len(paths) == 0 {
 		return "", nil
@@ -90,7 +107,7 @@ func runGoFormatChecks(
 	if output, err = commandrun.ToolByID(
 		context,
 		workDir,
-		builtin.ToolGoimports,
+		goimportsToolID,
 		append([]string{"-l", "-local", localPrefix}, paths...)...,
 	); err != nil {
 		return output, err

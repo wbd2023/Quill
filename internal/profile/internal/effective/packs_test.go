@@ -3,12 +3,16 @@ package effective_test
 import (
 	"testing"
 
+	textrules "ciphera/tools/internal/checks/text"
+	vocabularyrules "ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
+	"ciphera/tools/internal/pack/shipped/bash"
+	"ciphera/tools/internal/pack/shipped/markdown"
+	"ciphera/tools/internal/pack/shipped/text"
+	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/effective"
-	"ciphera/tools/internal/rules/text"
-	"ciphera/tools/internal/rules/vocabulary"
 )
 
 /* ----------------------------------------- Validation ----------------------------------------- */
@@ -17,7 +21,7 @@ func TestResolvePacksRejectsMissingRequiredConfig(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackVocabulary},
+		EnabledPacks: []string{vocabulary.PackID},
 	}
 	registry := registryFor(t, config)
 
@@ -29,10 +33,10 @@ func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackVocabulary},
+		EnabledPacks: []string{vocabulary.PackID},
 		PackConfigs: policy.PackConfigs{
-			builtin.PackVocabulary: vocabulary.EncodeConfig(vocabulary.Config{
-				Go: vocabulary.GoConfig{ForbiddenTypeSuffixes: []string{"Repository"}},
+			vocabulary.PackID: vocabularyrules.EncodeConfig(vocabularyrules.Config{
+				Go: vocabularyrules.GoConfig{ForbiddenTypeSuffixes: []string{"Repository"}},
 			}),
 		},
 	}
@@ -46,9 +50,9 @@ func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackText},
+		EnabledPacks: []string{text.PackID},
 		PackConfigs: policy.PackConfigs{
-			builtin.PackText: text.EncodeConfig(text.Config{}),
+			text.PackID: textrules.EncodeConfig(textrules.Config{}),
 		},
 	}
 	registry := registryFor(t, config)
@@ -61,9 +65,9 @@ func TestResolvePacksRejectsUnsupportedConfig(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackMarkdown},
+		EnabledPacks: []string{markdown.PackID},
 		PackConfigs: policy.PackConfigs{
-			builtin.PackMarkdown: {"unknown": true},
+			markdown.PackID: {"unknown": true},
 		},
 	}
 	registry := registryFor(t, config)
@@ -76,7 +80,7 @@ func TestResolvePacksAcceptsPacksWithoutConfig(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackMarkdown},
+		EnabledPacks: []string{markdown.PackID},
 	}
 	registry := registryFor(t, config)
 
@@ -91,7 +95,7 @@ func TestResolvePacksAppliesPackDefaultFileSets(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackBash},
+		EnabledPacks: []string{bash.PackID},
 	}
 	registry := registryFor(t, config)
 
@@ -114,7 +118,7 @@ func TestResolvePacksLetsProfileFileSetsOverridePackDefaults(t *testing.T) {
 	t.Parallel()
 
 	config := policy.Config{
-		EnabledPacks: []string{builtin.PackBash},
+		EnabledPacks: []string{bash.PackID},
 		FileSets: policy.FileSets{
 			{Name: "bash", Include: policy.FileSetInclude{Extensions: []string{".bash"}}},
 		},
@@ -141,7 +145,7 @@ func TestResolvePacksLetsProfileFileSetsOverridePackDefaults(t *testing.T) {
 func registryFor(t *testing.T, config policy.Config) (registry pack.Registry) {
 	t.Helper()
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

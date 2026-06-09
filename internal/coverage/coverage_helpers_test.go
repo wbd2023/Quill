@@ -3,11 +3,11 @@ package coverage
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/styleguide"
 )
 
@@ -26,11 +26,11 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	return document
 }
 
-func loadEffectiveConfig(t *testing.T) (effectiveConfig contract.EffectiveConfig) {
+func loadEffectiveConfig(t *testing.T) (effectiveConfig style.EffectiveConfig) {
 	t.Helper()
 
 	config := profiles.Current(t)
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

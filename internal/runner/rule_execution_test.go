@@ -3,27 +3,27 @@ package runner
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
 func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	repoRoot := t.TempDir()
-	rule := contract.Rule{
+	rule := style.Rule{
 		ID: "test/rule",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionKind("test_execution"),
-			Detail: contract.RepositoryScanExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionKind("test_execution"),
+			Detail: style.RepositoryScanExecution{
 				Scanner: "test",
 			},
 		},
 	}
 	context := NewContext(
 		repoRoot,
-		contract.Scope("all"),
+		style.Scope("all"),
 		policy.Config{},
-		contract.EffectiveConfig{},
+		style.EffectiveConfig{},
 		nil,
 		nil,
 		nil,
@@ -31,10 +31,10 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	drivers := DriverRegistry{
 		"test_execution": func(
 			_ Context,
-			_ contract.ExecutionSpec,
+			_ style.ExecutionSpec,
 			_ map[string]toolchain.Status,
-		) (contract.ExecutionResult, error) {
-			return contract.ExecutionResult{Output: "ran"}, nil
+		) (style.ExecutionResult, error) {
+			return style.ExecutionResult{Output: "ran"}, nil
 		},
 	}
 

@@ -4,17 +4,17 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 const (
-	scopeAll         contract.Scope = "all"
-	scopeApp         contract.Scope = "app"
-	scopeCommand     contract.Scope = "command"
-	scopeCommandLine contract.Scope = "command_line"
-	scopeNested      contract.Scope = "nested"
-	scopeTools       contract.Scope = "tools"
+	scopeAll         style.Scope = "all"
+	scopeApp         style.Scope = "app"
+	scopeCommand     style.Scope = "command"
+	scopeCommandLine style.Scope = "command_line"
+	scopeNested      style.Scope = "nested"
+	scopeTools       style.Scope = "tools"
 )
 
 /* ------------------------------------------- Scopes ------------------------------------------- */
@@ -47,7 +47,7 @@ func TestRepositoryResolveScopeRoots(t *testing.T) {
 func TestRepositoryResolveScopeRootsNormalisesConfiguredRoots(t *testing.T) {
 	repositoryRoot := filepath.Join("workspace", "repo")
 	repository := testRepository()
-	normalisedScope := contract.Scope("normalised")
+	normalisedScope := style.Scope("normalised")
 
 	repository.ScopeRoots[normalisedScope] = []string{" ./cmd/../tools/ "}
 	roots := repository.ResolveScopeRoots(repositoryRoot, normalisedScope)
@@ -59,8 +59,8 @@ func TestRepositoryHasScopeOverlap(t *testing.T) {
 
 	cases := []struct {
 		name     string
-		scope    contract.Scope
-		other    contract.Scope
+		scope    style.Scope
+		other    style.Scope
 		expected bool
 	}{
 		{name: "global scope", scope: scopeAll, other: scopeTools, expected: true},
@@ -85,7 +85,7 @@ func TestRepositoryHasScopeOverlap(t *testing.T) {
 
 func testRepository() (repository policy.RepositoryConfig) {
 	return policy.RepositoryConfig{
-		ScopeRoots: map[contract.Scope][]string{
+		ScopeRoots: map[style.Scope][]string{
 			scopeAll:         {"."},
 			scopeApp:         {"cmd", "internal"},
 			scopeCommand:     {"cmd"},

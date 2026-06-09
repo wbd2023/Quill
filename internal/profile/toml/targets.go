@@ -1,8 +1,8 @@
 package toml
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 type schemaTarget struct {
@@ -20,7 +20,7 @@ func decodeTargets(schemas map[string]schemaTarget) (targets policy.TargetConfig
 		targets = append(targets, policy.TargetConfig{
 			Name:             name,
 			Language:         target.Language,
-			Scope:            contract.Scope(target.Scope),
+			Scope:            style.Scope(target.Scope),
 			WorkingDirectory: target.WorkingDirectory,
 			FormatPaths:      append([]string{}, target.FormatPaths...),
 			CheckPaths:       append([]string{}, target.CheckPaths...),

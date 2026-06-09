@@ -4,20 +4,20 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/style"
 )
 
 // RepositoryConfig defines repository scope roots, exclusions, and generated-file detection.
 type RepositoryConfig struct {
 	RootMarkers         []string
-	ScopeRoots          map[contract.Scope][]string
-	DefaultScope        contract.Scope
+	ScopeRoots          map[style.Scope][]string
+	DefaultScope        style.Scope
 	ExcludedDirectories []string
 	GeneratedMarker     string
 }
 
 // HasScope reports whether the repository defines the named scope.
-func (r RepositoryConfig) HasScope(scope contract.Scope) (found bool) {
+func (r RepositoryConfig) HasScope(scope style.Scope) (found bool) {
 	_, found = r.ScopeRoots[scope]
 	return found
 }
@@ -25,7 +25,7 @@ func (r RepositoryConfig) HasScope(scope contract.Scope) (found bool) {
 // ResolveScopeRoots returns the filesystem roots for a scope under the repository root.
 func (r RepositoryConfig) ResolveScopeRoots(
 	repositoryRoot string,
-	scope contract.Scope,
+	scope style.Scope,
 ) (roots []string) {
 	scopeRoots := r.ScopeRoots[scope]
 	roots = make([]string, 0, len(scopeRoots))
@@ -44,8 +44,8 @@ func (r RepositoryConfig) ResolveScopeRoots(
 
 // HasScopeOverlap reports whether two scopes cover any common root.
 func (r RepositoryConfig) HasScopeOverlap(
-	scope contract.Scope,
-	other contract.Scope,
+	scope style.Scope,
+	other style.Scope,
 ) (overlap bool) {
 	scopeRoots, otherRoots := r.ScopeRoots[scope], r.ScopeRoots[other]
 	for _, scopeRoot := range scopeRoots {

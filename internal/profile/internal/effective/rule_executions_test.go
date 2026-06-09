@@ -3,10 +3,10 @@ package effective_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Rule Executions -------------------------------------- */
@@ -14,11 +14,11 @@ import (
 func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/bad-file-command",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionFileCommand,
-			Detail: contract.FileCommandExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionFileCommand,
+			Detail: style.FileCommandExecution{
 				ToolID: fixture.Tool,
 			},
 		},
@@ -29,7 +29,7 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 func TestCompileRejectsMissingRuleCheck(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/missing-check",
 	})
 	requireErrorContains(t, err, "must define check execution")
@@ -38,11 +38,11 @@ func TestCompileRejectsMissingRuleCheck(t *testing.T) {
 func TestCompileRejectsMismatchedExecutionKind(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/mismatched-kind",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionFileCommand,
-			Detail: contract.ToolchainExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionFileCommand,
+			Detail: style.ToolchainExecution{
 				ToolIDs: []string{fixture.Tool},
 			},
 		},
@@ -53,11 +53,11 @@ func TestCompileRejectsMismatchedExecutionKind(t *testing.T) {
 func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/blank-tool",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionToolchain,
-			Detail: contract.ToolchainExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionToolchain,
+			Detail: style.ToolchainExecution{
 				ToolIDs: []string{" "},
 			},
 		},
@@ -68,11 +68,11 @@ func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/duplicate-tool",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionToolchain,
-			Detail: contract.ToolchainExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionToolchain,
+			Detail: style.ToolchainExecution{
 				ToolIDs: []string{
 					fixture.Tool,
 					fixture.Tool,
@@ -86,11 +86,11 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 	t.Parallel()
 
-	err := compileRuleDefinition(t, contract.RuleDefinition{
+	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/unknown-tool",
-		Check: contract.ExecutionSpec{
-			Kind: contract.ExecutionToolchain,
-			Detail: contract.ToolchainExecution{
+		Check: style.ExecutionSpec{
+			Kind: style.ExecutionToolchain,
+			Detail: style.ToolchainExecution{
 				ToolIDs: []string{"unknown"},
 			},
 		},
@@ -100,7 +100,7 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 
 /* ------------------------------------------- Support ------------------------------------------ */
 
-func compileRuleDefinition(t *testing.T, definition contract.RuleDefinition) (err error) {
+func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err error) {
 	t.Helper()
 
 	if definition.Name == "" {
@@ -114,7 +114,7 @@ func compileRuleDefinition(t *testing.T, definition contract.RuleDefinition) (er
 	config.Rules = []policy.RuleBinding{
 		{
 			RuleID:         definition.ID,
-			Enforcement:    contract.EnforcementRequired,
+			Enforcement:    style.EnforcementRequired,
 			Scope:          config.Repository.DefaultScope,
 			RequirementIDs: []string{fixture.Requirement},
 		},
@@ -123,11 +123,11 @@ func compileRuleDefinition(t *testing.T, definition contract.RuleDefinition) (er
 		{ID: fixture.Tool, Version: "1.0.0"},
 	}
 
-	_, err = effective.Compile(config, contract.Definitions{
-		Tools: []contract.Tool{
+	_, err = effective.Compile(config, style.Definitions{
+		Tools: []style.Tool{
 			{ID: fixture.Tool, Name: "Test tool"},
 		},
-		Rules: []contract.RuleDefinition{definition},
+		Rules: []style.RuleDefinition{definition},
 	})
 	return err
 }

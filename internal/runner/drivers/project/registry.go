@@ -1,12 +1,13 @@
 package project
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func CheckDrivers() (registry runner.DriverRegistry) {
+func CheckDrivers(checks binding.ProjectChecks) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		contract.ExecutionProject: projectDriver,
+		style.ExecutionProject: projectDriver(checks),
 	}
 }

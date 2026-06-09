@@ -3,8 +3,8 @@ package policy_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/style"
 )
 
 func TestTargetConfigsLookup(t *testing.T) {
@@ -23,7 +23,7 @@ func TestTargetConfigsLookup(t *testing.T) {
 	requireEqual(t, policy.TargetConfig{
 		Name:     "tools_go",
 		Language: "go",
-		Scope:    contract.Scope("tools"),
+		Scope:    style.Scope("tools"),
 	}, target)
 
 	_, found = targets.Lookup("missing")

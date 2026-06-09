@@ -1,23 +1,21 @@
 package scan
 
 import (
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
-	"ciphera/tools/internal/rules/security"
+	"ciphera/tools/internal/checks/security"
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/style"
 )
 
-func securityPackScanners() (scanners map[string]repositoryScanner) {
-	return map[string]repositoryScanner{
-		builtin.ScannerSecrets: func(
-			context runner.Context,
-			_ contract.RepositoryScanExecution,
-		) (contract.ExecutionResult, error) {
-			return security.CheckSecrets(
-				context.RepoRoot,
-				context.Profile.Repository,
-				context.Scope,
-			)
-		},
+func CheckSecrets() (scanner binding.RepositoryScanner) {
+	return func(
+		context runner.Context,
+		_ style.RepositoryScanExecution,
+	) (style.ExecutionResult, error) {
+		return security.CheckSecrets(
+			context.RepoRoot,
+			context.Profile.Repository,
+			context.Scope,
+		)
 	}
 }

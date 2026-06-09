@@ -1,16 +1,16 @@
 package profile
 
 import (
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/effective"
+	"ciphera/tools/internal/style"
 )
 
 // EffectiveProfile is the resolved Profile and executable rule/tool configuration.
 type EffectiveProfile struct {
 	Profile   policy.Config
-	Effective contract.EffectiveConfig
+	Effective style.EffectiveConfig
 }
 
 // Compile validates config, applies Pack defaults, and builds an Effective Profile.

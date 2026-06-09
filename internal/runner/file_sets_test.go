@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/style"
 )
 
 /* ------------------------------------------ File Sets ----------------------------------------- */
@@ -20,7 +20,7 @@ func TestCollectFileSetFilesUsesProfileDefinedScopeFilters(t *testing.T) {
 	fixtures.WriteFile(t, repoRoot, "internal/guide.md", "# Internal\n")
 	toolsReadme := fixtures.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
 
-	context := testContext(t, repoRoot, contract.Scope("app"))
+	context := testContext(t, repoRoot, style.Scope("app"))
 
 	files, err := CollectFileSetFiles(context, "markdown")
 	if err != nil {
@@ -39,12 +39,12 @@ func TestCollectFileSetFilesUsesProfileDefinedScopeFilters(t *testing.T) {
 func TestCollectFileSetFilesDoesNotUseDefaultScopeAsWidestScope(t *testing.T) {
 	repoRoot := t.TempDir()
 	config := profiles.Current(t)
-	config.Repository.DefaultScope = contract.Scope("app")
+	config.Repository.DefaultScope = style.Scope("app")
 	profiles.Write(t, repoRoot, config)
 
 	toolsReadme := fixtures.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
 
-	context := testContext(t, repoRoot, contract.Scope("all"))
+	context := testContext(t, repoRoot, style.Scope("all"))
 
 	files, err := CollectFileSetFiles(context, "markdown")
 	if err != nil {
@@ -62,7 +62,7 @@ func TestCollectFileSetFilesReturnsEmptySetWhenScopedIncludesDoNotOverlap(t *tes
 
 	fixtures.WriteFile(t, repoRoot, "README.md", "# App\n")
 
-	context := testContext(t, repoRoot, contract.Scope("tools"))
+	context := testContext(t, repoRoot, style.Scope("tools"))
 
 	files, err := CollectFileSetFiles(context, "markdown")
 	if err != nil {
@@ -78,7 +78,7 @@ func TestCollectFileSetFilesRejectsUnknownSet(t *testing.T) {
 	repoRoot := t.TempDir()
 	profiles.Write(t, repoRoot, profiles.Current(t))
 
-	context := testContext(t, repoRoot, contract.Scope("all"))
+	context := testContext(t, repoRoot, style.Scope("all"))
 
 	if _, err := CollectFileSetFiles(context, "javascript"); err == nil {
 		t.Fatal("expected unknown file set to fail")
@@ -92,7 +92,7 @@ func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 	config := fixtures.WriteFile(t, repoRoot, "style.local.toml", "enabled = true\n")
 	checksum := fixtures.WriteFile(t, repoRoot, "go.sum", strings.Repeat("x", 120)+"\n")
 
-	context := testContext(t, repoRoot, contract.Scope("all"))
+	context := testContext(t, repoRoot, style.Scope("all"))
 	files, err := CollectFileSetFiles(context, "line_length")
 	if err != nil {
 		t.Fatalf("collect line_length file set: %v", err)

@@ -3,14 +3,14 @@ package cli
 import (
 	"path/filepath"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 )
 
-func loadContext(repoRoot string, scope contract.Scope) (context runner.Context, err error) {
+func loadContext(repoRoot string, scope style.Scope) (context runner.Context, err error) {
 	config, err := profile.Load(repoRoot)
 	if err != nil {
 		return runner.Context{}, err
@@ -24,7 +24,7 @@ func loadContext(repoRoot string, scope contract.Scope) (context runner.Context,
 		return runner.Context{}, errUnknownScope(scope)
 	}
 
-	registry, err := builtin.DefaultRegistry(config.EnabledPacks)
+	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		return runner.Context{}, err
 	}

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/contract"
-	"ciphera/tools/internal/pack/builtin"
+	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -15,7 +15,7 @@ func TestInstallToolRejectsUnknownInstallKind(t *testing.T) {
 	err := installTool(
 		runtime.LayoutForToolsDir(t.TempDir()),
 		io.Discard,
-		contract.Tool{ID: "example"},
+		style.Tool{ID: "example"},
 		toolchain.Capability{
 			ID:          "example",
 			InstallKind: "unknown",
@@ -30,8 +30,8 @@ func TestInstallToolRejectsUnknownInstallKind(t *testing.T) {
 	}
 }
 
-func TestInstallerSupportsRulepackToolInstallKinds(t *testing.T) {
-	registry, err := builtin.DefaultRegistry(nil)
+func TestInstallerSupportsShippedPackToolInstallKinds(t *testing.T) {
+	registry, err := shipped.DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}

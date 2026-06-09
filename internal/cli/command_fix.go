@@ -3,10 +3,11 @@ package cli
 import (
 	"flag"
 
-	"ciphera/tools/internal/contract"
+	"ciphera/tools/internal/pack/shipped/bindings"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -42,7 +43,7 @@ func runFix(tool CLI, options fixOptions) (exitCode int) {
 	}
 
 	statusIndex := toolchain.StatusesByID(statuses)
-	fixers := drivers.FixDrivers()
+	fixers := drivers.FixDrivers(bindings.Build())
 	for _, rule := range rules {
 		result, err := runner.RunFix(rule, context, statusIndex, fixers)
 		if err != nil {
@@ -103,9 +104,9 @@ func fixUsageText() (usage string) {
 /* --------------------------------------- Rule Selection --------------------------------------- */
 
 func fixableRules(
-	available []contract.Rule,
+	available []style.Rule,
 	context runner.Context,
-) (rules []contract.Rule) {
+) (rules []style.Rule) {
 	for _, rule := range available {
 		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue
