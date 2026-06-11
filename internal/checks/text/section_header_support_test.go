@@ -3,10 +3,11 @@ package text
 import (
 	"testing"
 
+	textpolicy "ciphera/tools/internal/checks/text/policy"
 	"ciphera/tools/internal/fixtures/profiles"
 )
 
-func currentSectionHeaders(t *testing.T) (headers SectionHeaderConfig) {
+func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {
 	t.Helper()
 
 	pack, found := profiles.Current(t).PackConfigs.Lookup("text")
@@ -14,7 +15,7 @@ func currentSectionHeaders(t *testing.T) (headers SectionHeaderConfig) {
 		t.Fatal("expected text pack config")
 	}
 
-	config, err := DecodeConfig(pack)
+	config, err := textpolicy.DecodeConfig(pack)
 	if err != nil {
 		t.Fatalf("DecodeConfig: %v", err)
 	}

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	projectrules "ciphera/tools/internal/checks/project"
+	projectpolicy "ciphera/tools/internal/checks/project/policy"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
 	projectpack "ciphera/tools/internal/pack/shipped/project"
@@ -68,7 +68,7 @@ lint: $(STYLE_BIN)
 	}
 }
 
-func currentCommands(t *testing.T) (commands projectrules.CommandsConfig) {
+func currentCommands(t *testing.T) (commands projectpolicy.CommandsConfig) {
 	t.Helper()
 
 	pack, found := profiles.Current(t).PackConfigs.Lookup(projectpack.PackID)
@@ -76,7 +76,7 @@ func currentCommands(t *testing.T) (commands projectrules.CommandsConfig) {
 		t.Fatal("missing project pack config")
 	}
 
-	config, err := projectrules.DecodeConfig(pack)
+	config, err := projectpolicy.DecodeConfig(pack)
 	if err != nil {
 		t.Fatalf("Decode project config: %v", err)
 	}

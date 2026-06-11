@@ -2,6 +2,7 @@ package golang
 
 import (
 	"ciphera/tools/internal/checks/golang/check"
+	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/style"
 )
 
@@ -86,9 +87,9 @@ func golangciRule(
 			Kind: style.ExecutionTargetCommand,
 			Detail: style.TargetCommandExecution{
 				ToolIDs: []string{
-					ToolGo,
-					ToolGoimports,
-					ToolGolangciLint,
+					tool.Go,
+					tool.Goimports,
+					tool.GolangciLint,
 				},
 				Action:   TargetActionGolangci,
 				Language: Language,
@@ -98,8 +99,8 @@ func golangciRule(
 			Kind: style.ExecutionTargetCommand,
 			Detail: style.TargetCommandExecution{
 				ToolIDs: []string{
-					ToolGo,
-					ToolGoimports,
+					tool.Go,
+					tool.Goimports,
 				},
 				Action:   TargetActionGoFormat,
 				Language: Language,
@@ -120,7 +121,7 @@ func styleRule(
 		Check: style.ExecutionSpec{
 			Kind: style.ExecutionTargetCheck,
 			Detail: style.TargetCheckExecution{
-				ToolIDs:  []string{ToolGo},
+				ToolIDs:  []string{tool.Go},
 				Check:    checkID,
 				Language: Language,
 			},

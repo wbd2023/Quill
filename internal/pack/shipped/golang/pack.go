@@ -6,13 +6,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-const (
-	PackID = "go"
-
-	ToolGo           = "go"
-	ToolGoimports    = "goimports"
-	ToolGolangciLint = "golangci-lint"
-)
+const PackID = "go"
 
 // Pack returns the Go Shipped Pack definition.
 func Pack(tools []toolchain.Capability) (definition pack.Definition) {

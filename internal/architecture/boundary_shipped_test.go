@@ -31,7 +31,7 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 	}
 
 	testCases = append(testCases, importBoundaryCase{
-		name:      "shipped tool capabilities avoid policy and execution orchestration",
+		name:      "shipped tool capabilities own Tool IDs without Pack imports",
 		directory: "internal/pack/shipped/tool",
 		recursive: true,
 		forbidden: []string{
@@ -45,6 +45,13 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 			"ciphera/tools/internal/report",
 			"ciphera/tools/internal/runner",
 			"ciphera/tools/internal/runner/drivers",
+			"ciphera/tools/internal/pack/shipped/bash",
+			"ciphera/tools/internal/pack/shipped/golang",
+			"ciphera/tools/internal/pack/shipped/markdown",
+			"ciphera/tools/internal/pack/shipped/project",
+			"ciphera/tools/internal/pack/shipped/security",
+			"ciphera/tools/internal/pack/shipped/text",
+			"ciphera/tools/internal/pack/shipped/vocabulary",
 			"ciphera/tools/internal/checks",
 			"ciphera/tools/internal/runtime",
 			"ciphera/tools/internal/styleguide",

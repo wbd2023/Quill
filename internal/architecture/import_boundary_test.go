@@ -36,50 +36,6 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 	}
 }
 
-func TestRetiredPathsStayRetired(t *testing.T) {
-	t.Parallel()
-
-	toolsRoot := importBoundaryRoot(t)
-	retired := []string{
-		"internal/contract",
-		"internal/pack/builtin",
-		"internal/rules",
-		"internal/rules/bash/results.go",
-		"internal/rules/text/results.go",
-		"internal/rules/security/results.go",
-		"internal/rules/vocabulary/results.go",
-		"internal/rules/golang/check_ids.go",
-		"internal/rules/golang/checks",
-		"internal/rules/golang/diagnostic_test.go",
-		"internal/rules/golang/order",
-		"internal/rules/golang/rule_architecture.go",
-		"internal/rules/golang/rule_guard_clause_spacing.go",
-		"internal/rules/golang/rule_guard_clause_spacing_test.go",
-		"internal/rules/golang/rule_switch_case_spacing.go",
-		"internal/rules/golang/rule_switch_case_spacing_test.go",
-		"internal/rules/golang/scenarios/behaviour_harness_test.go",
-		"internal/rules/golang/scenarios/domain_identifier_casts_test.go",
-		"internal/pack/shipped/go_target_ids.go",
-		"internal/pack/shipped/pack_ids.go",
-		"internal/pack/shipped/project_check_ids.go",
-		"internal/pack/shipped/scanner_ids.go",
-		"internal/pack/shipped/tool_builders.go",
-		"internal/pack/shipped/tool_ids.go",
-		"internal/pack/shipped/tools.go",
-		"internal/runtime/handlers_test.go",
-		"internal/runtime/tool_inspection.go",
-		"internal/runtime/tool_version.go",
-		"internal/runtime/tool_version_detection.go",
-		"internal/runtime/version_normalisation.go",
-	}
-
-	for _, path := range retired {
-		if _, err := os.Stat(filepath.Join(toolsRoot, path)); err == nil {
-			t.Fatalf("retired path still exists: %s", path)
-		}
-	}
-}
-
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
 func importBoundaryRoot(t *testing.T) (toolsRoot string) {

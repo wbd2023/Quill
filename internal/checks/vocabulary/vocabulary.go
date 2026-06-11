@@ -1,6 +1,7 @@
 package vocabulary
 
 import (
+	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
@@ -13,7 +14,7 @@ const bashAssignmentMatchLength = 4
 func CheckVocabulary(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	config Config,
+	config vocabularypolicy.Config,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	goFiles, err := filewalk.CollectFiles(repoRoot, repository, scope, ".go")

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/style"
 )
@@ -13,7 +14,7 @@ func checkBashVocabulary(
 	result *style.ExecutionResult,
 	repoRoot string,
 	path string,
-	config Config,
+	config vocabularypolicy.Config,
 ) (err error) {
 	bashAssignmentPattern := compileBashAssignmentPattern(
 		config.Bash.ForbiddenVariableNames,

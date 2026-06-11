@@ -3,8 +3,8 @@ package effective_test
 import (
 	"testing"
 
-	textrules "ciphera/tools/internal/checks/text"
-	vocabularyrules "ciphera/tools/internal/checks/vocabulary"
+	textpolicy "ciphera/tools/internal/checks/text/policy"
+	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/pack/shipped/bash"
@@ -35,8 +35,8 @@ func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 	config := policy.Config{
 		EnabledPacks: []string{vocabulary.PackID},
 		PackConfigs: policy.PackConfigs{
-			vocabulary.PackID: vocabularyrules.EncodeConfig(vocabularyrules.Config{
-				Go: vocabularyrules.GoConfig{ForbiddenTypeSuffixes: []string{"Repository"}},
+			vocabulary.PackID: vocabularypolicy.EncodeConfig(vocabularypolicy.Config{
+				Go: vocabularypolicy.GoConfig{ForbiddenTypeSuffixes: []string{"Repository"}},
 			}),
 		},
 	}
@@ -52,7 +52,7 @@ func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {
 	config := policy.Config{
 		EnabledPacks: []string{text.PackID},
 		PackConfigs: policy.PackConfigs{
-			text.PackID: textrules.EncodeConfig(textrules.Config{}),
+			text.PackID: textpolicy.EncodeConfig(textpolicy.Config{}),
 		},
 	}
 	registry := registryFor(t, config)
