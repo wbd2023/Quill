@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	gopolicy "ciphera/tools/internal/checks/golang/policy"
-	vocabularyrules "ciphera/tools/internal/checks/vocabulary"
+	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
@@ -68,7 +68,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 			CheckPaths:       []string{"cmd", "internal"},
 		},
 	}
-	vocabularyConfig, err := vocabularyrules.DecodeConfig(config.PackConfigs[vocabulary.PackID])
+	vocabularyConfig, err := vocabularypolicy.DecodeConfig(config.PackConfigs[vocabulary.PackID])
 	if err != nil {
 		t.Fatalf("Decode vocabulary config: %v", err)
 	}
@@ -76,7 +76,7 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 	vocabularyConfig.Go.PreferredTypeSuffix = "Store"
 	vocabularyConfig.Go.ForbiddenIdentifierSuffixes = []string{"Repository"}
 	vocabularyConfig.Go.PreferredIdentifierSuffix = "Store"
-	config.PackConfigs[vocabulary.PackID] = vocabularyrules.EncodeConfig(vocabularyConfig)
+	config.PackConfigs[vocabulary.PackID] = vocabularypolicy.EncodeConfig(vocabularyConfig)
 	parameters := &goConfig.Constructors
 	parameters.ParameterOrder = replaceParameterGroup(
 		parameters.ParameterOrder,

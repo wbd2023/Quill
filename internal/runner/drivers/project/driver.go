@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	projectrules "ciphera/tools/internal/checks/project"
+	projectpolicy "ciphera/tools/internal/checks/project/policy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
@@ -113,10 +113,10 @@ func checkExcludedDirectories(repository policy.RepositoryConfig) (output string
 
 func checkCommands(
 	repositoryRoot string,
-	commands projectrules.CommandsConfig,
+	commands projectpolicy.CommandsConfig,
 ) (output string, err error) {
 	switch commands.Runner {
-	case projectrules.CommandsRunnerMake:
+	case projectpolicy.CommandsRunnerMake:
 		return checkMakeCommands(repositoryRoot, commands)
 	default:
 		return "", fmt.Errorf("unsupported quality commands runner %q", commands.Runner)
@@ -125,7 +125,7 @@ func checkCommands(
 
 func checkMakeCommands(
 	repositoryRoot string,
-	commands projectrules.CommandsConfig,
+	commands projectpolicy.CommandsConfig,
 ) (output string, err error) {
 	contents, err := os.ReadFile(filepath.Join(repositoryRoot, commands.Make.Path))
 	if err != nil {

@@ -2,16 +2,13 @@ package markdown
 
 import (
 	"ciphera/tools/internal/pack"
+	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-const (
-	PackID = "markdown"
-
-	ToolMarkdownlint = "markdownlint"
-)
+const PackID = "markdown"
 
 const ruleGroupExternal style.RuleGroup = "external_tools"
 
@@ -26,7 +23,7 @@ func Pack(tools []toolchain.Capability) (definition pack.Definition) {
 			fileCommandRuleWithConfig(
 				"markdown/style",
 				"Markdown style",
-				ToolMarkdownlint,
+				tool.Markdownlint,
 				"markdown",
 				nil,
 				"-c",

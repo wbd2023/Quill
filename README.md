@@ -140,18 +140,22 @@ Production packages must keep these boundaries:
   reports, or runners.
 - `pack` defines neutral Pack definitions, catalogues, and registries.
 - `pack/shipped` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
-- `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages
-  and Pack-owned policy codecs, but not runners, drivers, reports, profiles, or installers.
-- `pack/shipped/tool` owns reusable shipped tool capabilities, tool IDs, install kinds, and
-  version kinds.
+- `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages,
+  Pack-owned policy codecs, and canonical shipped Tool IDs from `pack/shipped/tool`, but not
+  runners, drivers, reports, profiles, or installers.
+- `pack/shipped/tool` owns reusable shipped tool capabilities, canonical Tool IDs,
+  install kinds, and version kinds.
 - `pack/shipped/bindings` owns Shipped Pack Runtime Bindings and may import only the
   top-level `runner/drivers` facade, not driver-family subpackages.
 - `runner` imports no `profile`, `pack/shipped`, `runtime`, or `report`.
 - `runner/drivers` binds generic Execution Kinds to concrete Drivers from explicit
   `drivers.Bindings` without importing Shipped Packs, profiles, reports, or installation packages.
   Its command, project, scan, and target subpackages stay behind the top-level facade.
-- Concrete Check packages import no `profile`; Go Checks import no `pack/shipped`, and Go
-  Check policy stays separate from Check implementations.
+- Concrete Check packages import no `profile`; Pack Policy packages such as
+  `internal/checks/<pack>/policy/` own typed Pack Policy and avoid Check implementations,
+  runners, profiles, and Shipped Packs.
+- Go Checks import no `pack/shipped`, and Go Check policy stays separate from Check
+  implementations.
 - `report` owns final text and JSON formatting; Checks and drivers return data.
 
 ## File Shape
@@ -197,10 +201,12 @@ The style platform uses balanced granularity:
 - `internal/pack/shipped/`
   - Shipped Pack catalogue facade and default registry assembly.
 - `internal/pack/shipped/<pack>/`
-  - Shipped Pack definitions, rule declarations, tool needs, file-set defaults, and Pack policy
-    wiring.
+  - Shipped Pack definitions, rule declarations, Tool needs, file-set defaults, and Pack policy
+    wiring. Multi-role Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`;
+    small Packs stay flat until the split improves locality. Packs reference canonical Tool IDs
+    from `internal/pack/shipped/tool/`.
 - `internal/pack/shipped/tool/`
-  - Reusable shipped tool IDs, capabilities, install kinds, and version kinds.
+  - Reusable shipped Tool IDs, capabilities, install kinds, and version kinds.
 - `internal/pack/shipped/bindings/`
   - Shipped Runtime Binding table from scanner IDs, target actions, target-check languages, and
     project check IDs to the generic `runner/drivers` facade.
@@ -221,18 +227,24 @@ The style platform uses balanced granularity:
 - `internal/filewalk/`
   - Repository file collection and generated-file filtering shared by runners and scanners.
 - `internal/report/`
-  - Text and explicit JSON DTO renderers for checks, coverage, and tool status.
+  - Text and explicit JSON DTO renderers for checks, coverage, and tool status. Report
+    surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`,
+    `<surface>_view.go`, and `<surface>_types.go` where those roles exist.
 - `internal/checks/golang/`
   - Go Check facade and package family. The root package walks Go files and reports diagnostics;
-    subpackages own check IDs, Go pack policy, shared analysis primitives, syntax checks,
+    subpackages own check IDs, Go Pack Policy, shared analysis primitives, syntax checks,
     structure checks, relationship checks, architecture checks, test checks, and scenario tests.
+- `internal/checks/<pack>/policy/`
+  - Pack Policy subpackages such as `internal/checks/text/policy/`,
+    `internal/checks/project/policy/`, and `internal/checks/vocabulary/policy/` own typed
+    Pack Policy, codecs, and validation for Checks that need Profile-supplied policy.
 - `internal/checks/text/`
-  - Text scanners for line length, ASCII, exception markers, maintenance markers, and section
-    headers.
+  - Executable Text scanners for line length, ASCII, exception markers, maintenance markers,
+    and section headers.
 - `internal/checks/security/`
   - Security scanners such as committed-secret detection.
 - `internal/checks/vocabulary/`
-  - Cross-language project-term vocabulary scanners.
+  - Executable cross-language project-term vocabulary scanner.
 - `internal/checks/bash/`
   - Bash-specific script structure, safety, magic-value, and test-hygiene scanners.
 - `internal/fixtures/`

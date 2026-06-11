@@ -26,6 +26,9 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 				"ciphera/tools/internal/checks/golang/test",
 			},
 		},
+		packPolicyBoundaryCase("text"),
+		packPolicyBoundaryCase("project"),
+		packPolicyBoundaryCase("vocabulary"),
 		{
 			name:      "go syntax checks do not import Shipped Packs",
 			directory: "internal/checks/golang/syntax",
@@ -105,6 +108,26 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 			forbidden: []string{
 				"ciphera/tools/internal/profile",
 			},
+		},
+	}
+}
+
+func packPolicyBoundaryCase(packID string) (testCase importBoundaryCase) {
+	return importBoundaryCase{
+		name:      packID + " Pack Policy avoids Check implementations and orchestration",
+		directory: "internal/checks/" + packID + "/policy",
+		forbidden: []string{
+			"ciphera/tools/internal/cli",
+			"ciphera/tools/internal/coverage",
+			"ciphera/tools/internal/installer",
+			"ciphera/tools/internal/pack/shipped",
+			"ciphera/tools/internal/profile",
+			"ciphera/tools/internal/report",
+			"ciphera/tools/internal/runner",
+			"ciphera/tools/internal/runtime",
+			"ciphera/tools/internal/style",
+			"ciphera/tools/internal/styleguide",
+			"ciphera/tools/internal/checks/" + packID,
 		},
 	}
 }

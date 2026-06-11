@@ -1,23 +1,14 @@
 package project
 
 import (
-	projectrules "ciphera/tools/internal/checks/project"
+	projectpolicy "ciphera/tools/internal/checks/project/policy"
 	"ciphera/tools/internal/pack"
+	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-const (
-	PackID = "project"
-
-	ToolGo           = "go"
-	ToolGoimports    = "goimports"
-	ToolMisspell     = "misspell"
-	ToolGolangciLint = "golangci-lint"
-	ToolShfmt        = "shfmt"
-	ToolShellcheck   = "shellcheck"
-	ToolMarkdownlint = "markdownlint"
-)
+const PackID = "project"
 
 const (
 	CheckEnforcementLevels   = "enforcement_levels"
@@ -35,7 +26,7 @@ func Pack(tools []toolchain.Capability) (definition pack.Definition) {
 		Tools: append([]toolchain.Capability{}, tools...),
 		Config: pack.Config{
 			Required: true,
-			Validate: projectrules.ValidatePackConfig,
+			Validate: projectpolicy.ValidatePackConfig,
 		},
 		Rules: rules(),
 	}
@@ -48,13 +39,13 @@ func rules() (rules []style.RuleDefinition) {
 		toolchainRule(
 			"toolchain/check-versions",
 			"Pinned toolchain versions",
-			ToolGo,
-			ToolGoimports,
-			ToolMisspell,
-			ToolGolangciLint,
-			ToolShfmt,
-			ToolShellcheck,
-			ToolMarkdownlint,
+			tool.Go,
+			tool.Goimports,
+			tool.Misspell,
+			tool.GolangciLint,
+			tool.Shfmt,
+			tool.Shellcheck,
+			tool.Markdownlint,
 		),
 		projectRule(
 			"project/enforcement-levels",

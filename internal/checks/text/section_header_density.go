@@ -3,6 +3,7 @@ package text
 import (
 	"fmt"
 
+	textpolicy "ciphera/tools/internal/checks/text/policy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
@@ -11,7 +12,7 @@ import (
 func CheckSectionHeaderDensity(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	sectionHeaders SectionHeaderConfig,
+	sectionHeaders textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()

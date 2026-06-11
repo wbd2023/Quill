@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	textpolicy "ciphera/tools/internal/checks/text/policy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
@@ -28,7 +29,7 @@ type sectionHeaderPatterns struct {
 func CheckSectionHeaders(
 	repoRoot string,
 	repository policy.RepositoryConfig,
-	sectionHeaders SectionHeaderConfig,
+	sectionHeaders textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()

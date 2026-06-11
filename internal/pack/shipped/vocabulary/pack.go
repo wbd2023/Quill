@@ -1,7 +1,7 @@
 package vocabulary
 
 import (
-	vocabularyrules "ciphera/tools/internal/checks/vocabulary"
+	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/style"
 )
@@ -19,7 +19,7 @@ func Pack() (definition pack.Definition) {
 		Name: "Vocabulary",
 		Config: pack.Config{
 			Required: true,
-			Validate: vocabularyrules.ValidatePackConfig,
+			Validate: vocabularypolicy.ValidatePackConfig,
 		},
 		Rules: []style.RuleDefinition{
 			{
