@@ -3,7 +3,13 @@ package report
 import (
 	"fmt"
 	"io"
+
+	"ciphera/tools/internal/toolchain"
 )
+
+type ToolchainResult struct {
+	Statuses []toolchain.Status
+}
 
 func WriteToolchain(
 	writer io.Writer,

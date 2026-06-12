@@ -7,6 +7,52 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+/* ------------------------------------------ JSON DTOs ----------------------------------------- */
+
+type checkJSON struct {
+	Result  checkResultJSON  `json:"result"`
+	Summary CheckSummary     `json:"summary"`
+	Groups  []checkGroupJSON `json:"groups"`
+}
+
+type checkResultJSON struct {
+	Entries []checkEntryJSON `json:"entries"`
+}
+
+type checkGroupJSON struct {
+	Group   style.RuleGroup  `json:"group"`
+	Entries []checkEntryJSON `json:"entries"`
+}
+
+type checkEntryJSON struct {
+	RuleID       string             `json:"rule_id"`
+	Name         string             `json:"name"`
+	Group        style.RuleGroup    `json:"group"`
+	Enforcement  style.Enforcement  `json:"enforcement"`
+	Scope        style.Scope        `json:"scope"`
+	Status       style.CheckStatus  `json:"status"`
+	Requirements []string           `json:"requirements"`
+	Diagnostics  []diagnosticJSON   `json:"diagnostics"`
+	Output       string             `json:"output,omitempty"`
+	Command      *commandResultJSON `json:"command,omitempty"`
+}
+
+type diagnosticJSON struct {
+	Code    string `json:"code"`
+	File    string `json:"file,omitempty"`
+	Line    int    `json:"line,omitempty"`
+	Column  int    `json:"column,omitempty"`
+	Message string `json:"message"`
+}
+
+type commandResultJSON struct {
+	ExitCode  int  `json:"exit_code"`
+	TimedOut  bool `json:"timed_out"`
+	Truncated bool `json:"truncated"`
+}
+
+/* ------------------------------------------ Rendering ----------------------------------------- */
+
 func writeCheckJSON(writer io.Writer, view CheckView) (summary CheckSummary, err error) {
 	summary = view.Summary
 	err = writeJSON(writer, struct {
