@@ -8,12 +8,12 @@ import (
 
 	"ciphera/tools/internal/checks/golang"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
-func CheckGoStyle(goPackID string, goLanguage string) (check binding.TargetCheck) {
+func CheckGoStyle(goPackID string, goLanguage string) (check runtimebinding.TargetCheck) {
 	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
 		return runGoStyleCheck(context, spec, goPackID, goLanguage)
 	}

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func targetCommandDriver(commands binding.TargetCommands) (driver runner.Driver) {
+func targetCommandDriver(commands runtimebinding.TargetCommands) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
@@ -34,7 +34,7 @@ func targetCommandDriver(commands binding.TargetCommands) (driver runner.Driver)
 	}
 }
 
-func targetCheckDriver(checks binding.TargetChecks) (driver runner.Driver) {
+func targetCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,

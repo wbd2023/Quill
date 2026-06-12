@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
 func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
-	driver := repositoryScanDriver(binding.NewRepositoryScanners())
+	driver := repositoryScanDriver(runtimebinding.NewRepositoryScanners())
 	_, err := driver(
 		runner.Context{},
 		style.ExecutionSpec{
@@ -33,7 +33,7 @@ func TestRepositoryScannersRejectDuplicateScannerID(t *testing.T) {
 		return style.ExecutionResult{}, nil
 	}
 
-	registry := binding.NewRepositoryScanners()
+	registry := runtimebinding.NewRepositoryScanners()
 	registry.Add("duplicate", scanner)
 	defer func() {
 		if recovered := recover(); recovered == nil {

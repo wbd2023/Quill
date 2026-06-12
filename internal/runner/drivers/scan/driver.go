@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func repositoryScanDriver(scanners binding.RepositoryScanners) (driver runner.Driver) {
+func repositoryScanDriver(scanners runtimebinding.RepositoryScanners) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,

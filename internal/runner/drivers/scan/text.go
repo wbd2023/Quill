@@ -3,11 +3,11 @@ package scan
 import (
 	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
-func CheckASCII() (scanner binding.RepositoryScanner) {
+func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -16,7 +16,7 @@ func CheckASCII() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckExceptionMarkers() (scanner binding.RepositoryScanner) {
+func CheckExceptionMarkers() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -29,11 +29,11 @@ func CheckExceptionMarkers() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckLineLengths() (scanner binding.RepositoryScanner) {
+func CheckLineLengths() (scanner runtimebinding.RepositoryScanner) {
 	return scanLineLengths
 }
 
-func CheckMaintenanceMarkers() (scanner binding.RepositoryScanner) {
+func CheckMaintenanceMarkers() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -46,7 +46,7 @@ func CheckMaintenanceMarkers() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckSectionHeaderNames(textPackID string) (scanner binding.RepositoryScanner) {
+func CheckSectionHeaderNames(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		execution style.RepositoryScanExecution,
@@ -55,7 +55,7 @@ func CheckSectionHeaderNames(textPackID string) (scanner binding.RepositoryScann
 	}
 }
 
-func CheckSectionHeaderDensity(textPackID string) (scanner binding.RepositoryScanner) {
+func CheckSectionHeaderDensity(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		execution style.RepositoryScanExecution,
@@ -64,7 +64,7 @@ func CheckSectionHeaderDensity(textPackID string) (scanner binding.RepositorySca
 	}
 }
 
-func CheckSectionHeaders(textPackID string) (scanner binding.RepositoryScanner) {
+func CheckSectionHeaders(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		execution style.RepositoryScanExecution,

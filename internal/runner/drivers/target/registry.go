@@ -2,13 +2,13 @@ package target
 
 import (
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
 func CheckDrivers(
-	commands binding.TargetCommands,
-	checks binding.TargetChecks,
+	commands runtimebinding.TargetCommands,
+	checks runtimebinding.TargetChecks,
 ) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
 		style.ExecutionTargetCommand: targetCommandDriver(commands),
@@ -16,7 +16,7 @@ func CheckDrivers(
 	}
 }
 
-func FixDrivers(commands binding.TargetCommands) (registry runner.DriverRegistry) {
+func FixDrivers(commands runtimebinding.TargetCommands) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
 		style.ExecutionTargetCommand: targetCommandDriver(commands),
 	}
