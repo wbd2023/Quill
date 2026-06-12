@@ -4,15 +4,15 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -49,7 +49,7 @@ func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
 	for range 77 {
 		builder.WriteString("const value = 1\n")
 	}
-	fixtures.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
 
 	result, err := CheckSectionHeaderDensity(
 		repoRoot,
@@ -73,7 +73,7 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 	for range 7 {
 		builder.WriteString(header + "\n\n")
 	}
-	fixtures.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
 
 	result, err := CheckSectionHeaderDensity(
 		repoRoot,

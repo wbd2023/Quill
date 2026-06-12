@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 		"fi",
 		"",
 	}, "\n")
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"tools/example.sh",
@@ -53,7 +53,7 @@ func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
 		"head -1 file.txt",
 		"",
 	}, "\n")
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"tools/example.sh",

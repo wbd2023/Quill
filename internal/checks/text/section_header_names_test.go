@@ -4,15 +4,15 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + " Checks " + strings.Repeat("-", 42) + " */"
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -43,7 +43,7 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -66,7 +66,7 @@ func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 	header := "/* " + strings.Repeat("-", 43) + " Local " + strings.Repeat("-", 43) + " */"
 	headers := currentSectionHeaders(t)
 	headers.GenericNames = []string{"Local"}
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",

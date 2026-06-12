@@ -233,7 +233,7 @@ The style platform uses balanced granularity:
 - `internal/report/`
   - Text and explicit JSON DTO renderers for checks, coverage, and tool status. Report
     surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`,
-    `<surface>_view.go`, and `<surface>_types.go` where those roles exist.
+    and `<surface>_view.go` where those roles exist.
 - `internal/checks/golang/`
   - Go Check facade and package family. The root package walks Go files and reports diagnostics;
     subpackages own check IDs, shared analysis primitives, syntax checks,
@@ -251,8 +251,9 @@ The style platform uses balanced granularity:
   - Executable cross-language project-term vocabulary scanner.
 - `internal/checks/bash/`
   - Bash-specific script structure, safety, magic-value, and test-hygiene scanners.
-- `internal/fixtures/`
-  - Shared helpers for writing repository-shaped test fixtures.
+- `internal/testutil/`
+  - Shared test-only helpers for repository roots, file writing, and repository-shaped profile
+    setup.
 
 There is no longer a shell registry, shell-script control plane, nested `tools/style/` module, or
 single overloaded package mixing style-platform vocabulary with STYLE.md parsing.

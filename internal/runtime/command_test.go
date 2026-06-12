@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
+	"ciphera/tools/internal/testutil"
 )
 
 /* -------------------------------------- Command Execution ------------------------------------- */
@@ -15,7 +15,7 @@ import (
 func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 	tempDir := t.TempDir()
 	commandPath := filepath.Join(tempDir, "test-tool")
-	fixtures.WriteExecutable(
+	testutil.WriteExecutable(
 		t,
 		commandPath,
 		"#!/bin/sh\necho resolved\n",
@@ -38,7 +38,7 @@ func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 func TestRunCommandTimesOut(t *testing.T) {
 	tempDir := t.TempDir()
 	commandPath := filepath.Join(tempDir, "slow-tool")
-	fixtures.WriteExecutable(
+	testutil.WriteExecutable(
 		t,
 		commandPath,
 		"#!/bin/sh\nsleep 5\n",
@@ -72,7 +72,7 @@ func commandSearchPath(tempDir string) (value string) {
 func TestRunCommandCapsOutput(t *testing.T) {
 	tempDir := t.TempDir()
 	commandPath := filepath.Join(tempDir, "loud-tool")
-	fixtures.WriteExecutable(
+	testutil.WriteExecutable(
 		t,
 		commandPath,
 		"#!/bin/sh\nprintf 1234567890\n",
@@ -96,7 +96,7 @@ func TestRunCommandCapsOutput(t *testing.T) {
 func TestCommandErrorIncludesExitCodeAndOutput(t *testing.T) {
 	tempDir := t.TempDir()
 	commandPath := filepath.Join(tempDir, "bad-tool")
-	fixtures.WriteExecutable(
+	testutil.WriteExecutable(
 		t,
 		commandPath,
 		"#!/bin/sh\necho failure\nexit 7\n",

@@ -4,22 +4,22 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestNewContextLoadsCurrentProfileFixture(t *testing.T) {
 	fixtureRoot := t.TempDir()
 	profiles.Write(t, fixtureRoot, profiles.Current(t))
 
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "core", "domain", "errors.go"),
 		"package domain\n\nvar ErrMissing = error(nil)\n",
 	)
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "client", "application", "port", "messages", "repository.go"),

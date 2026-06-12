@@ -5,20 +5,20 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/text"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* ------------------------------------- Repository Scanners ------------------------------------ */
 
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("tools"))
+	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
 	if _, err := testRepositoryScanDriver()(
 		context,
@@ -30,7 +30,7 @@ func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 }
 
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("all"))
+	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
 
 	_, err := testRepositoryScanDriver()(
 		context,
@@ -50,26 +50,26 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	fixtureRoot := t.TempDir()
 	alternateProfile := buildScanDriverPolicyFixture(t)
 	profiles.Write(t, fixtureRoot, alternateProfile)
-	fixtures.WriteFile(t, fixtureRoot, "ALTROOT", "")
-	fixtures.WriteFile(
+	testutil.WriteFile(t, fixtureRoot, "ALTROOT", "")
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		"go.mod",
 		"module example.com/altchat\n\ngo 1.24.5\n",
 	)
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "domain", "errors.go"),
 		"package domain\n\nvar ErrMissing = error(nil)\n",
 	)
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "app", "ports", "message_store.go"),
 		"package ports\n\ntype Message"+"Store interface { ListMessages() }\n",
 	)
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "app", "services", "message_service.go"),
@@ -85,7 +85,7 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 			"\tstore ports.Message"+"Store\n"+
 			"}\n",
 	)
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		fixtureRoot,
 		filepath.Join("internal", "domain", "message.go"),

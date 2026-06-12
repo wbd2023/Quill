@@ -5,11 +5,11 @@ import (
 
 	"ciphera/tools/internal/checks/gopolicy"
 	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Policy Fixture --------------------------------------- */

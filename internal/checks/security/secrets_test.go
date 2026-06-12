@@ -3,14 +3,14 @@ package security
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckSecretsFindsHighConfidenceSecretMarkers(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/secret.txt",
@@ -35,7 +35,7 @@ func TestCheckSecretsFindsHighConfidenceSecretMarkers(t *testing.T) {
 
 func TestCheckSecretsPassesOrdinaryFiles(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(t, repoRoot, "internal/example/doc.txt", "ordinary content\n")
+	testutil.WriteFile(t, repoRoot, "internal/example/doc.txt", "ordinary content\n")
 
 	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
 	if err != nil {

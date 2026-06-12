@@ -3,15 +3,15 @@ package profile_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/testutil"
 )
 
 func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 	t.Parallel()
 
-	config, err := profile.Load(fixtures.RepositoryRoot(t))
+	config, err := profile.Load(testutil.RepositoryRoot(t))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}

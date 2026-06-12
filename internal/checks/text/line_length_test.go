@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/markers"
+	"ciphera/tools/internal/testutil"
 )
 
 func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {
 	repoRoot := t.TempDir()
 	longLine := strings.Repeat("a", 101)
-	path := fixtures.WriteFile(
+	path := testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -40,7 +40,7 @@ func TestCheckLineLengthsHonoursShellAllowMarker(t *testing.T) {
 		"echo \"" + longLine + "\" # " + markers.Text(longLineMarker),
 		"",
 	}, "\n")
-	path := fixtures.WriteFile(
+	path := testutil.WriteFile(
 		t,
 		repoRoot,
 		"tools/test.sh",

@@ -3,14 +3,14 @@ package text
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"tools/test.sh",
@@ -33,7 +33,7 @@ func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
 
 func TestCheckExceptionMarkersAcceptsValidMarkers(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
