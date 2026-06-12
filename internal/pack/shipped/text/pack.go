@@ -1,7 +1,7 @@
 package text
 
 import (
-	textpolicy "ciphera/tools/internal/checks/text/policy"
+	"ciphera/tools/internal/checks/textpolicy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/toolchain"
 )

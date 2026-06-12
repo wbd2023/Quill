@@ -3,8 +3,8 @@ package effective_test
 import (
 	"testing"
 
-	textpolicy "ciphera/tools/internal/checks/text/policy"
-	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
+	"ciphera/tools/internal/checks/textpolicy"
+	"ciphera/tools/internal/checks/vocabularypolicy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/pack/shipped/bash"

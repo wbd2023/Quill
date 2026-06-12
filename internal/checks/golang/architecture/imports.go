@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/gopolicy"
 	"ciphera/tools/internal/style"
 )
 

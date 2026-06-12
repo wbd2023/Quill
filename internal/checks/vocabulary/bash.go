@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
+	"ciphera/tools/internal/checks/vocabularypolicy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/style"
 )

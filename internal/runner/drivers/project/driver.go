@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	projectpolicy "ciphera/tools/internal/checks/project/policy"
+	"ciphera/tools/internal/checks/projectpolicy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"

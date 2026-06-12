@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	textpolicy "ciphera/tools/internal/checks/text/policy"
+	"ciphera/tools/internal/checks/textpolicy"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"

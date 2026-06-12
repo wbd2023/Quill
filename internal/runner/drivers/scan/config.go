@@ -3,9 +3,9 @@ package scan
 import (
 	"fmt"
 
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
-	textpolicy "ciphera/tools/internal/checks/text/policy"
-	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
+	"ciphera/tools/internal/checks/gopolicy"
+	"ciphera/tools/internal/checks/textpolicy"
+	"ciphera/tools/internal/checks/vocabularypolicy"
 	"ciphera/tools/internal/runner"
 )
 

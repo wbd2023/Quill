@@ -1,7 +1,7 @@
 package vocabulary
 
 import (
-	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
+	"ciphera/tools/internal/checks/vocabularypolicy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/style"
 )
