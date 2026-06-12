@@ -2,7 +2,6 @@ package report
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -10,12 +9,6 @@ import (
 )
 
 const tabwriterPadding = 2
-
-func writeJSON(writer io.Writer, value any) (err error) {
-	encoder := json.NewEncoder(writer)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(value)
-}
 
 func writeAlignedColumns(writer io.Writer, columns ...string) (err error) {
 	var buffer bytes.Buffer
