@@ -4,15 +4,15 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/profile/internal/effective"
-	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/profile/internal/profilefixture"
 )
 
 func TestCompileRejectsDuplicateRuleDefinitions(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
-	definitions := fixture.Definitions()
+	definitions := profilefixture.Definitions()
 	definitions.Rules = append(definitions.Rules, definitions.Rules[0])
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "duplicate rule definition")
@@ -21,9 +21,9 @@ func TestCompileRejectsDuplicateRuleDefinitions(t *testing.T) {
 func TestCompileRejectsBlankRuleDefinitionName(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
-	definitions := fixture.Definitions()
+	definitions := profilefixture.Definitions()
 	definitions.Rules[0].Name = " "
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "empty name")
@@ -32,9 +32,9 @@ func TestCompileRejectsBlankRuleDefinitionName(t *testing.T) {
 func TestCompileRejectsBlankRuleDefinitionGroup(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
-	definitions := fixture.Definitions()
+	definitions := profilefixture.Definitions()
 	definitions.Rules[0].Group = ""
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "empty group")
@@ -43,9 +43,9 @@ func TestCompileRejectsBlankRuleDefinitionGroup(t *testing.T) {
 func TestCompileRejectsBlankToolDefinitionName(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
-	definitions := fixture.Definitions()
+	definitions := profilefixture.Definitions()
 	definitions.Tools[0].Name = " "
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "empty name")
@@ -54,9 +54,9 @@ func TestCompileRejectsBlankToolDefinitionName(t *testing.T) {
 func TestCompileRejectsDuplicateToolDefinitions(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
-	definitions := fixture.Definitions()
+	definitions := profilefixture.Definitions()
 	definitions.Tools = append(definitions.Tools, definitions.Tools[0])
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "duplicate tool definition")

@@ -1,4 +1,4 @@
-package fixture
+package profilefixture
 
 import (
 	"ciphera/tools/internal/policy"
@@ -7,29 +7,29 @@ import (
 )
 
 const (
-	// Target is the primary target fixture.
+	// Target is the primary target profilefixture.
 	Target = "test_target"
-	// OtherTarget is the secondary target fixture.
+	// OtherTarget is the secondary target profilefixture.
 	OtherTarget = "other_target"
-	// FileSet is the default file set fixture.
+	// FileSet is the default file set profilefixture.
 	FileSet = "test_files"
-	// Language is the default language fixture.
+	// Language is the default language profilefixture.
 	Language = "test"
-	// PathRole is the default path role fixture.
+	// PathRole is the default path role profilefixture.
 	PathRole = "test_paths"
-	// Requirement is the default requirement ID fixture.
+	// Requirement is the default requirement ID profilefixture.
 	Requirement = "1.1." + "test-rule"
-	// Rule is the default rule ID fixture.
+	// Rule is the default rule ID profilefixture.
 	Rule = "test/rule"
-	// Scope is the default repository scope fixture.
+	// Scope is the default repository scope profilefixture.
 	Scope = style.Scope("test")
-	// Tool is the default tool ID fixture.
+	// Tool is the default tool ID profilefixture.
 	Tool = "test/tool"
 )
 
 /* -------------------------------------- Profile Fixtures -------------------------------------- */
 
-// Config returns a valid minimal profile config fixture.
+// Config returns a valid minimal profile config profilefixture.
 func Config() (config policy.Config) {
 	return policy.Config{
 		SchemaVersion: policy.SchemaVersion,

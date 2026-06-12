@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/profile/internal/profilefixture"
 	"ciphera/tools/internal/profile/internal/validation"
 	"ciphera/tools/internal/style"
 )
@@ -14,7 +14,7 @@ import (
 func TestCheckRequiresCurrentSchemaVersion(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.SchemaVersion = 2
 	err := validation.Check(config)
@@ -26,7 +26,7 @@ func TestCheckRequiresCurrentSchemaVersion(t *testing.T) {
 func TestCheckRejectsUnknownDefaultScope(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.Repository.DefaultScope = "unknown"
 	err := validation.Check(config)
@@ -36,7 +36,7 @@ func TestCheckRejectsUnknownDefaultScope(t *testing.T) {
 func TestCheckRejectsEmptyRootMarker(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.Repository.RootMarkers = []string{""}
 	err := validation.Check(config)
@@ -58,7 +58,7 @@ func TestCheckRejectsEmptyScopeRoot(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			config := fixture.Config()
+			config := profilefixture.Config()
 
 			config.Repository.ScopeRoots[style.Scope("tools")] = test.roots
 			err := validation.Check(config)
@@ -76,7 +76,7 @@ func TestCheckRejectsEmptyScopeRoot(t *testing.T) {
 func TestCheckAllowsProfileOwnedPathRoles(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.PathRoles["local_policy"] = []string{"internal/local/"}
 	if err := validation.Check(config); err != nil {
@@ -87,7 +87,7 @@ func TestCheckAllowsProfileOwnedPathRoles(t *testing.T) {
 func TestCheckRejectsInvalidPathRole(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.PathRoles["local_policy"] = []string{"internal/local/", " "}
 	err := validation.Check(config)
@@ -97,7 +97,7 @@ func TestCheckRejectsInvalidPathRole(t *testing.T) {
 func TestCheckRejectsUnknownFileSetScope(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.FileSets[0].Include.Paths[style.Scope("unknown")] = []string{"unknown/"}
 	err := validation.Check(config)
@@ -109,7 +109,7 @@ func TestCheckRejectsUnknownFileSetScope(t *testing.T) {
 func TestCheckRejectsDuplicateEnabledPacks(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.EnabledPacks = append(config.EnabledPacks, config.EnabledPacks[0])
 	err := validation.Check(config)
@@ -119,7 +119,7 @@ func TestCheckRejectsDuplicateEnabledPacks(t *testing.T) {
 func TestCheckRejectsDisabledPackConfig(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 	config.PackConfigs = policy.PackConfigs{
 		"disabled": policy.PackConfig{"enabled": true},
 	}
@@ -131,7 +131,7 @@ func TestCheckRejectsDisabledPackConfig(t *testing.T) {
 func TestCheckRejectsEmptyPackConfig(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 	config.PackConfigs = policy.PackConfigs{
 		config.EnabledPacks[0]: policy.PackConfig{},
 	}
@@ -143,7 +143,7 @@ func TestCheckRejectsEmptyPackConfig(t *testing.T) {
 func TestCheckRejectsUnknownRuleScope(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.Rules[0].Scope = "unknown"
 	err := validation.Check(config)
@@ -153,7 +153,7 @@ func TestCheckRejectsUnknownRuleScope(t *testing.T) {
 func TestCheckRejectsMalformedRequirementID(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 
 	config.Rules[0].RequirementIDs = []string{"not-a-requirement-id"}
 	err := validation.Check(config)

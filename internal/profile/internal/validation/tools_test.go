@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/profile/internal/profilefixture"
 	"ciphera/tools/internal/profile/internal/validation"
 )
 
@@ -36,7 +36,7 @@ func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			config := fixture.Config()
+			config := profilefixture.Config()
 
 			test.adjust(&config.Tools[0])
 			err := validation.Check(config)

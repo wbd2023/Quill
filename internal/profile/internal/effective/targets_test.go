@@ -5,16 +5,16 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/profile/internal/effective"
-	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/profile/internal/profilefixture"
 )
 
 func TestCompileInfersTargetsFromRuleScope(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
-	want := []string{fixture.Target, fixture.OtherTarget}
+	config := profilefixture.Config()
+	want := []string{profilefixture.Target, profilefixture.OtherTarget}
 
-	compiled, err := effective.Compile(config, fixture.TargetCommandDefinitions())
+	compiled, err := effective.Compile(config, profilefixture.TargetCommandDefinitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
@@ -32,19 +32,19 @@ func TestCompileInfersTargetsFromRuleScope(t *testing.T) {
 func TestCompileRejectsMissingInferredTargets(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 	config.Targets = nil
 
-	_, err := effective.Compile(config, fixture.TargetCommandDefinitions())
+	_, err := effective.Compile(config, profilefixture.TargetCommandDefinitions())
 	requireErrorContains(t, err, "has no test targets")
 }
 
 func TestCompileRejectsTargetCheckWithoutCheckPaths(t *testing.T) {
 	t.Parallel()
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 	config.Targets[0].CheckPaths = nil
 
-	_, err := effective.Compile(config, fixture.TargetCheckDefinitions())
+	_, err := effective.Compile(config, profilefixture.TargetCheckDefinitions())
 	requireErrorContains(t, err, "must define check_paths")
 }

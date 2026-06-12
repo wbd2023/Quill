@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/effective"
-	"ciphera/tools/internal/profile/internal/fixture"
+	"ciphera/tools/internal/profile/internal/profilefixture"
 	"ciphera/tools/internal/style"
 )
 
@@ -19,7 +19,7 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 		Check: style.ExecutionSpec{
 			Kind: style.ExecutionFileCommand,
 			Detail: style.FileCommandExecution{
-				ToolID: fixture.Tool,
+				ToolID: profilefixture.Tool,
 			},
 		},
 	})
@@ -43,7 +43,7 @@ func TestCompileRejectsMismatchedExecutionKind(t *testing.T) {
 		Check: style.ExecutionSpec{
 			Kind: style.ExecutionFileCommand,
 			Detail: style.ToolchainExecution{
-				ToolIDs: []string{fixture.Tool},
+				ToolIDs: []string{profilefixture.Tool},
 			},
 		},
 	})
@@ -74,8 +74,8 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 			Kind: style.ExecutionToolchain,
 			Detail: style.ToolchainExecution{
 				ToolIDs: []string{
-					fixture.Tool,
-					fixture.Tool,
+					profilefixture.Tool,
+					profilefixture.Tool,
 				},
 			},
 		},
@@ -110,22 +110,22 @@ func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err e
 		definition.Group = "test"
 	}
 
-	config := fixture.Config()
+	config := profilefixture.Config()
 	config.Rules = []policy.RuleBinding{
 		{
 			RuleID:         definition.ID,
 			Enforcement:    style.EnforcementRequired,
 			Scope:          config.Repository.DefaultScope,
-			RequirementIDs: []string{fixture.Requirement},
+			RequirementIDs: []string{profilefixture.Requirement},
 		},
 	}
 	config.Tools = []policy.PinnedTool{
-		{ID: fixture.Tool, Version: "1.0.0"},
+		{ID: profilefixture.Tool, Version: "1.0.0"},
 	}
 
 	_, err = effective.Compile(config, style.Definitions{
 		Tools: []style.Tool{
-			{ID: fixture.Tool, Name: "Test tool"},
+			{ID: profilefixture.Tool, Name: "Test tool"},
 		},
 		Rules: []style.RuleDefinition{definition},
 	})
