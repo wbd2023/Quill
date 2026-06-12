@@ -4,50 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
-
 	"github.com/google/go-cmp/cmp"
 )
-
-/* ------------------------------------------ Fixtures ------------------------------------------ */
-
-func testStyleGuideConfig() (config Config) {
-	return Config{
-		Filename: "STYLE.md",
-		IDScheme: requirementid.SectionSlug,
-	}
-}
-
-func styleDocument(lines ...string) (document string) {
-	return strings.Join(lines, "\n") + "\n"
-}
-
-/* --------------------------------------- Parser Helpers --------------------------------------- */
-
-func parseDocument(t *testing.T, contents string) (document Document) {
-	t.Helper()
-
-	document, err := Parse([]byte(contents), testStyleGuideConfig())
-	if err != nil {
-		t.Fatalf("Parse: %v", err)
-	}
-
-	return document
-}
-
-func parseHeadings(t *testing.T, contents string) (headings []Heading) {
-	t.Helper()
-
-	return parseDocument(t, contents).Headings
-}
-
-func parseRequirements(t *testing.T, contents string) (requirements []Requirement) {
-	t.Helper()
-
-	return parseDocument(t, contents).Requirements
-}
-
-/* ----------------------------------------- Assertions ----------------------------------------- */
 
 func requireDocument(t *testing.T, document Document, expected Document) {
 	t.Helper()
