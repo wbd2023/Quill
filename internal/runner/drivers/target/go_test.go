@@ -3,16 +3,16 @@ package target
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
 )
 
 func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("app"))
+	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("app"))
 
 	spec := style.ExecutionSpec{
 		Kind: style.ExecutionTargetCommand,
@@ -35,7 +35,7 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 }
 
 func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
-	context := testContext(t, fixtures.RepositoryRoot(t), style.Scope("tools"))
+	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
 	spec := style.ExecutionSpec{
 		Kind: style.ExecutionTargetCommand,

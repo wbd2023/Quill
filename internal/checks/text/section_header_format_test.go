@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
 		builder.WriteString("const value = 1\n")
 	}
 
-	fixtures.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
 
 	result, err := CheckSectionHeaders(
 		repoRoot,
@@ -37,7 +37,7 @@ func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
 func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 44) + " Types " + strings.Repeat("-", 43) + " */"
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -58,7 +58,7 @@ func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
 func TestCheckSectionHeadersCountsTabsAsFourColumns(t *testing.T) {
 	repoRoot := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + "\tTypes " + strings.Repeat("-", 43) + " */"
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",

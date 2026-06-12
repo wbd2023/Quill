@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* ------------------------------------------ File Sets ----------------------------------------- */
@@ -16,9 +16,9 @@ func TestCollectFileSetFilesUsesProfileDefinedScopeFilters(t *testing.T) {
 	repoRoot := t.TempDir()
 	profiles.Write(t, repoRoot, profiles.Current(t))
 
-	readme := fixtures.WriteFile(t, repoRoot, "README.md", "# App\n")
-	fixtures.WriteFile(t, repoRoot, "internal/guide.md", "# Internal\n")
-	toolsReadme := fixtures.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
+	readme := testutil.WriteFile(t, repoRoot, "README.md", "# App\n")
+	testutil.WriteFile(t, repoRoot, "internal/guide.md", "# Internal\n")
+	toolsReadme := testutil.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
 
 	context := testContext(t, repoRoot, style.Scope("app"))
 
@@ -42,7 +42,7 @@ func TestCollectFileSetFilesDoesNotUseDefaultScopeAsWidestScope(t *testing.T) {
 	config.Repository.DefaultScope = style.Scope("app")
 	profiles.Write(t, repoRoot, config)
 
-	toolsReadme := fixtures.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
+	toolsReadme := testutil.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
 
 	context := testContext(t, repoRoot, style.Scope("all"))
 
@@ -60,7 +60,7 @@ func TestCollectFileSetFilesReturnsEmptySetWhenScopedIncludesDoNotOverlap(t *tes
 	repoRoot := t.TempDir()
 	profiles.Write(t, repoRoot, profiles.Current(t))
 
-	fixtures.WriteFile(t, repoRoot, "README.md", "# App\n")
+	testutil.WriteFile(t, repoRoot, "README.md", "# App\n")
 
 	context := testContext(t, repoRoot, style.Scope("tools"))
 
@@ -88,9 +88,9 @@ func TestCollectFileSetFilesRejectsUnknownSet(t *testing.T) {
 func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 	repoRoot := t.TempDir()
 	profiles.Write(t, repoRoot, profiles.Current(t))
-	makefile := fixtures.WriteFile(t, repoRoot, "Makefile", "all:\n\t@true\n")
-	config := fixtures.WriteFile(t, repoRoot, "style.local.toml", "enabled = true\n")
-	checksum := fixtures.WriteFile(t, repoRoot, "go.sum", strings.Repeat("x", 120)+"\n")
+	makefile := testutil.WriteFile(t, repoRoot, "Makefile", "all:\n\t@true\n")
+	config := testutil.WriteFile(t, repoRoot, "style.local.toml", "enabled = true\n")
+	checksum := testutil.WriteFile(t, repoRoot, "go.sum", strings.Repeat("x", 120)+"\n")
 
 	context := testContext(t, repoRoot, style.Scope("all"))
 	files, err := CollectFileSetFiles(context, "line_length")

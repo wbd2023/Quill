@@ -4,29 +4,29 @@ import (
 	"slices"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* --------------------------------------- File Collection -------------------------------------- */
 
 func TestCollectFilesSkipsExcludedDirectoriesAndGeneratedFiles(t *testing.T) {
 	repoRoot := t.TempDir()
-	keptFile := fixtures.WriteFile(t, repoRoot, "internal/example/kept.go", "package example\n")
-	testdataFile := fixtures.WriteFile(
+	keptFile := testutil.WriteFile(t, repoRoot, "internal/example/kept.go", "package example\n")
+	testdataFile := testutil.WriteFile(
 		t,
 		repoRoot,
 		"testdata/example/skipped.go",
 		"package example\n",
 	)
-	thirdPartyFile := fixtures.WriteFile(
+	thirdPartyFile := testutil.WriteFile(
 		t,
 		repoRoot,
 		"third_party/example/skipped.go",
 		"package example\n",
 	)
-	generatedFile := fixtures.WriteFile(
+	generatedFile := testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/generated.go",
@@ -57,7 +57,7 @@ func TestCollectFilesSkipsExcludedDirectoriesAndGeneratedFiles(t *testing.T) {
 
 func TestCollectFilesKeepsProseMentionsOfGeneratedMarker(t *testing.T) {
 	repoRoot := t.TempDir()
-	markdownFile := fixtures.WriteFile(
+	markdownFile := testutil.WriteFile(
 		t,
 		repoRoot,
 		"STYLE.md",
@@ -81,9 +81,9 @@ func TestCollectFilesKeepsProseMentionsOfGeneratedMarker(t *testing.T) {
 
 func TestCollectFilesInScopesDeduplicatesRoots(t *testing.T) {
 	repoRoot := t.TempDir()
-	commandFile := fixtures.WriteFile(t, repoRoot, "cmd/main.go", "package main\n")
-	internalFile := fixtures.WriteFile(t, repoRoot, "internal/app.go", "package internal\n")
-	toolsFile := fixtures.WriteFile(t, repoRoot, "tools/main.go", "package main\n")
+	commandFile := testutil.WriteFile(t, repoRoot, "cmd/main.go", "package main\n")
+	internalFile := testutil.WriteFile(t, repoRoot, "internal/app.go", "package internal\n")
+	toolsFile := testutil.WriteFile(t, repoRoot, "tools/main.go", "package main\n")
 
 	repository := profiles.RepositoryConfig(t)
 	repository.ScopeRoots = map[style.Scope][]string{
@@ -107,7 +107,7 @@ func TestCollectFilesInScopesDeduplicatesRoots(t *testing.T) {
 
 func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
 	repoRoot := t.TempDir()
-	configFile := fixtures.WriteFile(
+	configFile := testutil.WriteFile(
 		t,
 		repoRoot,
 		"style.toml",

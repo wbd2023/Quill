@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/checks/textpolicy"
-	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {

@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -158,7 +158,7 @@ func toolByID(t *testing.T, toolID string) (tool style.Tool) {
 func readRepoFile(t *testing.T, relativePath string) (contents string) {
 	t.Helper()
 
-	path := filepath.Join(fixtures.RepositoryRoot(t), filepath.FromSlash(relativePath))
+	path := filepath.Join(testutil.RepositoryRoot(t), filepath.FromSlash(relativePath))
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read %s: %v", relativePath, err)

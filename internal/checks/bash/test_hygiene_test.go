@@ -3,14 +3,14 @@ package bash
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"test/smoke/example_test.sh",
@@ -39,7 +39,7 @@ func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
 
 func TestCheckTestHygieneAcceptsTrapCleanup(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"test/smoke/example_test.sh",

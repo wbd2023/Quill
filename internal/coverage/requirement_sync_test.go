@@ -3,12 +3,12 @@ package coverage
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/styleguide"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* -------------------------------------------- Sync -------------------------------------------- */
@@ -93,7 +93,7 @@ func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement)
 	t.Helper()
 
 	config := profiles.Current(t)
-	document, err := styleguide.Load(fixtures.RepositoryRoot(t), styleguide.Config{
+	document, err := styleguide.Load(testutil.RepositoryRoot(t), styleguide.Config{
 		Filename: config.StyleGuide.Path,
 		IDScheme: config.StyleGuide.IDScheme,
 	})

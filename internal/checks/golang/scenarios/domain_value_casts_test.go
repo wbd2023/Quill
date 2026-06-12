@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* ----------------------------------- Domain Identifier Casts ---------------------------------- */

@@ -6,8 +6,8 @@ import (
 
 	"ciphera/tools/internal/checks/golang"
 	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Rule Selection --------------------------------------- */

@@ -3,9 +3,9 @@ package shipped
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Rule Contracts --------------------------------------- */

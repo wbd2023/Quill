@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestStylePlatformPassesGoStyleChecks(t *testing.T) {
-	toolsRoot := fixtures.ToolsRoot(t)
+	toolsRoot := testutil.ToolsRoot(t)
 	config := profiles.Current(t)
 
 	result, err := golang.CheckDirectories(

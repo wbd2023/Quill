@@ -3,14 +3,14 @@ package text
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"internal/example/example.go",
@@ -39,7 +39,7 @@ func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 
 func TestCheckMaintenanceMarkersAcceptsConcreteTodoText(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		"README.md",

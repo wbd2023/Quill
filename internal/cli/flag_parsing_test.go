@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
+	"ciphera/tools/internal/testutil"
 )
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
@@ -102,7 +102,7 @@ func TestResolveRepoRootAutoDetectsRepository(t *testing.T) {
 		t.Fatalf("resolveRepoRoot: %v", err)
 	}
 
-	if repositoryRoot != fixtures.RepositoryRoot(t) {
+	if repositoryRoot != testutil.RepositoryRoot(t) {
 		t.Fatalf("unexpected repo root %q", repositoryRoot)
 	}
 }
@@ -118,9 +118,9 @@ func TestFindRepoRootRejectsMissingRepository(t *testing.T) {
 
 func TestFindRepoRootRejectsLegacyRootWithoutStyleProfile(t *testing.T) {
 	legacyRoot := t.TempDir()
-	fixtures.WriteFile(t, legacyRoot, "STYLE.md", "# Style\n")
+	testutil.WriteFile(t, legacyRoot, "STYLE.md", "# Style\n")
 
-	fixtures.WriteFile(t, legacyRoot, "tools/go.mod", "module example.com/tools\n")
+	testutil.WriteFile(t, legacyRoot, "tools/go.mod", "module example.com/tools\n")
 
 	if _, err := findRepoRoot(legacyRoot); err == nil {
 		t.Fatal("expected legacy repo root without style.toml to be rejected")

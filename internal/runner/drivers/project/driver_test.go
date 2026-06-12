@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/checks/projectpolicy"
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	projectpack "ciphera/tools/internal/pack/shipped/project"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
@@ -18,7 +18,7 @@ func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
 
 func TestCheckCommandsAcceptsExpectedShape(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		filepath.Join("mk", "quality.mk"),
@@ -52,7 +52,7 @@ style-coverage: $(STYLE_BIN)
 
 func TestCheckCommandsRejectsMissingRequiredRecipe(t *testing.T) {
 	repoRoot := t.TempDir()
-	fixtures.WriteFile(
+	testutil.WriteFile(
 		t,
 		repoRoot,
 		filepath.Join("mk", "quality.mk"),

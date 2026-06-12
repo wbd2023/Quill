@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestGoStyleRejectsMissingScanRoot(t *testing.T) {
@@ -14,7 +14,7 @@ func TestGoStyleRejectsMissingScanRoot(t *testing.T) {
 	config := profiles.Current(t)
 
 	if _, err := golang.CheckDirectories(
-		fixtures.RepositoryRoot(t),
+		testutil.RepositoryRoot(t),
 		[]string{missingRoot},
 		config.Repository,
 		config.PathRoles,

@@ -3,15 +3,15 @@ package profile_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
-	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/testutil"
+	"ciphera/tools/internal/testutil/profiles"
 )
 
 func TestLoadReadsCurrentProfile(t *testing.T) {
 	t.Parallel()
 
-	config, err := profile.Load(fixtures.RepositoryRoot(t))
+	config, err := profile.Load(testutil.RepositoryRoot(t))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestLoadWrapsProfilePathOnParseError(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
-	fixtures.WriteFile(t, root, profile.DefaultFilename, "schema_version = 2\n")
+	testutil.WriteFile(t, root, profile.DefaultFilename, "schema_version = 2\n")
 
 	_, err := profile.Load(root)
 	requireErrorContains(t, err, profile.DefaultFilename)

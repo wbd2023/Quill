@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/fixtures"
+	"ciphera/tools/internal/testutil"
 )
 
 func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 	requirementIDPattern := regexp.MustCompile(`\b[0-9]+\.[0-9]+\.[a-z][a-z0-9-]*\b`)
-	repoRoot := fixtures.RepositoryRoot(t)
+	repoRoot := testutil.RepositoryRoot(t)
 	internalRoot := filepath.Join(repoRoot, "tools", "internal")
 
 	err := filepath.WalkDir(
