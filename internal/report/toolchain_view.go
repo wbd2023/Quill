@@ -1,5 +1,10 @@
 package report
 
+type ToolchainView struct {
+	Result   ToolchainResult
+	AllValid bool
+}
+
 func NewToolchainView(result ToolchainResult) (view ToolchainView) {
 	view = ToolchainView{
 		Result:   result,

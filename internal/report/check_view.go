@@ -2,6 +2,17 @@ package report
 
 import "ciphera/tools/internal/style"
 
+type CheckGroup struct {
+	Group   style.RuleGroup
+	Entries []CheckEntry
+}
+
+type CheckView struct {
+	Result  CheckResult
+	Summary CheckSummary
+	Groups  []CheckGroup
+}
+
 func NewCheckEntry(
 	rule style.Rule,
 	status style.CheckStatus,
