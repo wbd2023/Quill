@@ -10,7 +10,7 @@ import (
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -19,7 +19,7 @@ var errViolationsFound = errors.New("violations found")
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
-func projectDriver(checks binding.ProjectChecks) (driver runner.Driver) {
+func projectDriver(checks runtimebinding.ProjectChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
@@ -42,7 +42,7 @@ func projectDriver(checks binding.ProjectChecks) (driver runner.Driver) {
 	}
 }
 
-func CheckEnforcementLevels() (check binding.ProjectCheck) {
+func CheckEnforcementLevels() (check runtimebinding.ProjectCheck) {
 	return func(
 		_ runner.Context,
 		_ style.ProjectExecution,
@@ -52,7 +52,7 @@ func CheckEnforcementLevels() (check binding.ProjectCheck) {
 	}
 }
 
-func CheckExcludedDirectories() (check binding.ProjectCheck) {
+func CheckExcludedDirectories() (check runtimebinding.ProjectCheck) {
 	return func(
 		context runner.Context,
 		_ style.ProjectExecution,
@@ -62,7 +62,7 @@ func CheckExcludedDirectories() (check binding.ProjectCheck) {
 	}
 }
 
-func CheckCommands(projectPackID string) (check binding.ProjectCheck) {
+func CheckCommands(projectPackID string) (check runtimebinding.ProjectCheck) {
 	return func(
 		context runner.Context,
 		_ style.ProjectExecution,

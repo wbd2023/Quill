@@ -3,11 +3,11 @@ package scan
 import (
 	"ciphera/tools/internal/checks/bash"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
-func CheckBashMagicValues() (scanner binding.RepositoryScanner) {
+func CheckBashMagicValues() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -20,7 +20,7 @@ func CheckBashMagicValues() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckBashSafety() (scanner binding.RepositoryScanner) {
+func CheckBashSafety() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -29,7 +29,7 @@ func CheckBashSafety() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckBashStructure() (scanner binding.RepositoryScanner) {
+func CheckBashStructure() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,
@@ -42,7 +42,7 @@ func CheckBashStructure() (scanner binding.RepositoryScanner) {
 	}
 }
 
-func CheckBashTestHygiene() (scanner binding.RepositoryScanner) {
+func CheckBashTestHygiene() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
 		_ style.RepositoryScanExecution,

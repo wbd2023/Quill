@@ -11,7 +11,7 @@ import (
 	"ciphera/tools/internal/pack/shipped/text"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/binding"
+	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
 
@@ -131,7 +131,7 @@ func repositoryScanSpec(scanner string) (spec style.ExecutionSpec) {
 }
 
 func testRepositoryScanDriver() (driver runner.Driver) {
-	scanners := binding.NewRepositoryScanners()
+	scanners := runtimebinding.NewRepositoryScanners()
 	scanners.Add(text.ScannerASCII, CheckASCII())
 	scanners.Add(golang.ScannerArchitecture, CheckGoArchitecture(golang.PackID))
 	scanners.Add(vocabulary.ScannerVocabulary, CheckVocabulary(vocabulary.PackID))

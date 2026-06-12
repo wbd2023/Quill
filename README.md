@@ -222,6 +222,9 @@ The style platform uses balanced granularity:
 - `internal/runner/drivers/`
   - Driver facade that maps Execution Kinds to generic driver families and accepts explicit
     Runtime Bindings for scanner IDs, target actions, target-check languages, and project checks.
+- `internal/runner/drivers/internal/runtimebinding/`
+  - Runtime Binding function contracts and duplicate-detecting registries shared by the driver
+    facade and concrete driver-family packages.
 - `internal/runner/drivers/{command,project,scan,target}/`
   - Execution-family Driver implementations owned behind the `runner/drivers` facade.
 - `internal/filewalk/`
