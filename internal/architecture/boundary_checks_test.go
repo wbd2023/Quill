@@ -11,7 +11,7 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 		},
 		{
 			name:      "go policy avoids Check implementations",
-			directory: "internal/checks/golang/policy",
+			directory: "internal/checks/gopolicy",
 			forbidden: []string{
 				"ciphera/tools/internal/style",
 				"ciphera/tools/internal/pack/shipped",
@@ -115,7 +115,7 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 func packPolicyBoundaryCase(packID string) (testCase importBoundaryCase) {
 	return importBoundaryCase{
 		name:      packID + " Pack Policy avoids Check implementations and orchestration",
-		directory: "internal/checks/" + packID + "/policy",
+		directory: "internal/checks/" + packID + "policy",
 		forbidden: []string{
 			"ciphera/tools/internal/cli",
 			"ciphera/tools/internal/coverage",

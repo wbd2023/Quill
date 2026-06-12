@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	projectpolicy "ciphera/tools/internal/checks/project/policy"
+	"ciphera/tools/internal/checks/projectpolicy"
 	"ciphera/tools/internal/fixtures"
 	"ciphera/tools/internal/fixtures/profiles"
 	projectpack "ciphera/tools/internal/pack/shipped/project"

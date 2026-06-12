@@ -152,7 +152,8 @@ Production packages must keep these boundaries:
   `drivers.Bindings` without importing Shipped Packs, profiles, reports, or installation packages.
   Its command, project, scan, and target subpackages stay behind the top-level facade.
 - Concrete Check packages import no `profile`; Pack Policy packages such as
-  `internal/checks/<pack>/policy/` own typed Pack Policy and avoid Check implementations,
+  `internal/checks/gopolicy`, `internal/checks/textpolicy`, `internal/checks/projectpolicy`,
+  and `internal/checks/vocabularypolicy` own typed Pack Policy and avoid Check implementations,
   runners, profiles, and Shipped Packs.
 - Go Checks import no `pack/shipped`, and Go Check policy stays separate from Check
   implementations.
@@ -235,12 +236,12 @@ The style platform uses balanced granularity:
     `<surface>_view.go`, and `<surface>_types.go` where those roles exist.
 - `internal/checks/golang/`
   - Go Check facade and package family. The root package walks Go files and reports diagnostics;
-    subpackages own check IDs, Go Pack Policy, shared analysis primitives, syntax checks,
+    subpackages own check IDs, shared analysis primitives, syntax checks,
     structure checks, relationship checks, architecture checks, test checks, and scenario tests.
-- `internal/checks/<pack>/policy/`
-  - Pack Policy subpackages such as `internal/checks/text/policy/`,
-    `internal/checks/project/policy/`, and `internal/checks/vocabulary/policy/` own typed
-    Pack Policy, codecs, and validation for Checks that need Profile-supplied policy.
+- `internal/checks/{gopolicy,textpolicy,projectpolicy,vocabularypolicy}/`
+  - Domain-named Pack Policy packages own typed Pack Policy, codecs, and validation for
+    Checks that need Profile-supplied policy. These packages use names that match their import
+    paths, so callers do not need aliases for ordinary use.
 - `internal/checks/text/`
   - Executable Text scanners for line length, ASCII, exception markers, maintenance markers,
     and section headers.

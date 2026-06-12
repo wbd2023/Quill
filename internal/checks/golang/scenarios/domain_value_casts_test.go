@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/gopolicy"
 	"ciphera/tools/internal/fixtures/profiles"
 )
 

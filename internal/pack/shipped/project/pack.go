@@ -1,7 +1,7 @@
 package project
 
 import (
-	projectpolicy "ciphera/tools/internal/checks/project/policy"
+	"ciphera/tools/internal/checks/projectpolicy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/style"

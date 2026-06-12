@@ -7,8 +7,8 @@ import (
 
 	"ciphera/tools/internal/checks/golang/analysis"
 	"ciphera/tools/internal/checks/golang/check"
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
 	"ciphera/tools/internal/checks/golang/relationships"
+	"ciphera/tools/internal/checks/gopolicy"
 	"ciphera/tools/internal/policy"
 )
 

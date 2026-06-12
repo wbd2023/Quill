@@ -1,7 +1,7 @@
 package golang
 
 import (
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/gopolicy"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/toolchain"
 )

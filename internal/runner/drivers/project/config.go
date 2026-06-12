@@ -3,7 +3,7 @@ package project
 import (
 	"fmt"
 
-	projectpolicy "ciphera/tools/internal/checks/project/policy"
+	"ciphera/tools/internal/checks/projectpolicy"
 	"ciphera/tools/internal/runner"
 )
 

@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/gopolicy"
 )
 
 /* --------------------------------------- Type-Aware Scan -------------------------------------- */

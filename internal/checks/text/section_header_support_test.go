@@ -3,7 +3,7 @@ package text
 import (
 	"testing"
 
-	textpolicy "ciphera/tools/internal/checks/text/policy"
+	"ciphera/tools/internal/checks/textpolicy"
 	"ciphera/tools/internal/fixtures/profiles"
 )
 

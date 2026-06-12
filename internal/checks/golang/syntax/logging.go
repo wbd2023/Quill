@@ -6,7 +6,7 @@ import (
 	"go/token"
 
 	"ciphera/tools/internal/checks/golang/analysis"
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
+	"ciphera/tools/internal/checks/gopolicy"
 )
 
 /* ------------------------------------- Structured Logging ------------------------------------- */

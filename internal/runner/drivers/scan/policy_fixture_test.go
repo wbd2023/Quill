@@ -3,8 +3,8 @@ package scan
 import (
 	"testing"
 
-	gopolicy "ciphera/tools/internal/checks/golang/policy"
-	vocabularypolicy "ciphera/tools/internal/checks/vocabulary/policy"
+	"ciphera/tools/internal/checks/gopolicy"
+	"ciphera/tools/internal/checks/vocabularypolicy"
 	"ciphera/tools/internal/fixtures/profiles"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
