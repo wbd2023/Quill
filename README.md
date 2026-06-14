@@ -171,89 +171,101 @@ The style platform uses balanced granularity:
 - Generated and machine-maintained files such as `go.sum` and `package-lock.json` are excluded from
   aesthetic file-shape judgement.
 
-## Implementation
+## Directory Layout
 
-- `cmd/style/`
-  - Go CLI entrypoint for `bin/style`.
-- `internal/style/`
-  - Shared style-platform vocabulary: levels, scopes, check statuses, diagnostics, execution
-    results, effective rules, tool policy, and typed execution specs.
-- `internal/policy/`
-  - Project policy value types and profile vocabulary such as scopes, path roles, Targets,
-    Pack configs, and rule bindings.
-- `internal/toolchain/`
-  - Installed-tool capability and status values, status indexing, command lookup, Tool health
-    inspection, version detection, sorting, and issue helpers.
-- `internal/runtime/`
-  - Command execution, command environment layout, and repository-local tool directories.
-- `internal/installer/`
-  - Pinned tool installation, downloads, archive extraction, and lockfile validation.
-- `internal/profile/`
-  - Style Profile facade: loading, parsing, formatting, validation, and Effective Profile
-    compilation.
-- `internal/profile/toml/`
-  - Persisted `style.toml` schema decoding, encoding, and conversion to policy values.
-- `internal/profile/internal/validation/`
-  - Internal consistency checks for typed Profile policy values.
-- `internal/profile/internal/effective/`
-  - Effective Profile compilation from resolved Profile policy and Pack registry style definitions.
-- `internal/pack/`
-  - Neutral Pack definitions, catalogues, registries, and selection validation.
-- `internal/pack/shipped/`
-  - Shipped Pack catalogue facade and default registry assembly.
-- `internal/pack/shipped/<pack>/`
-  - Shipped Pack definitions, rule declarations, Tool needs, file-set defaults, and Pack policy
-    wiring. Multi-role Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`;
-    small Packs stay flat until the split improves locality. Packs reference canonical Tool IDs
-    from `internal/pack/shipped/tool/`.
-- `internal/pack/shipped/tool/`
-  - Reusable shipped Tool IDs, capabilities, install kinds, and version kinds.
-- `internal/pack/shipped/bindings/`
-  - Shipped Runtime Binding table from scanner IDs, target actions, target-check languages, and
-    project check IDs to the generic `runner/drivers` facade.
-- `internal/coverage/`
-  - Pure STYLE.md/profile/rule graph coverage assembly.
-- `internal/styleguide/`
-  - Pure STYLE.md parser, requirement metadata, verification modes, and exception-marker helpers.
-- `internal/cli/`
-  - Command parsing, repository-root resolution, and public CLI UX.
-- `internal/runner/`
-  - Generic rule/fix execution through injected Drivers, status mapping, and policy-owned file-set
-    selection.
-- `internal/runner/drivers/`
-  - Driver facade that maps Execution Kinds to generic driver families and accepts explicit
-    Runtime Bindings for scanner IDs, target actions, target-check languages, and project checks.
-- `internal/runner/drivers/internal/runtimebinding/`
-  - Runtime Binding function contracts and duplicate-detecting registries shared by the driver
-    facade and concrete driver-family packages.
-- `internal/runner/drivers/{command,project,scan,target}/`
-  - Execution-family Driver implementations owned behind the `runner/drivers` facade.
-- `internal/filewalk/`
-  - Repository file collection and generated-file filtering shared by runners and scanners.
-- `internal/report/`
-  - Text and explicit JSON DTO renderers for checks, coverage, and tool status. Report
-    surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`,
-    and `<surface>_view.go` where those roles exist.
-- `internal/checks/golang/`
-  - Go Check facade and package family. The root package walks Go files and reports diagnostics;
-    subpackages own check IDs, shared analysis primitives, syntax checks,
-    structure checks, relationship checks, architecture checks, test checks, and scenario tests.
-- `internal/checks/{gopolicy,textpolicy,projectpolicy,vocabularypolicy}/`
-  - Domain-named Pack Policy packages own typed Pack Policy, codecs, and validation for
-    Checks that need Profile-supplied policy. These packages use names that match their import
-    paths, so callers do not need aliases for ordinary use.
-- `internal/checks/text/`
-  - Executable Text scanners for line length, ASCII, exception markers, maintenance markers,
-    and section headers.
-- `internal/checks/security/`
-  - Security scanners such as committed-secret detection.
-- `internal/checks/vocabulary/`
-  - Executable cross-language project-term vocabulary scanner.
-- `internal/checks/bash/`
-  - Bash-specific script structure, safety, magic-value, and test-hygiene scanners.
-- `internal/testutil/`
-  - Shared test-only helpers for repository roots, file writing, and repository-shaped profile
-    setup.
+The tool is a private Go module owned by this repository. The tree is grouped by ownership:
+profile model, Pack declaration, Check implementation, execution, output, and test guardrails.
+
+```text
+tools/
+|-- cmd/
+|   `-- style/                         CLI entrypoint for bin/style.
+|
+`-- internal/
+    |-- style/                         Shared rule, scope, diagnostic, and execution vocabulary.
+    |-- policy/                        Neutral typed profile policy and repository policy.
+    |-- profile/                       Profile facade: load, parse, format, validate, compile.
+    |   |-- toml/                      Persisted style.toml schema and policy conversion.
+    |   `-- internal/
+    |       |-- validation/             Consistency checks for typed profile policy.
+    |       |-- effective/              Effective Profile compilation.
+    |       `-- profiletest/            Profile-specific test helpers.
+    |
+    |-- pack/                          Neutral Pack definitions, catalogues, and registries.
+    |   `-- shipped/                   Built-in Pack catalogue.
+    |       |-- golang/                 Go Pack declaration.
+    |       |-- text/                   Text Pack declaration.
+    |       |-- bash/                   Bash Pack declaration.
+    |       |-- markdown/               Markdown Pack declaration.
+    |       |-- project/                Project Pack declaration.
+    |       |-- security/               Security Pack declaration.
+    |       |-- vocabulary/             Vocabulary Pack declaration.
+    |       |-- tool/                  Canonical shipped Tool IDs and capabilities.
+    |       `-- bindings/              Shipped Pack Runtime Binding assembly.
+    |
+    |-- checks/                        Check implementations and Pack-specific policy codecs.
+    |   |-- golang/                    Go checker facade and Go check family.
+    |   |   |-- analysis/              Shared Go analysis primitives.
+    |   |   |-- check/                 Go check IDs.
+    |   |   |-- syntax/                AST and syntax checks.
+    |   |   |-- structure/             File shape, order, and spacing checks.
+    |   |   |-- relationships/         Interface, implementation, and mock checks.
+    |   |   |-- architecture/          Go import and layering checks.
+    |   |   |-- test/                  Go test hygiene checks.
+    |   |   `-- scenarios/             End-to-end Go style scenarios.
+    |   |-- text/                     Executable text scanners.
+    |   |-- bash/                     Executable Bash scanners.
+    |   |-- security/                 Executable security scanners.
+    |   |-- vocabulary/               Executable project-term vocabulary scanner.
+    |   |-- gopolicy/                 Go Pack Policy codec and validation.
+    |   |-- textpolicy/               Text Pack Policy codec and validation.
+    |   |-- projectpolicy/            Project Pack Policy codec and validation.
+    |   `-- vocabularypolicy/         Vocabulary Pack Policy codec and validation.
+    |
+    |-- runner/                       Generic rule and fix execution.
+    |   `-- drivers/                  Driver facade and execution-family implementations.
+    |       |-- command/               File-command execution.
+    |       |-- project/               Project-level check execution.
+    |       |-- scan/                  Repository scanner execution.
+    |       |-- target/                Target command and target check execution.
+    |       `-- internal/
+    |           |-- runtimebinding/    Runtime Binding contracts and duplicate guards.
+    |           `-- commandrun/        Command output handling shared by command drivers.
+    |
+    |-- toolchain/                    Tool capability, health, command lookup, and versions.
+    |-- runtime/                      Command execution and repository-local tool layout.
+    |-- installer/                    Pinned Tool installation, downloads, and archives.
+    |
+    |-- styleguide/                   STYLE.md parsing and hidden metadata extraction.
+    |-- requirementid/                STYLE.md requirement ID grammar.
+    |-- markers/                      Hidden STYLE.md marker parsing.
+    |-- coverage/                     STYLE.md/profile/rule coverage graph.
+    |-- report/                       Text and JSON output rendering.
+    |   `-- testdata/                 Golden output fixtures.
+    |
+    |-- cli/                          Command parsing, repo-root detection, and user UX.
+    |-- filewalk/                     Repository file collection and generated-file filtering.
+    |-- testutil/                     Shared test-only repository helpers.
+    |   `-- profiles/                 Repository-shaped profile test setup.
+    `-- architecture/                 Test-only architecture boundary guardrails.
+```
+
+### Naming Notes
+
+- `internal/policy` is neutral profile policy. It should not know about concrete Packs.
+- `checks/<domain>` packages run checks. For example, `checks/text` runs text scanners.
+- `checks/<domain>policy` packages decode and validate Pack-specific policy. For example,
+  `checks/textpolicy` owns Text Pack Policy, not executable scanners.
+- `internal/architecture` is intentionally test-only. It enforces package import boundaries and
+  requirement ownership from one place.
+- `internal/requirementid` is separate from `styleguide` so profile code can use the requirement
+  ID grammar without importing the full STYLE.md parser.
+- `internal/profile/internal/profiletest` is profile-specific test support. Shared test helpers
+  that are not profile-specific live in `internal/testutil`.
+- Report surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`, and
+  `<surface>_view.go` where those roles exist.
+- Multi-role shipped Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`. Small Packs
+  stay flat until splitting improves locality.
 
 There is no longer a shell registry, shell-script control plane, nested `tools/style/` module, or
 single overloaded package mixing style-platform vocabulary with STYLE.md parsing.

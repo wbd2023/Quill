@@ -1,4 +1,4 @@
-package profilefixture
+package profiletest
 
 import (
 	"ciphera/tools/internal/policy"
