@@ -4,15 +4,15 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/profile/internal/effective"
-	"ciphera/tools/internal/profile/internal/profilefixture"
+	"ciphera/tools/internal/profile/internal/profiletest"
 )
 
 func TestCompileRejectsUnknownFileSetBinding(t *testing.T) {
 	t.Parallel()
 
-	config := profilefixture.Config()
+	config := profiletest.Config()
 
 	config.FileSets = nil
-	_, err := effective.Compile(config, profilefixture.FileCommandDefinitions())
+	_, err := effective.Compile(config, profiletest.FileCommandDefinitions())
 	requireErrorContains(t, err, "unknown file set")
 }
