@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 func validateStyleGuide(styleGuide policy.StyleGuideConfig) (err error) {
@@ -16,7 +16,7 @@ func validateStyleGuide(styleGuide policy.StyleGuideConfig) (err error) {
 		return fmt.Errorf("style_guide.id_scheme must not be empty")
 	}
 
-	if styleGuide.IDScheme != requirementid.SectionSlug {
+	if styleGuide.IDScheme != style.SectionSlug {
 		return fmt.Errorf(
 			"unsupported style_guide.id_scheme %q",
 			styleGuide.IDScheme,

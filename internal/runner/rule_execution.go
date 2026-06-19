@@ -57,7 +57,7 @@ func runExecution(
 		return style.ExecutionResult{}, nil
 	}
 
-	if len(toolIDs) > 0 && !toolchain.AllToolsValid(toolIDs, toolStatuses) {
+	if len(toolIDs) > 0 && !toolchain.AreAllToolsValid(toolIDs, toolStatuses) {
 		return style.ExecutionResult{
 			Diagnostics: []style.Diagnostic{
 				{

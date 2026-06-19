@@ -52,7 +52,7 @@ func findCommand(name string) (matched Command, found bool) {
 
 func prepareAction[options any](
 	parse func(repositoryRootResolver, []string) (options, error),
-	run func(CLI, options) int,
+	run func(Tool, options) int,
 ) (prepare func(repositoryRootResolver, []string) (Action, error)) {
 	return func(resolve repositoryRootResolver, arguments []string) (bound Action, err error) {
 		options, err := parse(resolve, arguments)
@@ -60,7 +60,7 @@ func prepareAction[options any](
 			return nil, err
 		}
 
-		return func(tool CLI) int {
+		return func(tool Tool) int {
 			return run(tool, options)
 		}, nil
 	}

@@ -7,12 +7,14 @@ import (
 	"ciphera/tools/internal/checks/vocabularypolicy"
 )
 
-func TestValidateConfigRejectsIncompleteVocabularyPolicy(t *testing.T) {
+func TestValidateConfigRejectsEmptyPreferredName(t *testing.T) {
 	t.Parallel()
 
 	config := vocabularypolicy.Config{
 		Go: vocabularypolicy.GoConfig{
-			ForbiddenTypeSuffixes: []string{"Repository"},
+			TypeSuffixes: map[string][]string{
+				"": {"Store"},
+			},
 		},
 	}
 
@@ -21,7 +23,29 @@ func TestValidateConfigRejectsIncompleteVocabularyPolicy(t *testing.T) {
 		t.Fatal("expected validation error")
 	}
 
-	if !strings.Contains(err.Error(), "packs.vocabulary.go.preferred_type_suffix") {
+	if !strings.Contains(err.Error(), "packs.vocabulary.go.type_suffixes") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateConfigRejectsShorthandMappedToTwoPreferred(t *testing.T) {
+	t.Parallel()
+
+	config := vocabularypolicy.Config{
+		Go: vocabularypolicy.GoConfig{
+			IdentifierSuffixes: map[string][]string{
+				"Repository": {"Repo"},
+				"Service":    {"Repo"},
+			},
+		},
+	}
+
+	err := vocabularypolicy.ValidateConfig(config)
+	if err == nil {
+		t.Fatal("expected validation error")
+	}
+
+	if !strings.Contains(err.Error(), `shorthand "Repo"`) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

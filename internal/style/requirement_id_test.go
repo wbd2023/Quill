@@ -1,17 +1,17 @@
-package requirementid_test
+package style_test
 
 import (
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
-func TestParse(t *testing.T) {
-	id, err := requirementid.Parse(
+func TestParseRequirementID(t *testing.T) {
+	id, err := style.ParseRequirementID(
 		"3.8.constructor-category-order",
-		requirementid.SectionSlug,
+		style.SectionSlug,
 	)
 	if err != nil {
 		t.Fatalf("parse requirement id: %v", err)
@@ -28,7 +28,7 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestParseRejectsInvalidID(t *testing.T) {
+func TestParseRequirementIDRejectsInvalidID(t *testing.T) {
 	cases := []struct {
 		name  string
 		value string
@@ -47,7 +47,9 @@ func TestParseRejectsInvalidID(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := requirementid.Parse(test.value, requirementid.SectionSlug)
+			t.Parallel()
+
+			_, err := style.ParseRequirementID(test.value, style.SectionSlug)
 			if err == nil {
 				t.Fatalf("expected requirement id %q to be rejected", test.value)
 			}
@@ -55,8 +57,8 @@ func TestParseRejectsInvalidID(t *testing.T) {
 	}
 }
 
-func TestParseRejectsUnsupportedScheme(t *testing.T) {
-	_, err := requirementid.Parse("3.8.constructor-category-order", "unknown")
+func TestParseRequirementIDRejectsUnsupportedScheme(t *testing.T) {
+	_, err := style.ParseRequirementID("3.8.constructor-category-order", "unknown")
 	if err == nil {
 		t.Fatalf("expected unsupported requirement id scheme to be rejected")
 	}
@@ -85,8 +87,11 @@ func TestValidSection(t *testing.T) {
 	}
 
 	for _, test := range cases {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
-			valid := requirementid.ValidSection(test.value)
+			t.Parallel()
+
+			valid := style.IsValidSection(test.value)
 			if valid != test.expected {
 				t.Fatalf("unexpected section validity %t", valid)
 			}

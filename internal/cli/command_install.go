@@ -9,7 +9,7 @@ import (
 	"ciphera/tools/internal/runtime"
 )
 
-func runInstall(tool CLI, options installOptions) (exitCode int) {
+func runInstall(tool Tool, options installOptions) (exitCode int) {
 	context, err := loadContext(options.repoRoot, "")
 	if err != nil {
 		tool.writeError(err)

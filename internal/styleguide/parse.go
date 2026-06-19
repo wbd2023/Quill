@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/text"
@@ -47,7 +47,7 @@ func Parse(source []byte, config Config) (document Document, err error) {
 	return parse(newSourceFile(filename, source), scheme)
 }
 
-func parse(file sourceFile, scheme requirementid.Scheme) (document Document, err error) {
+func parse(file sourceFile, scheme style.IDScheme) (document Document, err error) {
 	tree := goldmark.DefaultParser().Parse(text.NewReader(file.contents))
 	events := scanMarkdown(tree, file)
 	compiler := newDocumentCompiler(file, scheme)

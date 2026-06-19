@@ -28,6 +28,6 @@ func inspectToolchain(
 		runtime.RunToolchainCommand,
 	)
 	statusIndex := toolchain.StatusesByID(statuses)
-	allValid = toolchain.AllToolsValid(toolIDs, statusIndex)
+	allValid = toolchain.AreAllToolsValid(toolIDs, statusIndex)
 	return statuses, allValid
 }

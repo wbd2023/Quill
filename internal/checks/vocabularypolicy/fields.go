@@ -2,7 +2,32 @@ package vocabularypolicy
 
 import "fmt"
 
-func stringList(section map[string]any, key string, field string) (values []string, err error) {
+func cloneStrings(values []string) (clone []string) {
+	return append([]string{}, values...)
+}
+
+func validateList(field string, values []string) (err error) {
+	seen := make(map[string]bool, len(values))
+	for _, value := range values {
+		if value == "" {
+			return fmt.Errorf("%s contains an empty value", field)
+		}
+
+		if seen[value] {
+			return fmt.Errorf("%s contains duplicate value %q", field, value)
+		}
+
+		seen[value] = true
+	}
+
+	return nil
+}
+
+func stringListMap(
+	section map[string]any,
+	key string,
+	field string,
+) (values map[string][]string, err error) {
 	if section == nil {
 		return nil, nil
 	}
@@ -12,6 +37,23 @@ func stringList(section map[string]any, key string, field string) (values []stri
 		return nil, nil
 	}
 
+	raw, ok := value.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("%s must be a table", field)
+	}
+
+	values = make(map[string][]string, len(raw))
+	for name, forbidden := range raw {
+		values[name], err = decodeStringList(forbidden, field+"."+name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return values, nil
+}
+
+func decodeStringList(value any, field string) (values []string, err error) {
 	switch items := value.(type) {
 	case []any:
 		values = make([]string, 0, len(items))
@@ -34,41 +76,15 @@ func stringList(section map[string]any, key string, field string) (values []stri
 	}
 }
 
-func cloneStrings(values []string) (clone []string) {
-	return append([]string{}, values...)
-}
-
-func validateList(field string, values []string) (err error) {
-	seen := make(map[string]bool, len(values))
-	for _, value := range values {
-		if value == "" {
-			return fmt.Errorf("%s contains an empty value", field)
-		}
-
-		if seen[value] {
-			return fmt.Errorf("%s contains duplicate value %q", field, value)
-		}
-
-		seen[value] = true
+func encodeStringListMap(values map[string][]string) (encoded map[string]any) {
+	if values == nil {
+		return nil
 	}
 
-	return nil
-}
-
-func stringField(section map[string]any, key string, field string) (text string, err error) {
-	if section == nil {
-		return "", nil
+	encoded = make(map[string]any, len(values))
+	for name, forbidden := range values {
+		encoded[name] = cloneStrings(forbidden)
 	}
 
-	value, found := section[key]
-	if !found {
-		return "", nil
-	}
-
-	text, ok := value.(string)
-	if !ok {
-		return "", fmt.Errorf("%s must be a string", field)
-	}
-
-	return text, nil
+	return encoded
 }

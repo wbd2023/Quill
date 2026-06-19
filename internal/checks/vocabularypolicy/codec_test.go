@@ -15,14 +15,18 @@ func TestDecodeConfigReadsVocabularyPackConfig(t *testing.T) {
 
 	config, err := vocabularypolicy.DecodeConfig(corepolicy.PackConfig{
 		"go": map[string]any{
-			"forbidden_type_suffixes":       []any{"Repository"},
-			"preferred_type_suffix":         "Store",
-			"forbidden_identifier_suffixes": []any{"Repository"},
-			"preferred_identifier_suffix":   "Store",
+			"type_suffixes": map[string]any{
+				"Repository": []any{"Store"},
+			},
+			"identifier_suffixes": map[string]any{
+				"Repository": []any{"Repo"},
+				"Service":    []any{"Svc"},
+			},
 		},
 		"bash": map[string]any{
-			"forbidden_variable_names": []any{"x"},
-			"preferred_variable_name":  "named_constant",
+			"variable_names": map[string]any{
+				"named_constant": []any{"x"},
+			},
 		},
 	})
 	if err != nil {
@@ -53,8 +57,10 @@ func TestDecodeConfigRejectsUnknownFields(t *testing.T) {
 
 	_, err := vocabularypolicy.DecodeConfig(corepolicy.PackConfig{
 		"go": map[string]any{
-			"preferred_type_suffix": "Store",
-			"surprise":              true,
+			"type_suffixes": map[string]any{
+				"Repository": []any{"Store"},
+			},
+			"surprise": true,
 		},
 	})
 	if err == nil {
@@ -69,14 +75,18 @@ func TestDecodeConfigRejectsUnknownFields(t *testing.T) {
 func baselineConfig() (config vocabularypolicy.Config) {
 	return vocabularypolicy.Config{
 		Go: vocabularypolicy.GoConfig{
-			ForbiddenTypeSuffixes:       []string{"Repository"},
-			PreferredTypeSuffix:         "Store",
-			ForbiddenIdentifierSuffixes: []string{"Repository"},
-			PreferredIdentifierSuffix:   "Store",
+			TypeSuffixes: map[string][]string{
+				"Repository": {"Store"},
+			},
+			IdentifierSuffixes: map[string][]string{
+				"Repository": {"Repo"},
+				"Service":    {"Svc"},
+			},
 		},
 		Bash: vocabularypolicy.BashConfig{
-			ForbiddenVariableNames: []string{"x"},
-			PreferredVariableName:  "named_constant",
+			VariableNames: map[string][]string{
+				"named_constant": {"x"},
+			},
 		},
 	}
 }

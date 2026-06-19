@@ -16,9 +16,8 @@ func checkBashVocabulary(
 	path string,
 	config vocabularypolicy.Config,
 ) (err error) {
-	bashAssignmentPattern := compileBashAssignmentPattern(
-		config.Bash.ForbiddenVariableNames,
-	)
+	variablePreferred := flattenSuffixMap(config.Bash.VariableNames)
+	bashAssignmentPattern := compileBashAssignmentPattern(variablePreferred)
 
 	return filewalk.ScanLines(path, func(line filewalk.Line) error {
 		name := matchedBashAssignment(bashAssignmentPattern, line.Text)
@@ -31,22 +30,27 @@ func checkBashVocabulary(
 			File: filewalk.RelativePath(repoRoot, path),
 			Line: line.Number,
 			Message: fmt.Sprintf(
-				"use descriptive constant names in Bash (prefer %s over %s)",
-				config.Bash.PreferredVariableName,
+				"bash variable %q must be %s",
 				name,
+				variablePreferred[name],
 			),
 		})
 		return nil
 	})
 }
 
-func compileBashAssignmentPattern(names []string) (pattern *regexp.Regexp) {
+func compileBashAssignmentPattern(names map[string]string) (pattern *regexp.Regexp) {
 	if len(names) == 0 {
 		return nil
 	}
 
+	forbidden := make([]string, 0, len(names))
+	for name := range names {
+		forbidden = append(forbidden, regexp.QuoteMeta(name))
+	}
+
 	return regexp.MustCompile(
-		fmt.Sprintf(`(^|[[:space:]])(local[[:space:]]+)?(%s)=`, strings.Join(names, "|")),
+		fmt.Sprintf(`(^|[[:space:]])(local[[:space:]]+)?(%s)=`, strings.Join(forbidden, "|")),
 	)
 }
 

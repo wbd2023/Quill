@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/style"
 )
 
 func validateRules(
 	repository policy.RepositoryConfig,
-	scheme requirementid.Scheme,
+	scheme style.IDScheme,
 	rules []policy.RuleBinding,
 ) (err error) {
 	if len(rules) == 0 {
@@ -61,7 +60,7 @@ func validateRules(
 				)
 			}
 
-			if _, err = requirementid.Parse(id, scheme); err != nil {
+			if _, err = style.ParseRequirementID(id, scheme); err != nil {
 				return fmt.Errorf(
 					"rule %q has invalid requirement id %q: %w",
 					binding.RuleID,

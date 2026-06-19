@@ -23,7 +23,7 @@ func CheckASCII(
 
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
-			if markers.Has(line.Text, nonASCIIMarker) {
+			if markers.HasMarker(line.Text, nonASCIIMarker) {
 				return nil
 			}
 

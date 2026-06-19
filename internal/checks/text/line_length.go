@@ -22,7 +22,7 @@ func CheckLineLengths(
 	for _, path := range files {
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
 			if strings.HasSuffix(path, ".sh") &&
-				markers.Has(line.Text, longLineMarker) {
+				markers.HasMarker(line.Text, longLineMarker) {
 				return nil
 			}
 

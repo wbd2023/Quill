@@ -25,8 +25,8 @@ func Parse(line string) (marker Marker) {
 	return parseBody(strings.TrimPrefix(directive, markerPrefix))
 }
 
-// Has reports whether the line contains a valid marker for the rule.
-func Has(line string, rule string) (valid bool) {
+// HasMarker reports whether the line contains a valid marker for the rule.
+func HasMarker(line string, rule string) (valid bool) {
 	marker := Parse(line)
 	return marker.Status == StatusValid && marker.Rule == rule
 }

@@ -4,13 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 func testStyleGuideConfig() (config Config) {
 	return Config{
 		Filename: "STYLE.md",
-		IDScheme: requirementid.SectionSlug,
+		IDScheme: style.SectionSlug,
 	}
 }
 

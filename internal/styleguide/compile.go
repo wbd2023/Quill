@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Compiler State --------------------------------------- */
 
 type documentCompiler struct {
 	file             sourceFile
-	scheme           requirementid.Scheme
+	scheme           style.IDScheme
 	document         Document
 	activeSection    string
 	pendingMetadata  *requirementMetadata
@@ -19,7 +19,7 @@ type documentCompiler struct {
 	seenRequirements map[string]bool
 }
 
-func newDocumentCompiler(file sourceFile, scheme requirementid.Scheme) (compiler documentCompiler) {
+func newDocumentCompiler(file sourceFile, scheme style.IDScheme) (compiler documentCompiler) {
 	return documentCompiler{
 		file:   file,
 		scheme: scheme,

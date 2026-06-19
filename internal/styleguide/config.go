@@ -3,7 +3,7 @@ package styleguide
 import (
 	"fmt"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 const (
@@ -17,15 +17,15 @@ type Config struct {
 	Filename string
 
 	// IDScheme selects the grammar used for requirement IDs.
-	IDScheme requirementid.Scheme
+	IDScheme style.IDScheme
 }
 
-func validateIDScheme(scheme requirementid.Scheme) (err error) {
+func validateIDScheme(scheme style.IDScheme) (err error) {
 	if scheme == "" {
 		return fmt.Errorf("styleguide requirement id scheme must not be empty")
 	}
 
-	if scheme != requirementid.SectionSlug {
+	if scheme != style.SectionSlug {
 		return fmt.Errorf(
 			"unsupported styleguide requirement id scheme %q",
 			scheme,

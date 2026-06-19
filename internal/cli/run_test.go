@@ -113,7 +113,7 @@ func TestUsageTextListsCommands(t *testing.T) {
 
 /* ---------------------------------------- Test Harness ---------------------------------------- */
 
-func newTestCLI() (tool CLI, stdout *bytes.Buffer, stderr *bytes.Buffer) {
+func newTestCLI() (tool Tool, stdout *bytes.Buffer, stderr *bytes.Buffer) {
 	stdout = &bytes.Buffer{}
 	stderr = &bytes.Buffer{}
 	tool = New(stdout, stderr)

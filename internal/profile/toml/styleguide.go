@@ -2,7 +2,7 @@ package toml
 
 import (
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 type schemaStyleGuideConfig struct {
@@ -13,7 +13,7 @@ type schemaStyleGuideConfig struct {
 func decodeStyleGuide(schema schemaStyleGuideConfig) (styleGuide policy.StyleGuideConfig) {
 	return policy.StyleGuideConfig{
 		Path:     schema.Path,
-		IDScheme: requirementid.Scheme(schema.IDScheme),
+		IDScheme: style.IDScheme(schema.IDScheme),
 	}
 }
 

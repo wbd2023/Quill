@@ -3,7 +3,7 @@ package styleguide
 import (
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 func TestDocumentCompilerBuildsDocumentFromEvents(t *testing.T) {
@@ -70,5 +70,5 @@ func TestDocumentCompilerRejectsUnknownEvents(t *testing.T) {
 }
 
 func newTestDocumentCompiler() (compiler documentCompiler) {
-	return newDocumentCompiler(newSourceFile("STYLE.md", nil), requirementid.SectionSlug)
+	return newDocumentCompiler(newSourceFile("STYLE.md", nil), style.SectionSlug)
 }
