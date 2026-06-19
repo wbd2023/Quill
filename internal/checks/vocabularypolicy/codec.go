@@ -49,14 +49,11 @@ func ValidatePackConfig(pack corepolicy.PackConfig) (err error) {
 func EncodeConfig(config Config) (pack corepolicy.PackConfig) {
 	return corepolicy.PackConfig{
 		"go": map[string]any{
-			"forbidden_type_suffixes":       cloneStrings(config.Go.ForbiddenTypeSuffixes),
-			"preferred_type_suffix":         config.Go.PreferredTypeSuffix,
-			"forbidden_identifier_suffixes": cloneStrings(config.Go.ForbiddenIdentifierSuffixes),
-			"preferred_identifier_suffix":   config.Go.PreferredIdentifierSuffix,
+			"type_suffixes":       encodeStringListMap(config.Go.TypeSuffixes),
+			"identifier_suffixes": encodeStringListMap(config.Go.IdentifierSuffixes),
 		},
 		"bash": map[string]any{
-			"forbidden_variable_names": cloneStrings(config.Bash.ForbiddenVariableNames),
-			"preferred_variable_name":  config.Bash.PreferredVariableName,
+			"variable_names": encodeStringListMap(config.Bash.VariableNames),
 		},
 	}
 }

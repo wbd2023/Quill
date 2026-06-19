@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 /* ----------------------------------------- Definitions ---------------------------------------- */
@@ -24,7 +24,7 @@ const (
 const metadataModeReviewOnly = "review_only"
 
 type requirementMetadata struct {
-	id     requirementid.ID
+	id     style.RequirementID
 	review Review
 	source position
 }
@@ -138,9 +138,9 @@ func (fields *metadataFields) setField(field metadataField, value string) (err e
 
 func buildRequirementMetadata(
 	fields metadataFields,
-	scheme requirementid.Scheme,
+	scheme style.IDScheme,
 ) (metadata requirementMetadata, err error) {
-	id, err := requirementid.Parse(fields.id, scheme)
+	id, err := style.ParseRequirementID(fields.id, scheme)
 	if err != nil {
 		return requirementMetadata{}, fmt.Errorf(
 			"invalid requirement id in style metadata comment: %w",

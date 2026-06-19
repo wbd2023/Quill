@@ -8,7 +8,7 @@ import (
 	"ciphera/tools/internal/report"
 )
 
-func (tool CLI) writeUsageError(usage string, err error) {
+func (tool Tool) writeUsageError(usage string, err error) {
 	if err != nil {
 		_, _ = fmt.Fprintln(tool.stderr, err)
 		_, _ = fmt.Fprintln(tool.stderr)
@@ -17,11 +17,11 @@ func (tool CLI) writeUsageError(usage string, err error) {
 	_, _ = io.WriteString(tool.stderr, usage)
 }
 
-func (tool CLI) writeError(err error) {
+func (tool Tool) writeError(err error) {
 	_, _ = fmt.Fprintln(tool.stderr, err)
 }
 
-func (tool CLI) writeCommandOutput(output string) {
+func (tool Tool) writeCommandOutput(output string) {
 	trimmed := strings.TrimSpace(output)
 	if trimmed == "" {
 		return

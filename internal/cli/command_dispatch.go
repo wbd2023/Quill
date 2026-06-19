@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func (tool CLI) Run(arguments []string) (exitCode int) {
+func (tool Tool) Run(arguments []string) (exitCode int) {
 	if len(arguments) == 0 {
 		tool.writeUsageError(rootUsageText(), nil)
 		return usageExitCode

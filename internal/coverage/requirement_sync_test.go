@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/styleguide"
 	"ciphera/tools/internal/testutil"
 	"ciphera/tools/internal/testutil/profiles"
@@ -44,7 +44,7 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 
 func TestStyleGuideRequirementIDsMatchTheirSection(t *testing.T) {
 	for _, requirement := range loadStyleRequirements(t) {
-		id, err := requirementid.Parse(requirement.ID, requirementid.SectionSlug)
+		id, err := style.ParseRequirementID(requirement.ID, style.SectionSlug)
 		if err != nil {
 			t.Fatalf("parse requirement ID %q: %v", requirement.ID, err)
 		}

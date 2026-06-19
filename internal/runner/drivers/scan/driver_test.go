@@ -115,7 +115,7 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		"vocabulary/project-terms/go-type-suffix",
 		"internal/app/services/message_service.go",
 		8,
-		"use Store not Repository",
+		"must be Store",
 	) {
 		t.Fatalf("expected alternate vocabulary diagnostic, got: %#v", result.Diagnostics)
 	}

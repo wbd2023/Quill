@@ -36,14 +36,16 @@ func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 		EnabledPacks: []string{vocabulary.PackID},
 		PackConfigs: policy.PackConfigs{
 			vocabulary.PackID: vocabularypolicy.EncodeConfig(vocabularypolicy.Config{
-				Go: vocabularypolicy.GoConfig{ForbiddenTypeSuffixes: []string{"Repository"}},
+				Go: vocabularypolicy.GoConfig{
+					TypeSuffixes: map[string][]string{"": {"Repository"}},
+				},
 			}),
 		},
 	}
 	registry := registryFor(t, config)
 
 	_, err := effective.ResolvePacks(config, registry.Packs())
-	requireErrorContains(t, err, "packs.vocabulary.go.preferred_type_suffix")
+	requireErrorContains(t, err, "packs.vocabulary.go.type_suffixes")
 }
 
 func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {

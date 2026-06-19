@@ -9,10 +9,10 @@ const (
 
 type repositoryRootResolver func(string) (string, error)
 
-type CLI struct {
+type Tool struct {
 	stdout          io.Writer
 	stderr          io.Writer
 	resolveRepoRoot repositoryRootResolver
 }
 
-type Action func(CLI) int
+type Action func(Tool) int

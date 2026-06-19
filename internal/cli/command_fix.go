@@ -13,7 +13,7 @@ import (
 
 /* ----------------------------------------- Fix Command ---------------------------------------- */
 
-func runFix(tool CLI, options fixOptions) (exitCode int) {
+func runFix(tool Tool, options fixOptions) (exitCode int) {
 	context, err := loadContext(options.repoRoot, options.scope)
 	if err != nil {
 		tool.writeError(err)

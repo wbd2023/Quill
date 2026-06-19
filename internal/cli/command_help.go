@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (tool CLI) runHelp(arguments []string) (exitCode int) {
+func (tool Tool) runHelp(arguments []string) (exitCode int) {
 	if len(arguments) == 0 {
 		_, _ = io.WriteString(tool.stdout, rootUsageText())
 		return 0

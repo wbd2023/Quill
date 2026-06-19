@@ -5,7 +5,6 @@ import (
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/toml"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/testutil"
 )
@@ -26,7 +25,7 @@ func TestEncodeRoundTripsLocalProfile(t *testing.T) {
 		},
 		StyleGuide: policy.StyleGuideConfig{
 			Path:     "STYLE.md",
-			IDScheme: requirementid.SectionSlug,
+			IDScheme: style.SectionSlug,
 		},
 		PathRoles: policy.PathRoles{
 			"go_source": {"internal/"},

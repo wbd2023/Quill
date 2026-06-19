@@ -38,7 +38,7 @@ func TestGoStyleCoverageUsesGranularRuleBindings(t *testing.T) {
 	report := loadCoverageReport(t)
 	expected := map[string]string{
 		"2.2.structured-logs":            "go/logging",
-		"3.8.constructor-category-order": "go/parameters",
+		"3.5.constructor-category-order": "go/parameters",
 		"1.8.blank-line-between-guards":  "go/guard-clause-spacing",
 	}
 

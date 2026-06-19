@@ -1,6 +1,22 @@
 # Tooling
 
-This directory is the repo-owned tooling module.
+This directory holds the style tool, a general-purpose style-checking engine. It turns a
+project's human-authored style guide (`STYLE.md`) and machine-readable profile (`style.toml`)
+into executable checks: an effective rule graph, pinned tool installation, and coverage
+reporting. The engine has no built-in knowledge of any particular project. Every
+project-specific decision (active scopes, file sets, Targets, rule bindings, tool pins) lives
+in that project's `style.toml`, and every requirement lives in that project's `STYLE.md`.
+
+This repository (Ciphera, the end-to-end encrypted chat client and relay) is the engine's
+current host and exemplar. `STYLE.md` and `style.toml` at the repository root are Ciphera's
+inputs; the engine under `tools/` consumes them.
+
+## Status
+
+The engine is currently embedded at `tools/` within the ciphera repository and is being split
+into its own repository so it can be reused across projects. Its Go module path is currently
+`ciphera/tools`; that path will be renamed as part of the split. Until then, treat the
+module path as an import-path detail, not a product coupling. The engine code is general.
 
 `STYLE.md` remains the human source of truth. `style.toml` is the executable repository profile:
 it enables Packs, binds checker rules to requirement IDs, declares file sets, and supplies
@@ -237,7 +253,6 @@ tools/
     |-- installer/                    Pinned Tool installation, downloads, and archives.
     |
     |-- styleguide/                   STYLE.md parsing and hidden metadata extraction.
-    |-- requirementid/                STYLE.md requirement ID grammar.
     |-- markers/                      Hidden STYLE.md marker parsing.
     |-- coverage/                     STYLE.md/profile/rule coverage graph.
     |-- report/                       Text and JSON output rendering.
@@ -258,8 +273,9 @@ tools/
   `checks/textpolicy` owns Text Pack Policy, not executable scanners.
 - `internal/architecture` is intentionally test-only. It enforces package import boundaries and
   requirement ownership from one place.
-- `internal/requirementid` is separate from `styleguide` so profile code can use the requirement
-  ID grammar without importing the full STYLE.md parser.
+- Requirement ID types (`style.RequirementID`, `style.IDScheme`, `style.SectionSlug`) live
+  in `internal/style` so profile and styleguide code can use the ID grammar without importing
+  the full STYLE.md parser.
 - `internal/profile/internal/profiletest` is profile-specific test support. Shared test helpers
   that are not profile-specific live in `internal/testutil`.
 - Report surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`, and

@@ -8,7 +8,6 @@ import (
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/style"
 )
 
@@ -27,7 +26,7 @@ func TestFormatReturnsCanonicalTOML(t *testing.T) {
 		},
 		StyleGuide: policy.StyleGuideConfig{
 			Path:     "STYLE.md",
-			IDScheme: requirementid.SectionSlug,
+			IDScheme: style.SectionSlug,
 		},
 		EnabledPacks: []string{"project", "text"},
 		PackConfigs: policy.PackConfigs{

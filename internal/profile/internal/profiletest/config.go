@@ -2,7 +2,6 @@ package profiletest
 
 import (
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/requirementid"
 	"ciphera/tools/internal/style"
 )
 
@@ -13,7 +12,7 @@ func Config() (config policy.Config) {
 		Repository:    baselineRepository(),
 		StyleGuide: policy.StyleGuideConfig{
 			Path:     "STYLE.md",
-			IDScheme: requirementid.SectionSlug,
+			IDScheme: style.SectionSlug,
 		},
 		PathRoles: policy.PathRoles{
 			PathRole: {"internal/"},

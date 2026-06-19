@@ -2,7 +2,7 @@ package cli
 
 import "io"
 
-func New(stdout io.Writer, stderr io.Writer) (tool CLI) {
+func New(stdout io.Writer, stderr io.Writer) (tool Tool) {
 	if stdout == nil {
 		stdout = io.Discard
 	}
@@ -10,7 +10,7 @@ func New(stdout io.Writer, stderr io.Writer) (tool CLI) {
 		stderr = io.Discard
 	}
 
-	return CLI{
+	return Tool{
 		stdout:          stdout,
 		stderr:          stderr,
 		resolveRepoRoot: resolveRepoRoot,

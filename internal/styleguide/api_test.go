@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/styleguide"
 
 	"github.com/google/go-cmp/cmp"
@@ -22,7 +22,7 @@ func TestParseExposesDocumentModelThroughPublicAPI(t *testing.T) {
 			"<!-- style: id=1.1.example -->",
 			"* Public parsing should expose requirements.",
 		)),
-		styleguide.Config{IDScheme: requirementid.SectionSlug},
+		styleguide.Config{IDScheme: style.SectionSlug},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -53,7 +53,7 @@ func TestParseExposesReviewMetadataThroughPublicAPI(t *testing.T) {
 			`<!-- style: id=1.1.example mode=review_only reason="Review this manually." -->`,
 			"* Public parsing should expose review metadata.",
 		)),
-		styleguide.Config{IDScheme: requirementid.SectionSlug},
+		styleguide.Config{IDScheme: style.SectionSlug},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -129,7 +129,7 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 
 	document, err := styleguide.Load(root, styleguide.Config{
 		Filename: filename,
-		IDScheme: requirementid.SectionSlug,
+		IDScheme: style.SectionSlug,
 	})
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -154,7 +154,7 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 
 func TestLoadRejectsMissingFilename(t *testing.T) {
 	_, err := styleguide.Load(t.TempDir(), styleguide.Config{
-		IDScheme: requirementid.SectionSlug,
+		IDScheme: style.SectionSlug,
 	})
 	requireErrorContains(t, err, "styleguide filename must not be empty")
 }

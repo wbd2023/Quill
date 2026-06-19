@@ -13,7 +13,7 @@ import (
 
 /* -------------------------------------- Coverage Command -------------------------------------- */
 
-func runCoverage(tool CLI, options coverageOptions) (exitCode int) {
+func runCoverage(tool Tool, options coverageOptions) (exitCode int) {
 	coverageReport, err := loadCoverageReport(options.repoRoot)
 	if err != nil {
 		tool.writeError(err)

@@ -25,7 +25,7 @@ func StatusesByID(statuses []Status) (indexed map[string]Status) {
 	return indexed
 }
 
-func AllToolsValid(toolIDs []string, indexed map[string]Status) (valid bool) {
+func AreAllToolsValid(toolIDs []string, indexed map[string]Status) (valid bool) {
 	for _, toolID := range SortedUniqueToolIDs(toolIDs) {
 		status, found := indexed[toolID]
 		if !found || !status.Valid {

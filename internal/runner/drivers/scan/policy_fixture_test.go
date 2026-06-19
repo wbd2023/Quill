@@ -72,10 +72,8 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 	if err != nil {
 		t.Fatalf("Decode vocabulary config: %v", err)
 	}
-	vocabularyConfig.Go.ForbiddenTypeSuffixes = []string{"Repository"}
-	vocabularyConfig.Go.PreferredTypeSuffix = "Store"
-	vocabularyConfig.Go.ForbiddenIdentifierSuffixes = []string{"Repository"}
-	vocabularyConfig.Go.PreferredIdentifierSuffix = "Store"
+	vocabularyConfig.Go.TypeSuffixes = map[string][]string{"Store": {"Repository"}}
+	vocabularyConfig.Go.IdentifierSuffixes = map[string][]string{"Store": {"Repository"}}
 	config.PackConfigs[vocabulary.PackID] = vocabularypolicy.EncodeConfig(vocabularyConfig)
 	parameters := &goConfig.Constructors
 	parameters.ParameterOrder = replaceParameterGroup(

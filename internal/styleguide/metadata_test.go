@@ -3,7 +3,7 @@ package styleguide
 import (
 	"testing"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -180,7 +180,7 @@ func TestBuildRequirementMetadataAcceptsSupportedFields(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			metadata, err := buildRequirementMetadata(
 				test.fields,
-				requirementid.SectionSlug,
+				style.SectionSlug,
 			)
 			if err != nil {
 				t.Fatalf("buildRequirementMetadata: %v", err)
@@ -237,7 +237,7 @@ func TestBuildRequirementMetadataRejectsInvalidFields(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			_, err := buildRequirementMetadata(
 				test.fields,
-				requirementid.SectionSlug,
+				style.SectionSlug,
 			)
 			requireErrorContains(t, err, test.expected)
 		})

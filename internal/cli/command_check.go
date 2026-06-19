@@ -15,7 +15,7 @@ import (
 
 /* ---------------------------------------- Check Command --------------------------------------- */
 
-func runCheck(tool CLI, options checkOptions) (exitCode int) {
+func runCheck(tool Tool, options checkOptions) (exitCode int) {
 	context, err := loadContext(options.repoRoot, options.scope)
 	if err != nil {
 		tool.writeError(err)

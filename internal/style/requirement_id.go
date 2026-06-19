@@ -1,20 +1,19 @@
-// Package requirementid parses and validates STYLE.md requirement identifiers.
-package requirementid
+package style
 
 import (
 	"fmt"
 	"strings"
 )
 
-// SectionSlug names IDs written as "<section>.<slug>".
+// SectionSlug names requirement IDs written as "<section>.<slug>".
 // For example, section "3.8" with slug "constructor-category-order".
-const SectionSlug Scheme = "section_slug"
+const SectionSlug IDScheme = "section_slug"
 
-// Scheme selects a requirement ID grammar.
-type Scheme string
+// IDScheme selects a requirement ID grammar.
+type IDScheme string
 
-// ID is a parsed STYLE.md requirement identifier.
-type ID struct {
+// RequirementID is a parsed STYLE.md requirement identifier.
+type RequirementID struct {
 	value   string
 	section string
 	slug    string
@@ -22,32 +21,32 @@ type ID struct {
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
-// Parse parses a STYLE.md requirement ID according to scheme.
-func Parse(value string, scheme Scheme) (id ID, err error) {
+// ParseRequirementID parses a STYLE.md requirement identifier according to scheme.
+func ParseRequirementID(value string, scheme IDScheme) (id RequirementID, err error) {
 	if scheme != SectionSlug {
-		return ID{}, fmt.Errorf("unsupported requirement id scheme %q", scheme)
+		return RequirementID{}, fmt.Errorf("unsupported requirement id scheme %q", scheme)
 	}
 
 	major, rest, found := strings.Cut(value, ".")
 	if !found {
-		return ID{}, fmt.Errorf("missing requirement id section")
+		return RequirementID{}, fmt.Errorf("missing requirement id section")
 	}
 
 	minor, slug, found := strings.Cut(rest, ".")
 	if !found {
-		return ID{}, fmt.Errorf("missing requirement id slug")
+		return RequirementID{}, fmt.Errorf("missing requirement id slug")
 	}
 
 	section := major + "." + minor
-	if !ValidSection(section) {
-		return ID{}, fmt.Errorf("invalid requirement id section %q", section)
+	if !IsValidSection(section) {
+		return RequirementID{}, fmt.Errorf("invalid requirement id section %q", section)
 	}
 
 	if !isSlug(slug) {
-		return ID{}, fmt.Errorf("invalid requirement id slug %q", slug)
+		return RequirementID{}, fmt.Errorf("invalid requirement id slug %q", slug)
 	}
 
-	id = ID{
+	id = RequirementID{
 		value:   value,
 		section: section,
 		slug:    slug,
@@ -58,24 +57,24 @@ func Parse(value string, scheme Scheme) (id ID, err error) {
 /* ------------------------------------------ Accessors ----------------------------------------- */
 
 // String returns the original requirement ID.
-func (id ID) String() (value string) {
+func (id RequirementID) String() (value string) {
 	return id.value
 }
 
 // Section returns the numeric STYLE.md section.
-func (id ID) Section() (section string) {
+func (id RequirementID) Section() (section string) {
 	return id.section
 }
 
 // Slug returns the readable requirement slug.
-func (id ID) Slug() (slug string) {
+func (id RequirementID) Slug() (slug string) {
 	return id.slug
 }
 
 /* ------------------------------------------ Sections ------------------------------------------ */
 
-// ValidSection reports whether value is a numeric STYLE.md section.
-func ValidSection(value string) (valid bool) {
+// IsValidSection reports whether value is a numeric STYLE.md section.
+func IsValidSection(value string) (valid bool) {
 	major, minor, found := strings.Cut(value, ".")
 	if !found {
 		return false

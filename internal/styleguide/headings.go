@@ -3,7 +3,7 @@ package styleguide
 import (
 	"strings"
 
-	"ciphera/tools/internal/requirementid"
+	"ciphera/tools/internal/style"
 )
 
 func parseHeading(text string) (heading Heading, found bool) {
@@ -13,7 +13,7 @@ func parseHeading(text string) (heading Heading, found bool) {
 	}
 
 	section, remainder, found := strings.Cut(text, " ")
-	if !found || !requirementid.ValidSection(section) {
+	if !found || !style.IsValidSection(section) {
 		return Heading{}, false
 	}
 

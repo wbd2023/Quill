@@ -1,6 +1,6 @@
 package policy
 
-import "ciphera/tools/internal/requirementid"
+import "ciphera/tools/internal/style"
 
 // SchemaVersion is the current style profile schema version.
 const SchemaVersion = 1
@@ -26,5 +26,5 @@ type Config struct {
 // StyleGuideConfig describes how the style guide is located and how its requirement IDs are parsed.
 type StyleGuideConfig struct {
 	Path     string
-	IDScheme requirementid.Scheme
+	IDScheme style.IDScheme
 }

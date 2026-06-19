@@ -6,7 +6,7 @@ import (
 	"ciphera/tools/internal/report"
 )
 
-func runDoctor(tool CLI, options doctorOptions) (exitCode int) {
+func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
 	context, err := loadContext(options.repoRoot, "")
 	if err != nil {
 		tool.writeError(err)
