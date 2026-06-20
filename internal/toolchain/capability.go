@@ -36,7 +36,7 @@ func Policies(capabilities []Capability) (tools []style.Tool) {
 	return tools
 }
 
-// CapabilitiesByID capabilities by i d.
+// CapabilitiesByID indexes tool capabilities by tool ID.
 func CapabilitiesByID(
 	capabilities []Capability,
 ) (indexed map[string]Capability) {

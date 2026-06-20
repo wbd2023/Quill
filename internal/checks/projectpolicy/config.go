@@ -1,5 +1,6 @@
 package projectpolicy
 
+// config constants.
 const (
 	// CommandsRunnerMake means quality commands are declared through Make targets.
 	CommandsRunnerMake CommandsRunner = "make"

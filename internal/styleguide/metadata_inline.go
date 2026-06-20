@@ -8,6 +8,7 @@ import (
 
 /* ------------------------------------------ Prefixes ------------------------------------------ */
 
+// metadata_inline constants.
 const (
 	inlineMetadataIDPrefix     = string(metadataFieldID) + "="
 	inlineMetadataModePrefix   = string(metadataFieldMode) + "="

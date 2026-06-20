@@ -1,6 +1,7 @@
 // Package analysis defines shared static-analysis primitives for Go style checks.
 package analysis
 
+// diagnostics constants.
 const (
 	DiagnosticAdapterWrapsCause         = "go/errors/adapter-wraps-cause"
 	DiagnosticConstructorCategoryOrder  = "go/constructors/category-order"

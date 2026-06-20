@@ -1,5 +1,6 @@
 package text
 
+// execution_ids constants.
 const (
 	ScannerASCII                = "ascii"
 	ScannerExceptionMarkers     = "exception_markers"

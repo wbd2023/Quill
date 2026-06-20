@@ -1,5 +1,6 @@
 package coverage
 
+// report constants.
 const (
 	StatusAutomated  Status = "automated"
 	StatusPartial    Status = "partial"
@@ -7,6 +8,7 @@ const (
 	StatusManual     Status = "manual"
 )
 
+// report constants.
 const (
 	ModeAutomated      Mode = "automated"
 	ModeReviewOnly     Mode = "review_only"

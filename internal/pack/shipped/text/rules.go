@@ -5,6 +5,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// rules constants.
 const (
 	ruleGroupExternal style.RuleGroup = "external_tools"
 	ruleGroupText     style.RuleGroup = "text_scanners"

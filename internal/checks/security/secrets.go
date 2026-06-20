@@ -10,6 +10,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// secrets constants.
 const (
 	pemMarkerPattern = `-----BEG` +
 		`IN (?:[A-Z0-9]+(?: [A-Z0-9]+)*) PRI` +

@@ -2,6 +2,7 @@ package markers
 
 import "strings"
 
+// comments constants.
 const (
 	hashCommentPrefix       = "# "
 	slashCommentPrefix      = "// "

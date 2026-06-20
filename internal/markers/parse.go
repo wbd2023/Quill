@@ -2,6 +2,7 @@ package markers
 
 import "strings"
 
+// parse constants.
 const (
 	rulePrefix       = "allow-"
 	asciiRuneMaximum = 127

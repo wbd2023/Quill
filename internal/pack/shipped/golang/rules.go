@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// rules constants.
 const (
 	TargetActionGoFormat = "go_format"
 	TargetActionGolangci = "golangci"

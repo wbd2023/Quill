@@ -11,6 +11,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// structure constants.
 const (
 	shellShebangLine = "#!/bin/bash"
 	strictModeLine   = "set -euo pipefail"

@@ -1,5 +1,6 @@
 package tool
 
+// ids constants.
 const (
 	Go           = "go"
 	Goimports    = "goimports"

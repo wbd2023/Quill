@@ -14,6 +14,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// parameter_order constants.
 const (
 	groupUnknown = -1
 )

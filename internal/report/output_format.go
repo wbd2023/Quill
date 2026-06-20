@@ -1,5 +1,6 @@
 package report
 
+// output_format constants.
 const (
 	FormatText OutputFormat = "text"
 	FormatJSON OutputFormat = "json"

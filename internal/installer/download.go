@@ -12,6 +12,7 @@ import (
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
+// download constants.
 const (
 	downloadTimeout = 30 * time.Second
 	maxDownloadSize = 128 << 20

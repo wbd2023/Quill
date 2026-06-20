@@ -1,5 +1,6 @@
 package analysis
 
+// path_roles constants.
 const (
 	PathRoleGoSource        = "go_source"
 	PathRoleApplicationPort = "application_port"

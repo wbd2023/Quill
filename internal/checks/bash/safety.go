@@ -10,6 +10,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// safety constants.
 const (
 	shellcheckRuleCaptureIndex   = 1
 	shellcheckReasonCaptureIndex = 2

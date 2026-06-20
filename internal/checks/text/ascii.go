@@ -11,7 +11,7 @@ import (
 
 const nonASCIIMarker = "allow-non-ascii"
 
-// CheckASCII check a s c i i.
+// CheckASCII scans for non-ASCII characters in text files.
 func CheckASCII(
 	repoRoot string,
 	repository policy.RepositoryConfig,

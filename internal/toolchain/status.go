@@ -17,7 +17,7 @@ type Status struct {
 	Issue   string
 }
 
-// StatusesByID statuses by i d.
+// StatusesByID indexes tool statuses by tool ID.
 func StatusesByID(statuses []Status) (indexed map[string]Status) {
 	indexed = make(map[string]Status, len(statuses))
 	for _, status := range statuses {
