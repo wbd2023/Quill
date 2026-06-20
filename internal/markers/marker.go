@@ -2,11 +2,13 @@ package markers
 
 import "strings"
 
+// marker constants.
 const (
 	markerPrefix    = "style: "
 	reasonSeparator = " because: "
 )
 
+// marker constants.
 const (
 	StatusUnknown Status = ""
 	StatusAbsent  Status = "absent"

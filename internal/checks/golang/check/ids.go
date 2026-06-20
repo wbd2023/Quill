@@ -1,6 +1,7 @@
 // Package check names the Go checks that a Pack can ask the Go driver to run.
 package check
 
+// ids constants.
 const (
 	Comments           = "comments"
 	Data               = "data"

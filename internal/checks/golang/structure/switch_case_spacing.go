@@ -10,6 +10,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// switch_case_spacing constants.
 const (
 	minSwitchCaseCount        = 2
 	maxVerySmallSwitchClauses = 3

@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+// generated constants.
 const (
 	generatedHeaderLineLimit = 12
 	generatedMarkerScanBytes = 4096

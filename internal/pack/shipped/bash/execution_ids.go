@@ -1,5 +1,6 @@
 package bash
 
+// execution_ids constants.
 const (
 	ScannerMagicValues = "bash_magic_values"
 	ScannerSafety      = "bash_safety"

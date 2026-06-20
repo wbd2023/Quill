@@ -11,6 +11,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// declaration_order constants.
 const (
 	declUnknown    = 0
 	declConstants  = 1

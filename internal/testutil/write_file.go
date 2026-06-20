@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// write_file constants.
 const (
 	testDirectoryMode  = 0o700
 	testExecutableMode = 0o700

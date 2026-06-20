@@ -12,6 +12,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// install_shellcheck constants.
 const (
 	shellcheckDownloadRoot  = "https://github.com/koalaman/shellcheck/releases/download"
 	shellcheckTempDirPrefix = "style-platform-shellcheck-*"

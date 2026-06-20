@@ -7,7 +7,7 @@ import (
 	"ciphera/tools/internal/runtime"
 )
 
-// ToolByID tool by i d.
+// ToolByID looks up a tool configuration by its ID.
 func ToolByID(
 	context runner.Context,
 	workDir string,

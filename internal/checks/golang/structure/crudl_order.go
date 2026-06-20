@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// crudl_order constants.
 const (
 	crudlUnknown = 0
 	crudlCreate  = 1

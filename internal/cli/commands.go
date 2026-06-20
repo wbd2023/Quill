@@ -2,6 +2,7 @@ package cli
 
 import "io"
 
+// commands constants.
 const (
 	helpCommand   = "help"
 	usageExitCode = 2

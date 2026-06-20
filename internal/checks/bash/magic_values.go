@@ -12,6 +12,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// magic_values constants.
 const (
 	trivialZero        = "0"
 	trivialOne         = "1"

@@ -2,6 +2,7 @@ package markers
 
 import "strings"
 
+// quotes constants.
 const (
 	escapeCharacter = '\\'
 	doubleQuote     = '"'

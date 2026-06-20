@@ -10,6 +10,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// section_headers constants.
 const (
 	sectionHeaderLength      = 100
 	sectionHeaderMatchGroups = 4

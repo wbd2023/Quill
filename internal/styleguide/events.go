@@ -1,5 +1,6 @@
 package styleguide
 
+// events constants.
 const (
 	eventHeading eventKind = iota + 1
 	eventHTMLBlock

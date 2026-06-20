@@ -9,12 +9,14 @@ import (
 
 /* ----------------------------------------- Definitions ---------------------------------------- */
 
+// metadata constants.
 const (
 	htmlCommentPrefix = "<!--"
 	htmlCommentSuffix = "-->"
 	metadataPrefix    = "style:"
 )
 
+// metadata constants.
 const (
 	metadataFieldID     metadataField = "id"
 	metadataFieldMode   metadataField = "mode"

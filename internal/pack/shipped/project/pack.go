@@ -8,9 +8,10 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-// PackID is pack i d.
+// PackID is the canonical identifier for this Pack.
 const PackID = "project"
 
+// pack constants.
 const (
 	CheckEnforcementLevels   = "enforcement_levels"
 	CheckExcludedDirectories = "excluded_directories"

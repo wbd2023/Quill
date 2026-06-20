@@ -5,7 +5,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-// PackID is pack i d.
+// PackID is the canonical identifier for this Pack.
 const PackID = "security"
 
 // ScannerSecrets is scanner secrets.

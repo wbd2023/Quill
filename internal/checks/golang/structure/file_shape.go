@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// file_shape constants.
 const (
 	maxHandwrittenFileLines = 300
 	maxFunctionLines        = 80

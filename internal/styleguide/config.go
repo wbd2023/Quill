@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// config constants.
 const (
 	defaultFilename = "STYLE.md"
 )

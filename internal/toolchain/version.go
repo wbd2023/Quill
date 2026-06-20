@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// version constants.
 const (
 	toolVersionGoCommand  VersionKind = "go_command"
 	toolVersionBuildInfo  VersionKind = "build_info"

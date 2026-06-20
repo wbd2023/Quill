@@ -7,7 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-// CheckASCII check a s c i i.
+// CheckASCII scans for non-ASCII characters in text files.
 func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

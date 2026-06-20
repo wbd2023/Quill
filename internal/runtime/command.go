@@ -13,6 +13,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// command constants.
 const (
 	defaultCommandTimeoutSeconds = 120
 	defaultOutputLimitBytes      = 1 << 20

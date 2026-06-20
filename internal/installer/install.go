@@ -12,12 +12,14 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
+// install constants.
 const (
 	defaultDirectoryMode os.FileMode = 0o755
 	downloadMode         os.FileMode = 0o644
 	executableMode       os.FileMode = 0o755
 )
 
+// install constants.
 const (
 	toolInstallNone              toolchain.InstallKind = "none"
 	toolInstallGoBinary          toolchain.InstallKind = "go_binary"

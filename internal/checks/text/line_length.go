@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// line_length constants.
 const (
 	lineLengthLimit    = 100
 	lineLengthTabWidth = 4

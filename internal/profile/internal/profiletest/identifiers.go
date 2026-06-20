@@ -2,6 +2,7 @@ package profiletest
 
 import "ciphera/tools/internal/style"
 
+// identifiers constants.
 const (
 	// Target is the primary target fixture.
 	Target = "test_target"

@@ -30,7 +30,7 @@ func CheckGoArchitecture(goPackID string) (scanner RepositoryScanner) {
 	return scandrivers.CheckGoArchitecture(goPackID)
 }
 
-// CheckASCII check a s c i i.
+// CheckASCII returns a scanner that flags non-ASCII characters.
 func CheckASCII() (scanner RepositoryScanner) {
 	return scandrivers.CheckASCII()
 }
@@ -107,6 +107,7 @@ func RunGolangci(
 	return targetdrivers.RunGolangci(goPackID, golangciLintToolID, goimportsToolID, goLanguage)
 }
 
+// RunGoFormat go format.
 func RunGoFormat(
 	goPackID string,
 	goimportsToolID string,
@@ -115,6 +116,7 @@ func RunGoFormat(
 	return targetdrivers.RunGoFormat(goPackID, goimportsToolID, goLanguage)
 }
 
+// CheckGoStyle go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check TargetCheck) {
 	return targetdrivers.CheckGoStyle(goPackID, goLanguage)
 }
