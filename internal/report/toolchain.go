@@ -7,10 +7,12 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// ToolchainResult is toolchain result.
 type ToolchainResult struct {
 	Statuses []toolchain.Status
 }
 
+// WriteToolchain write toolchain.
 func WriteToolchain(
 	writer io.Writer,
 	format OutputFormat,

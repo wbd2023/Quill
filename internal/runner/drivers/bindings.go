@@ -2,14 +2,19 @@ package drivers
 
 import "ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 
+// RepositoryScanner is repository scanner.
 type RepositoryScanner = runtimebinding.RepositoryScanner
 
+// TargetCommand is target command.
 type TargetCommand = runtimebinding.TargetCommand
 
+// TargetCheck is target check.
 type TargetCheck = runtimebinding.TargetCheck
 
+// ProjectCheck is project check.
 type ProjectCheck = runtimebinding.ProjectCheck
 
+// Bindings is bindings.
 type Bindings struct {
 	repositoryScanners runtimebinding.RepositoryScanners
 	targetCommands     runtimebinding.TargetCommands
@@ -17,6 +22,7 @@ type Bindings struct {
 	projectChecks      runtimebinding.ProjectChecks
 }
 
+// NewBindings new bindings.
 func NewBindings() (bindings Bindings) {
 	return Bindings{
 		repositoryScanners: runtimebinding.NewRepositoryScanners(),

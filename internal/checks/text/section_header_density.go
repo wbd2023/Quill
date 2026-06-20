@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(
 	repoRoot string,
 	repository policy.RepositoryConfig,

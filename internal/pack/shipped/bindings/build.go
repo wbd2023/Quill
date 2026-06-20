@@ -11,6 +11,7 @@ import (
 	"ciphera/tools/internal/runner/drivers"
 )
 
+// Build returns the requested value.
 func Build() (bindings drivers.Bindings) {
 	bindings = drivers.NewBindings()
 

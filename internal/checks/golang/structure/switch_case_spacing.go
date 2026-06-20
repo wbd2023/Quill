@@ -18,6 +18,7 @@ const (
 
 /* ---------------------------------------- Spacing Rules --------------------------------------- */
 
+// CheckSwitchCaseSpacing check switch case spacing.
 func CheckSwitchCaseSpacing(
 	fileSet *token.FileSet,
 	file *ast.File,

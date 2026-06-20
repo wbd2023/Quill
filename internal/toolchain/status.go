@@ -8,6 +8,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// Status is status.
 type Status struct {
 	Tool    style.Tool
 	Path    string
@@ -16,6 +17,7 @@ type Status struct {
 	Issue   string
 }
 
+// StatusesByID statuses by i d.
 func StatusesByID(statuses []Status) (indexed map[string]Status) {
 	indexed = make(map[string]Status, len(statuses))
 	for _, status := range statuses {
@@ -25,6 +27,7 @@ func StatusesByID(statuses []Status) (indexed map[string]Status) {
 	return indexed
 }
 
+// AreAllToolsValid are all tools valid.
 func AreAllToolsValid(toolIDs []string, indexed map[string]Status) (valid bool) {
 	for _, toolID := range SortedUniqueToolIDs(toolIDs) {
 		status, found := indexed[toolID]
@@ -36,6 +39,7 @@ func AreAllToolsValid(toolIDs []string, indexed map[string]Status) (valid bool) 
 	return true
 }
 
+// ExplainToolIssues explain tool issues.
 func ExplainToolIssues(toolIDs []string, indexed map[string]Status) (message string) {
 	var parts []string
 	for _, toolID := range SortedUniqueToolIDs(toolIDs) {
@@ -50,6 +54,7 @@ func ExplainToolIssues(toolIDs []string, indexed map[string]Status) (message str
 	return strings.Join(parts, "\n")
 }
 
+// SortedUniqueToolIDs sorted unique tool i ds.
 func SortedUniqueToolIDs(toolIDs []string) (deduped []string) {
 	seen := make(map[string]bool)
 	for _, toolID := range toolIDs {

@@ -9,6 +9,7 @@ import (
 
 const binaryProbeLimit = 4096
 
+// IsBinaryFile is binary file.
 func IsBinaryFile(path string) (binary bool) {
 	file, err := os.Open(path)
 	if err != nil {

@@ -26,6 +26,7 @@ type sectionHeaderPatterns struct {
 	Body  *regexp.Regexp
 }
 
+// CheckSectionHeaders check section headers.
 func CheckSectionHeaders(
 	repoRoot string,
 	repository policy.RepositoryConfig,

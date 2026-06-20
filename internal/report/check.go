@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// WriteCheck write check.
 func WriteCheck(
 	writer io.Writer,
 	format OutputFormat,

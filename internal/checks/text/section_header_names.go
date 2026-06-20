@@ -10,6 +10,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckSectionHeaderNames check section header names.
 func CheckSectionHeaderNames(
 	repoRoot string,
 	repository policy.RepositoryConfig,

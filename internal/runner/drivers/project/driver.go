@@ -42,6 +42,7 @@ func projectDriver(checks runtimebinding.ProjectChecks) (driver runner.Driver) {
 	}
 }
 
+// CheckEnforcementLevels check enforcement levels.
 func CheckEnforcementLevels() (check runtimebinding.ProjectCheck) {
 	return func(
 		_ runner.Context,
@@ -52,6 +53,7 @@ func CheckEnforcementLevels() (check runtimebinding.ProjectCheck) {
 	}
 }
 
+// CheckExcludedDirectories check excluded directories.
 func CheckExcludedDirectories() (check runtimebinding.ProjectCheck) {
 	return func(
 		context runner.Context,
@@ -62,6 +64,7 @@ func CheckExcludedDirectories() (check runtimebinding.ProjectCheck) {
 	}
 }
 
+// CheckCommands check commands.
 func CheckCommands(projectPackID string) (check runtimebinding.ProjectCheck) {
 	return func(
 		context runner.Context,

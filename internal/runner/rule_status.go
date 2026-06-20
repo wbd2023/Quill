@@ -2,6 +2,7 @@ package runner
 
 import "ciphera/tools/internal/style"
 
+// CheckStatus check status.
 func CheckStatus(
 	rule style.Rule,
 	err error,

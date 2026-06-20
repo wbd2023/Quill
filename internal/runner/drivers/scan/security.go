@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckSecrets check secrets.
 func CheckSecrets() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

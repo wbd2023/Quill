@@ -12,6 +12,7 @@ const (
 	testFileMode       = 0o600
 )
 
+// WriteFile write file.
 func WriteFile(
 	test *testing.T,
 	root string,
@@ -25,6 +26,7 @@ func WriteFile(
 	return path
 }
 
+// WritePath write path.
 func WritePath(
 	test *testing.T,
 	path string,
@@ -35,6 +37,7 @@ func WritePath(
 	writePath(test, path, contents, testFileMode)
 }
 
+// WriteExecutable write executable.
 func WriteExecutable(
 	test *testing.T,
 	path string,
@@ -45,6 +48,7 @@ func WriteExecutable(
 	writePath(test, path, contents, testExecutableMode)
 }
 
+// ReadFile read file.
 func ReadFile(
 	test *testing.T,
 	root string,

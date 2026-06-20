@@ -34,6 +34,7 @@ type installHandler func(
 
 /* ---------------------------------------- Installation ---------------------------------------- */
 
+// Install returns the requested value.
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
@@ -94,6 +95,7 @@ func skipInstall(
 	return nil
 }
 
+// SupportsInstallKind supports install kind.
 func SupportsInstallKind(kind toolchain.InstallKind) (supported bool) {
 	_, supported = installHandlers()[kind]
 	return supported

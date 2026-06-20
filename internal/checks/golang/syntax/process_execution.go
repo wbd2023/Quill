@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckProcessExecutionSafety check process execution safety.
 func CheckProcessExecutionSafety(
 	fileSet *token.FileSet,
 	file *ast.File,

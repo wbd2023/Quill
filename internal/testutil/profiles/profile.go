@@ -8,6 +8,7 @@ import (
 	"ciphera/tools/internal/testutil"
 )
 
+// Current returns the requested value.
 func Current(test *testing.T) (config policy.Config) {
 	test.Helper()
 
@@ -19,12 +20,14 @@ func Current(test *testing.T) (config policy.Config) {
 	return config
 }
 
+// RepositoryConfig repository config.
 func RepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
 	test.Helper()
 
 	return Current(test).Repository
 }
 
+// Write returns the requested value.
 func Write(test *testing.T, root string, config policy.Config) {
 	test.Helper()
 
@@ -33,6 +36,7 @@ func Write(test *testing.T, root string, config policy.Config) {
 	testutil.WriteFile(test, root, "style.toml", Format(test, config))
 }
 
+// Format returns the requested value.
 func Format(test *testing.T, config policy.Config) (contents string) {
 	test.Helper()
 

@@ -11,6 +11,7 @@ import (
 
 /* ------------------------------------------- Markers ------------------------------------------ */
 
+// CheckMaintenanceMarkers check maintenance markers.
 func CheckMaintenanceMarkers(
 	repoRoot string,
 	repository policy.RepositoryConfig,

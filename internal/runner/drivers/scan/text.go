@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckASCII check a s c i i.
 func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -16,6 +17,7 @@ func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -29,10 +31,12 @@ func CheckExceptionMarkers() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckLineLengths check line lengths.
 func CheckLineLengths() (scanner runtimebinding.RepositoryScanner) {
 	return scanLineLengths
 }
 
+// CheckMaintenanceMarkers check maintenance markers.
 func CheckMaintenanceMarkers() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -46,6 +50,7 @@ func CheckMaintenanceMarkers() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckSectionHeaderNames check section header names.
 func CheckSectionHeaderNames(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -55,6 +60,7 @@ func CheckSectionHeaderNames(textPackID string) (scanner runtimebinding.Reposito
 	}
 }
 
+// CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -64,6 +70,7 @@ func CheckSectionHeaderDensity(textPackID string) (scanner runtimebinding.Reposi
 	}
 }
 
+// CheckSectionHeaders check section headers.
 func CheckSectionHeaders(textPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

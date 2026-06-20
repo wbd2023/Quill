@@ -4,12 +4,14 @@ import (
 	"ciphera/tools/internal/coverage"
 )
 
+// CoverageTotals is coverage totals.
 type CoverageTotals struct {
 	Automated      int `json:"automated"`
 	ReviewOnly     int `json:"review_only"`
 	ManualDeferred int `json:"manual_deferred"`
 }
 
+// SectionTotals is section totals.
 type SectionTotals struct {
 	Automated  int `json:"automated"`
 	Partial    int `json:"partial"`
@@ -17,6 +19,7 @@ type SectionTotals struct {
 	Manual     int `json:"manual"`
 }
 
+// CoverageView is coverage view.
 type CoverageView struct {
 	Report            coverage.Report
 	RequirementTotals CoverageTotals
@@ -25,6 +28,7 @@ type CoverageView struct {
 	OutstandingByMode map[string]int
 }
 
+// NewCoverageView new coverage view.
 func NewCoverageView(report coverage.Report) (view CoverageView) {
 	view = CoverageView{
 		Report:            report,

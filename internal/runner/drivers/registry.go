@@ -11,6 +11,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckDrivers check drivers.
 func CheckDrivers(bindings Bindings) (registry runner.DriverRegistry) {
 	return mergeDrivers(
 		runner.DriverRegistry{
@@ -23,6 +24,7 @@ func CheckDrivers(bindings Bindings) (registry runner.DriverRegistry) {
 	)
 }
 
+// FixDrivers fix drivers.
 func FixDrivers(bindings Bindings) (registry runner.DriverRegistry) {
 	return mergeDrivers(
 		commanddrivers.FixDrivers(),

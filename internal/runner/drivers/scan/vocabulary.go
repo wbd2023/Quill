@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckVocabulary check vocabulary.
 func CheckVocabulary(vocabularyPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

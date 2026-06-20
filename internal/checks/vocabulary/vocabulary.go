@@ -11,6 +11,7 @@ const goTypeSuffixMatchLength = 2
 const goIdentifierSuffixMatchLength = 2
 const bashAssignmentMatchLength = 4
 
+// CheckVocabulary check vocabulary.
 func CheckVocabulary(
 	repoRoot string,
 	repository policy.RepositoryConfig,

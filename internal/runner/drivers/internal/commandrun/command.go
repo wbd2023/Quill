@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/runtime"
 )
 
+// ToolByID tool by i d.
 func ToolByID(
 	context runner.Context,
 	workDir string,
@@ -26,6 +27,7 @@ func ToolByID(
 	return runtime.RunToolCommand(workDir, context.GoEnvironment, tool, capability, arguments...)
 }
 
+// Output returns the requested value.
 func Output(
 	workDir string,
 	environment map[string]string,

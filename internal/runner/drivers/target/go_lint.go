@@ -12,6 +12,7 @@ import (
 
 /* --------------------------------------- Lint Execution --------------------------------------- */
 
+// RunGolangci run golangci.
 func RunGolangci(
 	goPackID string,
 	golangciLintToolID string,

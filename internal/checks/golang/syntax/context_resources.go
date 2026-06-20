@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckContextAndResourceSafety check context and resource safety.
 func CheckContextAndResourceSafety(
 	fileSet *token.FileSet,
 	file *ast.File,

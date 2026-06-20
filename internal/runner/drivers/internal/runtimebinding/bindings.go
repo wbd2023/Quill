@@ -9,54 +9,66 @@ import (
 
 /* ----------------------------------------- Registries ----------------------------------------- */
 
+// RepositoryScanner is repository scanner.
 type RepositoryScanner func(
 	context runner.Context,
 	execution style.RepositoryScanExecution,
 ) (result style.ExecutionResult, err error)
 
+// TargetCommand is target command.
 type TargetCommand func(
 	context runner.Context,
 	spec style.ExecutionSpec,
 ) (result style.ExecutionResult, err error)
 
+// TargetCheck is target check.
 type TargetCheck func(
 	context runner.Context,
 	spec style.ExecutionSpec,
 ) (result style.ExecutionResult, err error)
 
+// ProjectCheck is project check.
 type ProjectCheck func(
 	context runner.Context,
 	execution style.ProjectExecution,
 ) (result style.ExecutionResult, err error)
 
+// RepositoryScanners is repository scanners.
 type RepositoryScanners struct {
 	entries map[string]RepositoryScanner
 }
 
+// TargetCommands is target commands.
 type TargetCommands struct {
 	entries map[string]TargetCommand
 }
 
+// TargetChecks is target checks.
 type TargetChecks struct {
 	entries map[string]TargetCheck
 }
 
+// ProjectChecks is project checks.
 type ProjectChecks struct {
 	entries map[string]ProjectCheck
 }
 
+// NewRepositoryScanners new repository scanners.
 func NewRepositoryScanners() (registry RepositoryScanners) {
 	return RepositoryScanners{entries: map[string]RepositoryScanner{}}
 }
 
+// NewTargetCommands new target commands.
 func NewTargetCommands() (registry TargetCommands) {
 	return TargetCommands{entries: map[string]TargetCommand{}}
 }
 
+// NewTargetChecks new target checks.
 func NewTargetChecks() (registry TargetChecks) {
 	return TargetChecks{entries: map[string]TargetCheck{}}
 }
 
+// NewProjectChecks new project checks.
 func NewProjectChecks() (registry ProjectChecks) {
 	return ProjectChecks{entries: map[string]ProjectCheck{}}
 }

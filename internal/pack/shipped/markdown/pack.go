@@ -8,6 +8,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// PackID is pack i d.
 const PackID = "markdown"
 
 const ruleGroupExternal style.RuleGroup = "external_tools"

@@ -39,6 +39,7 @@ type shellSafetyState struct {
 
 /* ---------------------------------------- Safety Rules ---------------------------------------- */
 
+// CheckSafety check safety.
 func CheckSafety(
 	repoRoot string,
 	repository policy.RepositoryConfig,

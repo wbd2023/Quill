@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/filewalk"
 )
 
+// CollectFileSetFiles collect file set files.
 func CollectFileSetFiles(context Context, name string) (files []string, err error) {
 	fileSet, found := context.Profile.FileSets.Lookup(name)
 	if !found {

@@ -7,11 +7,13 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+// PathClassifier is path classifier.
 type PathClassifier struct {
 	repoRoot string
 	paths    policy.PathRoles
 }
 
+// NewPathClassifier new path classifier.
 func NewPathClassifier(
 	repoRoot string,
 	paths policy.PathRoles,

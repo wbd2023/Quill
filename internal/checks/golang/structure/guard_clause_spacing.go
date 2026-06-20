@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckGuardClauseSpacing check guard clause spacing.
 func CheckGuardClauseSpacing(
 	fileSet *token.FileSet,
 	file *ast.File,

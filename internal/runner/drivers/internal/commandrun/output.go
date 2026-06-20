@@ -2,6 +2,7 @@ package commandrun
 
 import "strings"
 
+// AppendOutput append output.
 func AppendOutput(builder *strings.Builder, output string) {
 	output = strings.TrimSpace(output)
 	if output == "" {

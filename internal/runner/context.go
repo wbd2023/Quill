@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// Context is context.
 type Context struct {
 	RepoRoot         string
 	Scope            style.Scope
@@ -16,6 +17,7 @@ type Context struct {
 	GoEnvironment    map[string]string
 }
 
+// NewContext new context.
 func NewContext(
 	repoRoot string,
 	scope style.Scope,

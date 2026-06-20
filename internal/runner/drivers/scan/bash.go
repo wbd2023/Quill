@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckBashMagicValues check bash magic values.
 func CheckBashMagicValues() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -20,6 +21,7 @@ func CheckBashMagicValues() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckBashSafety check bash safety.
 func CheckBashSafety() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -29,6 +31,7 @@ func CheckBashSafety() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckBashStructure check bash structure.
 func CheckBashStructure() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,
@@ -42,6 +45,7 @@ func CheckBashStructure() (scanner runtimebinding.RepositoryScanner) {
 	}
 }
 
+// CheckBashTestHygiene check bash test hygiene.
 func CheckBashTestHygiene() (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Layout is layout.
 type Layout struct {
 	RepoRoot     string
 	ToolsDir     string

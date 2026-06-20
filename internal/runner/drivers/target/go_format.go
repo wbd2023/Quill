@@ -10,6 +10,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// RunGoFormat run go format.
 func RunGoFormat(
 	goPackID string,
 	goimportsToolID string,

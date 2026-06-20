@@ -5,6 +5,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// PackID is pack i d.
 const PackID = "bash"
 
 // Pack returns the Bash Shipped Pack definition.

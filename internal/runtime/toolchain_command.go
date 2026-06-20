@@ -2,6 +2,7 @@ package runtime
 
 import "ciphera/tools/internal/toolchain"
 
+// RunToolchainCommand run toolchain command.
 func RunToolchainCommand(request toolchain.CommandRequest) (output string, err error) {
 	result, err := RunCommand(CommandRequest{
 		Directory:   ".",

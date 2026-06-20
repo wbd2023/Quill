@@ -10,7 +10,7 @@ import (
 
 /* ---------------------------------------- Naming Rules ---------------------------------------- */
 
-// CheckSingleLetterVars flags single-letter variable names that are not loop indices (i, j, k)
+// CheckSingleLetterVars flags single-letter variable names that are not loop indices (i, j, k).
 // or method receivers.
 func CheckSingleLetterVars(
 	fileSet *token.FileSet,

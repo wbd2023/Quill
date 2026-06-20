@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckDrivers check drivers.
 func CheckDrivers(checks runtimebinding.ProjectChecks) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
 		style.ExecutionProject: projectDriver(checks),

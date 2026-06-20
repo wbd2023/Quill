@@ -30,6 +30,7 @@ func collectScopeRoots(
 	return roots
 }
 
+// RelativePath relative path.
 func RelativePath(repoRoot string, path string) (relative string) {
 	relative, err := filepath.Rel(repoRoot, path)
 	if err != nil {

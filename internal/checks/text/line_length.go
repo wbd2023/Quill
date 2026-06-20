@@ -15,6 +15,7 @@ const (
 	longLineMarker     = "allow-long-line"
 )
 
+// CheckLineLengths check line lengths.
 func CheckLineLengths(
 	repoRoot string,
 	files []string,

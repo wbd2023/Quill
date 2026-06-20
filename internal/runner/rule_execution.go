@@ -15,18 +15,22 @@ var (
 	errRuleViolation = errors.New("rule violations found")
 )
 
+// Driver is driver.
 type Driver func(
 	context Context,
 	spec style.ExecutionSpec,
 	toolStatuses map[string]toolchain.Status,
 ) (result style.ExecutionResult, err error)
 
+// DriverRegistry is driver registry.
 type DriverRegistry map[style.ExecutionKind]Driver
 
+// IsBlocked is blocked.
 func IsBlocked(err error) (blocked bool) {
 	return errors.Is(err, errRuleBlocked)
 }
 
+// RunRule run rule.
 func RunRule(
 	rule style.Rule,
 	context Context,
@@ -36,6 +40,7 @@ func RunRule(
 	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, drivers)
 }
 
+// RunFix run fix.
 func RunFix(
 	rule style.Rule,
 	context Context,

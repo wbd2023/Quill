@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckDrivers check drivers.
 func CheckDrivers(
 	commands runtimebinding.TargetCommands,
 	checks runtimebinding.TargetChecks,
@@ -16,6 +17,7 @@ func CheckDrivers(
 	}
 }
 
+// FixDrivers fix drivers.
 func FixDrivers(commands runtimebinding.TargetCommands) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
 		style.ExecutionTargetCommand: targetCommandDriver(commands),

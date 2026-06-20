@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// PackID is pack i d.
 const PackID = "text"
 
 // Pack returns the Text Shipped Pack definition.

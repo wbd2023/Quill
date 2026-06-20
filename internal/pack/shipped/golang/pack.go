@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// PackID is pack i d.
 const PackID = "go"
 
 // Pack returns the Go Shipped Pack definition.
