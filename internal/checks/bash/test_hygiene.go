@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckTestHygiene check test hygiene.
 func CheckTestHygiene(
 	repoRoot string,
 	repository policy.RepositoryConfig,

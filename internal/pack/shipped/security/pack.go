@@ -5,8 +5,10 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// PackID is pack i d.
 const PackID = "security"
 
+// ScannerSecrets is scanner secrets.
 const ScannerSecrets = "secrets"
 
 const ruleGroupSecurity style.RuleGroup = "security_scanners"

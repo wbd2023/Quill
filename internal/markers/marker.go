@@ -14,8 +14,10 @@ const (
 	StatusValid   Status = "valid"
 )
 
+// Status is status.
 type Status string
 
+// Marker is marker.
 type Marker struct {
 	Rule   string
 	Reason string

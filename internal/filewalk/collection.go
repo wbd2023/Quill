@@ -13,6 +13,7 @@ import (
 
 /* ----------------------------------------- Collection ----------------------------------------- */
 
+// CollectFiles collect files.
 func CollectFiles(
 	repoRoot string,
 	repository policy.RepositoryConfig,
@@ -35,6 +36,7 @@ func CollectFiles(
 	})
 }
 
+// CollectFilesInRoots collect files in roots.
 func CollectFilesInRoots(
 	repository policy.RepositoryConfig,
 	roots []string,
@@ -60,6 +62,7 @@ func CollectFilesInRoots(
 	})
 }
 
+// CollectFilesInScopes collect files in scopes.
 func CollectFilesInScopes(
 	repoRoot string,
 	repository policy.RepositoryConfig,
@@ -73,6 +76,7 @@ func CollectFilesInScopes(
 	)
 }
 
+// CollectAllFiles collect all files.
 func CollectAllFiles(
 	repoRoot string,
 	repository policy.RepositoryConfig,

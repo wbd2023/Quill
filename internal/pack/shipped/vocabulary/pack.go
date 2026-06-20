@@ -6,8 +6,10 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// PackID is pack i d.
 const PackID = "vocabulary"
 
+// ScannerVocabulary is scanner vocabulary.
 const ScannerVocabulary = "vocabulary"
 
 const ruleGroupVocabulary style.RuleGroup = "vocabulary_scanners"

@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// CommandError is command error.
 type CommandError struct {
 	Name      string
 	Arguments []string

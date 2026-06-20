@@ -9,6 +9,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckScannerEntrypointOrder check scanner entrypoint order.
 func CheckScannerEntrypointOrder(
 	fileSet *token.FileSet,
 	file *ast.File,

@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// ToolchainDriver toolchain driver.
 func ToolchainDriver(
 	_ Context,
 	spec style.ExecutionSpec,

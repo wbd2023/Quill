@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
+// ValidateCollectorPolicy validate collector policy.
 func ValidateCollectorPolicy(repository policy.RepositoryConfig) (err error) {
 	requiredDirectories := []string{
 		".cache",

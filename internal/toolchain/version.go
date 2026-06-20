@@ -21,6 +21,7 @@ type versionHandler func(
 	environment map[string]string,
 ) (string, error)
 
+// SupportsVersionKind supports version kind.
 func SupportsVersionKind(kind VersionKind) (supported bool) {
 	_, supported = versionHandlers()[kind]
 	return supported

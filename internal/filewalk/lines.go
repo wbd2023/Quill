@@ -6,11 +6,13 @@ import (
 	"os"
 )
 
+// Line is line.
 type Line struct {
 	Number int
 	Text   string
 }
 
+// ScanLines scan lines.
 func ScanLines(path string, visit func(Line) error) (err error) {
 	file, err := os.Open(path)
 	if err != nil {

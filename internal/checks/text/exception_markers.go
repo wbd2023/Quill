@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers(
 	repoRoot string,
 	repository policy.RepositoryConfig,

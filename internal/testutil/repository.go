@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// RepositoryRoot repository root.
 func RepositoryRoot(test *testing.T) (root string) {
 	test.Helper()
 
@@ -17,6 +18,7 @@ func RepositoryRoot(test *testing.T) (root string) {
 	return filepath.Clean(filepath.Join(filepath.Dir(callerFile), "..", "..", ".."))
 }
 
+// ToolsRoot tools root.
 func ToolsRoot(test *testing.T) (root string) {
 	test.Helper()
 

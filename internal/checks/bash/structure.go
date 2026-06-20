@@ -18,6 +18,7 @@ const (
 
 /* --------------------------------------- Structure Rules -------------------------------------- */
 
+// CheckStructure check structure.
 func CheckStructure(
 	repoRoot string,
 	repository policy.RepositoryConfig,

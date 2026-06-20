@@ -11,7 +11,7 @@ import (
 
 /* ---------------------------------------- Return Rules ---------------------------------------- */
 
-// CheckNamedReturns ensures all functions, methods, and interface methods use named,
+// CheckNamedReturns ensures all functions, methods, and interface methods use named,.
 // descriptive return values.
 func CheckNamedReturns(fileSet *token.FileSet, file *ast.File) (violations []analysis.Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {

@@ -5,4 +5,5 @@ const (
 	FormatJSON OutputFormat = "json"
 )
 
+// OutputFormat is output format.
 type OutputFormat string

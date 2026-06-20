@@ -13,6 +13,7 @@ import (
 
 /* --------------------------------------- Type-Aware Scan -------------------------------------- */
 
+// CollectTypeAwareDomainValueCastViolations collect type aware domain value cast violations.
 func CollectTypeAwareDomainValueCastViolations(
 	rootDirectories []string,
 	filePaths []string,

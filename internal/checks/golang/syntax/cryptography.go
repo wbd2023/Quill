@@ -8,6 +8,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckCryptographySafety check cryptography safety.
 func CheckCryptographySafety(
 	fileSet *token.FileSet,
 	file *ast.File,

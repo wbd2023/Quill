@@ -105,6 +105,7 @@ func inspectTool(
 
 /* --------------------------------------- Command Lookup --------------------------------------- */
 
+// ResolveCommandPath resolve command path.
 func ResolveCommandPath(command string, environment map[string]string) (path string, err error) {
 	pathList := lookupEnvironmentVariable(environment, "PATH")
 	if pathList == "" {

@@ -22,6 +22,7 @@ const (
 
 /* -------------------------------------- Magic Value Rules ------------------------------------- */
 
+// CheckMagicValues check magic values.
 func CheckMagicValues(
 	repoRoot string,
 	repository policy.RepositoryConfig,

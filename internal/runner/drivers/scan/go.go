@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckGoArchitecture check go architecture.
 func CheckGoArchitecture(goPackID string) (scanner runtimebinding.RepositoryScanner) {
 	return func(
 		context runner.Context,

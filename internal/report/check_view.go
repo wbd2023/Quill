@@ -2,17 +2,20 @@ package report
 
 import "ciphera/tools/internal/style"
 
+// CheckGroup is check group.
 type CheckGroup struct {
 	Group   style.RuleGroup
 	Entries []CheckEntry
 }
 
+// CheckView is check view.
 type CheckView struct {
 	Result  CheckResult
 	Summary CheckSummary
 	Groups  []CheckGroup
 }
 
+// NewCheckEntry new check entry.
 func NewCheckEntry(
 	rule style.Rule,
 	status style.CheckStatus,
@@ -25,6 +28,7 @@ func NewCheckEntry(
 	}
 }
 
+// NewRuleSummary new rule summary.
 func NewRuleSummary(rule style.Rule) (summary RuleSummary) {
 	return RuleSummary{
 		ID:             rule.ID,
@@ -36,6 +40,7 @@ func NewRuleSummary(rule style.Rule) (summary RuleSummary) {
 	}
 }
 
+// NewCheckView new check view.
 func NewCheckView(result CheckResult) (view CheckView) {
 	view = CheckView{
 		Result:  result,

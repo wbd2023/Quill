@@ -13,10 +13,13 @@ const (
 	ModeManualDeferred Mode = "manual_deferred"
 )
 
+// Status is status.
 type Status string
 
+// Mode is mode.
 type Mode string
 
+// Requirement is requirement.
 type Requirement struct {
 	ID      string
 	Section string
@@ -26,6 +29,7 @@ type Requirement struct {
 	RuleIDs []string
 }
 
+// Section is section.
 type Section struct {
 	Section             string
 	Title               string
@@ -36,6 +40,7 @@ type Section struct {
 	ManualDeferredCount int
 }
 
+// Report is report.
 type Report struct {
 	Requirements []Requirement
 	Sections     []Section

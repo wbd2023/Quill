@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// Collector is collector.
 type Collector struct {
 	pathClassifier         analysis.PathClassifier
 	interfaces             map[string]interfaceDeclaration
@@ -15,6 +16,7 @@ type Collector struct {
 	implementationBindings []implementationBinding
 }
 
+// NewCollector new collector.
 func NewCollector(pathClassifier analysis.PathClassifier) (collector *Collector) {
 	return &Collector{
 		pathClassifier:         pathClassifier,

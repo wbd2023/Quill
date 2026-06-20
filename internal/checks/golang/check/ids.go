@@ -20,6 +20,7 @@ const (
 	Tests              = "tests"
 )
 
+// IDs i ds.
 func IDs() (ids []string) {
 	return []string{
 		Comments,

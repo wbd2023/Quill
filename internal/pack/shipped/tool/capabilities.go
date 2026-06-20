@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
+// BuildAll build all.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{
 		buildBuiltin(Go, "Go", "go", VersionGoCommand),
@@ -47,6 +48,7 @@ func BuildAll() (capabilities []toolchain.Capability) {
 	}
 }
 
+// Select returns the requested value.
 func Select(toolIDs ...string) (capabilities []toolchain.Capability) {
 	wanted := make(map[string]bool, len(toolIDs))
 	for _, toolID := range toolIDs {

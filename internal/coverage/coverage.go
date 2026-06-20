@@ -5,6 +5,7 @@ import (
 	"ciphera/tools/internal/styleguide"
 )
 
+// Build returns the requested value.
 func Build(document styleguide.Document, rules []style.Rule) (report Report) {
 	requirements := buildRequirements(document.Requirements, ruleIDsByRequirement(rules))
 	return Report{

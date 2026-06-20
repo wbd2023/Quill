@@ -13,6 +13,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// CheckGoStyle check go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check runtimebinding.TargetCheck) {
 	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
 		return runGoStyleCheck(context, spec, goPackID, goLanguage)

@@ -31,6 +31,7 @@ type secretPattern struct {
 
 /* --------------------------------------- Secret Scanning -------------------------------------- */
 
+// CheckSecrets check secrets.
 func CheckSecrets(
 	repoRoot string,
 	repository policy.RepositoryConfig,

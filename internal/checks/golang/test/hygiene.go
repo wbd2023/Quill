@@ -10,6 +10,7 @@ import (
 
 /* ------------------------------------- Test Hygiene Rules ------------------------------------- */
 
+// CheckHygiene check hygiene.
 func CheckHygiene(
 	fileSet *token.FileSet,
 	file *ast.File,

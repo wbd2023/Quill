@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// FileCommandArguments file command arguments.
 func FileCommandArguments(
 	repoRoot string,
 	spec style.ExecutionSpec,

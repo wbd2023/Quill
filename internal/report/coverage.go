@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// WriteCoverage write coverage.
 func WriteCoverage(
 	writer io.Writer,
 	format OutputFormat,

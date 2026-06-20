@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/checks/golang/analysis"
 )
 
+// CheckDataUsage check data usage.
 func CheckDataUsage(
 	fileSet *token.FileSet,
 	file *ast.File,

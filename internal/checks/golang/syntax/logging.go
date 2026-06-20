@@ -11,6 +11,7 @@ import (
 
 /* ------------------------------------- Structured Logging ------------------------------------- */
 
+// CheckStructuredLogging check structured logging.
 func CheckStructuredLogging(
 	fileSet *token.FileSet,
 	file *ast.File,

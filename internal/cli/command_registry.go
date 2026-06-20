@@ -1,5 +1,6 @@
 package cli
 
+// Command is command.
 type Command struct {
 	name    string
 	summary string

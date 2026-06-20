@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+// ToolIDsForRules tool i ds for rules.
 func ToolIDsForRules(rules []style.Rule) (toolIDs []string) {
 	seen := make(map[string]bool)
 	for _, rule := range rules {
@@ -23,6 +24,7 @@ func ToolIDsForRules(rules []style.Rule) (toolIDs []string) {
 	return toolIDs
 }
 
+// ToolIDsForFixes tool i ds for fixes.
 func ToolIDsForFixes(rules []style.Rule) (toolIDs []string) {
 	seen := make(map[string]bool)
 	for _, rule := range rules {

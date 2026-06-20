@@ -2,10 +2,13 @@ package toolchain
 
 import "ciphera/tools/internal/style"
 
+// VersionKind is version kind.
 type VersionKind string
 
+// InstallKind is install kind.
 type InstallKind string
 
+// Capability is capability.
 type Capability struct {
 	ID            string
 	Name          string
@@ -23,6 +26,7 @@ func (capability Capability) Tool() (tool style.Tool) {
 	}
 }
 
+// Policies returns the requested value.
 func Policies(capabilities []Capability) (tools []style.Tool) {
 	tools = make([]style.Tool, 0, len(capabilities))
 	for _, capability := range capabilities {
@@ -32,6 +36,7 @@ func Policies(capabilities []Capability) (tools []style.Tool) {
 	return tools
 }
 
+// CapabilitiesByID capabilities by i d.
 func CapabilitiesByID(
 	capabilities []Capability,
 ) (indexed map[string]Capability) {

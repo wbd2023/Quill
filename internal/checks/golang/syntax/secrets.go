@@ -13,6 +13,7 @@ const minSensitiveLiteralLength = 16
 
 /* ------------------------------------ Sensitive Data Rules ------------------------------------ */
 
+// CheckSensitiveDataLiterals check sensitive data literals.
 func CheckSensitiveDataLiterals(
 	fileSet *token.FileSet,
 	file *ast.File,

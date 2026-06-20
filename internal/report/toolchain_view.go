@@ -1,10 +1,12 @@
 package report
 
+// ToolchainView is toolchain view.
 type ToolchainView struct {
 	Result   ToolchainResult
 	AllValid bool
 }
 
+// NewToolchainView new toolchain view.
 func NewToolchainView(result ToolchainResult) (view ToolchainView) {
 	view = ToolchainView{
 		Result:   result,

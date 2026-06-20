@@ -20,6 +20,7 @@ const (
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
+// CommandRequest is command request.
 type CommandRequest struct {
 	Directory        string
 	Environment      map[string]string
@@ -29,6 +30,7 @@ type CommandRequest struct {
 	OutputLimitBytes int64
 }
 
+// CommandResult is command result.
 type CommandResult struct {
 	Output    string
 	ExitCode  int
@@ -38,6 +40,7 @@ type CommandResult struct {
 
 /* -------------------------------------- Command Execution ------------------------------------- */
 
+// RunCommand run command.
 func RunCommand(request CommandRequest) (result CommandResult, err error) {
 	commandPath, err := toolchain.ResolveCommandPath(request.Name, request.Environment)
 	if err != nil {
@@ -75,6 +78,7 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 	return result, nil
 }
 
+// RunToolCommand run tool command.
 func RunToolCommand(
 	directory string,
 	environment map[string]string,
@@ -92,6 +96,7 @@ func RunToolCommand(
 	return CommandOutput(result, err)
 }
 
+// RunToolCommandResult run tool command result.
 func RunToolCommandResult(
 	directory string,
 	environment map[string]string,
@@ -109,6 +114,7 @@ func RunToolCommandResult(
 	})
 }
 
+// BuildStyleCommandResult build style command result.
 func BuildStyleCommandResult(result CommandResult) (commandResult style.CommandResult) {
 	return style.CommandResult{
 		ExitCode:  result.ExitCode,
@@ -117,6 +123,7 @@ func BuildStyleCommandResult(result CommandResult) (commandResult style.CommandR
 	}
 }
 
+// CommandOutput command output.
 func CommandOutput(result CommandResult, err error) (output string, commandErr error) {
 	if err == nil {
 		return result.Output, nil
