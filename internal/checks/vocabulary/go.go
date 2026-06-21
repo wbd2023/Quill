@@ -67,9 +67,8 @@ func checkGoVocabulary(
 
 /* ------------------------------------------ Patterns ------------------------------------------ */
 
-// flattenSuffixMap inverts a preferred -> [shorthands] map into a
-// shorthand -> preferred lookup so a matched forbidden suffix can be resolved
-// to its preferred form.
+// flattenSuffixMap inverts a preferred -> [shorthands] map into a shorthand -> preferred lookup so
+// a matched forbidden suffix can be resolved to its preferred form.
 func flattenSuffixMap(suffixes map[string][]string) (lookup map[string]string) {
 	lookup = make(map[string]string, len(suffixes))
 	for preferred, forbidden := range suffixes {
@@ -81,9 +80,8 @@ func flattenSuffixMap(suffixes map[string][]string) (lookup map[string]string) {
 	return lookup
 }
 
-// preferredKeys returns the preferred forms (map keys) for the line-skip check.
-// A line that already uses a preferred form such as Repository is not flagged
-// for its shorthands such as Repo.
+// preferredKeys returns the preferred forms (map keys) for the line-skip check. A line that already
+// uses a preferred form such as Repository is not flagged for its shorthands such as Repo.
 func preferredKeys(suffixes map[string][]string) (keys []string) {
 	keys = make([]string, 0, len(suffixes))
 	for preferred := range suffixes {

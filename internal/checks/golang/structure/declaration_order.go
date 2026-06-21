@@ -24,8 +24,8 @@ const minCategoryKinds = 2
 
 /* --------------------------------------- Ordering Rules --------------------------------------- */
 
-// CheckStructureOrder enforces objective top-level declaration ordering.
-// This check intentionally avoids subjective formatting requirements.
+// CheckStructureOrder enforces objective top-level declaration ordering. This check intentionally
+// avoids subjective formatting requirements.
 func CheckStructureOrder(
 	fileSet *token.FileSet,
 	file *ast.File,

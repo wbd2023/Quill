@@ -5,8 +5,8 @@ import "ciphera/tools/internal/style"
 // FileSets defines the configured file sets.
 type FileSets []FileSetConfig
 
-// FileSetConfig defines a named group of repository text files.
-// Binary files are skipped by scanners before file set filters are applied.
+// FileSetConfig defines a named group of repository text files. Binary files are skipped by
+// scanners before file set filters are applied.
 type FileSetConfig struct {
 	Name    string
 	Include FileSetInclude

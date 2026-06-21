@@ -11,7 +11,6 @@ const (
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
 // Parse parses one inline style-exception marker from a comment line.
-//
 // Marker grammar: style: allow-<rule> [because: <reason>].
 func Parse(line string) (marker Marker) {
 	directive, found := extractDirective(line)
