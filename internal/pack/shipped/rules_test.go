@@ -96,7 +96,7 @@ func TestRegisteredRulesUseExpectedExecutionKinds(t *testing.T) {
 
 	validExecutionKinds := map[style.ExecutionKind]bool{
 		style.ExecutionToolchain:      true,
-		style.ExecutionProject:        true,
+		style.ExecutionProfile:        true,
 		style.ExecutionFileCommand:    true,
 		style.ExecutionTargetCommand:  true,
 		style.ExecutionTargetCheck:    true,

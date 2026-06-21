@@ -13,7 +13,7 @@ func TestRunnerDriverFamiliesStayBehindFacade(t *testing.T) {
 	toolsRoot := importBoundaryRoot(t)
 	families := []string{
 		"ciphera/tools/internal/runner/drivers/command",
-		"ciphera/tools/internal/runner/drivers/project",
+		"ciphera/tools/internal/runner/drivers/profile",
 		"ciphera/tools/internal/runner/drivers/scan",
 		"ciphera/tools/internal/runner/drivers/target",
 	}

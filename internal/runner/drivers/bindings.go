@@ -11,15 +11,15 @@ type TargetCommand = runtimebinding.TargetCommand
 // TargetCheck is target check.
 type TargetCheck = runtimebinding.TargetCheck
 
-// ProjectCheck is project check.
-type ProjectCheck = runtimebinding.ProjectCheck
+// ProfileCheck is project check.
+type ProfileCheck = runtimebinding.ProfileCheck
 
 // Bindings is bindings.
 type Bindings struct {
 	repositoryScanners runtimebinding.RepositoryScanners
 	targetCommands     runtimebinding.TargetCommands
 	targetChecks       runtimebinding.TargetChecks
-	projectChecks      runtimebinding.ProjectChecks
+	projectChecks      runtimebinding.ProfileChecks
 }
 
 // NewBindings new bindings.
@@ -44,6 +44,6 @@ func (bindings *Bindings) AddTargetCheck(language string, check TargetCheck) {
 	bindings.targetChecks.Add(language, check)
 }
 
-func (bindings *Bindings) AddProjectCheck(id string, check ProjectCheck) {
+func (bindings *Bindings) AddProjectCheck(id string, check ProfileCheck) {
 	bindings.projectChecks.Add(id, check)
 }

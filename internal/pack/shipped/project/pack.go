@@ -50,17 +50,17 @@ func rules() (rules []style.RuleDefinition) {
 			tool.Markdownlint,
 		),
 		projectRule(
-			"project/enforcement-levels",
+			"profile/enforcement-levels",
 			"Enforcement levels",
 			CheckEnforcementLevels,
 		),
 		projectRule(
-			"project/quality-commands",
+			"profile/quality-commands",
 			"Quality commands",
 			CheckCommands,
 		),
 		projectRule(
-			"project/excluded-directories",
+			"profile/excluded-directories",
 			"Excluded directories",
 			CheckExcludedDirectories,
 		),
@@ -97,8 +97,8 @@ func projectRule(
 		Name:  name,
 		Group: ruleGroupProject,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionProject,
-			Detail: style.ProjectExecution{
+			Kind: style.ExecutionProfile,
+			Detail: style.ProfileExecution{
 				Check: check,
 			},
 		},

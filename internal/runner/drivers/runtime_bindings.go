@@ -1,26 +1,26 @@
 package drivers
 
 import (
-	projectdrivers "ciphera/tools/internal/runner/drivers/project"
+	profiledrivers "ciphera/tools/internal/runner/drivers/profile"
 	scandrivers "ciphera/tools/internal/runner/drivers/scan"
 	targetdrivers "ciphera/tools/internal/runner/drivers/target"
 )
 
-/* -------------------------------------- Project Bindings -------------------------------------- */
+/* -------------------------------------- Profile Bindings -------------------------------------- */
 
-// CheckProjectEnforcementLevels check project enforcement levels.
-func CheckProjectEnforcementLevels() (check ProjectCheck) {
-	return projectdrivers.CheckEnforcementLevels()
+// CheckProfileEnforcementLevels check project enforcement levels.
+func CheckProfileEnforcementLevels() (check ProfileCheck) {
+	return profiledrivers.CheckEnforcementLevels()
 }
 
-// CheckProjectExcludedDirectories check project excluded directories.
-func CheckProjectExcludedDirectories() (check ProjectCheck) {
-	return projectdrivers.CheckExcludedDirectories()
+// CheckProfileExcludedDirectories check project excluded directories.
+func CheckProfileExcludedDirectories() (check ProfileCheck) {
+	return profiledrivers.CheckExcludedDirectories()
 }
 
-// CheckProjectCommands check project commands.
-func CheckProjectCommands(projectPackID string) (check ProjectCheck) {
-	return projectdrivers.CheckCommands(projectPackID)
+// CheckProfileCommands check project commands.
+func CheckProfileCommands(profilePackID string) (check ProfileCheck) {
+	return profiledrivers.CheckCommands(profilePackID)
 }
 
 /* -------------------------------------- Scanner Bindings -------------------------------------- */
