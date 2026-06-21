@@ -7,8 +7,8 @@ import (
 )
 
 // CheckDrivers check drivers.
-func CheckDrivers(checks runtimebinding.ProjectChecks) (registry runner.DriverRegistry) {
+func CheckDrivers(checks runtimebinding.ProfileChecks) (registry runner.DriverRegistry) {
 	return runner.DriverRegistry{
-		style.ExecutionProject: projectDriver(checks),
+		style.ExecutionProfile: projectDriver(checks),
 	}
 }

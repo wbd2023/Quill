@@ -19,7 +19,7 @@ func TestGoStyleCheckRunsOnlyRequestedDiagnosticFamily(t *testing.T) {
 
 import (
 	"log/slog"
-	"project/internal/core/domain"
+	"profile/internal/core/domain"
 )
 
 func Bad(raw string) (id domain.IdentityID, err error) {

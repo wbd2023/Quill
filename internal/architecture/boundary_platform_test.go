@@ -217,7 +217,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 				"ciphera/tools/internal/coverage",
 				"ciphera/tools/internal/runner/drivers/command",
 				"ciphera/tools/internal/runner/drivers/internal",
-				"ciphera/tools/internal/runner/drivers/project",
+				"ciphera/tools/internal/runner/drivers/profile",
 				"ciphera/tools/internal/runner/drivers/scan",
 				"ciphera/tools/internal/runner/drivers/target",
 				"ciphera/tools/internal/filewalk",

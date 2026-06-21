@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/runner"
 	commanddrivers "ciphera/tools/internal/runner/drivers/command"
-	projectdrivers "ciphera/tools/internal/runner/drivers/project"
+	profiledrivers "ciphera/tools/internal/runner/drivers/profile"
 	scandrivers "ciphera/tools/internal/runner/drivers/scan"
 	targetdrivers "ciphera/tools/internal/runner/drivers/target"
 	"ciphera/tools/internal/style"
@@ -18,7 +18,7 @@ func CheckDrivers(bindings Bindings) (registry runner.DriverRegistry) {
 			style.ExecutionToolchain: runner.ToolchainDriver,
 		},
 		commanddrivers.CheckDrivers(),
-		projectdrivers.CheckDrivers(bindings.projectChecks),
+		profiledrivers.CheckDrivers(bindings.projectChecks),
 		targetdrivers.CheckDrivers(bindings.targetCommands, bindings.targetChecks),
 		scandrivers.CheckDrivers(bindings.repositoryScanners),
 	)

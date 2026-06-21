@@ -15,7 +15,7 @@ func TestGoStyleReportsDirectDomainValueCast(t *testing.T) {
 	sourcePath := filepath.Join(tempDir, "sample.go")
 	sourceCode := `package sample
 
-import "project/internal/core/domain"
+import "profile/internal/core/domain"
 
 func Bad(raw string) (id domain.IdentityID, err error) {
 	id = domain.IdentityID(raw)
@@ -37,7 +37,7 @@ func TestGoStylePassesDomainValueParserUsage(t *testing.T) {
 	sourcePath := filepath.Join(tempDir, "sample.go")
 	sourceCode := `package sample
 
-import "project/internal/core/domain"
+import "profile/internal/core/domain"
 
 func Good(raw string) (id domain.IdentityID, err error) {
 	id, err = domain.ParseIdentityID(raw)
@@ -93,7 +93,7 @@ func TestGoStyleUsesProfileDomainValueVocabulary(t *testing.T) {
 	sourcePath := filepath.Join(tempDir, "sample.go")
 	sourceCode := `package sample
 
-import "project/internal/core/domain"
+import "profile/internal/core/domain"
 
 func Bad(raw string) (id domain.SessionKey, err error) {
 	id = domain.SessionKey(raw)

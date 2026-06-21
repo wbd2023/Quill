@@ -69,7 +69,7 @@ type UserRepository interface {
 	implPath := filepath.Join(implDirectory, "user_repository.go")
 	implSource := `package storage
 
-import "project/internal/client/application/port/account"
+import "profile/internal/client/application/port/account"
 
 type UserFileRepository struct{}
 
@@ -117,7 +117,7 @@ type UserRepository interface {
 	implPath := filepath.Join(implDirectory, "user_repository.go")
 	implSource := `package storage
 
-import "project/internal/client/application/port/account"
+import "profile/internal/client/application/port/account"
 
 type UserFileRepository struct{}
 

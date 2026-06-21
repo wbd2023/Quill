@@ -17,15 +17,15 @@ func Build() (bindings drivers.Bindings) {
 
 	bindings.AddProjectCheck(
 		project.CheckEnforcementLevels,
-		drivers.CheckProjectEnforcementLevels(),
+		drivers.CheckProfileEnforcementLevels(),
 	)
 	bindings.AddProjectCheck(
 		project.CheckExcludedDirectories,
-		drivers.CheckProjectExcludedDirectories(),
+		drivers.CheckProfileExcludedDirectories(),
 	)
 	bindings.AddProjectCheck(
 		project.CheckCommands,
-		drivers.CheckProjectCommands(project.PackID),
+		drivers.CheckProfileCommands(project.PackID),
 	)
 
 	bindings.AddRepositoryScanner(

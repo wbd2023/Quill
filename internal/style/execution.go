@@ -2,32 +2,33 @@ package style
 
 /* --------------------------------------- Execution Kinds -------------------------------------- */
 
-// ExecutionKind constants name the supported execution families for a rule.
+// ExecutionKind names the execution family that handles a rule.
 const (
-	// ExecutionToolchain runs a pinned tool against the repository root.
+	// ExecutionToolchain validates that pinned external tools are installed and healthy.
 	ExecutionToolchain ExecutionKind = "toolchain"
-	// ExecutionProject runs a repository-wide check that does not invoke an external tool.
-	ExecutionProject ExecutionKind = "project"
-	// ExecutionFileCommand runs a tool against files selected by a file set.
+	// ExecutionProfile validates profile configuration consistency.
+	ExecutionProfile ExecutionKind = "profile"
+
+	// ExecutionFileCommand runs an external tool against files from a file set.
 	ExecutionFileCommand ExecutionKind = "file_command"
-	// ExecutionTargetCommand runs a tool against language-specific targets.
+	// ExecutionTargetCommand runs an external tool against language-specific targets.
 	ExecutionTargetCommand ExecutionKind = "target_command"
-	// ExecutionTargetCheck runs a language-specific check against targets.
-	ExecutionTargetCheck ExecutionKind = "target_check"
-	// ExecutionRepositoryScan runs a repository-wide scanner that does not invoke an external tool.
+
+	// ExecutionRepositoryScan runs an internal Go function over files line-by-line.
 	ExecutionRepositoryScan ExecutionKind = "repository_scan"
+	// ExecutionTargetCheck runs an internal Go function for a language-specific AST check.
+	ExecutionTargetCheck ExecutionKind = "target_check"
 )
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
-// ExecutionSpec describes how a rule is executed: the execution kind and its
-// concrete detail.
+// ExecutionSpec describes how a rule is executed: the execution kind and its concrete detail.
 type ExecutionSpec struct {
 	Kind   ExecutionKind
 	Detail ExecutionDetail
 }
 
-// ExecutionDetail is a sealed interface implemented by each execution-family. detail type. The
+// ExecutionDetail is a sealed interface implemented by each execution-family detail type. The
 // marker method is unexported so only types in this package can satisfy it.
 type ExecutionDetail interface {
 	executionDetail()
@@ -38,8 +39,8 @@ type ToolchainExecution struct {
 	ToolIDs []string
 }
 
-// ProjectExecution runs a repository-wide check identified by its check ID.
-type ProjectExecution struct {
+// ProfileExecution validates the profile configuration identified by its check ID.
+type ProfileExecution struct {
 	Check string
 }
 
@@ -85,7 +86,7 @@ type CommandResult struct {
 
 func (ToolchainExecution) executionDetail() {}
 
-func (ProjectExecution) executionDetail() {}
+func (ProfileExecution) executionDetail() {}
 
 func (FileCommandExecution) executionDetail() {}
 
@@ -106,9 +107,9 @@ func (spec ExecutionSpec) ToolchainExecution() (execution ToolchainExecution, fo
 	return execution, found
 }
 
-// ProjectExecution returns the project execution detail, if the spec holds one.
-func (spec ExecutionSpec) ProjectExecution() (execution ProjectExecution, found bool) {
-	execution, found = spec.Detail.(ProjectExecution)
+// ProfileExecution returns the profile execution detail, if the spec holds one.
+func (spec ExecutionSpec) ProfileExecution() (execution ProfileExecution, found bool) {
+	execution, found = spec.Detail.(ProfileExecution)
 	return execution, found
 }
 

@@ -27,10 +27,10 @@ type TargetCheck func(
 	spec style.ExecutionSpec,
 ) (result style.ExecutionResult, err error)
 
-// ProjectCheck is project check.
-type ProjectCheck func(
+// ProfileCheck is project check.
+type ProfileCheck func(
 	context runner.Context,
-	execution style.ProjectExecution,
+	execution style.ProfileExecution,
 ) (result style.ExecutionResult, err error)
 
 // RepositoryScanners is repository scanners.
@@ -48,9 +48,9 @@ type TargetChecks struct {
 	entries map[string]TargetCheck
 }
 
-// ProjectChecks is project checks.
-type ProjectChecks struct {
-	entries map[string]ProjectCheck
+// ProfileChecks is project checks.
+type ProfileChecks struct {
+	entries map[string]ProfileCheck
 }
 
 // NewRepositoryScanners new repository scanners.
@@ -69,8 +69,8 @@ func NewTargetChecks() (registry TargetChecks) {
 }
 
 // NewProjectChecks new project checks.
-func NewProjectChecks() (registry ProjectChecks) {
-	return ProjectChecks{entries: map[string]ProjectCheck{}}
+func NewProjectChecks() (registry ProfileChecks) {
+	return ProfileChecks{entries: map[string]ProfileCheck{}}
 }
 
 func (registry *RepositoryScanners) Add(id string, scanner RepositoryScanner) {
@@ -85,7 +85,7 @@ func (registry *TargetChecks) Add(id string, check TargetCheck) {
 	registry.entries = addBinding(registry.entries, "target check", id, check)
 }
 
-func (registry *ProjectChecks) Add(id string, check ProjectCheck) {
+func (registry *ProfileChecks) Add(id string, check ProfileCheck) {
 	registry.entries = addBinding(registry.entries, "project check", id, check)
 }
 
@@ -104,7 +104,7 @@ func (registry TargetChecks) Lookup(id string) (check TargetCheck, found bool) {
 	return check, found
 }
 
-func (registry ProjectChecks) Lookup(id string) (check ProjectCheck, found bool) {
+func (registry ProfileChecks) Lookup(id string) (check ProfileCheck, found bool) {
 	check, found = registry.entries[id]
 	return check, found
 }

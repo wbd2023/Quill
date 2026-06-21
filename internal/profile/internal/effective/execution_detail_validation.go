@@ -19,11 +19,11 @@ func (validator ruleExecutionValidator) validateToolchainExecution(
 	return validator.validateToolReferences(execution.ToolIDs)
 }
 
-func (validator ruleExecutionValidator) validateProjectExecution(
+func (validator ruleExecutionValidator) validateProfileExecution(
 	kind style.ExecutionKind,
-	execution style.ProjectExecution,
+	execution style.ProfileExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionProject); err != nil {
+	if err = validator.validateExecutionKind(kind, style.ExecutionProfile); err != nil {
 		return err
 	}
 

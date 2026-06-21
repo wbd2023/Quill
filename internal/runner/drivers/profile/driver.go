@@ -19,13 +19,13 @@ var errViolationsFound = errors.New("violations found")
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
-func projectDriver(checks runtimebinding.ProjectChecks) (driver runner.Driver) {
+func projectDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
 		_ map[string]toolchain.Status,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.ProjectExecution()
+		execution, found := spec.ProfileExecution()
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
 		}
@@ -43,10 +43,10 @@ func projectDriver(checks runtimebinding.ProjectChecks) (driver runner.Driver) {
 }
 
 // CheckEnforcementLevels check enforcement levels.
-func CheckEnforcementLevels() (check runtimebinding.ProjectCheck) {
+func CheckEnforcementLevels() (check runtimebinding.ProfileCheck) {
 	return func(
 		_ runner.Context,
-		_ style.ProjectExecution,
+		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
 		output, err := checkEnforcementLevels()
 		return style.ExecutionResult{Output: output}, err
@@ -54,10 +54,10 @@ func CheckEnforcementLevels() (check runtimebinding.ProjectCheck) {
 }
 
 // CheckExcludedDirectories check excluded directories.
-func CheckExcludedDirectories() (check runtimebinding.ProjectCheck) {
+func CheckExcludedDirectories() (check runtimebinding.ProfileCheck) {
 	return func(
 		context runner.Context,
-		_ style.ProjectExecution,
+		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
 		output, err := checkExcludedDirectories(context.Profile.Repository)
 		return style.ExecutionResult{Output: output}, err
@@ -65,12 +65,12 @@ func CheckExcludedDirectories() (check runtimebinding.ProjectCheck) {
 }
 
 // CheckCommands check commands.
-func CheckCommands(projectPackID string) (check runtimebinding.ProjectCheck) {
+func CheckCommands(profilePackID string) (check runtimebinding.ProfileCheck) {
 	return func(
 		context runner.Context,
-		_ style.ProjectExecution,
+		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
-		projectConfig, err := decodeProjectConfig(context, projectPackID)
+		projectConfig, err := decodeProjectConfig(context, profilePackID)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}

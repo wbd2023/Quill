@@ -35,8 +35,8 @@ func (validator ruleExecutionValidator) validate(execution style.ExecutionSpec) 
 	case style.ToolchainExecution:
 		return validator.validateToolchainExecution(execution.Kind, detail)
 
-	case style.ProjectExecution:
-		return validator.validateProjectExecution(execution.Kind, detail)
+	case style.ProfileExecution:
+		return validator.validateProfileExecution(execution.Kind, detail)
 
 	case style.FileCommandExecution:
 		return validator.validateFileCommandExecution(execution.Kind, detail)
