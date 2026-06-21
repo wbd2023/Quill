@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// SectionSlug names requirement IDs written as "<section>.<slug>".
-// For example, section "3.8" with slug "constructor-category-order".
+// SectionSlug names requirement IDs written as "<section>.<slug>". For example, section "3.8" with
+// slug "constructor-category-order".
 const SectionSlug IDScheme = "section_slug"
 
 // IDScheme selects a requirement ID grammar.

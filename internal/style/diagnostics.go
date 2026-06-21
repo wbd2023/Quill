@@ -11,8 +11,8 @@ type Diagnostic struct {
 	Message string
 }
 
-// ExecutionResult holds the outcome of running one check or fix against a.
-// rule: diagnostics, tool output, and the raw command result.
+// ExecutionResult holds the outcome of running one check or fix against a. rule: diagnostics, tool
+// output, and the raw command result.
 type ExecutionResult struct {
 	Diagnostics []Diagnostic
 	Output      string
@@ -26,8 +26,7 @@ func (result ExecutionResult) Empty() (empty bool) {
 		result.Command == CommandResult{}
 }
 
-// ViolationsFound is the sentinel error returned when a check produces at.
-// least one diagnostic.
+// ViolationsFound is the sentinel error returned when a check produces at. least one diagnostic.
 func ViolationsFound() (err error) {
 	return errors.New("violations found")
 }

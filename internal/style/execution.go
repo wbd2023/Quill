@@ -20,16 +20,15 @@ const (
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
-// ExecutionSpec describes how a rule is executed: the execution kind and its.
+// ExecutionSpec describes how a rule is executed: the execution kind and its
 // concrete detail.
 type ExecutionSpec struct {
 	Kind   ExecutionKind
 	Detail ExecutionDetail
 }
 
-// ExecutionDetail is a sealed interface implemented by each execution-family.
-// detail type. The marker method is unexported so only types in this package
-// can satisfy it.
+// ExecutionDetail is a sealed interface implemented by each execution-family. detail type. The
+// marker method is unexported so only types in this package can satisfy it.
 type ExecutionDetail interface {
 	executionDetail()
 }
