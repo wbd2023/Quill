@@ -9,24 +9,14 @@ import (
 /* -------------------------------------- Execution Details ------------------------------------- */
 
 func (validator ruleExecutionValidator) validateToolchainExecution(
-	kind style.ExecutionKind,
 	execution style.ToolchainExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionToolchain); err != nil {
-		return err
-	}
-
 	return validator.validateToolReferences(execution.ToolIDs)
 }
 
 func (validator ruleExecutionValidator) validateProfileExecution(
-	kind style.ExecutionKind,
 	execution style.ProfileExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionProfile); err != nil {
-		return err
-	}
-
 	if isBlank(execution.Check) {
 		return fmt.Errorf(
 			"rule definition %q %s must define a check",
@@ -39,13 +29,8 @@ func (validator ruleExecutionValidator) validateProfileExecution(
 }
 
 func (validator ruleExecutionValidator) validateFileCommandExecution(
-	kind style.ExecutionKind,
 	execution style.FileCommandExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionFileCommand); err != nil {
-		return err
-	}
-
 	if isBlank(execution.ToolID) {
 		return fmt.Errorf(
 			"rule definition %q %s must define a tool ID",
@@ -78,13 +63,8 @@ func (validator ruleExecutionValidator) validateFileCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCommandExecution(
-	kind style.ExecutionKind,
 	execution style.TargetCommandExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionTargetCommand); err != nil {
-		return err
-	}
-
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
 		return err
 	}
@@ -109,13 +89,8 @@ func (validator ruleExecutionValidator) validateTargetCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCheckExecution(
-	kind style.ExecutionKind,
 	execution style.TargetCheckExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionTargetCheck); err != nil {
-		return err
-	}
-
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
 		return err
 	}
@@ -140,13 +115,8 @@ func (validator ruleExecutionValidator) validateTargetCheckExecution(
 }
 
 func (validator ruleExecutionValidator) validateRepositoryScanExecution(
-	kind style.ExecutionKind,
 	execution style.RepositoryScanExecution,
 ) (err error) {
-	if err = validator.validateExecutionKind(kind, style.ExecutionRepositoryScan); err != nil {
-		return err
-	}
-
 	if isBlank(execution.Scanner) {
 		return fmt.Errorf(
 			"rule definition %q %s must define a scanner",

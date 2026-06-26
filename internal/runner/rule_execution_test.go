@@ -13,7 +13,6 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	rule := style.Rule{
 		ID: "test/rule",
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionKind("test_execution"),
 			Detail: style.RepositoryScanExecution{
 				Scanner: "test",
 			},
@@ -28,12 +27,12 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		nil,
 		nil,
 	)
-	drivers := DriverRegistry{
-		"test_execution": func(
+	drivers := DriverSet{
+		RepositoryScan: func(
 			_ Context,
 			_ style.ExecutionSpec,
 			_ map[string]toolchain.Status,
-		) (style.ExecutionResult, error) {
+		) (result style.ExecutionResult, err error) {
 			return style.ExecutionResult{Output: "ran"}, nil
 		},
 	}

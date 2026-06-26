@@ -20,7 +20,6 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "first",
 					Check: style.ExecutionSpec{
-						Kind: style.ExecutionRepositoryScan,
 						Detail: style.RepositoryScanExecution{
 							Scanner: "test",
 						},
@@ -36,7 +35,6 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 					ID:   "duplicate",
 					Name: "second",
 					Check: style.ExecutionSpec{
-						Kind: style.ExecutionRepositoryScan,
 						Detail: style.RepositoryScanExecution{
 							Scanner: "test",
 						},
@@ -164,7 +162,6 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 					ID:   "custom/rule",
 					Name: "Custom rule",
 					Check: style.ExecutionSpec{
-						Kind: style.ExecutionFileCommand,
 						Detail: style.FileCommandExecution{
 							Arguments: []string{"-w"},
 						},
@@ -194,7 +191,6 @@ func testPack(id string) (definition Definition) {
 				ID:   id + "/rule",
 				Name: id + " rule",
 				Check: style.ExecutionSpec{
-					Kind: style.ExecutionRepositoryScan,
 					Detail: style.RepositoryScanExecution{
 						Scanner: "test",
 					},

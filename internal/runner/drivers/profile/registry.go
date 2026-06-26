@@ -1,14 +1,11 @@
-package project
+package profile
 
 import (
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
-	"ciphera/tools/internal/style"
 )
 
-// CheckDrivers check drivers.
-func CheckDrivers(checks runtimebinding.ProfileChecks) (registry runner.DriverRegistry) {
-	return runner.DriverRegistry{
-		style.ExecutionProfile: projectDriver(checks),
-	}
+// CheckDriver returns the profile driver for check execution.
+func CheckDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
+	return profileDriver(checks)
 }

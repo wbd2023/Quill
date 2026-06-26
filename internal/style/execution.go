@@ -1,40 +1,18 @@
 package style
 
-/* --------------------------------------- Execution Kinds -------------------------------------- */
-
-// ExecutionKind names the execution family that handles a rule.
-const (
-	// ExecutionToolchain validates that pinned external tools are installed and healthy.
-	ExecutionToolchain ExecutionKind = "toolchain"
-	// ExecutionProfile validates profile configuration consistency.
-	ExecutionProfile ExecutionKind = "profile"
-
-	// ExecutionFileCommand runs an external tool against files from a file set.
-	ExecutionFileCommand ExecutionKind = "file_command"
-	// ExecutionTargetCommand runs an external tool against language-specific targets.
-	ExecutionTargetCommand ExecutionKind = "target_command"
-
-	// ExecutionRepositoryScan runs an internal Go function over files line-by-line.
-	ExecutionRepositoryScan ExecutionKind = "repository_scan"
-	// ExecutionTargetCheck runs an internal Go function for a language-specific AST check.
-	ExecutionTargetCheck ExecutionKind = "target_check"
-)
-
-/* -------------------------------------------- Types ------------------------------------------- */
-
-// ExecutionSpec describes how a rule is executed: the execution kind and its concrete detail.
+// ExecutionSpec describes how a rule is executed. The concrete Detail type determines which driver
+// handles the rule.
 type ExecutionSpec struct {
-	Kind   ExecutionKind
 	Detail ExecutionDetail
 }
 
-// ExecutionDetail is a sealed interface implemented by each execution-family detail type. The
-// marker method is unexported so only types in this package can satisfy it.
+// ExecutionDetail is a sealed interface implemented by each execution detail type. The marker
+// method is unexported so only types in this package can satisfy it.
 type ExecutionDetail interface {
 	executionDetail()
 }
 
-// ToolchainExecution runs one or more pinned tools against the repository root.
+// ToolchainExecution validates that pinned external tools are installed and healthy.
 type ToolchainExecution struct {
 	ToolIDs []string
 }
@@ -96,9 +74,11 @@ func (TargetCheckExecution) executionDetail() {}
 
 func (RepositoryScanExecution) executionDetail() {}
 
-// Empty reports whether the spec has no kind and no detail.
+/* ------------------------------------------ Accessors ----------------------------------------- */
+
+// Empty reports whether the spec has no detail.
 func (spec ExecutionSpec) Empty() (empty bool) {
-	return spec.Kind == "" && spec.Detail == nil
+	return spec.Detail == nil
 }
 
 // ToolchainExecution returns the toolchain execution detail, if the spec holds one.
@@ -120,10 +100,7 @@ func (spec ExecutionSpec) FileCommandExecution() (execution FileCommandExecution
 }
 
 // TargetCommandExecution returns the target-command execution detail, if the spec holds one.
-func (spec ExecutionSpec) TargetCommandExecution() (
-	execution TargetCommandExecution,
-	found bool,
-) {
+func (spec ExecutionSpec) TargetCommandExecution() (execution TargetCommandExecution, found bool) {
 	execution, found = spec.Detail.(TargetCommandExecution)
 	return execution, found
 }

@@ -24,7 +24,6 @@ func Pack() (definition pack.Definition) {
 				Name:  "Committed secrets",
 				Group: ruleGroupSecurity,
 				Check: style.ExecutionSpec{
-					Kind: style.ExecutionRepositoryScan,
 					Detail: style.RepositoryScanExecution{
 						Scanner: ScannerSecrets,
 					},

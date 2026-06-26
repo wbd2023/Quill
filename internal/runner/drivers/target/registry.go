@@ -3,23 +3,19 @@ package target
 import (
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
-	"ciphera/tools/internal/style"
 )
 
-// CheckDrivers check drivers.
-func CheckDrivers(
-	commands runtimebinding.TargetCommands,
-	checks runtimebinding.TargetChecks,
-) (registry runner.DriverRegistry) {
-	return runner.DriverRegistry{
-		style.ExecutionTargetCommand: targetCommandDriver(commands),
-		style.ExecutionTargetCheck:   targetCheckDriver(checks),
-	}
+// CheckCommandDriver returns the target-command driver for check execution.
+func CheckCommandDriver(commands runtimebinding.TargetCommands) (driver runner.Driver) {
+	return targetCommandDriver(commands)
 }
 
-// FixDrivers fix drivers.
-func FixDrivers(commands runtimebinding.TargetCommands) (registry runner.DriverRegistry) {
-	return runner.DriverRegistry{
-		style.ExecutionTargetCommand: targetCommandDriver(commands),
-	}
+// CheckCheckDriver returns the target-check driver for check execution.
+func CheckCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver) {
+	return targetCheckDriver(checks)
+}
+
+// FixCommandDriver returns the target-command driver for fix execution.
+func FixCommandDriver(commands runtimebinding.TargetCommands) (driver runner.Driver) {
+	return targetCommandDriver(commands)
 }

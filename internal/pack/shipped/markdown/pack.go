@@ -72,7 +72,6 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionFileCommand,
 			Detail: style.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,

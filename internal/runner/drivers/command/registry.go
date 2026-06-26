@@ -1,20 +1,9 @@
 package command
 
-import (
-	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/style"
-)
+import "ciphera/tools/internal/runner"
 
-// CheckDrivers check drivers.
-func CheckDrivers() (registry runner.DriverRegistry) {
-	return runner.DriverRegistry{
-		style.ExecutionFileCommand: fileCommandDriver,
-	}
-}
+// CheckDriver returns the file-command driver for check execution.
+func CheckDriver() (driver runner.Driver) { return fileCommandDriver }
 
-// FixDrivers fix drivers.
-func FixDrivers() (registry runner.DriverRegistry) {
-	return runner.DriverRegistry{
-		style.ExecutionFileCommand: fileCommandDriver,
-	}
-}
+// FixDriver returns the file-command driver for fix execution.
+func FixDriver() (driver runner.Driver) { return fileCommandDriver }

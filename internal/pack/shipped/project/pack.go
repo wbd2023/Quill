@@ -79,7 +79,6 @@ func toolchainRule(
 		Name:  name,
 		Group: ruleGroupProject,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionToolchain,
 			Detail: style.ToolchainExecution{
 				ToolIDs: append([]string{}, toolIDs...),
 			},
@@ -97,7 +96,6 @@ func projectRule(
 		Name:  name,
 		Group: ruleGroupProject,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionProfile,
 			Detail: style.ProfileExecution{
 				Check: check,
 			},
