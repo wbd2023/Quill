@@ -13,7 +13,7 @@ func buildBuiltin(
 		Name:        name,
 		Command:     command,
 		VersionKind: versionKind,
-		InstallKind: InstallNone,
+		InstallKind: toolchain.InstallKindNone,
 	}
 }
 
@@ -28,9 +28,9 @@ func buildGoBinary(
 		ID:            id,
 		Name:          name,
 		Command:       command,
-		VersionKind:   VersionBuildInfo,
+		VersionKind:   toolchain.VersionKindBuildInfo,
 		ModulePath:    modulePath,
-		InstallKind:   InstallGoBinary,
+		InstallKind:   toolchain.InstallKindGoBinary,
 		InstallSource: installSource,
 	}
 }
@@ -45,8 +45,8 @@ func buildNodePackage(
 		ID:            id,
 		Name:          name,
 		Command:       command,
-		VersionKind:   VersionNodeCLI,
-		InstallKind:   InstallNodePackage,
+		VersionKind:   toolchain.VersionKindNodeCLI,
+		InstallKind:   toolchain.InstallKindNodePackage,
 		InstallSource: installSource,
 	}
 }
@@ -56,7 +56,7 @@ func buildShellcheckArchive() (capability toolchain.Capability) {
 		ID:          Shellcheck,
 		Name:        "shellcheck",
 		Command:     "shellcheck",
-		VersionKind: VersionShellcheck,
-		InstallKind: InstallShellcheckArchive,
+		VersionKind: toolchain.VersionKindShellcheck,
+		InstallKind: toolchain.InstallKindShellcheckArchive,
 	}
 }

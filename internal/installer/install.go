@@ -19,21 +19,6 @@ const (
 	executableMode       os.FileMode = 0o755
 )
 
-// install constants.
-const (
-	toolInstallNone              toolchain.InstallKind = "none"
-	toolInstallGoBinary          toolchain.InstallKind = "go_binary"
-	toolInstallNodePackage       toolchain.InstallKind = "node_package"
-	toolInstallShellcheckArchive toolchain.InstallKind = "shellcheck_archive"
-)
-
-type installHandler func(
-	layout runtime.Layout,
-	writer io.Writer,
-	tool style.Tool,
-	capability toolchain.Capability,
-) error
-
 /* ---------------------------------------- Installation ---------------------------------------- */
 
 // Install returns the requested value.
@@ -67,40 +52,41 @@ func installTool(
 	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
-	handler, found := installHandlers()[capability.InstallKind]
-	if !found {
+	switch capability.InstallKind {
+
+	case toolchain.InstallKindNone:
+		return nil
+
+	case toolchain.InstallKindGoBinary:
+		return installGoTool(layout, writer, tool, capability)
+
+	case toolchain.InstallKindNodePackage:
+		return installNodeTool(layout, writer, tool, capability)
+
+	case toolchain.InstallKindShellcheckArchive:
+		return installShellcheckTool(layout, writer, tool, capability)
+
+	default:
 		return fmt.Errorf(
 			"unsupported install strategy %q for tool %s",
 			capability.InstallKind,
 			tool.ID,
 		)
 	}
-
-	return handler(layout, writer, tool, capability)
 }
 
-func installHandlers() (handlers map[toolchain.InstallKind]installHandler) {
-	return map[toolchain.InstallKind]installHandler{
-		toolInstallNone:              skipInstall,
-		toolInstallGoBinary:          installGoTool,
-		toolInstallNodePackage:       installNodeTool,
-		toolInstallShellcheckArchive: installShellcheckTool,
-	}
-}
-
-func skipInstall(
-	_ runtime.Layout,
-	_ io.Writer,
-	_ style.Tool,
-	_ toolchain.Capability,
-) (err error) {
-	return nil
-}
-
-// SupportsInstallKind supports install kind.
+// SupportsInstallKind reports whether kind names a known install strategy.
 func SupportsInstallKind(kind toolchain.InstallKind) (supported bool) {
-	_, supported = installHandlers()[kind]
-	return supported
+	switch kind {
+
+	case toolchain.InstallKindNone,
+		toolchain.InstallKindGoBinary,
+		toolchain.InstallKindNodePackage,
+		toolchain.InstallKindShellcheckArchive:
+		return true
+	}
+
+	return false
 }
 
 /* ---------------------------------------- Layout Setup ---------------------------------------- */

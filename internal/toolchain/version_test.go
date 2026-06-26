@@ -4,14 +4,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"ciphera/tools/internal/style"
 )
 
 func TestDetectVersionRejectsUnknownVersionKind(t *testing.T) {
 	_, err := detectVersion(
 		nil,
-		style.Tool{ID: "example"},
 		Capability{
 			ID:          "example",
 			VersionKind: "unknown",
@@ -42,8 +39,7 @@ func TestDetectGoVersionUsesCommandRunner(t *testing.T) {
 
 	version, err := detectVersion(
 		runner,
-		style.Tool{ID: "go", PinnedVersion: "1.24.5"},
-		Capability{ID: "go", VersionKind: toolVersionGoCommand},
+		Capability{ID: "go", VersionKind: VersionKindGoCommand},
 		"/bin/go",
 		nil,
 	)

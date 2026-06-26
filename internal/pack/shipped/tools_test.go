@@ -40,10 +40,10 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 	}
 
 	supportedInstallKinds := map[toolchain.InstallKind]bool{
-		tool.InstallNone:              true,
-		tool.InstallGoBinary:          true,
-		tool.InstallNodePackage:       true,
-		tool.InstallShellcheckArchive: true,
+		toolchain.InstallKindNone:              true,
+		toolchain.InstallKindGoBinary:          true,
+		toolchain.InstallKindNodePackage:       true,
+		toolchain.InstallKindShellcheckArchive: true,
 	}
 
 	for _, capability := range registry.ToolCapabilities() {
@@ -56,11 +56,11 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 		}
 
 		switch capability.InstallKind {
-		case tool.InstallGoBinary, tool.InstallNodePackage:
+		case toolchain.InstallKindGoBinary, toolchain.InstallKindNodePackage:
 			if capability.InstallSource == "" {
 				t.Fatalf("tool %q must define an install source", capability.ID)
 			}
-		case tool.InstallNone, tool.InstallShellcheckArchive:
+		case toolchain.InstallKindNone, toolchain.InstallKindShellcheckArchive:
 			if capability.InstallSource != "" {
 				t.Fatalf("tool %q must not define an install source", capability.ID)
 			}

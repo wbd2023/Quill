@@ -87,7 +87,7 @@ func inspectTool(
 	}
 
 	status.Path = path
-	version, versionErr := detectVersion(runner, tool, capability, path, environment)
+	version, versionErr := detectVersion(runner, capability, path, environment)
 	if versionErr != nil {
 		status.Issue = versionErr.Error()
 		return status
