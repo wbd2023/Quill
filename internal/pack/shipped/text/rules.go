@@ -73,7 +73,6 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionFileCommand,
 			Detail: style.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,
@@ -102,7 +101,6 @@ func scanRule(
 		Name:  name,
 		Group: group,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionRepositoryScan,
 			Detail: style.RepositoryScanExecution{
 				Scanner: scanner,
 			},

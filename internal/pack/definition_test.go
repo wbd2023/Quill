@@ -19,7 +19,6 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 			{
 				ID: "custom/rule",
 				Check: style.ExecutionSpec{
-					Kind: style.ExecutionFileCommand,
 					Detail: style.FileCommandExecution{
 						Arguments: []string{"-w"},
 					},

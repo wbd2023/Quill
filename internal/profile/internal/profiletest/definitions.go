@@ -14,7 +14,6 @@ func Definitions() (definitions style.Definitions) {
 				Name:  "Test rule",
 				Group: "test",
 				Check: style.ExecutionSpec{
-					Kind: style.ExecutionRepositoryScan,
 					Detail: style.RepositoryScanExecution{
 						Scanner: "test",
 					},
@@ -28,7 +27,6 @@ func Definitions() (definitions style.Definitions) {
 func FileCommandDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = style.ExecutionSpec{
-		Kind: style.ExecutionFileCommand,
 		Detail: style.FileCommandExecution{
 			ToolID:  Tool,
 			FileSet: FileSet,
@@ -41,7 +39,6 @@ func FileCommandDefinitions() (definitions style.Definitions) {
 func TargetCommandDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = style.ExecutionSpec{
-		Kind: style.ExecutionTargetCommand,
 		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "test",
@@ -49,7 +46,6 @@ func TargetCommandDefinitions() (definitions style.Definitions) {
 		},
 	}
 	definitions.Rules[0].Fix = style.ExecutionSpec{
-		Kind: style.ExecutionTargetCommand,
 		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{Tool},
 			Action:   "fix",
@@ -63,7 +59,6 @@ func TargetCommandDefinitions() (definitions style.Definitions) {
 func TargetCheckDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
 	definitions.Rules[0].Check = style.ExecutionSpec{
-		Kind: style.ExecutionTargetCheck,
 		Detail: style.TargetCheckExecution{
 			ToolIDs:  []string{Tool},
 			Check:    "test",

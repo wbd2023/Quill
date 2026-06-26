@@ -22,7 +22,6 @@ func rules() (rules []style.RuleDefinition) {
 		[]string{"-d"},
 	)
 	shfmtRule.Fix = style.ExecutionSpec{
-		Kind: style.ExecutionFileCommand,
 		Detail: style.FileCommandExecution{
 			ToolID:    tool.Shfmt,
 			FileSet:   "bash",
@@ -76,7 +75,6 @@ func fileCommandRule(
 		Name:  name,
 		Group: ruleGroupExternal,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionFileCommand,
 			Detail: style.FileCommandExecution{
 				ToolID:    toolID,
 				FileSet:   fileSet,
@@ -96,7 +94,6 @@ func scannerRule(
 		Name:  name,
 		Group: ruleGroupText,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionRepositoryScan,
 			Detail: style.RepositoryScanExecution{
 				Scanner: scanner,
 			},

@@ -3,9 +3,6 @@ package style
 // RuleGroup categorises rules by concern, for example Go syntax or repository text.
 type RuleGroup string
 
-// ExecutionKind names one of the supported execution families for a rule.
-type ExecutionKind string
-
 // Definitions holds the raw tool and rule definitions assembled from Packs
 // before the Effective Profile is compiled.
 type Definitions struct {

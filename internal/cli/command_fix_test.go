@@ -15,7 +15,6 @@ func TestFixableRulesUsePackFixes(t *testing.T) {
 		{
 			ID: "go/lint",
 			Fix: style.ExecutionSpec{
-				Kind: style.ExecutionTargetCommand,
 				Detail: style.TargetCommandExecution{
 					ToolIDs:  []string{tool.Go},
 					Action:   golang.TargetActionGoFormat,

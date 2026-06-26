@@ -88,31 +88,24 @@ func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
 	}
 }
 
-func TestRegisteredRulesUseExpectedExecutionKinds(t *testing.T) {
+func TestRegisteredRulesHaveExecutionDetails(t *testing.T) {
 	registry, err := DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	validExecutionKinds := map[style.ExecutionKind]bool{
-		style.ExecutionToolchain:      true,
-		style.ExecutionProfile:        true,
-		style.ExecutionFileCommand:    true,
-		style.ExecutionTargetCommand:  true,
-		style.ExecutionTargetCheck:    true,
-		style.ExecutionRepositoryScan: true,
-	}
-
 	for _, rule := range registry.Rules() {
-		if !validExecutionKinds[rule.Check.Kind] {
-			t.Fatalf("rule %q uses unsupported execution kind %q", rule.ID, rule.Check.Kind)
+		if rule.Check.Detail == nil {
+			t.Fatalf("rule %q has no check execution detail", rule.ID)
 		}
 
-		if rule.Fix.Empty() || validExecutionKinds[rule.Fix.Kind] {
+		if rule.Fix.Empty() {
 			continue
 		}
 
-		t.Fatalf("rule %q uses unsupported fix execution kind %q", rule.ID, rule.Fix.Kind)
+		if rule.Fix.Detail == nil {
+			t.Fatalf("rule %q has no fix execution detail", rule.ID)
+		}
 	}
 }
 

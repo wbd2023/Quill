@@ -1,48 +1,29 @@
 package drivers
 
 import (
-	"fmt"
-
 	"ciphera/tools/internal/runner"
-	commanddrivers "ciphera/tools/internal/runner/drivers/command"
-	profiledrivers "ciphera/tools/internal/runner/drivers/profile"
-	scandrivers "ciphera/tools/internal/runner/drivers/scan"
-	targetdrivers "ciphera/tools/internal/runner/drivers/target"
-	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/runner/drivers/command"
+	"ciphera/tools/internal/runner/drivers/profile"
+	"ciphera/tools/internal/runner/drivers/scan"
+	"ciphera/tools/internal/runner/drivers/target"
 )
 
-// CheckDrivers check drivers.
-func CheckDrivers(bindings Bindings) (registry runner.DriverRegistry) {
-	return mergeDrivers(
-		runner.DriverRegistry{
-			style.ExecutionToolchain: runner.ToolchainDriver,
-		},
-		commanddrivers.CheckDrivers(),
-		profiledrivers.CheckDrivers(bindings.projectChecks),
-		targetdrivers.CheckDrivers(bindings.targetCommands, bindings.targetChecks),
-		scandrivers.CheckDrivers(bindings.repositoryScanners),
-	)
-}
-
-// FixDrivers fix drivers.
-func FixDrivers(bindings Bindings) (registry runner.DriverRegistry) {
-	return mergeDrivers(
-		commanddrivers.FixDrivers(),
-		targetdrivers.FixDrivers(bindings.targetCommands),
-	)
-}
-
-func mergeDrivers(registries ...runner.DriverRegistry) (merged runner.DriverRegistry) {
-	merged = runner.DriverRegistry{}
-	for _, registry := range registries {
-		for kind, driver := range registry {
-			if _, exists := merged[kind]; exists {
-				panic(fmt.Sprintf("duplicate driver for execution kind %q", kind))
-			}
-
-			merged[kind] = driver
-		}
+// CheckDrivers returns the complete driver set for check execution.
+func CheckDrivers(bindings Bindings) (set runner.DriverSet) {
+	return runner.DriverSet{
+		Toolchain:      runner.ToolchainDriver,
+		Profile:        profile.CheckDriver(bindings.projectChecks),
+		FileCommand:    command.CheckDriver(),
+		TargetCommand:  target.CheckCommandDriver(bindings.targetCommands),
+		TargetCheck:    target.CheckCheckDriver(bindings.targetChecks),
+		RepositoryScan: scan.CheckDriver(bindings.repositoryScanners),
 	}
+}
 
-	return merged
+// FixDrivers returns the driver set for fix execution (command and target only).
+func FixDrivers(bindings Bindings) (set runner.DriverSet) {
+	return runner.DriverSet{
+		FileCommand:   command.FixDriver(),
+		TargetCommand: target.FixCommandDriver(bindings.targetCommands),
+	}
 }

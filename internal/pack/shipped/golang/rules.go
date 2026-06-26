@@ -85,7 +85,6 @@ func golangciRule(
 		Name:  name,
 		Group: ruleGroupLanguage,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionTargetCommand,
 			Detail: style.TargetCommandExecution{
 				ToolIDs: []string{
 					tool.Go,
@@ -97,7 +96,6 @@ func golangciRule(
 			},
 		},
 		Fix: style.ExecutionSpec{
-			Kind: style.ExecutionTargetCommand,
 			Detail: style.TargetCommandExecution{
 				ToolIDs: []string{
 					tool.Go,
@@ -120,7 +118,6 @@ func styleRule(
 		Name:  name,
 		Group: ruleGroupLanguage,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionTargetCheck,
 			Detail: style.TargetCheckExecution{
 				ToolIDs:  []string{tool.Go},
 				Check:    checkID,
@@ -136,7 +133,6 @@ func architectureRule() (rule style.RuleDefinition) {
 		Name:  "Architecture imports",
 		Group: ruleGroupLanguage,
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionRepositoryScan,
 			Detail: style.RepositoryScanExecution{
 				Scanner: ScannerArchitecture,
 			},

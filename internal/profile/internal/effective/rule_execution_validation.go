@@ -33,22 +33,22 @@ func (validator ruleExecutionValidator) validate(execution style.ExecutionSpec) 
 
 	switch detail := execution.Detail.(type) {
 	case style.ToolchainExecution:
-		return validator.validateToolchainExecution(execution.Kind, detail)
+		return validator.validateToolchainExecution(detail)
 
 	case style.ProfileExecution:
-		return validator.validateProfileExecution(execution.Kind, detail)
+		return validator.validateProfileExecution(detail)
 
 	case style.FileCommandExecution:
-		return validator.validateFileCommandExecution(execution.Kind, detail)
+		return validator.validateFileCommandExecution(detail)
 
 	case style.TargetCommandExecution:
-		return validator.validateTargetCommandExecution(execution.Kind, detail)
+		return validator.validateTargetCommandExecution(detail)
 
 	case style.TargetCheckExecution:
-		return validator.validateTargetCheckExecution(execution.Kind, detail)
+		return validator.validateTargetCheckExecution(detail)
 
 	case style.RepositoryScanExecution:
-		return validator.validateRepositoryScanExecution(execution.Kind, detail)
+		return validator.validateRepositoryScanExecution(detail)
 
 	default:
 		return fmt.Errorf(
@@ -57,29 +57,4 @@ func (validator ruleExecutionValidator) validate(execution style.ExecutionSpec) 
 			validator.label,
 		)
 	}
-}
-
-func (validator ruleExecutionValidator) validateExecutionKind(
-	actual style.ExecutionKind,
-	expected style.ExecutionKind,
-) (err error) {
-	if actual == expected {
-		return nil
-	}
-
-	if isBlank(string(actual)) {
-		return fmt.Errorf(
-			"rule definition %q %s must define an execution kind",
-			validator.ruleID,
-			validator.label,
-		)
-	}
-
-	return fmt.Errorf(
-		"rule definition %q %s uses execution kind %q, expected %q",
-		validator.ruleID,
-		validator.label,
-		actual,
-		expected,
-	)
 }

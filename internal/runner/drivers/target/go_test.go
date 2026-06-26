@@ -15,7 +15,6 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("app"))
 
 	spec := style.ExecutionSpec{
-		Kind: style.ExecutionTargetCommand,
 		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
 			Action:   golang.TargetActionGolangci,
@@ -38,7 +37,6 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
 	spec := style.ExecutionSpec{
-		Kind: style.ExecutionTargetCommand,
 		Detail: style.TargetCommandExecution{
 			ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
 			Action:   golang.TargetActionGolangci,

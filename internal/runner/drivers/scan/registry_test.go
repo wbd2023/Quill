@@ -13,7 +13,6 @@ func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 	_, err := driver(
 		runner.Context{},
 		style.ExecutionSpec{
-			Kind: style.ExecutionRepositoryScan,
 			Detail: style.RepositoryScanExecution{
 				Scanner: "missing",
 			},

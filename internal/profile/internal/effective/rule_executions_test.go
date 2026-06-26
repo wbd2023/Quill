@@ -17,7 +17,6 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/bad-file-command",
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionFileCommand,
 			Detail: style.FileCommandExecution{
 				ToolID: profiletest.Tool,
 			},
@@ -35,19 +34,12 @@ func TestCompileRejectsMissingRuleCheck(t *testing.T) {
 	requireErrorContains(t, err, "must define check execution")
 }
 
-func TestCompileRejectsMismatchedExecutionKind(t *testing.T) {
-	t.Parallel()
-
-	err := compileRuleDefinition(t, style.RuleDefinition{
-		ID: "test/mismatched-kind",
-		Check: style.ExecutionSpec{
-			Kind: style.ExecutionFileCommand,
-			Detail: style.ToolchainExecution{
-				ToolIDs: []string{profiletest.Tool},
-			},
-		},
-	})
-	requireErrorContains(t, err, `expected "toolchain"`)
+func TestCompileRejectsUnknownExecutionDetail(t *testing.T) {
+	// The sealed ExecutionDetail interface prevents external types from
+	// satisfying it, so the default case in the validator switch is
+	// unreachable from outside the style package. This test documents
+	// that the guard exists but cannot be exercised from external tests.
+	t.Skip("sealed interface prevents constructing unknown detail types")
 }
 
 func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
@@ -56,7 +48,6 @@ func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/blank-tool",
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionToolchain,
 			Detail: style.ToolchainExecution{
 				ToolIDs: []string{" "},
 			},
@@ -71,7 +62,6 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/duplicate-tool",
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionToolchain,
 			Detail: style.ToolchainExecution{
 				ToolIDs: []string{
 					profiletest.Tool,
@@ -89,7 +79,6 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/unknown-tool",
 		Check: style.ExecutionSpec{
-			Kind: style.ExecutionToolchain,
 			Detail: style.ToolchainExecution{
 				ToolIDs: []string{"unknown"},
 			},
