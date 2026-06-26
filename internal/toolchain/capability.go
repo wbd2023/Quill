@@ -2,13 +2,31 @@ package toolchain
 
 import "ciphera/tools/internal/style"
 
-// VersionKind is version kind.
+// Known version-detection strategies, dispatched by detectVersion.
+const (
+	VersionKindGoCommand  VersionKind = "go_command"
+	VersionKindBuildInfo  VersionKind = "build_info"
+	VersionKindShellcheck VersionKind = "shellcheck"
+	VersionKindNodeCLI    VersionKind = "node_cli"
+)
+
+// Known install strategies, dispatched by installer.installTool.
+// InstallKindNone is a no-op success, distinct from an unset InstallKind
+// which is rejected as unsupported.
+const (
+	InstallKindNone              InstallKind = "none"
+	InstallKindGoBinary          InstallKind = "go_binary"
+	InstallKindNodePackage       InstallKind = "node_package"
+	InstallKindShellcheckArchive InstallKind = "shellcheck_archive"
+)
+
+// VersionKind selects how a tool's installed version is detected.
 type VersionKind string
 
-// InstallKind is install kind.
+// InstallKind selects how a missing tool is installed.
 type InstallKind string
 
-// Capability is capability.
+// Capability is a pinned external tool and how to inspect and install it.
 type Capability struct {
 	ID            string
 	Name          string
