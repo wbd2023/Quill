@@ -37,5 +37,5 @@ func ToolchainDriver(
 		return style.ExecutionResult{}, nil
 	}
 
-	return style.ExecutionResult{Diagnostics: diagnostics}, errRuleViolation
+	return style.ExecutionResult{Diagnostics: diagnostics}, nil
 }

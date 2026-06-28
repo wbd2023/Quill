@@ -19,13 +19,13 @@ func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
-	result, err := CheckSectionHeaderDensity(
+	result, _ := CheckSectionHeaderDensity(
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
 		style.Scope("app"),
 	)
-	if err == nil {
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected short-file header density warning")
 	}
 
@@ -75,13 +75,13 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 	}
 	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
 
-	result, err := CheckSectionHeaderDensity(
+	result, _ := CheckSectionHeaderDensity(
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
 		style.Scope("app"),
 	)
-	if err == nil {
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected over-dense header warning")
 	}
 

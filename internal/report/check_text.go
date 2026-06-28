@@ -62,11 +62,12 @@ func writeCheckText(
 
 	_, err = fmt.Fprintf(
 		writer,
-		"Results: %d passed, %d warned, %d failed, %d skipped\n",
+		"Results: %d passed, %d warned, %d failed, %d skipped, %d errored\n",
 		summary.Passed,
 		summary.Warned,
 		summary.Failed,
 		summary.Skipped,
+		summary.Errored,
 	)
 	return summary, err
 }

@@ -10,10 +10,7 @@ import (
 
 /* ------------------------------------------- Errors ------------------------------------------- */
 
-var (
-	errRuleBlocked   = errors.New("rule blocked by toolchain")
-	errRuleViolation = errors.New("rule violations found")
-)
+var errRuleBlocked = errors.New("rule blocked by toolchain")
 
 // Driver executes one rule's check or fix against the repository.
 type Driver func(

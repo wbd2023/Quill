@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -47,7 +48,6 @@ func runGolangci(
 	}
 
 	var builder strings.Builder
-	var joined error
 	localPrefix := joinGoLocalImportPrefixes(goConfig.LocalImportPrefixes)
 	for _, target := range targets {
 		workDir := targetWorkDir(context.RepoRoot, target)
@@ -59,26 +59,52 @@ func runGolangci(
 			goimportsToolID,
 		)
 		if err != nil {
-			commandrun.AppendOutput(&builder, output)
-			joined = errors.Join(joined, err)
-			continue
+			return style.ExecutionResult{}, err
 		}
+		commandrun.AppendOutput(&builder, output)
 
-		output, err = commandrun.ToolByID(
+		output, err = runGolangciLint(
 			context,
 			workDir,
 			golangciLintToolID,
-			"run",
-			"./...",
 		)
+		if err != nil {
+			return style.ExecutionResult{}, err
+		}
 		commandrun.AppendOutput(&builder, output)
-		joined = errors.Join(joined, err)
 	}
 
-	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
+	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, nil
 }
 
 /* ---------------------------------------- Format Checks --------------------------------------- */
+
+// runGolangciLint runs golangci-lint and returns its output. golangci-lint exits non-zero when it
+// finds issues; that output is findings (data), not an operational error. Only command-execution
+// failures (tool missing, timeout) produce a non-nil error.
+func runGolangciLint(
+	context runner.Context,
+	workDir string,
+	golangciLintToolID string,
+) (output string, err error) {
+	output, err = commandrun.ToolByID(
+		context,
+		workDir,
+		golangciLintToolID,
+		"run",
+		"./...",
+	)
+	if err == nil {
+		return "", nil
+	}
+
+	var cmdErr runtime.CommandError
+	if errors.As(err, &cmdErr) && cmdErr.Result.ExitCode == 1 {
+		return output, nil
+	}
+
+	return output, err
+}
 
 func runGoFormatChecks(
 	context runner.Context,
@@ -91,33 +117,36 @@ func runGoFormatChecks(
 		return "", nil
 	}
 
-	if output, err = commandrun.Output(
+	gofmtOutput, err := commandrun.Output(
 		workDir,
 		context.GoEnvironment,
 		"gofmt",
 		append([]string{"-l"}, paths...)...,
-	); err != nil {
-		return output, err
+	)
+	if err != nil {
+		return "", err
 	}
 
-	if strings.TrimSpace(output) != "" {
-		return "Go files require gofmt formatting:\n" + strings.TrimSpace(output),
-			errors.New("gofmt formatting required")
+	if strings.TrimSpace(gofmtOutput) != "" {
+		output = "Go files require gofmt formatting:\n" + strings.TrimSpace(gofmtOutput)
 	}
 
-	if output, err = commandrun.ToolByID(
+	goimportsOutput, err := commandrun.ToolByID(
 		context,
 		workDir,
 		goimportsToolID,
 		append([]string{"-l", "-local", localPrefix}, paths...)...,
-	); err != nil {
-		return output, err
+	)
+	if err != nil {
+		return "", err
 	}
 
-	if strings.TrimSpace(output) != "" {
-		return "Go files require goimports formatting:\n" + strings.TrimSpace(output),
-			errors.New("goimports formatting required")
+	if strings.TrimSpace(goimportsOutput) != "" {
+		if output != "" {
+			output += "\n"
+		}
+		output += "Go files require goimports formatting:\n" + strings.TrimSpace(goimportsOutput)
 	}
 
-	return "", nil
+	return output, nil
 }

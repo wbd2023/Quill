@@ -3,7 +3,6 @@ package architecture
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -13,8 +12,6 @@ import (
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */
-
-var errViolationsFound = errors.New("violations found")
 
 /* -------------------------------------- Package Listings -------------------------------------- */
 
@@ -77,7 +74,7 @@ func CheckImports(
 		return style.ExecutionResult{}, nil
 	}
 
-	return style.ExecutionResult{Diagnostics: diagnostics}, errViolationsFound
+	return style.ExecutionResult{Diagnostics: diagnostics}, nil
 }
 
 /* ----------------------------------- Package Classification ----------------------------------- */

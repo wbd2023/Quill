@@ -21,7 +21,10 @@ func BadLogging() {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected structured logging failure, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -68,7 +71,10 @@ func BadLogging(passphrase string) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected structured logging failure, diagnostics: %#v", result.Diagnostics)
 	}
 

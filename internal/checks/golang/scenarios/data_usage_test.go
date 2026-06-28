@@ -32,7 +32,10 @@ func Build(repositoryPointer *repository, values []string) (payloadPointer *payl
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected data-usage failure, diagnostics: %#v", result.Diagnostics)
 	}
 

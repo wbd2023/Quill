@@ -15,7 +15,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-var errViolationsFound = errors.New("violations found")
+var errCheckStatusMisconfigured = errors.New("check status classification is misconfigured")
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
@@ -83,24 +83,27 @@ func CheckCommands(profilePackID string) (check runtimebinding.ProfileCheck) {
 func checkEnforcementLevels() (output string, err error) {
 	requiredRule := style.Rule{Enforcement: style.EnforcementRequired}
 	recommendationRule := style.Rule{Enforcement: style.EnforcementRecommendation}
-	violation := errors.New("violation")
-
-	switch runner.CheckStatus(requiredRule, violation, false) {
-	case style.CheckStatusFail:
-	default:
-		return "required rules must fail on violations", errViolationsFound
+	violations := style.ExecutionResult{
+		Diagnostics: []style.Diagnostic{{Code: "self-test", Message: "violation"}},
 	}
 
-	switch runner.CheckStatus(recommendationRule, violation, false) {
+	switch runner.CheckStatus(requiredRule, violations, nil, false) {
+	case style.CheckStatusFail:
+	default:
+		return "required rules must fail on violations", errCheckStatusMisconfigured
+	}
+
+	switch runner.CheckStatus(recommendationRule, violations, nil, false) {
 	case style.CheckStatusWarn:
 	default:
-		return "recommendation rules must warn by default", errViolationsFound
+		return "recommendation rules must warn by default", errCheckStatusMisconfigured
 	}
 
-	switch runner.CheckStatus(recommendationRule, violation, true) {
+	switch runner.CheckStatus(recommendationRule, violations, nil, true) {
 	case style.CheckStatusFail:
 	default:
-		return "strict recommendations must fail on recommendation violations", errViolationsFound
+		return "strict recommendations must fail on recommendation violations",
+			errCheckStatusMisconfigured
 	}
 
 	return "", nil
@@ -108,7 +111,7 @@ func checkEnforcementLevels() (output string, err error) {
 
 func checkExcludedDirectories(repository policy.RepositoryConfig) (output string, err error) {
 	if err = filewalk.ValidateCollectorPolicy(repository); err != nil {
-		return err.Error(), errViolationsFound
+		return err.Error(), err
 	}
 
 	return "", nil
@@ -143,7 +146,7 @@ func checkMakeCommands(
 				"%s is missing required variable: %s",
 				commands.Make.Path,
 				variable.Name,
-			), errViolationsFound
+			), nil
 		}
 
 		if actual == variable.Value {
@@ -156,7 +159,7 @@ func checkMakeCommands(
 			variable.Name,
 			variable.Value,
 			actual,
-		), errViolationsFound
+		), nil
 	}
 
 	for _, requiredTarget := range commands.Make.RequiredTargets {
@@ -166,7 +169,7 @@ func checkMakeCommands(
 				"%s is missing required target: %s",
 				commands.Make.Path,
 				requiredTarget.Name,
-			), errViolationsFound
+			), nil
 		}
 
 		if hasRecipeLine(target.Recipes, requiredTarget.RecipeLine) {
@@ -178,7 +181,7 @@ func checkMakeCommands(
 			commands.Make.Path,
 			requiredTarget.Name,
 			requiredTarget.RecipeLine,
-		), errViolationsFound
+		), nil
 	}
 
 	return "", nil

@@ -23,7 +23,6 @@ func detectVersion(
 	environment map[string]string,
 ) (version string, err error) {
 	switch capability.VersionKind {
-
 	case VersionKindGoCommand:
 		return detectGoVersion(runner, path, environment)
 

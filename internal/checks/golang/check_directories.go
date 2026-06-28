@@ -2,7 +2,6 @@
 package golang
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,8 +14,6 @@ import (
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */
-
-var errViolationsFound = errors.New("violations found")
 
 /* -------------------------------------- Directory Checks -------------------------------------- */
 
@@ -40,7 +37,7 @@ func CheckDirectories(
 
 	return style.ExecutionResult{
 		Diagnostics: diagnosticsFromViolations(repoRoot, violations),
-	}, errViolationsFound
+	}, nil
 }
 
 func validateScanRoots(directories []string) (err error) {

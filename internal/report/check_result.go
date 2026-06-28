@@ -30,6 +30,7 @@ type CheckSummary struct {
 	Warned  int
 	Failed  int
 	Skipped int
+	Errored int
 }
 
 func (result CheckResult) Summary() (summary CheckSummary) {
@@ -46,6 +47,9 @@ func (result CheckResult) Summary() (summary CheckSummary) {
 
 		case style.CheckStatusSkip:
 			summary.Skipped++
+
+		case style.CheckStatusError:
+			summary.Errored++
 		}
 	}
 

@@ -19,7 +19,10 @@ func BadInline(value string) (err error) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 

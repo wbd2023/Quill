@@ -55,7 +55,7 @@ func CheckTestHygiene(
 		return style.ExecutionResult{}, nil
 	}
 
-	return result, style.ViolationsFound()
+	return result, nil
 }
 
 func isBashTestFile(repoRoot string, path string) (found bool) {

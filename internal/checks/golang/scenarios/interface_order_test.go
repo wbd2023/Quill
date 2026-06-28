@@ -40,7 +40,10 @@ func (m *MockUserRepository) Save(value string) (err error) {
 	writeSourceFile(t, mockPath, mockSource)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -88,7 +91,10 @@ var _ ports.UserRepository = (*UserFileRepository)(nil)
 	writeSourceFile(t, implPath, implSource)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -187,8 +193,8 @@ func (m *IdentityRepositoryMock) Load(value string) (err error) {
 
 	writeSourceFile(t, mockSuffixPath, mockSuffixSource)
 
-	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	result, _ := runGoStyleResult(t, tempDir)
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf(
 			"expected custom Go check to fail on ambiguous mock naming, diagnostics: %#v",
 			result.Diagnostics,

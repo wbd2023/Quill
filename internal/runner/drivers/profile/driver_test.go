@@ -63,7 +63,7 @@ lint: $(STYLE_BIN)
 	`,
 	)
 
-	if _, err := checkCommands(repoRoot, currentCommands(t)); err == nil {
+	if output, _ := checkCommands(repoRoot, currentCommands(t)); output == "" {
 		t.Fatal("expected missing lint-required recipe to fail")
 	}
 }

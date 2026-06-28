@@ -94,7 +94,7 @@ func CheckStructure(
 		return style.ExecutionResult{}, nil
 	}
 
-	return result, style.ViolationsFound()
+	return result, nil
 }
 
 func hasSpaceIndentation(line string) (found bool) {

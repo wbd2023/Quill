@@ -26,6 +26,9 @@ const (
 	CheckStatusFail CheckStatus = "fail"
 	// CheckStatusSkip means the rule was skipped due to a missing tool or blocked dependency.
 	CheckStatusSkip CheckStatus = "skip"
+	// CheckStatusError means the rule could not run (operational failure: parse error, missing
+	// config, IO failure). Distinct from Fail, which means the rule ran and found violations.
+	CheckStatusError CheckStatus = "error"
 )
 
 // Enforcement is a rule's enforcement level: required or recommendation.
