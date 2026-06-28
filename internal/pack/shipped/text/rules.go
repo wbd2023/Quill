@@ -74,9 +74,10 @@ func fileCommandRule(
 		Group: ruleGroupExternal,
 		Check: style.ExecutionSpec{
 			Detail: style.FileCommandExecution{
-				ToolID:    toolID,
-				FileSet:   fileSet,
-				Arguments: append([]string{}, arguments...),
+				ToolID:          toolID,
+				FileSet:         fileSet,
+				Arguments:       append([]string{}, arguments...),
+				FindingExitCode: style.ExitFindingsMisspell,
 			},
 		},
 	}
