@@ -22,8 +22,8 @@ type Driver func(
 	toolStatuses map[string]toolchain.Status,
 ) (result style.ExecutionResult, err error)
 
-// DriverSet holds one driver per execution detail type. Fields that are nil
-// are treated as "no driver for this execution" and produce an empty result.
+// DriverSet holds one driver per execution detail type. Fields that are nil are treated as "no
+// driver for this execution" and produce an empty result.
 type DriverSet struct {
 	Toolchain      Driver
 	Profile        Driver
