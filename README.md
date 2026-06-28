@@ -1,28 +1,27 @@
 # Tooling
 
-This directory holds the style tool, a general-purpose style-checking engine. It turns a
-project's human-authored style guide (`STYLE.md`) and machine-readable profile (`style.toml`)
-into executable checks: an effective rule graph, pinned tool installation, and coverage
-reporting. The engine has no built-in knowledge of any particular project. Every
-project-specific decision (active scopes, file sets, Targets, rule bindings, tool pins) lives
-in that project's `style.toml`, and every requirement lives in that project's `STYLE.md`.
+This directory holds the style tool, a general-purpose style-checking engine. It turns a project's
+human-authored style guide (`STYLE.md`) and machine-readable profile (`style.toml`) into executable
+checks: an effective rule graph, pinned tool installation, and coverage reporting. The engine has no
+built-in knowledge of any particular project. Every project-specific decision (active scopes, file
+sets, Targets, rule bindings, tool pins) lives in that project's `style.toml`, and every requirement
+lives in that project's `STYLE.md`.
 
-This repository (Ciphera, the end-to-end encrypted chat client and relay) is the engine's
-current host and exemplar. `STYLE.md` and `style.toml` at the repository root are Ciphera's
-inputs; the engine under `tools/` consumes them.
+This repository (Ciphera, the end-to-end encrypted chat client and relay) is the engine's current
+host and exemplar. `STYLE.md` and `style.toml` at the repository root are Ciphera's inputs; the
+engine under `tools/` consumes them.
 
 ## Status
 
-The engine is currently embedded at `tools/` within the ciphera repository and is being split
-into its own repository so it can be reused across projects. Its Go module path is currently
-`ciphera/tools`; that path will be renamed as part of the split. Until then, treat the
-module path as an import-path detail, not a product coupling. The engine code is general.
+The engine is currently embedded at `tools/` within the ciphera repository and is being split into
+its own repository so it can be reused across projects. Its Go module path is currently
+`ciphera/tools`; that path will be renamed as part of the split. Until then, treat the module path
+as an import-path detail, not a product coupling. The engine code is general.
 
-`STYLE.md` remains the human source of truth. `style.toml` is the executable repository profile:
-it enables Packs, binds checker rules to requirement IDs, declares file sets, and supplies
-project-specific paths. The Go control plane in `tools/` compiles those two inputs into an
-effective rule graph, installs pinned tools from active Packs, and reports coverage from the
-same graph.
+`STYLE.md` remains the human source of truth. `style.toml` is the executable repository profile: it
+enables Packs, binds checker rules to requirement IDs, declares file sets, and supplies project-
+specific paths. The Go control plane in `tools/` compiles those two inputs into an effective rule
+graph, installs pinned tools from active Packs, and reports coverage from the same graph.
 
 ## Daily Use
 
@@ -60,8 +59,8 @@ plane as checking, fixing, doctor, and coverage. On a fresh checkout, run it onc
 `.cache/style/` tree instead of mutating global GOPATH or home-directory tool paths.
 
 `make style` builds `bin/style` directly, and the `make lint*` and `make style-*` targets build it
-on demand first, so the style tool is integrated into the repo like the other executables instead
-of being launched via ad hoc `go run` plumbing.
+on demand first, so the style tool is integrated into the repo like the other executables instead of
+being launched via ad hoc `go run` plumbing.
 
 ## Target Contract
 
@@ -103,8 +102,7 @@ finds the configured profile markers, currently `STYLE.md` and `style.toml`.
   bullets themselves.
 - Hidden `<!-- style: ... -->` metadata comments also declare review-only requirements and other
   machine-only guide metadata.
-- Packs define checker capabilities; `style.toml` decides which Packs and rules are
-  active.
+- Packs define checker capabilities; `style.toml` decides which Packs and rules are active.
 - Rules map to requirement IDs through `style.toml`, not through implementation code.
 - Rule bindings also own project path-class requirements; Packs do not import project policy.
 - Go style diagnostics use checker-owned diagnostic codes instead of hardcoded STYLE.md IDs.
@@ -139,40 +137,39 @@ Production packages must keep these boundaries:
 
 - `style` imports no internal package.
 - `policy` imports only `style`.
-- `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not
-  loaders, validators, Packs, runners, drivers, checks, or reports.
-- `profile/internal/validation` imports profile policy types and style
-  vocabulary, not loaders, Packs, runners, drivers, checks, or reports.
+- `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not loaders,
+  validators, Packs, runners, drivers, checks, or reports.
+- `profile/internal/validation` imports profile policy types and style vocabulary, not loaders,
+  Packs, runners, drivers, checks, or reports.
 - `profile/internal/effective` imports profile policy types, style vocabulary, and neutral Pack
   definitions, not loaders, Shipped Packs, runners, drivers, checks, or reports.
-- `profile` is the public facade over profile loading, TOML, validation, Pack default
-  resolution, and Effective Profile compilation. It may import neutral Pack registries, but not
-  Shipped Packs, runners, drivers, checks, or reports.
-- `toolchain` owns Tool capability, health, status, command lookup, and version
-  detection. It imports no project policy, runtime, checks, profile, or reporting package.
-- `runtime` owns command execution, command environment layout, and no installation
-  orchestration or Tool health policy.
-- `installer` imports runtime and style tool types, not project policy, checks, profiles,
-  reports, or runners.
+- `profile` is the public facade over profile loading, TOML, validation, Pack default resolution,
+  and Effective Profile compilation. It may import neutral Pack registries, but not Shipped Packs,
+  runners, drivers, checks, or reports.
+- `toolchain` owns Tool capability, health, status, command lookup, and version detection. It
+  imports no project policy, runtime, checks, profile, or reporting package.
+- `runtime` owns command execution, command environment layout, and no installation orchestration or
+  Tool health policy.
+- `installer` imports runtime and style tool types, not project policy, checks, profiles, reports,
+  or runners.
 - `pack` defines neutral Pack definitions, catalogues, and registries.
 - `pack/shipped` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
 - `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages,
   Pack-owned policy codecs, and canonical shipped Tool IDs from `pack/shipped/tool`, but not
   runners, drivers, reports, profiles, or installers.
-- `pack/shipped/tool` owns reusable shipped tool capabilities, canonical Tool IDs,
-  install kinds, and version kinds.
-- `pack/shipped/bindings` owns Shipped Pack Runtime Bindings and may import only the
-  top-level `runner/drivers` facade, not driver-family subpackages.
+- `pack/shipped/tool` owns reusable shipped tool capabilities, canonical Tool IDs, install kinds,
+  and version kinds.
+- `pack/shipped/bindings` owns Shipped Pack Runtime Bindings and may import only the top-level
+  `runner/drivers` facade, not driver-family subpackages.
 - `runner` imports no `profile`, `pack/shipped`, `runtime`, or `report`.
 - `runner/drivers` binds generic Execution Kinds to concrete Drivers from explicit
   `drivers.Bindings` without importing Shipped Packs, profiles, reports, or installation packages.
   Its command, project, scan, and target subpackages stay behind the top-level facade.
 - Concrete Check packages import no `profile`; Pack Policy packages such as
-  `internal/checks/gopolicy`, `internal/checks/textpolicy`, `internal/checks/projectpolicy`,
-  and `internal/checks/vocabularypolicy` own typed Pack Policy and avoid Check implementations,
-  runners, profiles, and Shipped Packs.
-- Go Checks import no `pack/shipped`, and Go Check policy stays separate from Check
-  implementations.
+  `internal/checks/gopolicy`, `internal/checks/textpolicy`, `internal/checks/projectpolicy`, and
+  `internal/checks/vocabularypolicy` own typed Pack Policy and avoid Check implementations, runners,
+  profiles, and Shipped Packs.
+- Go Checks import no `pack/shipped`, and Go Check policy stays separate from Check implementations.
 - `report` owns final text and JSON formatting; Checks and drivers return data.
 
 ## File Shape
@@ -189,8 +186,8 @@ The style platform uses balanced granularity:
 
 ## Directory Layout
 
-The tool is a private Go module owned by this repository. The tree is grouped by ownership:
-profile model, Pack declaration, Check implementation, execution, output, and test guardrails.
+The tool is a private Go module owned by this repository. The tree is grouped by ownership: profile
+model, Pack declaration, Check implementation, execution, output, and test guardrails.
 
 ```text
 tools/
@@ -273,15 +270,15 @@ tools/
   `checks/textpolicy` owns Text Pack Policy, not executable scanners.
 - `internal/architecture` is intentionally test-only. It enforces package import boundaries and
   requirement ownership from one place.
-- Requirement ID types (`style.RequirementID`, `style.IDScheme`, `style.SectionSlug`) live
-  in `internal/style` so profile and styleguide code can use the ID grammar without importing
-  the full STYLE.md parser.
-- `internal/profile/internal/profiletest` is profile-specific test support. Shared test helpers
-  that are not profile-specific live in `internal/testutil`.
+- Requirement ID types (`style.RequirementID`, `style.IDScheme`, `style.SectionSlug`) live in
+  `internal/style` so profile and styleguide code can use the ID grammar without importing the full
+  STYLE.md parser.
+- `internal/profile/internal/profiletest` is profile-specific test support. Shared test helpers that
+  are not profile-specific live in `internal/testutil`.
 - Report surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`, and
   `<surface>_view.go` where those roles exist.
-- Multi-role shipped Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`. Small Packs
-  stay flat until splitting improves locality.
+- Multi-role shipped Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`. Small Packs stay
+  flat until splitting improves locality.
 
 There is no longer a shell registry, shell-script control plane, nested `tools/style/` module, or
 single overloaded package mixing style-platform vocabulary with STYLE.md parsing.
