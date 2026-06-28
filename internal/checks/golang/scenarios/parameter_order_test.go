@@ -25,7 +25,10 @@ func Worse(secretToken string, value string) (err error) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -54,7 +57,10 @@ func Bad(left, right string) (err error) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected type-elision failure, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -84,7 +90,10 @@ func NewThing(relayClient *RelayClient, userRepository UserRepository) (thing *T
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
 	}
 

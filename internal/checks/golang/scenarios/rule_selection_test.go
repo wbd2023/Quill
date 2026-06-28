@@ -31,7 +31,10 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runSelectedGoStyleCheck(t, tempDir, check.Logging)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected logging check to fail, result: %+v", result)
 	}
 
@@ -39,7 +42,10 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 	rejectDiagnosticMessage(t, result, "direct cast to domain.IdentityID")
 
 	result, err = runSelectedGoStyleCheck(t, tempDir, check.DomainValues)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected domain value check to fail, result: %+v", result)
 	}
 
@@ -66,7 +72,10 @@ func Validate(a int, b int) (err error) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runSelectedGoStyleCheck(t, tempDir, check.GuardClauseSpacing)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected guard-clause spacing check to fail, result: %+v", result)
 	}
 
@@ -98,7 +107,10 @@ func Render(value string) (rendered string) {
 	writeSourceFile(t, sourcePath, sourceCode)
 
 	result, err := runSelectedGoStyleCheck(t, tempDir, check.SwitchCaseSpacing)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected switch-case spacing check to fail, result: %+v", result)
 	}
 

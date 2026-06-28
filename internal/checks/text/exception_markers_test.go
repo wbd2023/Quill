@@ -22,7 +22,10 @@ func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
 		profiles.RepositoryConfig(t),
 		style.Scope("tools"),
 	)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected malformed exception marker to fail")
 	}
 

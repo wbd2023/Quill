@@ -106,7 +106,10 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		repositoryScanSpec(vocabulary.ScannerVocabulary),
 		nil,
 	)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v\n%s", err, result.Output)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected alternate vocabulary policy to reject Repository suffixes")
 	}
 

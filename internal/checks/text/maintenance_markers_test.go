@@ -22,7 +22,10 @@ func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 		profiles.RepositoryConfig(t),
 		style.Scope("app"),
 	)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected maintenance marker failure")
 	}
 

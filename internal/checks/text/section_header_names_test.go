@@ -19,13 +19,13 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
-	result, err := CheckSectionHeaderNames(
+	result, _ := CheckSectionHeaderNames(
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
 		style.Scope("app"),
 	)
-	if err == nil {
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected generic section header failure")
 	}
 
@@ -73,13 +73,13 @@ func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
-	result, err := CheckSectionHeaderNames(
+	result, _ := CheckSectionHeaderNames(
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		headers,
 		style.Scope("app"),
 	)
-	if err == nil {
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected profile-owned generic section header failure")
 	}
 

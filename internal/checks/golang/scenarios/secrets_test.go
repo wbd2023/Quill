@@ -19,8 +19,8 @@ func Token() (token string) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	result, _ := runGoStyleResult(t, tempDir)
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected secret literal failure, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -42,8 +42,8 @@ func Configure(client *Client) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	result, _ := runGoStyleResult(t, tempDir)
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected secret assignment failure, diagnostics: %#v", result.Diagnostics)
 	}
 
@@ -65,8 +65,8 @@ var defaultClient = Client{
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runGoStyleResult(t, tempDir)
-	if err == nil {
+	result, _ := runGoStyleResult(t, tempDir)
+	if len(result.Diagnostics) == 0 {
 		t.Fatalf("expected secret struct-field failure, diagnostics: %#v", result.Diagnostics)
 	}
 

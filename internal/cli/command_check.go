@@ -46,7 +46,7 @@ func runCheck(tool Tool, options checkOptions) (exitCode int) {
 			result.Entries,
 			report.NewCheckEntry(
 				rule,
-				statusForRuleResult(rule, err, options.strictRecommendations),
+				statusForRuleResult(rule, execution, err, options.strictRecommendations),
 				execution,
 			),
 		)
@@ -58,7 +58,7 @@ func runCheck(tool Tool, options checkOptions) (exitCode int) {
 		return 1
 	}
 
-	if summary.Failed > 0 {
+	if summary.Failed > 0 || summary.Errored > 0 {
 		return 1
 	}
 
@@ -180,8 +180,9 @@ func writeCheckResult(
 
 func statusForRuleResult(
 	rule style.Rule,
+	result style.ExecutionResult,
 	err error,
 	strictRecommendations bool,
 ) (status style.CheckStatus) {
-	return runner.CheckStatus(rule, err, strictRecommendations)
+	return runner.CheckStatus(rule, result, err, strictRecommendations)
 }

@@ -18,7 +18,10 @@ func TestCheckSecretsFindsHighConfidenceSecretMarkers(t *testing.T) {
 	)
 
 	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected committed-secret failure")
 	}
 

@@ -64,7 +64,7 @@ func CheckSafety(
 		return style.ExecutionResult{}, nil
 	}
 
-	return result, style.ViolationsFound()
+	return result, nil
 }
 
 func newSafetyPatterns() (patterns safetyPatterns) {

@@ -22,7 +22,10 @@ func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {
 		repoRoot,
 		[]string{path},
 	)
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected long-line failure")
 	}
 

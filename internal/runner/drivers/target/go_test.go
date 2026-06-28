@@ -28,7 +28,7 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 		t.Fatalf("golangciDriver(app): %v\n%s", err, result.Output)
 	}
 
-	if result.Output != "0 issues." {
+	if result.Output != "" {
 		t.Fatalf("unexpected app lint output: %q", result.Output)
 	}
 }
@@ -50,7 +50,7 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 		t.Fatalf("golangciDriver(tools): %v\n%s", err, result.Output)
 	}
 
-	if result.Output != "0 issues." {
+	if result.Output != "" {
 		t.Fatalf("unexpected tools lint output: %q", result.Output)
 	}
 }

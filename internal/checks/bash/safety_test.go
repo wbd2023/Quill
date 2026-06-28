@@ -33,7 +33,10 @@ func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
 	)
 
 	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), style.Scope("tools"))
-	if err == nil {
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected bash safety failure")
 	}
 

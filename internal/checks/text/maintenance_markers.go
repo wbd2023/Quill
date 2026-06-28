@@ -53,7 +53,7 @@ func CheckMaintenanceMarkers(
 		return style.ExecutionResult{}, nil
 	}
 
-	return result, style.ViolationsFound()
+	return result, nil
 }
 
 /* -------------------------------------- Marker Detection -------------------------------------- */
