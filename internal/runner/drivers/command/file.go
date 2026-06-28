@@ -40,18 +40,26 @@ func fileCommandDriver(
 
 	arguments := runner.FileCommandArguments(context.RepoRoot, spec)
 	arguments = append(arguments, files...)
-	commandResult, err := runtime.RunToolCommandResult(
+	commandResult, runErr := runtime.RunToolCommandResult(
 		context.RepoRoot,
 		context.ToolEnvironment,
 		tool,
 		capability,
 		arguments...,
 	)
-	output, err := runtime.CommandOutput(commandResult, err)
+	if runErr != nil && execution.FindingExitCode != 0 {
+		var cmdErr runtime.CommandError
+		if errors.As(runErr, &cmdErr) && cmdErr.Result.ExitCode == execution.FindingExitCode {
+			return style.ExecutionResult{
+				Output:  commandResult.Output,
+				Command: runtime.BuildStyleCommandResult(commandResult),
+			}, nil
+		}
+	}
 	return style.ExecutionResult{
-		Output:  output,
+		Output:  commandResult.Output,
 		Command: runtime.BuildStyleCommandResult(commandResult),
-	}, err
+	}, runErr
 }
 
 func errUnknownTool(toolID string) (err error) {

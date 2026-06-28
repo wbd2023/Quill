@@ -84,7 +84,11 @@ func runExecution(
 	}
 
 	if driver == nil {
-		return style.ExecutionResult{}, nil
+		return style.ExecutionResult{}, fmt.Errorf(
+			"rule %s: no driver registered for execution detail %T",
+			ruleID,
+			execution.Detail,
+		)
 	}
 
 	return driver(context, execution, toolStatuses)

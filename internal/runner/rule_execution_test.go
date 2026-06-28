@@ -46,3 +46,30 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		t.Fatalf("output = %q, want ran", result.Output)
 	}
 }
+
+func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
+	repoRoot := t.TempDir()
+	rule := style.Rule{
+		ID: "test/unsupported",
+		Check: style.ExecutionSpec{
+			Detail: style.ToolchainExecution{
+				ToolIDs: []string{"go"},
+			},
+		},
+	}
+	context := NewContext(
+		repoRoot,
+		style.Scope("all"),
+		policy.Config{},
+		style.EffectiveConfig{},
+		nil,
+		nil,
+		nil,
+	)
+	drivers := DriverSet{}
+
+	_, err := RunRule(rule, context, nil, drivers)
+	if err == nil {
+		t.Fatal("expected error for execution with no registered driver, got nil")
+	}
+}
