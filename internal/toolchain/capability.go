@@ -10,9 +10,8 @@ const (
 	VersionKindNodeCLI    VersionKind = "node_cli"
 )
 
-// Known install strategies, dispatched by installer.installTool.
-// InstallKindNone is a no-op success, distinct from an unset InstallKind
-// which is rejected as unsupported.
+// Known install strategies, dispatched by installer.installTool. InstallKindNone is a no-op
+// success, distinct from an unset InstallKind which is rejected as unsupported.
 const (
 	InstallKindNone              InstallKind = "none"
 	InstallKindGoBinary          InstallKind = "go_binary"
