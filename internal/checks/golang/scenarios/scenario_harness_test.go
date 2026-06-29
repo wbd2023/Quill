@@ -84,5 +84,5 @@ type IdentityID string
 func writeSourceFile(t *testing.T, path string, contents string) {
 	t.Helper()
 
-	testutil.WriteFileAt(t, path, contents)
+	testutil.WriteFile(t, "", path, contents)
 }
