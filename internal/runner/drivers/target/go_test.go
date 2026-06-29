@@ -25,11 +25,11 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 
 	result, err := testTargetCommandDriver()(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciDriver(app): %v\n%s", err, result.Output)
+		t.Fatalf("golangciDriver(app): %v", err)
 	}
 
-	if result.Output != "" {
-		t.Fatalf("unexpected app lint output: %q", result.Output)
+	if len(result.Diagnostics) != 0 {
+		t.Fatalf("unexpected app lint diagnostics: %#v", result.Diagnostics)
 	}
 }
 
@@ -47,11 +47,11 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 
 	result, err := testTargetCommandDriver()(context, spec, nil)
 	if err != nil {
-		t.Fatalf("golangciDriver(tools): %v\n%s", err, result.Output)
+		t.Fatalf("golangciDriver(tools): %v", err)
 	}
 
-	if result.Output != "" {
-		t.Fatalf("unexpected tools lint output: %q", result.Output)
+	if len(result.Diagnostics) != 0 {
+		t.Fatalf("unexpected tools lint diagnostics: %#v", result.Diagnostics)
 	}
 }
 

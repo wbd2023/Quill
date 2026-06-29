@@ -47,7 +47,7 @@ func runGolangci(
 		return style.ExecutionResult{}, err
 	}
 
-	var builder strings.Builder
+	var diagnostics []style.Diagnostic
 	localPrefix := joinGoLocalImportPrefixes(goConfig.LocalImportPrefixes)
 	for _, target := range targets {
 		workDir := targetWorkDir(context.RepoRoot, target)
@@ -61,7 +61,7 @@ func runGolangci(
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
-		commandrun.AppendOutput(&builder, output)
+		diagnostics = appendDiagnostics(diagnostics, output, "go/format")
 
 		output, err = runGolangciLint(
 			context,
@@ -71,10 +71,10 @@ func runGolangci(
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
-		commandrun.AppendOutput(&builder, output)
+		diagnostics = appendDiagnostics(diagnostics, output, "go/lint")
 	}
 
-	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, nil
+	return style.ExecutionResult{Diagnostics: diagnostics}, nil
 }
 
 /* ---------------------------------------- Format Checks --------------------------------------- */

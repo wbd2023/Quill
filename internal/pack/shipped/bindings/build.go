@@ -11,10 +11,41 @@ import (
 	"ciphera/tools/internal/runner/drivers"
 )
 
-// Build returns the requested value.
+// Build wires every shipped pack's scanners, commands, checks, and interpreters into a single
+// Bindings value for driver construction.
 func Build() (bindings drivers.Bindings) {
 	bindings = drivers.NewBindings()
+	registerFileInterpreters(&bindings)
+	registerProfileChecks(&bindings)
+	registerRepositoryScanners(&bindings)
+	registerTargetBindings(&bindings)
+	return bindings
+}
 
+/* -------------------------------------- File Interpreters ------------------------------------- */
+
+func registerFileInterpreters(bindings *drivers.Bindings) {
+	bindings.AddFileInterpreter(
+		tool.Shellcheck,
+		drivers.InterpretPlainText(drivers.ExitFindings, "bash/shellcheck/findings"),
+	)
+	bindings.AddFileInterpreter(
+		tool.Shfmt,
+		drivers.InterpretLines(drivers.ExitFindings, "bash/shfmt/findings"),
+	)
+	bindings.AddFileInterpreter(
+		tool.Misspell,
+		drivers.InterpretPlainText(drivers.ExitFindingsMisspell, "text/spelling/findings"),
+	)
+	bindings.AddFileInterpreter(
+		tool.Markdownlint,
+		drivers.InterpretPlainText(drivers.ExitFindings, "markdown/markdownlint/findings"),
+	)
+}
+
+/* --------------------------------------- Profile Checks --------------------------------------- */
+
+func registerProfileChecks(bindings *drivers.Bindings) {
 	bindings.AddProjectCheck(
 		project.CheckEnforcementLevels,
 		drivers.CheckProfileEnforcementLevels(),
@@ -27,7 +58,11 @@ func Build() (bindings drivers.Bindings) {
 		project.CheckCommands,
 		drivers.CheckProfileCommands(project.PackID),
 	)
+}
 
+/* ------------------------------------- Repository Scanners ------------------------------------ */
+
+func registerRepositoryScanners(bindings *drivers.Bindings) {
 	bindings.AddRepositoryScanner(
 		golang.ScannerArchitecture,
 		drivers.CheckGoArchitecture(golang.PackID),
@@ -69,7 +104,11 @@ func Build() (bindings drivers.Bindings) {
 		vocabulary.ScannerVocabulary,
 		drivers.CheckVocabulary(vocabulary.PackID),
 	)
+}
 
+/* --------------------------------------- Target Bindings -------------------------------------- */
+
+func registerTargetBindings(bindings *drivers.Bindings) {
 	bindings.AddTargetCommand(
 		golang.TargetActionGolangci,
 		drivers.RunGolangci(
@@ -84,6 +123,4 @@ func Build() (bindings drivers.Bindings) {
 		drivers.RunGoFormat(golang.PackID, tool.Goimports, golang.Language),
 	)
 	bindings.AddTargetCheck(golang.Language, drivers.CheckGoStyle(golang.PackID, golang.Language))
-
-	return bindings
 }

@@ -1,6 +1,7 @@
 package drivers
 
 import (
+	"ciphera/tools/internal/runner/drivers/command"
 	profiledrivers "ciphera/tools/internal/runner/drivers/profile"
 	scandrivers "ciphera/tools/internal/runner/drivers/scan"
 	targetdrivers "ciphera/tools/internal/runner/drivers/target"
@@ -119,4 +120,25 @@ func RunGoFormat(
 // CheckGoStyle go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check TargetCheck) {
 	return targetdrivers.CheckGoStyle(goPackID, goLanguage)
+}
+
+/* ------------------------------------ Interpreter Bindings ------------------------------------ */
+
+// ExitFindings is the conventional Unix linter findings exit code.
+const ExitFindings = command.ExitFindings
+
+// ExitFindingsMisspell is misspell's findings exit code when invoked with -error.
+const ExitFindingsMisspell = command.ExitFindingsMisspell
+
+// InterpretPlainText returns a file interpreter for tools whose findings output is multi-line
+// text (shellcheck, markdownlint, misspell). When the tool exits with code, its trimmed output
+// becomes a single diagnostic.
+func InterpretPlainText(code int, codeLabel string) (interpreter FileInterpreter) {
+	return command.InterpretPlainText(code, codeLabel)
+}
+
+// InterpretLines returns a file interpreter for tools whose findings output is one finding per
+// line (gofmt -l, shfmt -d).
+func InterpretLines(code int, codeLabel string) (interpreter FileInterpreter) {
+	return command.InterpretLines(code, codeLabel)
 }

@@ -33,7 +33,9 @@ func TestWriteCheckText(t *testing.T) {
 					RequirementIDs: []string{"5.2.concise-and-clear"},
 				}),
 				Status: style.CheckStatusFail,
-				Result: style.ExecutionResult{Output: "missing from PATH"},
+				Result: style.ExecutionResult{
+					Diagnostics: []style.Diagnostic{{Message: "missing from PATH"}},
+				},
 			},
 		},
 	}

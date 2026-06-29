@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -33,6 +34,14 @@ type ProfileCheck func(
 	execution style.ProfileExecution,
 ) (result style.ExecutionResult, err error)
 
+// FileInterpreter converts a tool's raw command output into style diagnostics. It owns the
+// tool-specific knowledge of which exit code signals findings and how the output is structured:
+// the kind of knowledge that previously lived as FindingExitCode on FileCommandExecution. The
+// interpreter returns nil diagnostics for a clean run. Non-nil error means the command genuinely
+// failed (launch error, timeout, unexpected exit) and the diagnostics, if any, are diagnostic
+// context for that failure.
+type FileInterpreter func(result runtime.CommandResult) (diagnostics []style.Diagnostic, err error)
+
 // RepositoryScanners is repository scanners.
 type RepositoryScanners struct {
 	entries map[string]RepositoryScanner
@@ -51,6 +60,11 @@ type TargetChecks struct {
 // ProfileChecks is project checks.
 type ProfileChecks struct {
 	entries map[string]ProfileCheck
+}
+
+// FileInterpreters is file interpreters.
+type FileInterpreters struct {
+	entries map[string]FileInterpreter
 }
 
 // NewRepositoryScanners new repository scanners.
@@ -73,6 +87,11 @@ func NewProjectChecks() (registry ProfileChecks) {
 	return ProfileChecks{entries: map[string]ProfileCheck{}}
 }
 
+// NewFileInterpreters new file interpreters.
+func NewFileInterpreters() (registry FileInterpreters) {
+	return FileInterpreters{entries: map[string]FileInterpreter{}}
+}
+
 func (registry *RepositoryScanners) Add(id string, scanner RepositoryScanner) {
 	registry.entries = addBinding(registry.entries, "repository scanner", id, scanner)
 }
@@ -87,6 +106,10 @@ func (registry *TargetChecks) Add(id string, check TargetCheck) {
 
 func (registry *ProfileChecks) Add(id string, check ProfileCheck) {
 	registry.entries = addBinding(registry.entries, "project check", id, check)
+}
+
+func (registry *FileInterpreters) Add(id string, interpreter FileInterpreter) {
+	registry.entries = addBinding(registry.entries, "file interpreter", id, interpreter)
 }
 
 func (registry RepositoryScanners) Lookup(id string) (scanner RepositoryScanner, found bool) {
@@ -107,6 +130,11 @@ func (registry TargetChecks) Lookup(id string) (check TargetCheck, found bool) {
 func (registry ProfileChecks) Lookup(id string) (check ProfileCheck, found bool) {
 	check, found = registry.entries[id]
 	return check, found
+}
+
+func (registry FileInterpreters) Lookup(id string) (interpreter FileInterpreter, found bool) {
+	interpreter, found = registry.entries[id]
+	return interpreter, found
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */

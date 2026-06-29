@@ -13,7 +13,7 @@ func CheckDrivers(bindings Bindings) (set runner.DriverSet) {
 	return runner.DriverSet{
 		Toolchain:      runner.ToolchainDriver,
 		Profile:        profile.CheckDriver(bindings.projectChecks),
-		FileCommand:    command.CheckDriver(),
+		FileCommand:    command.CheckDriver(bindings.fileInterpreters),
 		TargetCommand:  target.CheckCommandDriver(bindings.targetCommands),
 		TargetCheck:    target.CheckCheckDriver(bindings.targetChecks),
 		RepositoryScan: scan.CheckDriver(bindings.repositoryScanners),

@@ -93,12 +93,12 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	)
 
 	context := testContext(t, fixtureRoot, style.Scope("all"))
-	if result, err := testRepositoryScanDriver()(
+	if _, err := testRepositoryScanDriver()(
 		context,
 		repositoryScanSpec(golang.ScannerArchitecture),
 		nil,
 	); err != nil {
-		t.Fatalf("repositoryScanDriver(architecture): %v\n%s", err, result.Output)
+		t.Fatalf("repositoryScanDriver(architecture): %v", err)
 	}
 
 	result, err := testRepositoryScanDriver()(
@@ -107,7 +107,7 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		nil,
 	)
 	if err != nil {
-		t.Fatalf("unexpected error: %v\n%s", err, result.Output)
+		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected alternate vocabulary policy to reject Repository suffixes")
