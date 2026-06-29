@@ -3,7 +3,6 @@ package runtime
 import (
 	"errors"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -14,10 +13,10 @@ import (
 
 func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 	tempDir := t.TempDir()
-	commandPath := filepath.Join(tempDir, "test-tool")
 	testutil.WriteExecutable(
 		t,
-		commandPath,
+		tempDir,
+		"test-tool",
 		"#!/bin/sh\necho resolved\n",
 	)
 
@@ -37,10 +36,10 @@ func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 
 func TestRunCommandTimesOut(t *testing.T) {
 	tempDir := t.TempDir()
-	commandPath := filepath.Join(tempDir, "slow-tool")
 	testutil.WriteExecutable(
 		t,
-		commandPath,
+		tempDir,
+		"slow-tool",
 		"#!/bin/sh\nsleep 5\n",
 	)
 
@@ -71,10 +70,10 @@ func commandSearchPath(tempDir string) (value string) {
 
 func TestRunCommandCapsOutput(t *testing.T) {
 	tempDir := t.TempDir()
-	commandPath := filepath.Join(tempDir, "loud-tool")
 	testutil.WriteExecutable(
 		t,
-		commandPath,
+		tempDir,
+		"loud-tool",
 		"#!/bin/sh\nprintf 1234567890\n",
 	)
 
@@ -95,10 +94,10 @@ func TestRunCommandCapsOutput(t *testing.T) {
 
 func TestCommandErrorIncludesExitCodeAndOutput(t *testing.T) {
 	tempDir := t.TempDir()
-	commandPath := filepath.Join(tempDir, "bad-tool")
 	testutil.WriteExecutable(
 		t,
-		commandPath,
+		tempDir,
+		"bad-tool",
 		"#!/bin/sh\necho failure\nexit 7\n",
 	)
 
