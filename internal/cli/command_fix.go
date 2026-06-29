@@ -47,8 +47,7 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 	statusIndex := toolchain.StatusesByID(statuses)
 	fixers := drivers.FixDrivers(bindings.Build())
 	for _, rule := range rules {
-		result, err := runner.RunFix(rule, context, statusIndex, fixers)
-		if err != nil {
+		if _, err := runner.RunFix(rule, context, statusIndex, fixers); err != nil {
 			var cmdErr runtime.CommandError
 			if errors.As(err, &cmdErr) && cmdErr.Result.Output != "" {
 				tool.writeCommandOutput(cmdErr.Result.Output)
@@ -57,7 +56,6 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 			}
 			return 1
 		}
-		_ = result
 	}
 
 	return 0
