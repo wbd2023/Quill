@@ -2,7 +2,6 @@ package target
 
 import (
 	"errors"
-	"strings"
 
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
@@ -42,7 +41,7 @@ func runGoFormat(
 		return style.ExecutionResult{}, err
 	}
 
-	var builder strings.Builder
+	var diagnostics []style.Diagnostic
 	var joined error
 	localPrefix := joinGoLocalImportPrefixes(goConfig.LocalImportPrefixes)
 	for _, target := range targets {
@@ -58,7 +57,7 @@ func runGoFormat(
 			append([]string{"-w"}, target.FormatPaths...)...,
 		)
 		if err != nil {
-			commandrun.AppendOutput(&builder, output)
+			diagnostics = appendDiagnostics(diagnostics, output, "go/format")
 			joined = errors.Join(joined, err)
 			continue
 		}
@@ -72,9 +71,9 @@ func runGoFormat(
 				target.FormatPaths...,
 			)...,
 		)
-		commandrun.AppendOutput(&builder, output)
+		diagnostics = appendDiagnostics(diagnostics, output, "go/format")
 		joined = errors.Join(joined, err)
 	}
 
-	return style.ExecutionResult{Output: strings.TrimSpace(builder.String())}, joined
+	return style.ExecutionResult{Diagnostics: diagnostics}, joined
 }

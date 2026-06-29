@@ -33,7 +33,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 			_ style.ExecutionSpec,
 			_ map[string]toolchain.Status,
 		) (result style.ExecutionResult, err error) {
-			return style.ExecutionResult{Output: "ran"}, nil
+			return style.ExecutionResult{Diagnostics: []style.Diagnostic{{Message: "ran"}}}, nil
 		},
 	}
 
@@ -42,8 +42,8 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		t.Fatalf("RunRule: %v", err)
 	}
 
-	if result.Output != "ran" {
-		t.Fatalf("output = %q, want ran", result.Output)
+	if len(result.Diagnostics) == 0 || result.Diagnostics[0].Message != "ran" {
+		t.Fatalf("diagnostics = %#v, want ran", result.Diagnostics)
 	}
 }
 

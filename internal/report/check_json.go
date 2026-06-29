@@ -2,7 +2,6 @@ package report
 
 import (
 	"io"
-	"strings"
 
 	"ciphera/tools/internal/style"
 )
@@ -33,7 +32,6 @@ type checkEntryJSON struct {
 	Status       style.CheckStatus  `json:"status"`
 	Requirements []string           `json:"requirements"`
 	Diagnostics  []diagnosticJSON   `json:"diagnostics"`
-	Output       string             `json:"output,omitempty"`
 	Command      *commandResultJSON `json:"command,omitempty"`
 }
 
@@ -92,7 +90,6 @@ func checkEntryListJSON(entries []CheckEntry) (payload []checkEntryJSON) {
 			Status:       entry.Status,
 			Requirements: append([]string{}, entry.Rule.RequirementIDs...),
 			Diagnostics:  diagnosticListJSON(entry.Result.Diagnostics),
-			Output:       strings.TrimSpace(entry.Result.Output),
 			Command:      commandResultJSONFor(entry.Result.Command),
 		})
 	}

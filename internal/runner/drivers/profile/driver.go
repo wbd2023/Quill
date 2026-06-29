@@ -17,6 +17,21 @@ import (
 
 var errCheckStatusMisconfigured = errors.New("check status classification is misconfigured")
 
+// enforcementResult converts a profile-check message into an ExecutionResult. A non-empty message
+// is a finding; an empty message means the check passed.
+func enforcementResult(message string) (result style.ExecutionResult) {
+	if message == "" {
+		return style.ExecutionResult{}
+	}
+
+	return style.ExecutionResult{
+		Diagnostics: []style.Diagnostic{{
+			Code:    "profile/enforcement",
+			Message: message,
+		}},
+	}
+}
+
 /* --------------------------------------- Project Checks --------------------------------------- */
 
 func profileDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
@@ -48,8 +63,8 @@ func CheckEnforcementLevels() (check runtimebinding.ProfileCheck) {
 		_ runner.Context,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
-		output, err := checkEnforcementLevels()
-		return style.ExecutionResult{Output: output}, err
+		message, err := checkEnforcementLevels()
+		return enforcementResult(message), err
 	}
 }
 
@@ -59,8 +74,8 @@ func CheckExcludedDirectories() (check runtimebinding.ProfileCheck) {
 		context runner.Context,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
-		output, err := checkExcludedDirectories(context.Profile.Repository)
-		return style.ExecutionResult{Output: output}, err
+		message, err := checkExcludedDirectories(context.Profile.Repository)
+		return enforcementResult(message), err
 	}
 }
 
@@ -75,8 +90,8 @@ func CheckCommands(profilePackID string) (check runtimebinding.ProfileCheck) {
 			return style.ExecutionResult{}, err
 		}
 
-		output, err := checkCommands(context.RepoRoot, projectConfig.Commands)
-		return style.ExecutionResult{Output: output}, err
+		message, err := checkCommands(context.RepoRoot, projectConfig.Commands)
+		return enforcementResult(message), err
 	}
 }
 

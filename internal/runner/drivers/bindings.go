@@ -14,12 +14,16 @@ type TargetCheck = runtimebinding.TargetCheck
 // ProfileCheck is project check.
 type ProfileCheck = runtimebinding.ProfileCheck
 
+// FileInterpreter converts a tool's raw command output into style diagnostics.
+type FileInterpreter = runtimebinding.FileInterpreter
+
 // Bindings is bindings.
 type Bindings struct {
 	repositoryScanners runtimebinding.RepositoryScanners
 	targetCommands     runtimebinding.TargetCommands
 	targetChecks       runtimebinding.TargetChecks
 	projectChecks      runtimebinding.ProfileChecks
+	fileInterpreters   runtimebinding.FileInterpreters
 }
 
 // NewBindings new bindings.
@@ -29,6 +33,7 @@ func NewBindings() (bindings Bindings) {
 		targetCommands:     runtimebinding.NewTargetCommands(),
 		targetChecks:       runtimebinding.NewTargetChecks(),
 		projectChecks:      runtimebinding.NewProjectChecks(),
+		fileInterpreters:   runtimebinding.NewFileInterpreters(),
 	}
 }
 
@@ -46,4 +51,15 @@ func (bindings *Bindings) AddTargetCheck(language string, check TargetCheck) {
 
 func (bindings *Bindings) AddProjectCheck(id string, check ProfileCheck) {
 	bindings.projectChecks.Add(id, check)
+}
+
+func (bindings *Bindings) AddFileInterpreter(id string, interpreter FileInterpreter) {
+	bindings.fileInterpreters.Add(id, interpreter)
+}
+
+func (bindings Bindings) LookupFileInterpreter(id string) (
+	interpreter FileInterpreter,
+	found bool,
+) {
+	return bindings.fileInterpreters.Lookup(id)
 }

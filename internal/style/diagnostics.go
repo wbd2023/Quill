@@ -9,18 +9,16 @@ type Diagnostic struct {
 	Message string
 }
 
-// ExecutionResult holds the outcome of running one check or fix against a rule: diagnostics, tool
-// output, and the raw command result. A non-empty result signals violations; the error return is
-// reserved for operational failures (the rule could not run).
+// ExecutionResult holds the outcome of running one check or fix against a rule. A non-empty
+// Diagnostics slice signals findings; the error return is reserved for operational failures (the
+// rule could not run). There is no text-blob field: all findings are structured diagnostics.
 type ExecutionResult struct {
 	Diagnostics []Diagnostic
-	Output      string
 	Command     CommandResult
 }
 
-// Empty reports whether the result has no diagnostics, output, or command data.
+// Empty reports whether the result has no diagnostics or command data.
 func (result ExecutionResult) Empty() (empty bool) {
 	return len(result.Diagnostics) == 0 &&
-		result.Output == "" &&
 		result.Command == CommandResult{}
 }

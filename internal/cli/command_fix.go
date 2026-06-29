@@ -1,12 +1,14 @@
 package cli
 
 import (
+	"errors"
 	"flag"
 
 	"ciphera/tools/internal/pack/shipped/bindings"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
+	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -47,12 +49,15 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 	for _, rule := range rules {
 		result, err := runner.RunFix(rule, context, statusIndex, fixers)
 		if err != nil {
-			tool.writeCommandOutput(result.Output)
-			if result.Output == "" {
+			var cmdErr runtime.CommandError
+			if errors.As(err, &cmdErr) && cmdErr.Result.Output != "" {
+				tool.writeCommandOutput(cmdErr.Result.Output)
+			} else {
 				tool.writeError(err)
 			}
 			return 1
 		}
+		_ = result
 	}
 
 	return 0

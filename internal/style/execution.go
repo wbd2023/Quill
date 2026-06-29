@@ -1,15 +1,5 @@
 package style
 
-// Exit codes that tools use to signal findings rather than failure. Set FileCommandExecution.
-// FindingExitCode to the value matching the tool's behaviour.
-const (
-	// ExitFindings is the conventional Unix linter findings exit code (shellcheck, markdownlint,
-	// shfmt -d).
-	ExitFindings = 1
-	// ExitFindingsMisspell is misspell's findings exit code when invoked with -error.
-	ExitFindingsMisspell = 2
-)
-
 // ExecutionSpec describes how a rule is executed. The concrete Detail type determines which driver
 // handles the rule.
 type ExecutionSpec struct {
@@ -32,18 +22,13 @@ type ProfileExecution struct {
 	Check string
 }
 
-// FileCommandExecution runs a tool against files selected by a file set. FindingExitCode is the
-// exit code the tool uses to signal findings (typically ExitFindings; misspell -error uses
-// ExitFindingsMisspell). When the tool exits with that code, its output is treated as findings
-// (data), not an operational failure. Leave zero for executions where non-zero always means
-// failure (eg fixes).
+// FileCommandExecution runs a tool against files selected by a file set.
 type FileCommandExecution struct {
-	ToolID          string
-	FileSet         string
-	Arguments       []string
-	ConfigArgument  string
-	ConfigFile      string
-	FindingExitCode int
+	ToolID         string
+	FileSet        string
+	Arguments      []string
+	ConfigArgument string
+	ConfigFile     string
 }
 
 // TargetCommandExecution runs a tool against language-specific targets.

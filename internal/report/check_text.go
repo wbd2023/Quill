@@ -99,14 +99,6 @@ func writeRuleDetails(writer io.Writer, entry CheckEntry, verbose bool) (err err
 		}
 	}
 
-	if strings.TrimSpace(entry.Result.Output) != "" {
-		for _, line := range strings.Split(strings.TrimSpace(entry.Result.Output), "\n") {
-			if _, err = fmt.Fprintf(writer, "    %s\n", line); err != nil {
-				return err
-			}
-		}
-	}
-
 	if commandMetadataPresent(entry.Result.Command) {
 		if _, err = fmt.Fprintf(
 			writer,

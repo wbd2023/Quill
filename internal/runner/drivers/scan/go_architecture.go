@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"fmt"
+
 	"ciphera/tools/internal/checks/golang/architecture"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
@@ -14,12 +16,12 @@ func scanGoArchitecture(
 ) (result style.ExecutionResult, err error) {
 	modulePath, err := runGoList(context, "-m", "-f", "{{.Path}}")
 	if err != nil {
-		return style.ExecutionResult{Output: modulePath}, err
+		return style.ExecutionResult{}, fmt.Errorf("go list module path: %w", err)
 	}
 
 	packageList, err := runGoList(context, "-json", "./...")
 	if err != nil {
-		return style.ExecutionResult{Output: packageList}, err
+		return style.ExecutionResult{}, fmt.Errorf("go list packages: %w", err)
 	}
 
 	goConfig, err := decodeGoPackConfig(context, goPackID)

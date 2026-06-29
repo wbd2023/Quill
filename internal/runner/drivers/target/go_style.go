@@ -4,11 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"ciphera/tools/internal/checks/golang"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/style"
 )
@@ -42,7 +40,6 @@ func runGoStyleCheck(
 	}
 
 	diagnostics := make([]style.Diagnostic, 0)
-	var builder strings.Builder
 	var joined error
 	for _, target := range targets {
 		if len(target.CheckPaths) == 0 {
@@ -68,12 +65,8 @@ func runGoStyleCheck(
 			execution.Check,
 		)
 		diagnostics = append(diagnostics, styleResult.Diagnostics...)
-		commandrun.AppendOutput(&builder, styleResult.Output)
 		joined = errors.Join(joined, err)
 	}
 
-	return style.ExecutionResult{
-		Diagnostics: diagnostics,
-		Output:      strings.TrimSpace(builder.String()),
-	}, joined
+	return style.ExecutionResult{Diagnostics: diagnostics}, joined
 }
