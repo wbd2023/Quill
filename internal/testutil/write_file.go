@@ -6,29 +6,33 @@ import (
 	"testing"
 )
 
-// write_file constants.
 const (
-	testDirectoryMode  = 0o700
-	testExecutableMode = 0o700
-	testFileMode       = 0o600
+	testDirectoryMode  os.FileMode = 0o700
+	testExecutableMode os.FileMode = 0o755
+	testFileMode       os.FileMode = 0o600
 )
 
-// WriteFile write file.
+/* ---------------------------------------- File Writing ---------------------------------------- */
+
+// WriteFile creates a file at root/path with owner-only permissions (0o600), creating parent
+// directories as needed. Returns the joined absolute path. Use WriteFileAt when you already have
+// the absolute path.
 func WriteFile(
 	test *testing.T,
 	root string,
-	relativePath string,
+	path string,
 	contents string,
-) (path string) {
+) (absolutePath string) {
 	test.Helper()
 
-	path = filepath.Join(root, relativePath)
-	WritePath(test, path, contents)
-	return path
+	absolutePath = filepath.Join(root, path)
+	WriteFileAt(test, absolutePath, contents)
+	return absolutePath
 }
 
-// WritePath write path.
-func WritePath(
+// WriteFileAt creates a file at the given absolute path with owner-only permissions (0o600),
+// creating parent directories as needed.
+func WriteFileAt(
 	test *testing.T,
 	path string,
 	contents string,
@@ -38,7 +42,8 @@ func WritePath(
 	writePath(test, path, contents, testFileMode)
 }
 
-// WriteExecutable write executable.
+// WriteExecutable creates an executable file at the given absolute path (0o755), creating parent
+// directories as needed. Used for test fixtures that simulate installed binaries.
 func WriteExecutable(
 	test *testing.T,
 	path string,
@@ -47,23 +52,6 @@ func WriteExecutable(
 	test.Helper()
 
 	writePath(test, path, contents, testExecutableMode)
-}
-
-// ReadFile read file.
-func ReadFile(
-	test *testing.T,
-	root string,
-	relativePath string,
-) (contents string) {
-	test.Helper()
-
-	path := filepath.Join(root, relativePath)
-	data, err := os.ReadFile(path)
-	if err != nil {
-		test.Fatalf("read %s: %v", path, err)
-	}
-
-	return string(data)
 }
 
 func writePath(
@@ -81,4 +69,23 @@ func writePath(
 	if err := os.WriteFile(path, []byte(contents), mode); err != nil {
 		test.Fatalf("write %s: %v", path, err)
 	}
+}
+
+/* ---------------------------------------- File Reading ---------------------------------------- */
+
+// ReadFile reads the file at root/path and returns its contents.
+func ReadFile(
+	test *testing.T,
+	root string,
+	path string,
+) (contents string) {
+	test.Helper()
+
+	absolutePath := filepath.Join(root, path)
+	data, err := os.ReadFile(absolutePath)
+	if err != nil {
+		test.Fatalf("read %s: %v", absolutePath, err)
+	}
+
+	return string(data)
 }
