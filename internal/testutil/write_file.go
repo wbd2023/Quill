@@ -65,10 +65,10 @@ func ReadFile(
 ) (contents string) {
 	test.Helper()
 
-	full := filepath.Join(root, path)
-	data, err := os.ReadFile(full)
+	joined := filepath.Join(root, path)
+	data, err := os.ReadFile(joined)
 	if err != nil {
-		test.Fatalf("read %s: %v", full, err)
+		test.Fatalf("read %s: %v", joined, err)
 	}
 
 	return string(data)
