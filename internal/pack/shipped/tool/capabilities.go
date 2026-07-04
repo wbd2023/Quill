@@ -48,7 +48,7 @@ func BuildAll() (capabilities []toolchain.Capability) {
 	}
 }
 
-// Select returns the requested value.
+// Select returns only the capabilities whose IDs match the given tool IDs.
 func Select(toolIDs ...string) (capabilities []toolchain.Capability) {
 	wanted := make(map[string]bool, len(toolIDs))
 	for _, toolID := range toolIDs {

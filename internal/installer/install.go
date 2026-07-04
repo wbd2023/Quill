@@ -21,7 +21,7 @@ const (
 
 /* ---------------------------------------- Installation ---------------------------------------- */
 
-// Install returns the requested value.
+// Install downloads and installs the pinned external tools declared in the profile.
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
