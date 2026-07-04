@@ -8,7 +8,7 @@ import (
 	"ciphera/tools/internal/testutil"
 )
 
-// Current returns the requested value.
+// Current loads the active profile from the repository root.
 func Current(test *testing.T) (config policy.Config) {
 	test.Helper()
 
@@ -27,7 +27,7 @@ func RepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
 	return Current(test).Repository
 }
 
-// Write returns the requested value.
+// Write writes the profile and STYLE.md to the given root.
 func Write(test *testing.T, root string, config policy.Config) {
 	test.Helper()
 
@@ -36,7 +36,7 @@ func Write(test *testing.T, root string, config policy.Config) {
 	testutil.WriteFile(test, root, "style.toml", Format(test, config))
 }
 
-// Format returns the requested value.
+// Format serialises a profile config to its TOML representation.
 func Format(test *testing.T, config policy.Config) (contents string) {
 	test.Helper()
 

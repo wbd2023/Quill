@@ -5,7 +5,7 @@ import (
 	"ciphera/tools/internal/styleguide"
 )
 
-// Build returns the requested value.
+// Build assembles a coverage report mapping STYLE.md requirements to automated rules.
 func Build(document styleguide.Document, rules []style.Rule) (report Report) {
 	requirements := buildRequirements(document.Requirements, ruleIDsByRequirement(rules))
 	return Report{

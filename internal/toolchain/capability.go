@@ -43,7 +43,7 @@ func (capability Capability) Tool() (tool style.Tool) {
 	}
 }
 
-// Policies returns the requested value.
+// Policies converts capabilities to the style tools they represent.
 func Policies(capabilities []Capability) (tools []style.Tool) {
 	tools = make([]style.Tool, 0, len(capabilities))
 	for _, capability := range capabilities {

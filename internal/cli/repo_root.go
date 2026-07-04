@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func absPath(path string) (absolutePath string, err error) {
+func absPath(path string) (resolved string, err error) {
 	return filepath.Abs(path)
 }
 

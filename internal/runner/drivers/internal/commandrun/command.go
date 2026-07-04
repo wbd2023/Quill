@@ -27,7 +27,7 @@ func ToolByID(
 	return runtime.RunToolCommand(workDir, context.GoEnvironment, tool, capability, arguments...)
 }
 
-// Output returns the requested value.
+// Output runs a command and returns its stdout.
 func Output(
 	workDir string,
 	environment map[string]string,
