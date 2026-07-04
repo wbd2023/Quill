@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 )
 
-func absPath(path string) (resolved string, err error) {
+func resolvePath(path string) (resolved string, err error) {
 	return filepath.Abs(path)
 }
 
 func resolveRepoRoot(path string) (repoRoot string, err error) {
 	if path != "" {
-		return absPath(path)
+		return resolvePath(path)
 	}
 
 	workingDirectory, err := os.Getwd()
