@@ -50,10 +50,10 @@ func recommendedDomainValueConstructor(
 }
 
 func normalisePath(path string) (normalisedPath string) {
-	abs, err := filepath.Abs(path)
+	absolute, err := filepath.Abs(path)
 	if err != nil {
 		return filepath.ToSlash(filepath.Clean(path))
 	}
 
-	return filepath.ToSlash(filepath.Clean(abs))
+	return filepath.ToSlash(filepath.Clean(absolute))
 }
