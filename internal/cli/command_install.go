@@ -3,7 +3,6 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"path/filepath"
 
 	"ciphera/tools/internal/installer"
 	"ciphera/tools/internal/report"
@@ -18,10 +17,8 @@ func runInstall(tool Tool, options installOptions) (exitCode int) {
 	}
 
 	layout := runtime.NewLayout(context.RepoRoot)
-	toolsDirectory := filepath.Join(context.RepoRoot, "tools")
 	if err := installer.Install(
 		layout,
-		toolsDirectory,
 		tool.stdout,
 		context.Effective.Tools,
 		context.ToolCapabilities,

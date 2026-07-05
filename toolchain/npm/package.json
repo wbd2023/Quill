@@ -1,7 +1,0 @@
-{
-  "name": "style-platform-node-tools",
-  "private": true,
-  "dependencies": {
-    "markdownlint-cli": "0.45.0"
-  }
-}

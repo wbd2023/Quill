@@ -3,7 +3,6 @@ package installer
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 
 	"ciphera/tools/internal/runtime"
@@ -11,15 +10,8 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-/* ------------------------------------------ Constants ----------------------------------------- */
-
-const nodeToolchainDir = "toolchain/npm"
-
-/* ---------------------------------------- Node Install ---------------------------------------- */
-
 func installNodeTool(
 	layout runtime.Layout,
-	toolsDirectory string,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
@@ -38,13 +30,9 @@ func installNodeTool(
 		return nil
 	}
 
-	if err = prepareLockedNodeInstall(layout, toolsDirectory, tool, capability); err != nil {
-		return err
-	}
-
 	if _, err = fmt.Fprintf(
 		writer,
-		"Installing %s@%s via npm ci...\n",
+		"Installing %s@%s via npm install...\n",
 		capability.InstallSource,
 		tool.PinnedVersion,
 	); err != nil {
@@ -62,7 +50,7 @@ func installNodeTool(
 		},
 		npmTool,
 		npmCapability,
-		npmInstallArguments()...,
+		npmInstallArguments(capability.InstallSource, tool.PinnedVersion)...,
 	)
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
@@ -71,42 +59,15 @@ func installNodeTool(
 	return nil
 }
 
-/* ------------------------------------------ Lockfiles ----------------------------------------- */
-
-func prepareLockedNodeInstall(
-	layout runtime.Layout,
-	toolsDirectory string,
-	tool style.Tool,
-	capability toolchain.Capability,
-) (err error) {
-	sourceDir := filepath.Join(toolsDirectory, nodeToolchainDir)
-	packagePath := filepath.Join(sourceDir, "package.json")
-	lockPath := filepath.Join(sourceDir, "package-lock.json")
-	if err = validatePackageMetadata(packagePath, lockPath); err != nil {
-		return err
+// npmInstallArguments builds the argument list for `npm install`. npm creates package.json and
+// package-lock.json automatically in the working directory, so no static lockfile is needed.
+func npmInstallArguments(packageSource string, version string) (arguments []string) {
+	return []string{
+		"install",
+		"--save-exact",
+		"--ignore-scripts",
+		"--no-audit",
+		"--no-fund",
+		packageSource + "@" + version,
 	}
-
-	if err = validatePackageLock(lockPath, tool, capability); err != nil {
-		return err
-	}
-
-	if err = os.MkdirAll(layout.NodeDirectory(), defaultDirectoryMode); err != nil {
-		return err
-	}
-
-	for _, name := range []string{"package.json", "package-lock.json"} {
-		if err = copyFile(
-			filepath.Join(sourceDir, name),
-			filepath.Join(layout.NodeDirectory(), name),
-			downloadMode,
-		); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func npmInstallArguments() (arguments []string) {
-	return []string{"ci", "--ignore-scripts", "--no-audit", "--no-fund"}
 }
