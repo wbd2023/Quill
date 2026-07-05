@@ -19,6 +19,7 @@ const nodeToolchainDir = "toolchain/npm"
 
 func installNodeTool(
 	layout runtime.Layout,
+	toolsDirectory string,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
@@ -27,7 +28,7 @@ func installNodeTool(
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	localPath := filepath.Join(layout.NodeBinDir, capability.Command)
+	localPath := filepath.Join(layout.NodeBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, localPath)
 	if err != nil {
 		return err
@@ -37,7 +38,7 @@ func installNodeTool(
 		return nil
 	}
 
-	if err = prepareLockedNodeInstall(layout, tool, capability); err != nil {
+	if err = prepareLockedNodeInstall(layout, toolsDirectory, tool, capability); err != nil {
 		return err
 	}
 
@@ -54,10 +55,10 @@ func installNodeTool(
 		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
 	npmCapability := toolchain.Capability{ID: "npm", Name: "npm", Command: "npm"}
 	_, err = runtime.RunToolCommand(
-		layout.NodeDir,
+		layout.NodeDirectory(),
 		map[string]string{
 			"PATH":             layout.SearchPath(),
-			"npm_config_cache": layout.NpmCache,
+			"npm_config_cache": layout.NpmCache(),
 		},
 		npmTool,
 		npmCapability,
@@ -74,10 +75,11 @@ func installNodeTool(
 
 func prepareLockedNodeInstall(
 	layout runtime.Layout,
+	toolsDirectory string,
 	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
-	sourceDir := filepath.Join(layout.ToolsDir, nodeToolchainDir)
+	sourceDir := filepath.Join(toolsDirectory, nodeToolchainDir)
 	packagePath := filepath.Join(sourceDir, "package.json")
 	lockPath := filepath.Join(sourceDir, "package-lock.json")
 	if err = validatePackageMetadata(packagePath, lockPath); err != nil {
@@ -88,14 +90,14 @@ func prepareLockedNodeInstall(
 		return err
 	}
 
-	if err = os.MkdirAll(layout.NodeDir, defaultDirectoryMode); err != nil {
+	if err = os.MkdirAll(layout.NodeDirectory(), defaultDirectoryMode); err != nil {
 		return err
 	}
 
 	for _, name := range []string{"package.json", "package-lock.json"} {
 		if err = copyFile(
 			filepath.Join(sourceDir, name),
-			filepath.Join(layout.NodeDir, name),
+			filepath.Join(layout.NodeDirectory(), name),
 			downloadMode,
 		); err != nil {
 			return err

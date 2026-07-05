@@ -24,6 +24,7 @@ const (
 // Install downloads and installs the pinned external tools declared in the profile.
 func Install(
 	layout runtime.Layout,
+	toolsDirectory string,
 	writer io.Writer,
 	tools []style.Tool,
 	capabilities map[string]toolchain.Capability,
@@ -38,7 +39,7 @@ func Install(
 			return fmt.Errorf("missing tool capability %q", tool.ID)
 		}
 
-		if err = installTool(layout, writer, tool, capability); err != nil {
+		if err = installTool(layout, toolsDirectory, writer, tool, capability); err != nil {
 			return err
 		}
 	}
@@ -48,6 +49,7 @@ func Install(
 
 func installTool(
 	layout runtime.Layout,
+	toolsDirectory string,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
@@ -58,10 +60,10 @@ func installTool(
 		return nil
 
 	case toolchain.InstallKindGoBinary:
-		return installGoTool(layout, writer, tool, capability)
+		return installGoTool(layout, toolsDirectory, writer, tool, capability)
 
 	case toolchain.InstallKindNodePackage:
-		return installNodeTool(layout, writer, tool, capability)
+		return installNodeTool(layout, toolsDirectory, writer, tool, capability)
 
 	case toolchain.InstallKindShellcheckArchive:
 		return installShellcheckTool(layout, writer, tool, capability)
@@ -93,12 +95,12 @@ func SupportsInstallKind(kind toolchain.InstallKind) (supported bool) {
 
 func ensureLayout(layout runtime.Layout) (err error) {
 	for _, path := range []string{
-		layout.GoBuildCache,
-		layout.GoModCache,
-		layout.GoPath,
-		layout.NpmCache,
-		layout.ToolBinDir,
-		layout.NodeBinDir,
+		layout.GoBuildCache(),
+		layout.GoModuleCache(),
+		layout.GoPath(),
+		layout.NpmCache(),
+		layout.ToolBinaryDirectory(),
+		layout.NodeBinaryDirectory(),
 	} {
 		if err = os.MkdirAll(path, defaultDirectoryMode); err != nil {
 			return err

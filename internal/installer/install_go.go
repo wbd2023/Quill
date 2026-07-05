@@ -12,6 +12,7 @@ import (
 
 func installGoTool(
 	layout runtime.Layout,
+	toolsDirectory string,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
@@ -20,7 +21,7 @@ func installGoTool(
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	localPath := filepath.Join(layout.ToolBinDir, capability.Command)
+	localPath := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, localPath)
 	if err != nil {
 		return err
@@ -43,7 +44,7 @@ func installGoTool(
 	goTool := style.Tool{ID: "go", Name: "Go",
 		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
 	_, err = runtime.RunToolCommand(
-		layout.ToolsDir,
+		toolsDirectory,
 		goInstallEnvironment(layout),
 		goTool,
 		goCapability,
@@ -59,10 +60,10 @@ func installGoTool(
 
 func goInstallEnvironment(layout runtime.Layout) (environment map[string]string) {
 	return map[string]string{
-		"GOBIN":      layout.ToolBinDir,
-		"GOCACHE":    layout.GoBuildCache,
-		"GOMODCACHE": layout.GoModCache,
-		"GOPATH":     layout.GoPath,
+		"GOBIN":      layout.ToolBinaryDirectory(),
+		"GOCACHE":    layout.GoBuildCache(),
+		"GOMODCACHE": layout.GoModuleCache(),
+		"GOPATH":     layout.GoPath(),
 		"PATH":       layout.SearchPath(),
 	}
 }
