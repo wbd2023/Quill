@@ -14,7 +14,6 @@ import (
 func TestInstallToolRejectsUnknownInstallKind(t *testing.T) {
 	err := installTool(
 		runtime.NewLayout(t.TempDir()),
-		"",
 		io.Discard,
 		style.Tool{ID: "example"},
 		toolchain.Capability{

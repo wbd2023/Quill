@@ -12,7 +12,6 @@ import (
 
 func installGoTool(
 	layout runtime.Layout,
-	toolsDirectory string,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
@@ -44,7 +43,7 @@ func installGoTool(
 	goTool := style.Tool{ID: "go", Name: "Go",
 		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
 	_, err = runtime.RunToolCommand(
-		toolsDirectory,
+		layout.StateDirectory(),
 		goInstallEnvironment(layout),
 		goTool,
 		goCapability,
