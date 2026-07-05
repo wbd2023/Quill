@@ -33,9 +33,9 @@ func testContext(
 		t.Fatalf("Compile: %v", err)
 	}
 
-	layout := runtime.LayoutForRepository(repoRoot)
+	layout := runtime.NewLayout(repoRoot)
 	goEnvironment := layout.GoEnvironment()
-	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDir, "golangci")
+	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	return runner.NewContext(
 		repoRoot,

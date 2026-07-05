@@ -24,7 +24,7 @@ func installShellcheckTool(
 	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
-	localPath := filepath.Join(layout.ToolBinDir, capability.Command)
+	localPath := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, localPath)
 	if err != nil {
 		return err
@@ -67,5 +67,5 @@ func installShellcheckTool(
 		return err
 	}
 
-	return copyExecutable(sourcePath, filepath.Join(layout.ToolBinDir, "shellcheck"))
+	return copyExecutable(sourcePath, filepath.Join(layout.ToolBinaryDirectory(), "shellcheck"))
 }

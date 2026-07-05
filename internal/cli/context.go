@@ -34,9 +34,9 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 		return runner.Context{}, err
 	}
 
-	layout := runtime.LayoutForRepository(repoRoot)
+	layout := runtime.NewLayout(repoRoot)
 	goEnvironment := layout.GoEnvironment()
-	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDir, "golangci")
+	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	return runner.NewContext(
 		repoRoot,
