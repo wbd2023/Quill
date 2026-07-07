@@ -58,8 +58,8 @@ func installTool(
 	case toolchain.InstallKindNodePackage:
 		return installNodePackage(layout, writer, tool, capability)
 
-	case toolchain.InstallKindShellcheckArchive:
-		return installShellcheckArchive(layout, writer, tool, capability)
+	case toolchain.InstallKindArchive:
+		return installArchive(layout, writer, tool, capability)
 
 	default:
 		return fmt.Errorf(

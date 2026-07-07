@@ -5,12 +5,26 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"ciphera/tools/internal/toolchain"
 )
 
-func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
+// testShellcheckSpec mirrors the shellcheck ArchiveSpec from
+// pack/shipped/tool/builders.go without importing that package, so the
+// installer's archive extraction is tested against a fixed shape.
+func testShellcheckSpec() (spec toolchain.ArchiveSpec) {
+	return toolchain.ArchiveSpec{
+		Format:     toolchain.ArchiveFormatXz,
+		BinaryPath: func(version string) string { return "shellcheck-v" + version + "/shellcheck" },
+	}
+}
+
+/* -------------------------------------------- Tests ------------------------------------------- */
+
+func TestExtractBinaryExtractsExpectedAsset(t *testing.T) {
 	t.Parallel()
 
-	archive := writeShellcheckArchive(
+	archive := writeTestArchive(
 		t,
 		archiveEntry{
 			Name: "shellcheck-v0.10.0/LICENSE.txt",
@@ -27,7 +41,7 @@ func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
 	)
 
 	dir := t.TempDir()
-	binary, err := extractShellcheckBinary(archive, dir, "0.10.0")
+	binary, err := extractBinary(archive, dir, testShellcheckSpec(), "0.10.0")
 	if err != nil {
 		t.Fatalf("extract: %v", err)
 	}
@@ -56,10 +70,10 @@ func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
 	}
 }
 
-func TestExtractShellcheckBinaryRejectsPathTraversal(t *testing.T) {
+func TestExtractBinaryRejectsPathTraversal(t *testing.T) {
 	t.Parallel()
 
-	archive := writeShellcheckArchive(
+	archive := writeTestArchive(
 		t,
 		archiveEntry{
 			Name: "shellcheck-v0.10.0/../shellcheck",
@@ -67,15 +81,15 @@ func TestExtractShellcheckBinaryRejectsPathTraversal(t *testing.T) {
 		},
 	)
 
-	if _, err := extractShellcheckBinary(archive, t.TempDir(), "0.10.0"); err == nil {
+	if _, err := extractBinary(archive, t.TempDir(), testShellcheckSpec(), "0.10.0"); err == nil {
 		t.Fatal("expected path traversal entry to fail")
 	}
 }
 
-func TestExtractShellcheckBinaryRejectsLinks(t *testing.T) {
+func TestExtractBinaryRejectsLinks(t *testing.T) {
 	t.Parallel()
 
-	archive := writeShellcheckArchive(
+	archive := writeTestArchive(
 		t,
 		archiveEntry{
 			Name:     "shellcheck-v0.10.0/shellcheck",
@@ -84,7 +98,7 @@ func TestExtractShellcheckBinaryRejectsLinks(t *testing.T) {
 		},
 	)
 
-	if _, err := extractShellcheckBinary(archive, t.TempDir(), "0.10.0"); err == nil {
+	if _, err := extractBinary(archive, t.TempDir(), testShellcheckSpec(), "0.10.0"); err == nil {
 		t.Fatal("expected link entry to fail")
 	}
 }

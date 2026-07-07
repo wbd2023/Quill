@@ -66,7 +66,7 @@ func buildShellcheckArchive() (capability toolchain.Capability) {
 		Name:        "shellcheck",
 		Command:     "shellcheck",
 		VersionKind: toolchain.VersionKindShellcheck,
-		InstallKind: toolchain.InstallKindShellcheckArchive,
+		InstallKind: toolchain.InstallKindArchive,
 		Archive: &toolchain.ArchiveSpec{
 			URL:        shellcheckArchiveURL,
 			Format:     toolchain.ArchiveFormatXz,
