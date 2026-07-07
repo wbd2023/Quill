@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
@@ -45,5 +46,6 @@ func testContext(
 		registry.ToolCapabilities(),
 		layout.ToolEnvironment(),
 		goEnvironment,
+		lockfile.Lockfile{},
 	)
 }

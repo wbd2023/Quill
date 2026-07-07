@@ -3,6 +3,7 @@ package runner
 import (
 	"testing"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
@@ -26,6 +27,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		lockfile.Lockfile{},
 	)
 	drivers := DriverSet{
 		RepositoryScan: func(
@@ -65,6 +67,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		lockfile.Lockfile{},
 	)
 	drivers := DriverSet{}
 

@@ -1,12 +1,13 @@
 package runner
 
 import (
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-// Context is context.
+// Context carries loaded profile and toolchain state through a check or install run.
 type Context struct {
 	RepoRoot         string
 	Scope            style.Scope
@@ -15,9 +16,10 @@ type Context struct {
 	ToolCapabilities map[string]toolchain.Capability
 	ToolEnvironment  map[string]string
 	GoEnvironment    map[string]string
+	Lockfile         lockfile.Lockfile
 }
 
-// NewContext new context.
+// NewContext constructs a Context from loaded profile and toolchain state.
 func NewContext(
 	repoRoot string,
 	scope style.Scope,
@@ -26,6 +28,7 @@ func NewContext(
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,
+	lockfile lockfile.Lockfile,
 ) (context Context) {
 	return Context{
 		RepoRoot:         repoRoot,
@@ -35,5 +38,6 @@ func NewContext(
 		ToolCapabilities: toolchain.CapabilitiesByID(capabilities),
 		ToolEnvironment:  toolEnvironment,
 		GoEnvironment:    goEnvironment,
+		Lockfile:         lockfile,
 	}
 }

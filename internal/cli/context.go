@@ -3,6 +3,7 @@ package cli
 import (
 	"path/filepath"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
@@ -38,6 +39,11 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 	goEnvironment := layout.GoEnvironment()
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
+	lockfile, err := lockfile.Load(repoRoot)
+	if err != nil {
+		return runner.Context{}, err
+	}
+
 	return runner.NewContext(
 		repoRoot,
 		scope,
@@ -46,5 +52,6 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 		registry.ToolCapabilities(),
 		layout.ToolEnvironment(),
 		goEnvironment,
+		lockfile,
 	), nil
 }

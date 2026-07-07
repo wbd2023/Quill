@@ -3,6 +3,7 @@ package runner
 import (
 	"testing"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/style"
@@ -38,5 +39,6 @@ func testContext(
 		registry.ToolCapabilities(),
 		map[string]string{"PATH": ""},
 		map[string]string{"PATH": ""},
+		lockfile.Lockfile{},
 	)
 }
