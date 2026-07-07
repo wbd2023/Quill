@@ -19,11 +19,28 @@ const (
 	InstallKindShellcheckArchive InstallKind = "shellcheck_archive"
 )
 
+// Known archive compression formats.
+const (
+	ArchiveFormatXz ArchiveFormat = "xz"
+)
+
 // VersionKind selects how a tool's installed version is detected.
 type VersionKind string
 
 // InstallKind selects how a missing tool is installed.
 type InstallKind string
+
+// ArchiveFormat selects the compression format of a release archive.
+type ArchiveFormat string
+
+// ArchiveSpec describes how to download and extract a binary tool from a release archive.
+// Carried on Capability; nil for non-archive tools.
+type ArchiveSpec struct {
+	URL        func(version string, platform string) string
+	Format     ArchiveFormat
+	BinaryPath func(version string) string
+	Platforms  map[string]string
+}
 
 // Capability is a pinned external tool and how to inspect and install it.
 type Capability struct {
@@ -34,6 +51,7 @@ type Capability struct {
 	ModulePath    string
 	InstallKind   InstallKind
 	InstallSource string
+	Archive       *ArchiveSpec
 }
 
 func (capability Capability) Tool() (tool style.Tool) {
