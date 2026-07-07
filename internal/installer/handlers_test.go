@@ -1,9 +1,10 @@
 package installer
 
 import (
-	"io"
 	"strings"
 	"testing"
+
+	"io"
 
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/runtime"
@@ -30,14 +31,21 @@ func TestInstallToolRejectsUnknownInstallKind(t *testing.T) {
 	}
 }
 
-func TestInstallerSupportsShippedPackToolInstallKinds(t *testing.T) {
+func TestInstallerRecognisesShippedPackToolInstallKinds(t *testing.T) {
 	registry, err := shipped.DefaultRegistry(nil)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
 	for _, capability := range registry.ToolCapabilities() {
-		if !SupportsInstallKind(capability.InstallKind) {
+		switch capability.InstallKind {
+
+		case toolchain.InstallKindNone,
+			toolchain.InstallKindGoBinary,
+			toolchain.InstallKindNodePackage,
+			toolchain.InstallKindShellcheckArchive:
+
+		default:
 			t.Fatalf(
 				"install kind %q for tool %s is unsupported",
 				capability.InstallKind,

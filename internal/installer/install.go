@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,38 +13,33 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
-// install constants.
-const (
-	defaultDirectoryMode os.FileMode = 0o755
-	downloadMode         os.FileMode = 0o644
-	executableMode       os.FileMode = 0o755
-)
+const standardPermissions os.FileMode = 0o755
 
 /* ---------------------------------------- Installation ---------------------------------------- */
 
-// Install downloads and installs the pinned external tools declared in the profile.
+// Install downloads and installs the pinned external tools declared in the profile. All tools are
+// attempted; failures from independent tools are collected and returned as a joined error.
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
 	tools []style.Tool,
 	capabilities map[string]toolchain.Capability,
 ) (err error) {
-	if err = ensureLayout(layout); err != nil {
-		return err
-	}
-
+	var errs []error
 	for _, tool := range tools {
 		capability, found := capabilities[tool.ID]
 		if !found {
-			return fmt.Errorf("missing tool capability %q", tool.ID)
+			errs = append(errs, fmt.Errorf("missing tool capability %q", tool.ID))
+			continue
 		}
 
-		if err = installTool(layout, writer, tool, capability); err != nil {
-			return err
+		if installErr := installTool(layout, writer, tool, capability); installErr != nil {
+			errs = append(errs, installErr)
 		}
 	}
 
-	return nil
+	err = errors.Join(errs...)
+	return err
 }
 
 func installTool(
@@ -53,18 +49,17 @@ func installTool(
 	capability toolchain.Capability,
 ) (err error) {
 	switch capability.InstallKind {
-
 	case toolchain.InstallKindNone:
 		return nil
 
 	case toolchain.InstallKindGoBinary:
-		return installGoTool(layout, writer, tool, capability)
+		return installGoBinary(layout, writer, tool, capability)
 
 	case toolchain.InstallKindNodePackage:
-		return installNodeTool(layout, writer, tool, capability)
+		return installNodePackage(layout, writer, tool, capability)
 
 	case toolchain.InstallKindShellcheckArchive:
-		return installShellcheckTool(layout, writer, tool, capability)
+		return installShellcheckArchive(layout, writer, tool, capability)
 
 	default:
 		return fmt.Errorf(
@@ -75,36 +70,35 @@ func installTool(
 	}
 }
 
-// SupportsInstallKind reports whether kind names a known install strategy.
-func SupportsInstallKind(kind toolchain.InstallKind) (supported bool) {
-	switch kind {
+/* -------------------------------------- Idempotency Probe ------------------------------------- */
 
-	case toolchain.InstallKindNone,
-		toolchain.InstallKindGoBinary,
-		toolchain.InstallKindNodePackage,
-		toolchain.InstallKindShellcheckArchive:
-		return true
-	}
-
-	return false
-}
-
-/* ---------------------------------------- Layout Setup ---------------------------------------- */
-
-func ensureLayout(layout runtime.Layout) (err error) {
-	for _, path := range []string{
-		layout.GoBuildCache(),
-		layout.GoModuleCache(),
-		layout.GoPath(),
-		layout.NodeDirectory(),
-		layout.NpmCache(),
-		layout.ToolBinaryDirectory(),
-		layout.NodeBinaryDirectory(),
-	} {
-		if err = os.MkdirAll(path, defaultDirectoryMode); err != nil {
-			return err
+// hasPinnedLocalTool reports whether a tool matching the pinned version is already installed at the
+// given path.
+func hasPinnedLocalTool(
+	tool style.Tool,
+	capability toolchain.Capability,
+	path string,
+) (installed bool, err error) {
+	if _, err = os.Stat(path); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
 		}
+
+		return false, err
 	}
 
-	return nil
+	probe := capability
+	probe.Command = path
+	statuses := toolchain.InspectToolsWithEnvironment(
+		[]style.Tool{tool},
+		map[string]toolchain.Capability{tool.ID: probe},
+		[]string{tool.ID},
+		nil,
+		runtime.RunToolchainCommand,
+	)
+	if len(statuses) != 1 {
+		return false, fmt.Errorf("inspect local tool %s: missing status", tool.ID)
+	}
+
+	return statuses[0].Valid, nil
 }

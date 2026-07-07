@@ -9,7 +9,7 @@ import (
 	"github.com/ulikunitz/xz"
 )
 
-type shellcheckArchiveEntry struct {
+type archiveEntry struct {
 	Name     string
 	Body     string
 	Typeflag byte
@@ -18,7 +18,7 @@ type shellcheckArchiveEntry struct {
 
 func writeShellcheckArchive(
 	t *testing.T,
-	entries ...shellcheckArchiveEntry,
+	entries ...archiveEntry,
 ) (path string) {
 	t.Helper()
 

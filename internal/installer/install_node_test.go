@@ -15,7 +15,7 @@ func TestNpmInstallArgumentsIncludePackageAndVersion(t *testing.T) {
 		"markdownlint-cli@0.45.0",
 	}
 
-	actual := npmInstallArguments("markdownlint-cli", "0.45.0")
+	actual := npmArguments("markdownlint-cli", "0.45.0")
 	if !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("npm install arguments = %v, want %v", actual, expected)
 	}

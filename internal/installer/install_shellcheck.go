@@ -12,20 +12,19 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-// install_shellcheck constants.
 const (
 	shellcheckDownloadRoot  = "https://github.com/koalaman/shellcheck/releases/download"
-	shellcheckTempDirPrefix = "style-platform-shellcheck-*"
+	shellcheckTempDirPrefix = "quill-shellcheck-*"
 )
 
-func installShellcheckTool(
+func installShellcheckArchive(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
-	localPath := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, localPath)
+	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
+	installed, err := hasPinnedLocalTool(tool, capability, path)
 	if err != nil {
 		return err
 	}
@@ -39,33 +38,38 @@ func installShellcheckTool(
 		return err
 	}
 
-	archiveName := fmt.Sprintf("shellcheck-v%s.%s.tar.xz", tool.PinnedVersion, asset.Name)
-	versionRoot := shellcheckDownloadRoot + "/v" + tool.PinnedVersion
-	tempDir, err := os.MkdirTemp("", shellcheckTempDirPrefix)
+	archive := fmt.Sprintf("shellcheck-v%s.%s.tar.xz", tool.PinnedVersion, asset.Name)
+	url := shellcheckDownloadRoot + "/v" + tool.PinnedVersion + "/" + archive
+	dir, err := os.MkdirTemp("", shellcheckTempDirPrefix)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = os.RemoveAll(tempDir)
+		_ = os.RemoveAll(dir)
 	}()
 
-	archivePath := filepath.Join(tempDir, archiveName)
-	if _, err = fmt.Fprintln(writer, "Installing shellcheck from release archive..."); err != nil {
+	downloaded := filepath.Join(dir, archive)
+	if _, err = fmt.Fprintf(
+		writer,
+		"Installing %s@%s...\n",
+		tool.Name,
+		tool.PinnedVersion,
+	); err != nil {
 		return err
 	}
 
-	if err = downloadFile(versionRoot+"/"+archiveName, archivePath); err != nil {
+	if err = downloadFile(url, downloaded); err != nil {
 		return err
 	}
 
-	if err = verifyFileChecksum(archivePath, archiveName, asset.SHA256); err != nil {
+	if err = verifyChecksum(downloaded, asset.SHA256); err != nil {
 		return err
 	}
 
-	sourcePath, err := extractShellcheckBinary(archivePath, tempDir, tool.PinnedVersion)
+	extracted, err := extractShellcheckBinary(downloaded, dir, tool.PinnedVersion)
 	if err != nil {
 		return err
 	}
 
-	return copyExecutable(sourcePath, filepath.Join(layout.ToolBinaryDirectory(), "shellcheck"))
+	return copyExecutable(extracted, path)
 }
