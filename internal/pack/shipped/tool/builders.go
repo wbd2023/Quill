@@ -51,6 +51,15 @@ func buildNodePackage(
 	}
 }
 
+func shellcheckArchiveURL(version string, platform string) (url string) {
+	return "https://github.com/koalaman/shellcheck/releases/download/v" +
+		version + "/shellcheck-v" + version + "." + platform + ".tar.xz"
+}
+
+func shellcheckBinaryPath(version string) (path string) {
+	return "shellcheck-v" + version + "/shellcheck"
+}
+
 func buildShellcheckArchive() (capability toolchain.Capability) {
 	return toolchain.Capability{
 		ID:          Shellcheck,
@@ -58,5 +67,16 @@ func buildShellcheckArchive() (capability toolchain.Capability) {
 		Command:     "shellcheck",
 		VersionKind: toolchain.VersionKindShellcheck,
 		InstallKind: toolchain.InstallKindShellcheckArchive,
+		Archive: &toolchain.ArchiveSpec{
+			URL:        shellcheckArchiveURL,
+			Format:     toolchain.ArchiveFormatXz,
+			BinaryPath: shellcheckBinaryPath,
+			Platforms: map[string]string{
+				"darwin/amd64": "darwin.x86_64",
+				"darwin/arm64": "darwin.aarch64",
+				"linux/amd64":  "linux.x86_64",
+				"linux/arm64":  "linux.aarch64",
+			},
+		},
 	}
 }

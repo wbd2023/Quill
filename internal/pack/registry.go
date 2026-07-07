@@ -188,7 +188,13 @@ func validatePackToolDefinitions(packs []Definition) (err error) {
 				continue
 			}
 
-			if existing != tool {
+			if existing.ID != tool.ID ||
+				existing.Name != tool.Name ||
+				existing.Command != tool.Command ||
+				existing.VersionKind != tool.VersionKind ||
+				existing.ModulePath != tool.ModulePath ||
+				existing.InstallKind != tool.InstallKind ||
+				existing.InstallSource != tool.InstallSource {
 				return fmt.Errorf("tool %q has conflicting definitions", tool.ID)
 			}
 		}
