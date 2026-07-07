@@ -39,6 +39,12 @@ var commands = []Command{
 		usage:   installUsageText,
 		prepare: prepareAction(parseInstallOptionsWithResolver, runInstall),
 	},
+	{
+		name:    "lock",
+		summary: "resolve archive-tool hashes to quill.lock",
+		usage:   lockUsageText,
+		prepare: prepareAction(parseLockOptionsWithResolver, runLock),
+	},
 }
 
 func findCommand(name string) (matched Command, found bool) {

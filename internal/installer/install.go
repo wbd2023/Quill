@@ -54,7 +54,6 @@ func installTool(
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	switch capability.InstallKind {
-
 	case toolchain.InstallKindNone:
 		return nil
 

@@ -34,6 +34,10 @@ type installOptions struct {
 	repoRoot string
 }
 
+type lockOptions struct {
+	repoRoot string
+}
+
 type flagHelpError struct {
 	message string
 }
