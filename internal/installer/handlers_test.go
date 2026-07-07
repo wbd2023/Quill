@@ -6,6 +6,7 @@ import (
 
 	"io"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
@@ -21,6 +22,7 @@ func TestInstallToolRejectsUnknownInstallKind(t *testing.T) {
 			ID:          "example",
 			InstallKind: "unknown",
 		},
+		lockfile.Lockfile{},
 	)
 	if err == nil {
 		t.Fatal("expected unknown install kind to fail")

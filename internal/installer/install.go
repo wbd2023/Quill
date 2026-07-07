@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
@@ -24,6 +25,7 @@ func Install(
 	writer io.Writer,
 	tools []style.Tool,
 	capabilities map[string]toolchain.Capability,
+	lockfile lockfile.Lockfile,
 ) (err error) {
 	var errs []error
 	for _, tool := range tools {
@@ -33,7 +35,9 @@ func Install(
 			continue
 		}
 
-		if installErr := installTool(layout, writer, tool, capability); installErr != nil {
+		if installErr := installTool(
+			layout, writer, tool, capability, lockfile,
+		); installErr != nil {
 			errs = append(errs, installErr)
 		}
 	}
@@ -47,8 +51,10 @@ func installTool(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	lockfile lockfile.Lockfile,
 ) (err error) {
 	switch capability.InstallKind {
+
 	case toolchain.InstallKindNone:
 		return nil
 
@@ -59,7 +65,7 @@ func installTool(
 		return installNodePackage(layout, writer, tool, capability)
 
 	case toolchain.InstallKindArchive:
-		return installArchive(layout, writer, tool, capability)
+		return installArchive(layout, writer, tool, capability, lockfile)
 
 	default:
 		return fmt.Errorf(

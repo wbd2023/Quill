@@ -22,6 +22,7 @@ func runInstall(tool Tool, options installOptions) (exitCode int) {
 		tool.stdout,
 		context.Effective.Tools,
 		context.ToolCapabilities,
+		context.Lockfile,
 	); err != nil {
 		tool.writeError(err)
 		return 1

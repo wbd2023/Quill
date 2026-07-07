@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	goruntime "runtime"
 
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
@@ -17,6 +18,7 @@ func installArchive(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	lockfile lockfile.Lockfile,
 ) (err error) {
 	spec := capability.Archive
 	if spec == nil {
@@ -44,7 +46,7 @@ func installArchive(
 	}
 
 	url := spec.URL(tool.PinnedVersion, platform)
-	hash, err := archiveHashFor(tool.ID, goruntime.GOOS, goruntime.GOARCH)
+	hash, err := lockfile.HashFor(tool.ID, tool.PinnedVersion, goruntime.GOOS, goruntime.GOARCH)
 	if err != nil {
 		return err
 	}
