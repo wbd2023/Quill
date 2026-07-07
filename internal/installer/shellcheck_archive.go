@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/ulikunitz/xz"
 )
@@ -15,45 +16,45 @@ import (
 /* ------------------------------------------- Archive ------------------------------------------ */
 
 func extractShellcheckBinary(
-	archivePath string,
-	destination string,
+	archive string,
+	dir string,
 	version string,
-) (binaryPath string, err error) {
-	file, err := os.Open(archivePath)
+) (extracted string, err error) {
+	file, err := os.Open(archive)
 	if err != nil {
 		return "", err
 	}
 	defer func() {
 		if closeErr := file.Close(); err == nil && closeErr != nil {
-			err = fmt.Errorf("close shellcheck archive %q: %w", archivePath, closeErr)
+			err = fmt.Errorf("close %q: %w", archive, closeErr)
 		}
 	}()
 
-	xzReader, err := xz.NewReader(file)
+	reader, err := xz.NewReader(file)
 	if err != nil {
 		return "", err
 	}
 
-	expectedName := path.Join(shellcheckArchiveRoot(version), "shellcheck")
-	targetPath := filepath.Join(destination, filepath.FromSlash(expectedName))
-	foundBinary := false
+	expected := path.Join(shellcheckArchiveRoot(version), "shellcheck")
+	target := filepath.Join(dir, filepath.FromSlash(expected))
+	found := false
 
-	tarReader := tar.NewReader(xzReader)
+	tarReader := tar.NewReader(reader)
 	for {
 		header, err := tarReader.Next()
 		if errors.Is(err, io.EOF) {
-			if !foundBinary {
-				return "", fmt.Errorf("shellcheck archive missing %s", expectedName)
+			if !found {
+				return "", fmt.Errorf("shellcheck archive missing %s", expected)
 			}
 
-			return targetPath, nil
+			return target, nil
 		}
 
 		if err != nil {
 			return "", err
 		}
 
-		cleanName, err := validateShellcheckArchiveEntry(header, version)
+		name, err := validateShellcheckEntry(header, version)
 		if err != nil {
 			return "", err
 		}
@@ -63,12 +64,12 @@ func extractShellcheckBinary(
 			continue
 
 		case tar.TypeReg:
-			if cleanName != expectedName {
+			if name != expected {
 				continue
 			}
 
-			foundBinary = true
-			if err = writeShellcheckBinary(targetPath, tarReader); err != nil {
+			found = true
+			if err = writeExecutable(target, tarReader); err != nil {
 				return "", err
 			}
 
@@ -78,30 +79,41 @@ func extractShellcheckBinary(
 	}
 }
 
-func writeShellcheckBinary(targetPath string, source io.Reader) (err error) {
-	if err = os.MkdirAll(filepath.Dir(targetPath), defaultDirectoryMode); err != nil {
-		return err
+/* ------------------------------------- Archive Validation ------------------------------------- */
+
+// validateShellcheckEntry checks that a tar header is safe (no symlinks, no path traversal) and
+// matches the expected shellcheck archive layout for the given version.
+func validateShellcheckEntry(header *tar.Header, version string) (name string, err error) {
+	if header.Typeflag == tar.TypeSymlink || header.Typeflag == tar.TypeLink {
+		return "", fmt.Errorf("shellcheck archive contains link entry %q", header.Name)
 	}
 
-	targetFile, err := os.OpenFile(
-		targetPath,
-		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
-		executableMode,
-	)
-	if err != nil {
-		return err
+	raw := header.Name
+	if header.Typeflag == tar.TypeDir {
+		raw = strings.TrimSuffix(raw, "/")
 	}
 
-	if _, err = io.Copy(targetFile, source); err != nil {
-		if closeErr := targetFile.Close(); closeErr != nil {
-			return fmt.Errorf(
-				"copy shellcheck file %q: %w",
-				targetPath,
-				errors.Join(err, closeErr),
-			)
-		}
-		return err
+	name = path.Clean(raw)
+	if name == "." ||
+		name != raw ||
+		path.IsAbs(raw) ||
+		strings.HasPrefix(name, "../") ||
+		strings.Contains(name, "/../") {
+		return "", fmt.Errorf("unsafe shellcheck archive path %q", header.Name)
 	}
 
-	return targetFile.Close()
+	root := shellcheckArchiveRoot(version)
+	switch name {
+	case root,
+		path.Join(root, "LICENSE.txt"),
+		path.Join(root, "README.txt"),
+		path.Join(root, "shellcheck"):
+		return name, nil
+	default:
+		return "", fmt.Errorf("unexpected shellcheck archive entry %q", header.Name)
+	}
+}
+
+func shellcheckArchiveRoot(version string) (root string) {
+	return "shellcheck-v" + version
 }

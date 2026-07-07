@@ -10,29 +10,19 @@ import (
 	"time"
 )
 
-/* -------------------------------------------- Types ------------------------------------------- */
+/* ------------------------------------------ Constants ----------------------------------------- */
 
-// download constants.
 const (
-	downloadTimeout = 30 * time.Second
-	maxDownloadSize = 128 << 20
+	limit   = 128 << 20
+	timeout = 30 * time.Second
 )
-
-type httpStatusError struct {
-	url        string
-	status     string
-	statusCode int
-}
-
-func (err httpStatusError) Error() (message string) {
-	return fmt.Sprintf("%s: unexpected HTTP status %s", err.url, err.status)
-}
 
 /* ------------------------------------------ Download ------------------------------------------ */
 
+// downloadFile fetches a URL and writes it to destination via an atomic temp-file rename. The
+// download is capped at limit bytes to prevent unbounded memory or disk usage.
 func downloadFile(url string, destination string) (err error) {
-	client := &http.Client{Timeout: downloadTimeout}
-	response, err := client.Get(url)
+	response, err := (&http.Client{Timeout: timeout}).Get(url)
 	if err != nil {
 		return err
 	}
@@ -43,86 +33,55 @@ func downloadFile(url string, destination string) (err error) {
 	}()
 
 	if response.StatusCode != http.StatusOK {
-		return httpStatusError{
-			url:        url,
-			status:     response.Status,
-			statusCode: response.StatusCode,
-		}
+		return fmt.Errorf("%s: unexpected HTTP status %s", url, response.Status)
 	}
 
-	if err = os.MkdirAll(filepath.Dir(destination), defaultDirectoryMode); err != nil {
+	if err = os.MkdirAll(filepath.Dir(destination), standardPermissions); err != nil {
 		return err
 	}
 
-	tempFile, err := os.CreateTemp(filepath.Dir(destination), ".download-*")
+	file, err := os.CreateTemp(filepath.Dir(destination), ".download-*")
 	if err != nil {
 		return err
 	}
-	tempPath := tempFile.Name()
+	temp := file.Name()
 	defer func() {
 		if err != nil {
-			_ = os.Remove(tempPath)
+			_ = os.Remove(temp)
 		}
 	}()
 
-	if err = writeDownloadFile(tempFile, response.Body, maxDownloadSize); err != nil {
-		_ = tempFile.Close() // returning the write error is more useful
-		return err
-	}
-
-	if err = tempFile.Close(); err != nil {
-		return err
-	}
-
-	return os.Rename(tempPath, destination)
-}
-
-func writeDownload(destination string, body io.Reader) (err error) {
-	return writeDownloadWithLimit(destination, body, maxDownloadSize)
-}
-
-func writeDownloadWithLimit(destination string, body io.Reader, limit int64) (err error) {
-	file, err := os.OpenFile(destination, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, downloadMode)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if closeErr := file.Close(); err == nil && closeErr != nil {
-			err = fmt.Errorf("close download file %q: %w", destination, closeErr)
-		}
-	}()
-
-	return writeDownloadFile(file, body, limit)
-}
-
-func writeDownloadFile(file *os.File, body io.Reader, limit int64) (err error) {
-	reader := &io.LimitedReader{R: body, N: limit + 1}
+	reader := &io.LimitedReader{R: response.Body, N: limit + 1}
 	written, err := io.Copy(file, reader)
 	if err != nil {
+		_ = file.Close()
 		return err
 	}
 
 	if written > limit {
+		_ = file.Close()
 		return fmt.Errorf("download exceeds maximum size")
 	}
 
-	return file.Chmod(downloadMode)
+	if err = file.Close(); err != nil {
+		return err
+	}
+
+	return os.Rename(temp, destination)
 }
 
 /* ------------------------------------------ Checksums ----------------------------------------- */
 
-func verifyFileChecksum(
-	archivePath string,
-	archiveName string,
-	expected string,
-) (err error) {
-	file, err := os.Open(archivePath)
+// verifyChecksum reports whether the SHA-256 hash of the file at path matches the expected hex
+// digest.
+func verifyChecksum(path string, expected string) (err error) {
+	file, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if closeErr := file.Close(); err == nil && closeErr != nil {
-			err = fmt.Errorf("close archive %q: %w", archivePath, closeErr)
+			err = fmt.Errorf("close %q: %w", path, closeErr)
 		}
 	}()
 
@@ -133,7 +92,7 @@ func verifyFileChecksum(
 
 	actual := fmt.Sprintf("%x", hash.Sum(nil))
 	if actual != expected {
-		return fmt.Errorf("checksum mismatch for %s", archiveName)
+		return fmt.Errorf("checksum mismatch for %s", path)
 	}
 
 	return nil

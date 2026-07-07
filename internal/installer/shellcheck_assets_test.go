@@ -7,10 +7,10 @@ import (
 	"testing"
 )
 
-func TestShellcheckAssetName(t *testing.T) {
+func TestShellcheckAssetForReturnsCorrectName(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
+	tests := []struct {
 		goos     string
 		goarch   string
 		expected string
@@ -21,27 +21,26 @@ func TestShellcheckAssetName(t *testing.T) {
 		{goos: "darwin", goarch: "arm64", expected: "darwin.aarch64"},
 	}
 
-	for _, testCase := range testCases {
-		testCase := testCase
-		t.Run(testCase.goos+"-"+testCase.goarch, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.goos+"-"+test.goarch, func(t *testing.T) {
 			t.Parallel()
 
-			actual, err := shellcheckAssetName(testCase.goos, testCase.goarch)
+			asset, err := shellcheckAssetFor(test.goos, test.goarch)
 			if err != nil {
-				t.Fatalf("shellcheckAssetName: %v", err)
+				t.Fatalf("shellcheckAssetFor: %v", err)
 			}
 
-			if actual != testCase.expected {
-				t.Fatalf("asset name = %q, want %q", actual, testCase.expected)
+			if asset.Name != test.expected {
+				t.Fatalf("asset name = %q, want %q", asset.Name, test.expected)
 			}
 		})
 	}
 }
 
-func TestShellcheckAssetNameRejectsUnsupportedPlatform(t *testing.T) {
+func TestShellcheckAssetForRejectsUnsupportedPlatform(t *testing.T) {
 	t.Parallel()
 
-	if _, err := shellcheckAssetName("freebsd", "amd64"); err == nil {
+	if _, err := shellcheckAssetFor("freebsd", "amd64"); err == nil {
 		t.Fatal("expected unsupported platform error")
 	}
 }
@@ -54,7 +53,7 @@ func TestVerifyFileChecksumRejectsMismatch(t *testing.T) {
 		t.Fatalf("write archive: %v", err)
 	}
 
-	err := verifyFileChecksum(path, "archive.tar.xz", strings.Repeat("0", 64))
+	err := verifyChecksum(path, strings.Repeat("0", 64))
 	if err == nil {
 		t.Fatal("expected checksum mismatch")
 	}

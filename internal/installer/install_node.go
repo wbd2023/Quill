@@ -3,6 +3,7 @@ package installer
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 
 	"ciphera/tools/internal/runtime"
@@ -10,7 +11,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func installNodeTool(
+func installNodePackage(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool style.Tool,
@@ -20,8 +21,8 @@ func installNodeTool(
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	localPath := filepath.Join(layout.NodeBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, localPath)
+	path := filepath.Join(layout.NodeBinaryDirectory(), capability.Command)
+	installed, err := hasPinnedLocalTool(tool, capability, path)
 	if err != nil {
 		return err
 	}
@@ -32,25 +33,28 @@ func installNodeTool(
 
 	if _, err = fmt.Fprintf(
 		writer,
-		"Installing %s@%s via npm install...\n",
-		capability.InstallSource,
+		"Installing %s@%s...\n",
+		tool.Name,
 		tool.PinnedVersion,
 	); err != nil {
 		return err
 	}
 
-	npmTool := style.Tool{ID: "npm", Name: "npm",
-		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
-	npmCapability := toolchain.Capability{ID: "npm", Name: "npm", Command: "npm"}
+	if err = os.MkdirAll(layout.NodeDirectory(), standardPermissions); err != nil {
+		return err
+	}
+
+	runnerCapability := toolchain.Capability{ID: "npm", Name: "npm", Command: "npm"}
+	runnerTool := style.Tool{ID: "npm", Name: "npm"}
 	_, err = runtime.RunToolCommand(
 		layout.NodeDirectory(),
 		map[string]string{
 			"PATH":             layout.SearchPath(),
 			"npm_config_cache": layout.NpmCache(),
 		},
-		npmTool,
-		npmCapability,
-		npmInstallArguments(capability.InstallSource, tool.PinnedVersion)...,
+		runnerTool,
+		runnerCapability,
+		npmArguments(capability.InstallSource, tool.PinnedVersion)...,
 	)
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
@@ -59,15 +63,15 @@ func installNodeTool(
 	return nil
 }
 
-// npmInstallArguments builds the argument list for `npm install`. npm creates package.json and
-// package-lock.json automatically in the working directory, so no static lockfile is needed.
-func npmInstallArguments(packageSource string, version string) (arguments []string) {
+// npmArguments builds the arguments for `npm install`. --ignore-scripts prevents arbitrary
+// postinstall scripts from running; the rest pin the exact version and suppress side output.
+func npmArguments(source string, version string) (arguments []string) {
 	return []string{
 		"install",
 		"--save-exact",
 		"--ignore-scripts",
 		"--no-audit",
 		"--no-fund",
-		packageSource + "@" + version,
+		source + "@" + version,
 	}
 }

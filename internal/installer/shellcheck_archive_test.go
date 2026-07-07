@@ -10,48 +10,48 @@ import (
 func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
 	t.Parallel()
 
-	archivePath := writeShellcheckArchive(
+	archive := writeShellcheckArchive(
 		t,
-		shellcheckArchiveEntry{
+		archiveEntry{
 			Name: "shellcheck-v0.10.0/LICENSE.txt",
 			Body: "licence",
 		},
-		shellcheckArchiveEntry{
+		archiveEntry{
 			Name: "shellcheck-v0.10.0/README.txt",
 			Body: "readme",
 		},
-		shellcheckArchiveEntry{
+		archiveEntry{
 			Name: "shellcheck-v0.10.0/shellcheck",
 			Body: "#!/bin/sh\n",
 		},
 	)
 
-	destination := t.TempDir()
-	binaryPath, err := extractShellcheckBinary(archivePath, destination, "0.10.0")
+	dir := t.TempDir()
+	binary, err := extractShellcheckBinary(archive, dir, "0.10.0")
 	if err != nil {
-		t.Fatalf("extractShellcheckBinary: %v", err)
+		t.Fatalf("extract: %v", err)
 	}
 
-	contents, err := os.ReadFile(binaryPath)
+	content, err := os.ReadFile(binary)
 	if err != nil {
 		t.Fatalf("read extracted binary: %v", err)
 	}
 
-	if string(contents) != "#!/bin/sh\n" {
-		t.Fatalf("unexpected extracted contents: %q", contents)
+	if string(content) != "#!/bin/sh\n" {
+		t.Fatalf("unexpected extracted content: %q", content)
 	}
 
-	info, err := os.Stat(binaryPath)
+	info, err := os.Stat(binary)
 	if err != nil {
 		t.Fatalf("stat extracted binary: %v", err)
 	}
 
-	if info.Mode().Perm() != executableMode {
-		t.Fatalf("extracted binary mode = %v, want %v", info.Mode().Perm(), executableMode)
+	if info.Mode().Perm() != standardPermissions {
+		t.Fatalf("extracted binary mode = %v, want %v", info.Mode().Perm(), standardPermissions)
 	}
 
-	readmePath := filepath.Join(destination, "shellcheck-v0.10.0", "README.txt")
-	if _, err := os.Stat(readmePath); err == nil {
+	readme := filepath.Join(dir, "shellcheck-v0.10.0", "README.txt")
+	if _, err := os.Stat(readme); err == nil {
 		t.Fatal("expected README to be ignored, not extracted")
 	}
 }
@@ -59,15 +59,15 @@ func TestExtractShellcheckBinaryExtractsExpectedAsset(t *testing.T) {
 func TestExtractShellcheckBinaryRejectsPathTraversal(t *testing.T) {
 	t.Parallel()
 
-	archivePath := writeShellcheckArchive(
+	archive := writeShellcheckArchive(
 		t,
-		shellcheckArchiveEntry{
+		archiveEntry{
 			Name: "shellcheck-v0.10.0/../shellcheck",
 			Body: "bad",
 		},
 	)
 
-	if _, err := extractShellcheckBinary(archivePath, t.TempDir(), "0.10.0"); err == nil {
+	if _, err := extractShellcheckBinary(archive, t.TempDir(), "0.10.0"); err == nil {
 		t.Fatal("expected path traversal entry to fail")
 	}
 }
@@ -75,16 +75,16 @@ func TestExtractShellcheckBinaryRejectsPathTraversal(t *testing.T) {
 func TestExtractShellcheckBinaryRejectsLinks(t *testing.T) {
 	t.Parallel()
 
-	archivePath := writeShellcheckArchive(
+	archive := writeShellcheckArchive(
 		t,
-		shellcheckArchiveEntry{
+		archiveEntry{
 			Name:     "shellcheck-v0.10.0/shellcheck",
 			Typeflag: tar.TypeSymlink,
 			Linkname: "/bin/sh",
 		},
 	)
 
-	if _, err := extractShellcheckBinary(archivePath, t.TempDir(), "0.10.0"); err == nil {
+	if _, err := extractShellcheckBinary(archive, t.TempDir(), "0.10.0"); err == nil {
 		t.Fatal("expected link entry to fail")
 	}
 }

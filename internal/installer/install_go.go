@@ -3,6 +3,7 @@ package installer
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 
 	"ciphera/tools/internal/runtime"
@@ -10,7 +11,7 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func installGoTool(
+func installGoBinary(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool style.Tool,
@@ -20,8 +21,8 @@ func installGoTool(
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	localPath := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, localPath)
+	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
+	installed, err := hasPinnedLocalTool(tool, capability, path)
 	if err != nil {
 		return err
 	}
@@ -39,14 +40,17 @@ func installGoTool(
 		return err
 	}
 
-	goCapability := toolchain.Capability{ID: "go", Name: "Go", Command: "go"}
-	goTool := style.Tool{ID: "go", Name: "Go",
-		TimeoutSeconds: tool.TimeoutSeconds, OutputLimitBytes: tool.OutputLimitBytes}
+	if err = os.MkdirAll(layout.StateDirectory(), standardPermissions); err != nil {
+		return err
+	}
+
+	runnerCapability := toolchain.Capability{ID: "go", Name: "Go", Command: "go"}
+	runnerTool := style.Tool{ID: "go", Name: "Go"}
 	_, err = runtime.RunToolCommand(
 		layout.StateDirectory(),
-		goInstallEnvironment(layout),
-		goTool,
-		goCapability,
+		goEnvironment(layout),
+		runnerTool,
+		runnerCapability,
 		"install",
 		capability.InstallSource+"@"+tool.PinnedVersion,
 	)
@@ -57,7 +61,7 @@ func installGoTool(
 	return nil
 }
 
-func goInstallEnvironment(layout runtime.Layout) (environment map[string]string) {
+func goEnvironment(layout runtime.Layout) (environment map[string]string) {
 	return map[string]string{
 		"GOBIN":      layout.ToolBinaryDirectory(),
 		"GOCACHE":    layout.GoBuildCache(),

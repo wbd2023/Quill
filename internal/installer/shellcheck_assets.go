@@ -2,6 +2,11 @@ package installer
 
 import "fmt"
 
+type shellcheckAsset struct {
+	Name   string
+	SHA256 string
+}
+
 var shellcheckAssets = map[string]shellcheckAsset{
 	"darwin/amd64": {
 		Name:   "darwin.x86_64",
@@ -21,28 +26,10 @@ var shellcheckAssets = map[string]shellcheckAsset{
 	},
 }
 
-type shellcheckAsset struct {
-	Name   string
-	SHA256 string
-}
-
-func shellcheckAssetName(goos string, goarch string) (name string, err error) {
-	asset, err := shellcheckAssetFor(goos, goarch)
-	if err != nil {
-		return "", err
-	}
-
-	return asset.Name, nil
-}
-
 func shellcheckAssetFor(goos string, goarch string) (asset shellcheckAsset, err error) {
-	asset, found := shellcheckAssets[goos+"/"+goarch]
-	if !found {
+	asset, ok := shellcheckAssets[goos+"/"+goarch]
+	if !ok {
 		return shellcheckAsset{}, fmt.Errorf("unsupported shellcheck platform: %s/%s", goos, goarch)
-	}
-
-	if asset.SHA256 == "" {
-		return shellcheckAsset{}, fmt.Errorf("missing shellcheck checksum for %s/%s", goos, goarch)
 	}
 
 	return asset, nil
