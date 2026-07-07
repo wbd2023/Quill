@@ -13,10 +13,10 @@ const (
 // Known install strategies, dispatched by installer.installTool. InstallKindNone is a no-op
 // success, distinct from an unset InstallKind which is rejected as unsupported.
 const (
-	InstallKindNone              InstallKind = "none"
-	InstallKindGoBinary          InstallKind = "go_binary"
-	InstallKindNodePackage       InstallKind = "node_package"
-	InstallKindShellcheckArchive InstallKind = "shellcheck_archive"
+	InstallKindNone        InstallKind = "none"
+	InstallKindGoBinary    InstallKind = "go_binary"
+	InstallKindNodePackage InstallKind = "node_package"
+	InstallKindArchive     InstallKind = "archive"
 )
 
 // Known archive compression formats.

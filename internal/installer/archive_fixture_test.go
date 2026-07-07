@@ -16,7 +16,7 @@ type archiveEntry struct {
 	Linkname string
 }
 
-func writeShellcheckArchive(
+func writeTestArchive(
 	t *testing.T,
 	entries ...archiveEntry,
 ) (path string) {

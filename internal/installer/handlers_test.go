@@ -43,7 +43,7 @@ func TestInstallerRecognisesShippedPackToolInstallKinds(t *testing.T) {
 		case toolchain.InstallKindNone,
 			toolchain.InstallKindGoBinary,
 			toolchain.InstallKindNodePackage,
-			toolchain.InstallKindShellcheckArchive:
+			toolchain.InstallKindArchive:
 
 		default:
 			t.Fatalf(

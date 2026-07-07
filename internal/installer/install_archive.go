@@ -12,17 +12,17 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-const (
-	shellcheckDownloadRoot  = "https://github.com/koalaman/shellcheck/releases/download"
-	shellcheckTempDirPrefix = "quill-shellcheck-*"
-)
-
-func installShellcheckArchive(
+func installArchive(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
 ) (err error) {
+	spec := capability.Archive
+	if spec == nil {
+		return fmt.Errorf("tool %s has no archive spec", tool.ID)
+	}
+
 	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, path)
 	if err != nil {
@@ -33,14 +33,23 @@ func installShellcheckArchive(
 		return nil
 	}
 
-	asset, err := shellcheckAssetFor(goruntime.GOOS, goruntime.GOARCH)
+	platform, ok := spec.Platforms[goruntime.GOOS+"/"+goruntime.GOARCH]
+	if !ok {
+		return fmt.Errorf(
+			"unsupported platform %s/%s for tool %s",
+			goruntime.GOOS,
+			goruntime.GOARCH,
+			tool.ID,
+		)
+	}
+
+	url := spec.URL(tool.PinnedVersion, platform)
+	hash, err := archiveHashFor(tool.ID, goruntime.GOOS, goruntime.GOARCH)
 	if err != nil {
 		return err
 	}
 
-	archive := fmt.Sprintf("shellcheck-v%s.%s.tar.xz", tool.PinnedVersion, asset.Name)
-	url := shellcheckDownloadRoot + "/v" + tool.PinnedVersion + "/" + archive
-	dir, err := os.MkdirTemp("", shellcheckTempDirPrefix)
+	dir, err := os.MkdirTemp("", "quill-archive-*")
 	if err != nil {
 		return err
 	}
@@ -48,7 +57,7 @@ func installShellcheckArchive(
 		_ = os.RemoveAll(dir)
 	}()
 
-	downloaded := filepath.Join(dir, archive)
+	archive := filepath.Join(dir, "archive")
 	if _, err = fmt.Fprintf(
 		writer,
 		"Installing %s@%s...\n",
@@ -58,15 +67,15 @@ func installShellcheckArchive(
 		return err
 	}
 
-	if err = downloadFile(url, downloaded); err != nil {
+	if err = downloadFile(url, archive); err != nil {
 		return err
 	}
 
-	if err = verifyChecksum(downloaded, asset.SHA256); err != nil {
+	if err = verifyChecksum(archive, hash); err != nil {
 		return err
 	}
 
-	extracted, err := extractShellcheckBinary(downloaded, dir, tool.PinnedVersion)
+	extracted, err := extractBinary(archive, dir, *spec, tool.PinnedVersion)
 	if err != nil {
 		return err
 	}
