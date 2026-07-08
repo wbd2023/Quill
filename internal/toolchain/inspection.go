@@ -12,16 +12,6 @@ import (
 
 /* ----------------------------------------- Inspection ----------------------------------------- */
 
-// InspectTools reports tool status using the current process environment.
-func InspectTools(
-	tools []style.Tool,
-	capabilities map[string]Capability,
-	toolIDs []string,
-	runner CommandRunner,
-) (statuses []Status) {
-	return InspectToolsWithEnvironment(tools, capabilities, toolIDs, nil, runner)
-}
-
 // InspectToolsWithEnvironment reports tool status using the provided environment.
 func InspectToolsWithEnvironment(
 	tools []style.Tool,
@@ -105,7 +95,9 @@ func inspectTool(
 
 /* --------------------------------------- Command Lookup --------------------------------------- */
 
-// ResolveCommandPath resolve command path.
+// ResolveCommandPath resolves command to an executable path. It honours the provided
+// environment's PATH when set, otherwise falls back to exec.LookPath. Absolute paths and paths
+// containing a separator are returned as-is.
 func ResolveCommandPath(command string, environment map[string]string) (path string, err error) {
 	pathList := lookupEnvironmentVariable(environment, "PATH")
 	if pathList == "" {

@@ -75,7 +75,13 @@ func TestRegistryToolsUseSupportedVersionDetectors(t *testing.T) {
 	}
 
 	for _, capability := range registry.ToolCapabilities() {
-		if !toolchain.SupportsVersionKind(capability.VersionKind) {
+		switch capability.VersionKind {
+		case toolchain.VersionKindGoCommand,
+			toolchain.VersionKindBuildInfo,
+			toolchain.VersionKindShellcheck,
+			toolchain.VersionKindNodeCLI:
+
+		default:
 			t.Fatalf(
 				"tool %q uses unsupported version detector %q",
 				capability.ID,
