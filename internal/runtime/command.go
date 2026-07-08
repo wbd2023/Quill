@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"time"
 
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -77,51 +76,6 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 	}
 
 	return result, nil
-}
-
-// RunToolCommand run tool command.
-func RunToolCommand(
-	directory string,
-	environment map[string]string,
-	tool style.Tool,
-	capability toolchain.Capability,
-	arguments ...string,
-) (output string, err error) {
-	result, err := RunToolCommandResult(
-		directory,
-		environment,
-		tool,
-		capability,
-		arguments...,
-	)
-	return CommandOutput(result, err)
-}
-
-// RunToolCommandResult run tool command result.
-func RunToolCommandResult(
-	directory string,
-	environment map[string]string,
-	tool style.Tool,
-	capability toolchain.Capability,
-	arguments ...string,
-) (result CommandResult, err error) {
-	return RunCommand(CommandRequest{
-		Directory:        directory,
-		Environment:      environment,
-		Name:             capability.Command,
-		Arguments:        append([]string{}, arguments...),
-		TimeoutSeconds:   tool.TimeoutSeconds,
-		OutputLimitBytes: tool.OutputLimitBytes,
-	})
-}
-
-// BuildStyleCommandResult build style command result.
-func BuildStyleCommandResult(result CommandResult) (commandResult style.CommandResult) {
-	return style.CommandResult{
-		ExitCode:  result.ExitCode,
-		TimedOut:  result.TimedOut,
-		Truncated: result.Truncated,
-	}
 }
 
 // CommandOutput command output.

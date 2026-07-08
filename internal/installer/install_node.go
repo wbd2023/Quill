@@ -44,18 +44,15 @@ func installNodePackage(
 		return err
 	}
 
-	runnerCapability := toolchain.Capability{ID: "npm", Name: "npm", Command: "npm"}
-	runnerTool := style.Tool{ID: "npm", Name: "npm"}
-	_, err = runtime.RunToolCommand(
-		layout.NodeDirectory(),
-		map[string]string{
+	_, err = runtime.RunCommand(runtime.CommandRequest{
+		Directory: layout.NodeDirectory(),
+		Environment: map[string]string{
 			"PATH":             layout.SearchPath(),
 			"npm_config_cache": layout.NpmCache(),
 		},
-		runnerTool,
-		runnerCapability,
-		npmArguments(capability.InstallSource, tool.PinnedVersion)...,
-	)
+		Name:      "npm",
+		Arguments: npmArguments(capability.InstallSource, tool.PinnedVersion),
+	})
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
 	}
