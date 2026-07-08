@@ -16,8 +16,9 @@ func installNodePackage(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	install toolchain.NodePackageInstall,
 ) (err error) {
-	if capability.InstallSource == "" {
+	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
@@ -51,7 +52,7 @@ func installNodePackage(
 			"npm_config_cache": layout.NpmCache(),
 		},
 		Name:      "npm",
-		Arguments: npmArguments(capability.InstallSource, tool.PinnedVersion),
+		Arguments: npmArguments(install.Source, tool.PinnedVersion),
 	})
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)

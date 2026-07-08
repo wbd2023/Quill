@@ -53,25 +53,22 @@ func installTool(
 	capability toolchain.Capability,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	switch capability.InstallKind {
-	case toolchain.InstallKindNone:
+	switch install := capability.Install.(type) {
+
+	case toolchain.NoInstall:
 		return nil
 
-	case toolchain.InstallKindGoBinary:
-		return installGoBinary(layout, writer, tool, capability)
+	case toolchain.GoBinaryInstall:
+		return installGoBinary(layout, writer, tool, capability, install)
 
-	case toolchain.InstallKindNodePackage:
-		return installNodePackage(layout, writer, tool, capability)
+	case toolchain.NodePackageInstall:
+		return installNodePackage(layout, writer, tool, capability, install)
 
-	case toolchain.InstallKindArchive:
-		return installArchive(layout, writer, tool, capability, lockfile)
+	case toolchain.ArchiveInstall:
+		return installArchive(layout, writer, tool, capability, install, lockfile)
 
 	default:
-		return fmt.Errorf(
-			"unsupported install strategy %q for tool %s",
-			capability.InstallKind,
-			tool.ID,
-		)
+		return fmt.Errorf("unsupported install spec %T for tool %s", install, tool.ID)
 	}
 }
 

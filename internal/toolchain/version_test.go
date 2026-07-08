@@ -6,26 +6,31 @@ import (
 	"testing"
 )
 
-func TestDetectVersionRejectsUnknownVersionKind(t *testing.T) {
+func TestDetectVersionRejectsUnknownVersionSpec(t *testing.T) {
+	t.Parallel()
+
 	_, err := detectVersion(
 		nil,
-		Capability{
-			ID:          "example",
-			VersionKind: "unknown",
-		},
+		unknownVersionSpec{},
 		"/bin/true",
 		nil,
 	)
 	if err == nil {
-		t.Fatal("expected unknown version kind to fail")
+		t.Fatal("expected unknown version spec to fail")
 	}
 
-	if !strings.Contains(err.Error(), "unsupported version detector") {
+	if !strings.Contains(err.Error(), "unsupported version spec") {
 		t.Fatalf("unexpected version error: %v", err)
 	}
 }
 
+type unknownVersionSpec struct{}
+
+func (unknownVersionSpec) versionSpec() {}
+
 func TestDetectGoVersionUsesCommandRunner(t *testing.T) {
+	t.Parallel()
+
 	runner := func(request CommandRequest) (output string, err error) {
 		if request.Name != "/bin/go" {
 			t.Fatalf("request.Name = %q", request.Name)
@@ -39,7 +44,7 @@ func TestDetectGoVersionUsesCommandRunner(t *testing.T) {
 
 	version, err := detectVersion(
 		runner,
-		Capability{ID: "go", VersionKind: VersionKindGoCommand},
+		GoCommandVersion{},
 		"/bin/go",
 		nil,
 	)
@@ -48,6 +53,6 @@ func TestDetectGoVersionUsesCommandRunner(t *testing.T) {
 	}
 
 	if version != "1.24.5" {
-		t.Fatalf("version = %q", version)
+		t.Fatalf("version = %q, want 1.24.5", version)
 	}
 }

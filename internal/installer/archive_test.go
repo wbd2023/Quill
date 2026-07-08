@@ -14,8 +14,7 @@ import (
 // installer's archive extraction is tested against a fixed shape.
 func testShellcheckSpec() (spec toolchain.ArchiveSpec) {
 	return toolchain.ArchiveSpec{
-		Format:     toolchain.ArchiveFormatXz,
-		BinaryPath: func(version string) string { return "shellcheck-v" + version + "/shellcheck" },
+		BinaryPathFormat: "shellcheck-v%[1]s/shellcheck",
 	}
 }
 

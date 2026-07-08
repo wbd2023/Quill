@@ -12,23 +12,17 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func testArchiveCapability(platforms ...string) (capability toolchain.Capability) {
+func testArchiveInstall(platforms ...string) (install toolchain.ArchiveInstall) {
 	platformMap := make(map[string]string, len(platforms))
 	for _, p := range platforms {
 		platformMap[p] = p + "-asset"
 	}
 
-	return toolchain.Capability{
-		ID:          "test-tool",
-		Name:        "Test",
-		InstallKind: toolchain.InstallKindArchive,
-		Archive: &toolchain.ArchiveSpec{
-			Format:    toolchain.ArchiveFormatXz,
-			Platforms: platformMap,
-			URL: func(version string, platform string) string {
-				return "https://example.com/" + platform
-			},
-			BinaryPath: func(version string) string { return "test-v" + version + "/test" },
+	return toolchain.ArchiveInstall{
+		Spec: toolchain.ArchiveSpec{
+			URLFormat:        "https://example.com/%[2]s",
+			BinaryPathFormat: "test-v%[1]s/test",
+			Platforms:        platformMap,
 		},
 	}
 }
@@ -60,7 +54,7 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	t.Parallel()
 
 	tool := style.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
-	capability := testArchiveCapability("linux/amd64", "darwin/arm64")
+	install := testArchiveInstall("linux/amd64", "darwin/arm64")
 	hashes := map[string]string{
 		"linux/amd64":  "aaa",
 		"darwin/arm64": "bbb",
@@ -69,7 +63,7 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	archive, err := resolveArchive(
 		io.Discard,
 		tool,
-		capability,
+		install,
 		stubResolver(hashes, "", nil),
 	)
 	if err != nil {
@@ -106,13 +100,13 @@ func TestResolveArchivePropagatesPlatformError(t *testing.T) {
 	t.Parallel()
 
 	tool := style.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
-	capability := testArchiveCapability("linux/amd64")
+	install := testArchiveInstall("linux/amd64")
 	platformErr := errors.New("network down")
 
 	_, err := resolveArchive(
 		io.Discard,
 		tool,
-		capability,
+		install,
 		stubResolver(nil, "linux/amd64", platformErr),
 	)
 	if err == nil {
@@ -132,7 +126,7 @@ func stubArchiveResolver(
 	return func(
 		_ io.Writer,
 		tool style.Tool,
-		_ toolchain.Capability,
+		_ toolchain.ArchiveInstall,
 		_ platformResolver,
 	) (archive lockfile.Archive, err error) {
 		return lockfile.Archive{
@@ -152,10 +146,13 @@ func TestResolveFiltersNonArchiveTools(t *testing.T) {
 	}
 	capabilities := map[string]toolchain.Capability{
 		"go-binary": {
-			ID:          "go-binary",
-			InstallKind: toolchain.InstallKindGoBinary,
+			ID:      "go-binary",
+			Install: toolchain.GoBinaryInstall{Source: "example.com/go/binary"},
 		},
-		"archive-tool": testArchiveCapability("linux/amd64"),
+		"archive-tool": {
+			ID:      "archive-tool",
+			Install: testArchiveInstall("linux/amd64"),
+		},
 	}
 
 	entries, err := resolveWith(

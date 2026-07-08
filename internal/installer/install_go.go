@@ -16,8 +16,9 @@ func installGoBinary(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	install toolchain.GoBinaryInstall,
 ) (err error) {
-	if capability.InstallSource == "" {
+	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
@@ -48,7 +49,7 @@ func installGoBinary(
 		Directory:   layout.StateDirectory(),
 		Environment: goEnvironment(layout),
 		Name:        "go",
-		Arguments:   []string{"install", capability.InstallSource + "@" + tool.PinnedVersion},
+		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
 	})
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)

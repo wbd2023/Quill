@@ -2,6 +2,7 @@ package pack
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 
 	"ciphera/tools/internal/style"
@@ -188,13 +189,7 @@ func validatePackToolDefinitions(packs []Definition) (err error) {
 				continue
 			}
 
-			if existing.ID != tool.ID ||
-				existing.Name != tool.Name ||
-				existing.Command != tool.Command ||
-				existing.VersionKind != tool.VersionKind ||
-				existing.ModulePath != tool.ModulePath ||
-				existing.InstallKind != tool.InstallKind ||
-				existing.InstallSource != tool.InstallSource {
+			if !reflect.DeepEqual(existing, tool) {
 				return fmt.Errorf("tool %q has conflicting definitions", tool.ID)
 			}
 		}

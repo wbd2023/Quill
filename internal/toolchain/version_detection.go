@@ -8,28 +8,31 @@ import (
 
 /* ------------------------------------------ Dispatch ------------------------------------------ */
 
-// detectVersion dispatches to the version-detection strategy named by capability.VersionKind.
+// detectVersion dispatches to the version-detection strategy carried by spec.
 func detectVersion(
 	runner CommandRunner,
-	capability Capability,
+	spec VersionSpec,
 	path string,
 	environment map[string]string,
 ) (version string, err error) {
-	switch capability.VersionKind {
-	case VersionKindGoCommand:
+	switch versionSpec := spec.(type) {
+
+	case GoCommandVersion:
 		return detectGoVersion(runner, path, environment)
 
-	case VersionKindBuildInfo:
-		return detectBuildInfoVersion(capability, path)
+	case BuildInfoVersion:
+		return detectBuildInfoVersion(versionSpec, path)
 
-	case VersionKindShellcheck:
-		return detectCommandVersion(runner, path, "--version", environment, parseShellcheckVersion)
+	case PrefixedLineVersion:
+		return detectCommandVersion(
+			runner, path, "--version", environment, parsePrefixedLineVersion,
+		)
 
-	case VersionKindNodeCLI:
+	case FirstTokenVersion:
 		return detectCommandVersion(runner, path, "--version", environment, parseSingleTokenVersion)
 
 	default:
-		return "", fmt.Errorf("unsupported version detector %q", capability.VersionKind)
+		return "", fmt.Errorf("unsupported version spec %T", spec)
 	}
 }
 
@@ -70,7 +73,7 @@ func detectGoVersion(
 /* ----------------------------------------- Build Info ----------------------------------------- */
 
 func detectBuildInfoVersion(
-	capability Capability,
+	spec BuildInfoVersion,
 	path string,
 ) (version string, err error) {
 	info, err := buildinfo.ReadFile(path)
@@ -78,7 +81,7 @@ func detectBuildInfoVersion(
 		return "", fmt.Errorf("could not read embedded build info")
 	}
 
-	if capability.ModulePath != "" && info.Main.Path != capability.ModulePath {
+	if spec.ModulePath != "" && info.Main.Path != spec.ModulePath {
 		return "", fmt.Errorf("unexpected build target %s", info.Main.Path)
 	}
 

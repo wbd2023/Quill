@@ -2,56 +2,82 @@ package toolchain
 
 import "ciphera/tools/internal/style"
 
-// Known version-detection strategies, dispatched by detectVersion.
-const (
-	VersionKindGoCommand  VersionKind = "go_command"
-	VersionKindBuildInfo  VersionKind = "build_info"
-	VersionKindShellcheck VersionKind = "shellcheck"
-	VersionKindNodeCLI    VersionKind = "node_cli"
-)
+/* ---------------------------------------- Version Spec ---------------------------------------- */
 
-// Known install strategies, dispatched by installer.installTool. InstallKindNone is a no-op
-// success, distinct from an unset InstallKind which is rejected as unsupported.
-const (
-	InstallKindNone        InstallKind = "none"
-	InstallKindGoBinary    InstallKind = "go_binary"
-	InstallKindNodePackage InstallKind = "node_package"
-	InstallKindArchive     InstallKind = "archive"
-)
-
-// Known archive compression formats.
-const (
-	ArchiveFormatXz ArchiveFormat = "xz"
-)
-
-// VersionKind selects how a tool's installed version is detected.
-type VersionKind string
-
-// InstallKind selects how a missing tool is installed.
-type InstallKind string
-
-// ArchiveFormat selects the compression format of a release archive.
-type ArchiveFormat string
-
-// ArchiveSpec describes how to download and extract a binary tool from a release archive.
-// Carried on Capability; nil for non-archive tools.
-type ArchiveSpec struct {
-	URL        func(version string, platform string) string
-	Format     ArchiveFormat
-	BinaryPath func(version string) string
-	Platforms  map[string]string
+// VersionSpec selects how a tool's installed version is detected. Sealed: only the variants in
+// this package satisfy it, dispatched by type-switch in detectVersion.
+type VersionSpec interface {
+	versionSpec()
 }
+
+// GoCommandVersion runs `go version` and parses the goX.Y.Z token.
+type GoCommandVersion struct{}
+
+// BuildInfoVersion reads embedded build info and checks the binary's module path.
+type BuildInfoVersion struct {
+	ModulePath string
+}
+
+// PrefixedLineVersion runs `<command> --version` and finds a "version:" prefixed line.
+type PrefixedLineVersion struct{}
+
+// FirstTokenVersion runs `<command> --version` and parses the first whitespace-delimited token.
+type FirstTokenVersion struct{}
+
+/* ---------------------------------------- Install Spec ---------------------------------------- */
+
+// InstallSpec selects how a missing tool is installed. Sealed: only the variants in this package
+// satisfy it, dispatched by type-switch in installer.installTool.
+type InstallSpec interface {
+	installSpec()
+}
+
+// NoInstall means the tool is never installed by the engine (assumed present on the host).
+type NoInstall struct{}
+
+// GoBinaryInstall runs `go install <Source>@<version>`.
+type GoBinaryInstall struct {
+	Source string
+}
+
+// NodePackageInstall runs `npm install <Source>@<version>`.
+type NodePackageInstall struct {
+	Source string
+}
+
+// ArchiveInstall downloads, verifies, and extracts a release archive.
+type ArchiveInstall struct {
+	Spec ArchiveSpec
+}
+
+// ArchiveSpec describes how to download and extract a binary tool from a release archive. Carried
+// on ArchiveInstall; both format strings are passed to fmt.Sprintf - URLFormat with args
+// (version, platform) using indexed %[1]s for repeats, BinaryPathFormat with arg (version).
+type ArchiveSpec struct {
+	URLFormat        string
+	BinaryPathFormat string
+	Platforms        map[string]string
+}
+
+func (GoCommandVersion) versionSpec()    {}
+func (BuildInfoVersion) versionSpec()    {}
+func (PrefixedLineVersion) versionSpec() {}
+func (FirstTokenVersion) versionSpec()   {}
+
+func (NoInstall) installSpec()          {}
+func (GoBinaryInstall) installSpec()    {}
+func (NodePackageInstall) installSpec() {}
+func (ArchiveInstall) installSpec()     {}
+
+/* ----------------------------------------- Capability ----------------------------------------- */
 
 // Capability is a pinned external tool and how to inspect and install it.
 type Capability struct {
-	ID            string
-	Name          string
-	Command       string
-	VersionKind   VersionKind
-	ModulePath    string
-	InstallKind   InstallKind
-	InstallSource string
-	Archive       *ArchiveSpec
+	ID      string
+	Name    string
+	Command string
+	Version VersionSpec
+	Install InstallSpec
 }
 
 func (capability Capability) Tool() (tool style.Tool) {
