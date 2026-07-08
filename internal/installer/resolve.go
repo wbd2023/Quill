@@ -1,7 +1,6 @@
 package installer
 
 import (
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -17,12 +16,29 @@ import (
 
 // Resolve downloads every platform archive for each archive-installed tool declared in the
 // profile, hashes each one, and returns the entries that make up quill.lock. Failures from
-// independent tools or platforms are collected and returned as a joined error; the partial
-// results are still returned so the caller can write what resolved successfully if it chooses.
+// independent tools or platforms are collected and returned as a joined error.
 func Resolve(
 	writer io.Writer,
 	tools []style.Tool,
 	capabilities map[string]toolchain.Capability,
+) (entries []lockfile.Archive, err error) {
+	return resolveWith(writer, tools, capabilities, resolveArchive)
+}
+
+// archiveResolver assembles one tool's lockfile entry by resolving each platform. Extracted as a
+// parameter so the iteration and filtering in resolveWith is testable without network I/O.
+type archiveResolver func(
+	writer io.Writer,
+	tool style.Tool,
+	capability toolchain.Capability,
+	resolveOne platformResolver,
+) (archive lockfile.Archive, err error)
+
+func resolveWith(
+	writer io.Writer,
+	tools []style.Tool,
+	capabilities map[string]toolchain.Capability,
+	resolveArchiveStep archiveResolver,
 ) (entries []lockfile.Archive, err error) {
 	var errs []error
 	for _, tool := range tools {
@@ -36,7 +52,7 @@ func Resolve(
 			continue
 		}
 
-		entry, resolveErr := resolveArchive(writer, tool, capability)
+		entry, resolveErr := resolveArchiveStep(writer, tool, capability, resolvePlatform)
 		if resolveErr != nil {
 			errs = append(errs, resolveErr)
 			continue
@@ -49,16 +65,26 @@ func Resolve(
 	return entries, err
 }
 
+// platformResolver hashes one platform's archive for a tool. Extracted as a parameter so the
+// assembly logic in resolveArchive is testable without network I/O.
+type platformResolver func(
+	writer io.Writer,
+	spec toolchain.ArchiveSpec,
+	tool style.Tool,
+	platformKey string,
+) (hash string, err error)
+
 func resolveArchive(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error) {
 	spec := *capability.Archive
 	hashes := make(map[string]string, len(spec.Platforms))
 
 	for platformKey := range spec.Platforms {
-		hash, hashErr := resolvePlatform(writer, spec, tool, platformKey)
+		hash, hashErr := resolveOne(writer, spec, tool, platformKey)
 		if hashErr != nil {
 			return lockfile.Archive{}, fmt.Errorf(
 				"resolve %s %s: %w",
@@ -104,24 +130,5 @@ func resolvePlatform(
 		return "", err
 	}
 
-	return sha256File(archive)
-}
-
-func sha256File(path string) (hash string, err error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		if closeErr := file.Close(); err == nil && closeErr != nil {
-			err = fmt.Errorf("close %q: %w", path, closeErr)
-		}
-	}()
-
-	digest := sha256.New()
-	if _, err = io.Copy(digest, file); err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%x", digest.Sum(nil)), nil
+	return hashFile(archive)
 }

@@ -3,6 +3,7 @@ package lockfile
 import (
 	"bytes"
 	"fmt"
+	"sort"
 
 	codec "github.com/BurntSushi/toml"
 )
@@ -44,14 +45,21 @@ func Decode(source string) (lockfile Lockfile, err error) {
 	return Lockfile{Archives: archives}, nil
 }
 
-// Encode writes lockfile content as TOML.
+// Encode writes lockfile content as TOML. Archive entries are sorted by tool ID for
+// deterministic output (spurious git diffs otherwise, since map iteration is unordered).
 func Encode(lockfile Lockfile) (contents string, err error) {
 	schema := schemaConfig{
 		SchemaVersion: 1,
 	}
 
-	for _, archive := range lockfile.Archives {
-		schema.Archives = append(schema.Archives, schemaArchive(archive))
+	tools := make([]string, 0, len(lockfile.Archives))
+	for tool := range lockfile.Archives {
+		tools = append(tools, tool)
+	}
+	sort.Strings(tools)
+
+	for _, tool := range tools {
+		schema.Archives = append(schema.Archives, schemaArchive(lockfile.Archives[tool]))
 	}
 
 	var buffer bytes.Buffer
