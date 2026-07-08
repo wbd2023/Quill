@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
@@ -47,15 +48,16 @@ func runFileCommand(
 
 	arguments := runner.FileCommandArguments(context.RepoRoot, spec)
 	arguments = append(arguments, files...)
-	commandResult, runErr := runtime.RunToolCommandResult(
-		context.RepoRoot,
-		context.ToolEnvironment,
-		tool,
-		capability,
-		arguments...,
-	)
+	commandResult, runErr := runtime.RunCommand(runtime.CommandRequest{
+		Directory:        context.RepoRoot,
+		Environment:      context.ToolEnvironment,
+		Name:             capability.Command,
+		Arguments:        arguments,
+		TimeoutSeconds:   tool.TimeoutSeconds,
+		OutputLimitBytes: tool.OutputLimitBytes,
+	})
 
-	styleCommand := runtime.BuildStyleCommandResult(commandResult)
+	styleCommand := commandrun.BuildStyleResult(commandResult)
 
 	if isFix {
 		return style.ExecutionResult{Command: styleCommand}, runErr

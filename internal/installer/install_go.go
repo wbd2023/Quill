@@ -44,16 +44,12 @@ func installGoBinary(
 		return err
 	}
 
-	runnerCapability := toolchain.Capability{ID: "go", Name: "Go", Command: "go"}
-	runnerTool := style.Tool{ID: "go", Name: "Go"}
-	_, err = runtime.RunToolCommand(
-		layout.StateDirectory(),
-		goEnvironment(layout),
-		runnerTool,
-		runnerCapability,
-		"install",
-		capability.InstallSource+"@"+tool.PinnedVersion,
-	)
+	_, err = runtime.RunCommand(runtime.CommandRequest{
+		Directory:   layout.StateDirectory(),
+		Environment: goEnvironment(layout),
+		Name:        "go",
+		Arguments:   []string{"install", capability.InstallSource + "@" + tool.PinnedVersion},
+	})
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
 	}

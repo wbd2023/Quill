@@ -5,7 +5,6 @@ import "fmt"
 // SupportsVersionKind reports whether kind names a known version-detection strategy.
 func SupportsVersionKind(kind VersionKind) (supported bool) {
 	switch kind {
-
 	case VersionKindGoCommand,
 		VersionKindBuildInfo,
 		VersionKindShellcheck,
