@@ -41,7 +41,7 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 	}
 
 	path := filepath.Join(options.repoRoot, lockfile.DefaultFilename)
-	if err = writeFile(path, contents); err != nil {
+	if err = writeLockfile(path, contents); err != nil {
 		tool.writeError(err)
 		return 1
 	}
@@ -56,8 +56,8 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 
 const standardLockPermissions os.FileMode = 0o755
 
-// writeFile writes contents to path atomically via a temp-file rename in the same directory.
-func writeFile(path string, contents string) (err error) {
+// writeLockfile writes contents to path atomically via a temp-file rename in the same directory.
+func writeLockfile(path string, contents string) (err error) {
 	dir := filepath.Dir(path)
 	if err = os.MkdirAll(dir, standardLockPermissions); err != nil {
 		return err

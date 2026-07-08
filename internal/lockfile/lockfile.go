@@ -13,9 +13,6 @@ import (
 // DefaultFilename is the lockfile filename loaded from repository roots.
 const DefaultFilename = "quill.lock"
 
-// errNotFound indicates the lockfile does not exist at the expected path.
-var errNotFound = errors.New("lockfile not found")
-
 // Lockfile is the parsed content of quill.lock.
 type Lockfile struct {
 	// Loaded reports whether a lockfile was present on disk. False means the
@@ -64,7 +61,7 @@ func (l Lockfile) HashFor(
 	goarch string,
 ) (hash string, err error) {
 	if !l.Loaded {
-		return "", fmt.Errorf("quill.lock not found; run 'quill lock' to populate: %w", errNotFound)
+		return "", fmt.Errorf("quill.lock not found; run 'quill lock' to populate")
 	}
 
 	archive, ok := l.Archives[toolID]

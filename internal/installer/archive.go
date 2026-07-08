@@ -117,7 +117,7 @@ func validateArchiveEntry(header *tar.Header, expected string) (name string, err
 		return "", fmt.Errorf("unsafe archive path %q", header.Name)
 	}
 
-	root := filepath.Dir(expected)
+	root := path.Dir(expected)
 	if name != root && !strings.HasPrefix(name, root+"/") {
 		return "", fmt.Errorf("unexpected archive entry %q", header.Name)
 	}

@@ -72,12 +72,11 @@ func downloadFile(url string, destination string) (err error) {
 
 /* ------------------------------------------ Checksums ----------------------------------------- */
 
-// verifyChecksum reports whether the SHA-256 hash of the file at path matches the expected hex
-// digest.
-func verifyChecksum(path string, expected string) (err error) {
+// hashFile returns the SHA-256 hex digest of the file at path.
+func hashFile(path string) (digest string, err error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func() {
 		if closeErr := file.Close(); err == nil && closeErr != nil {
@@ -87,10 +86,20 @@ func verifyChecksum(path string, expected string) (err error) {
 
 	hash := sha256.New()
 	if _, err = io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+}
+
+// verifyChecksum reports whether the SHA-256 hash of the file at path matches the expected hex
+// digest.
+func verifyChecksum(path string, expected string) (err error) {
+	actual, err := hashFile(path)
+	if err != nil {
 		return err
 	}
 
-	actual := fmt.Sprintf("%x", hash.Sum(nil))
 	if actual != expected {
 		return fmt.Errorf("checksum mismatch for %s", path)
 	}

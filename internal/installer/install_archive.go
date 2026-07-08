@@ -20,10 +20,11 @@ func installArchive(
 	capability toolchain.Capability,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	spec := capability.Archive
-	if spec == nil {
+	if capability.Archive == nil {
 		return fmt.Errorf("tool %s has no archive spec", tool.ID)
 	}
+
+	spec := *capability.Archive
 
 	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, path)
@@ -77,7 +78,7 @@ func installArchive(
 		return err
 	}
 
-	extracted, err := extractBinary(archive, dir, *spec, tool.PinnedVersion)
+	extracted, err := extractBinary(archive, dir, spec, tool.PinnedVersion)
 	if err != nil {
 		return err
 	}
