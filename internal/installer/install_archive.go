@@ -18,13 +18,10 @@ func installArchive(
 	writer io.Writer,
 	tool style.Tool,
 	capability toolchain.Capability,
+	install toolchain.ArchiveInstall,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	if capability.Archive == nil {
-		return fmt.Errorf("tool %s has no archive spec", tool.ID)
-	}
-
-	spec := *capability.Archive
+	spec := install.Spec
 
 	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
 	installed, err := hasPinnedLocalTool(tool, capability, path)
@@ -46,7 +43,7 @@ func installArchive(
 		)
 	}
 
-	url := spec.URL(tool.PinnedVersion, platform)
+	url := fmt.Sprintf(spec.URLFormat, tool.PinnedVersion, platform)
 	hash, err := lockfile.HashFor(tool.ID, tool.PinnedVersion, goruntime.GOOS, goruntime.GOARCH)
 	if err != nil {
 		return err

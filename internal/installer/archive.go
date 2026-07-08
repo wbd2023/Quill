@@ -33,12 +33,12 @@ func extractBinary(
 		}
 	}()
 
-	reader, err := archiveReader(spec.Format, file)
+	reader, err := xz.NewReader(file)
 	if err != nil {
 		return "", err
 	}
 
-	expected := spec.BinaryPath(version)
+	expected := fmt.Sprintf(spec.BinaryPathFormat, version)
 	target := filepath.Join(dir, filepath.FromSlash(expected))
 	found := false
 
@@ -80,17 +80,6 @@ func extractBinary(
 		default:
 			return "", fmt.Errorf("unsupported archive entry %q", header.Name)
 		}
-	}
-}
-
-/* ------------------------------------------- Formats ------------------------------------------ */
-
-func archiveReader(format toolchain.ArchiveFormat, file *os.File) (reader io.Reader, err error) {
-	switch format {
-	case toolchain.ArchiveFormatXz:
-		return xz.NewReader(file)
-	default:
-		return nil, fmt.Errorf("unsupported archive format %q", format)
 	}
 }
 

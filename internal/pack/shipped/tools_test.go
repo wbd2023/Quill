@@ -39,31 +39,29 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	supportedInstallKinds := map[toolchain.InstallKind]bool{
-		toolchain.InstallKindNone:        true,
-		toolchain.InstallKindGoBinary:    true,
-		toolchain.InstallKindNodePackage: true,
-		toolchain.InstallKindArchive:     true,
-	}
-
 	for _, capability := range registry.ToolCapabilities() {
-		if !supportedInstallKinds[capability.InstallKind] {
-			t.Fatalf(
-				"tool %q uses unsupported install strategy %q",
-				capability.ID,
-				capability.InstallKind,
-			)
-		}
+		switch install := capability.Install.(type) {
 
-		switch capability.InstallKind {
-		case toolchain.InstallKindGoBinary, toolchain.InstallKindNodePackage:
-			if capability.InstallSource == "" {
+		case toolchain.NoInstall,
+			toolchain.ArchiveInstall:
+			_ = install
+
+		case toolchain.GoBinaryInstall:
+			if install.Source == "" {
 				t.Fatalf("tool %q must define an install source", capability.ID)
 			}
-		case toolchain.InstallKindNone, toolchain.InstallKindArchive:
-			if capability.InstallSource != "" {
-				t.Fatalf("tool %q must not define an install source", capability.ID)
+
+		case toolchain.NodePackageInstall:
+			if install.Source == "" {
+				t.Fatalf("tool %q must define an install source", capability.ID)
 			}
+
+		default:
+			t.Fatalf(
+				"tool %q uses unsupported install spec %T",
+				capability.ID,
+				capability.Install,
+			)
 		}
 	}
 }
@@ -75,17 +73,18 @@ func TestRegistryToolsUseSupportedVersionDetectors(t *testing.T) {
 	}
 
 	for _, capability := range registry.ToolCapabilities() {
-		switch capability.VersionKind {
-		case toolchain.VersionKindGoCommand,
-			toolchain.VersionKindBuildInfo,
-			toolchain.VersionKindShellcheck,
-			toolchain.VersionKindNodeCLI:
+		switch capability.Version.(type) {
+
+		case toolchain.GoCommandVersion,
+			toolchain.BuildInfoVersion,
+			toolchain.PrefixedLineVersion,
+			toolchain.FirstTokenVersion:
 
 		default:
 			t.Fatalf(
-				"tool %q uses unsupported version detector %q",
+				"tool %q uses unsupported version spec %T",
 				capability.ID,
-				capability.VersionKind,
+				capability.Version,
 			)
 		}
 	}

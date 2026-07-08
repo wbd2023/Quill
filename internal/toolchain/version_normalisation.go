@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func parseShellcheckVersion(output string) (version string, err error) {
+func parsePrefixedLineVersion(output string) (version string, err error) {
 	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
 		if after, ok := strings.CutPrefix(line, "version:"); ok {
@@ -14,7 +14,7 @@ func parseShellcheckVersion(output string) (version string, err error) {
 		}
 	}
 
-	return "", fmt.Errorf("could not parse shellcheck version")
+	return "", fmt.Errorf("could not parse version from prefixed line")
 }
 
 func parseSingleTokenVersion(output string) (version string, err error) {

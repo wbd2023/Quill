@@ -30,7 +30,7 @@ func Resolve(
 type archiveResolver func(
 	writer io.Writer,
 	tool style.Tool,
-	capability toolchain.Capability,
+	install toolchain.ArchiveInstall,
 	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error)
 
@@ -48,11 +48,12 @@ func resolveWith(
 			continue
 		}
 
-		if capability.InstallKind != toolchain.InstallKindArchive || capability.Archive == nil {
+		install, ok := capability.Install.(toolchain.ArchiveInstall)
+		if !ok {
 			continue
 		}
 
-		entry, resolveErr := resolveArchiveStep(writer, tool, capability, resolvePlatform)
+		entry, resolveErr := resolveArchiveStep(writer, tool, install, resolvePlatform)
 		if resolveErr != nil {
 			errs = append(errs, resolveErr)
 			continue
@@ -77,10 +78,10 @@ type platformResolver func(
 func resolveArchive(
 	writer io.Writer,
 	tool style.Tool,
-	capability toolchain.Capability,
+	install toolchain.ArchiveInstall,
 	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error) {
-	spec := *capability.Archive
+	spec := install.Spec
 	hashes := make(map[string]string, len(spec.Platforms))
 
 	for platformKey := range spec.Platforms {
@@ -111,7 +112,7 @@ func resolvePlatform(
 	platformKey string,
 ) (hash string, err error) {
 	platform := spec.Platforms[platformKey]
-	url := spec.URL(tool.PinnedVersion, platform)
+	url := fmt.Sprintf(spec.URLFormat, tool.PinnedVersion, platform)
 
 	dir, err := os.MkdirTemp("", "quill-resolve-*")
 	if err != nil {
