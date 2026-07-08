@@ -6,6 +6,33 @@ import (
 	"strings"
 )
 
+/* ------------------------------------------ Dispatch ------------------------------------------ */
+
+// detectVersion dispatches to the version-detection strategy named by capability.VersionKind.
+func detectVersion(
+	runner CommandRunner,
+	capability Capability,
+	path string,
+	environment map[string]string,
+) (version string, err error) {
+	switch capability.VersionKind {
+	case VersionKindGoCommand:
+		return detectGoVersion(runner, path, environment)
+
+	case VersionKindBuildInfo:
+		return detectBuildInfoVersion(capability, path)
+
+	case VersionKindShellcheck:
+		return detectCommandVersion(runner, path, "--version", environment, parseShellcheckVersion)
+
+	case VersionKindNodeCLI:
+		return detectCommandVersion(runner, path, "--version", environment, parseSingleTokenVersion)
+
+	default:
+		return "", fmt.Errorf("unsupported version detector %q", capability.VersionKind)
+	}
+}
+
 /* -------------------------------------- Command Versions -------------------------------------- */
 
 func detectGoVersion(
