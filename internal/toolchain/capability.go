@@ -2,7 +2,16 @@ package toolchain
 
 import "ciphera/tools/internal/style"
 
-/* ---------------------------------------- Version Spec ---------------------------------------- */
+/* -------------------------------------------- Types ------------------------------------------- */
+
+// Capability is a pinned external tool and how to inspect and install it.
+type Capability struct {
+	ID      string
+	Name    string
+	Command string
+	Version VersionSpec
+	Install InstallSpec
+}
 
 // VersionSpec selects how a tool's installed version is detected. Sealed: only the variants in
 // this package satisfy it, dispatched by type-switch in detectVersion.
@@ -23,8 +32,6 @@ type PrefixedLineVersion struct{}
 
 // FirstTokenVersion runs `<command> --version` and parses the first whitespace-delimited token.
 type FirstTokenVersion struct{}
-
-/* ---------------------------------------- Install Spec ---------------------------------------- */
 
 // InstallSpec selects how a missing tool is installed. Sealed: only the variants in this package
 // satisfy it, dispatched by type-switch in installer.installTool.
@@ -59,6 +66,8 @@ type ArchiveSpec struct {
 	Platforms        map[string]string
 }
 
+/* ------------------------------------------- Markers ------------------------------------------ */
+
 func (GoCommandVersion) versionSpec()    {}
 func (BuildInfoVersion) versionSpec()    {}
 func (PrefixedLineVersion) versionSpec() {}
@@ -69,16 +78,7 @@ func (GoBinaryInstall) installSpec()    {}
 func (NodePackageInstall) installSpec() {}
 func (ArchiveInstall) installSpec()     {}
 
-/* ----------------------------------------- Capability ----------------------------------------- */
-
-// Capability is a pinned external tool and how to inspect and install it.
-type Capability struct {
-	ID      string
-	Name    string
-	Command string
-	Version VersionSpec
-	Install InstallSpec
-}
+/* ------------------------------------------- Helpers ------------------------------------------ */
 
 func (capability Capability) Tool() (tool style.Tool) {
 	return style.Tool{
