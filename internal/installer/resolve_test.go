@@ -8,22 +8,22 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func testArchiveInstall(platforms ...string) (install toolchain.ArchiveInstall) {
+func testGitHubInstall(platforms ...string) (install toolchain.GitHubInstall) {
 	platformMap := make(map[string]string, len(platforms))
 	for _, p := range platforms {
 		platformMap[p] = p + "-asset"
 	}
 
-	return toolchain.ArchiveInstall{
-		Spec: toolchain.ArchiveSpec{
-			URLFormat:        "https://example.com/%[2]s",
-			BinaryPathFormat: "test-v%[1]s/test",
-			Platforms:        platformMap,
-		},
+	return toolchain.GitHubInstall{
+		Owner:      "example",
+		Repository: "test",
+		Tag:        "%s",
+		Asset:      "test-%s.%s.tar.xz",
+		Path:       "test-%s/test",
+		Platforms:  platformMap,
 	}
 }
 
@@ -36,8 +36,8 @@ func stubResolver(
 ) (resolver platformResolver) {
 	return func(
 		_ io.Writer,
-		_ toolchain.ArchiveSpec,
-		_ style.Tool,
+		_ toolchain.GitHubInstall,
+		_ toolchain.Tool,
 		platformKey string,
 	) (hash string, err error) {
 		if platformKey == failPlatform {
@@ -53,8 +53,8 @@ func stubResolver(
 func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	t.Parallel()
 
-	tool := style.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
-	install := testArchiveInstall("linux/amd64", "darwin/arm64")
+	tool := toolchain.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
+	install := testGitHubInstall("linux/amd64", "darwin/arm64")
 	hashes := map[string]string{
 		"linux/amd64":  "aaa",
 		"darwin/arm64": "bbb",
@@ -99,8 +99,8 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 func TestResolveArchivePropagatesPlatformError(t *testing.T) {
 	t.Parallel()
 
-	tool := style.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
-	install := testArchiveInstall("linux/amd64")
+	tool := toolchain.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
+	install := testGitHubInstall("linux/amd64")
 	platformErr := errors.New("network down")
 
 	_, err := resolveArchive(
@@ -125,8 +125,8 @@ func stubArchiveResolver(
 ) (resolver archiveResolver) {
 	return func(
 		_ io.Writer,
-		tool style.Tool,
-		_ toolchain.ArchiveInstall,
+		tool toolchain.Tool,
+		_ toolchain.GitHubInstall,
 		_ platformResolver,
 	) (archive lockfile.Archive, err error) {
 		return lockfile.Archive{
@@ -140,25 +140,16 @@ func stubArchiveResolver(
 func TestResolveFiltersNonArchiveTools(t *testing.T) {
 	t.Parallel()
 
-	tools := []style.Tool{
-		{ID: "go-binary", Name: "Go Tool", PinnedVersion: "1.0.0"},
-		{ID: "archive-tool", Name: "Archive Tool", PinnedVersion: "2.0.0"},
-	}
-	capabilities := map[string]toolchain.Capability{
-		"go-binary": {
-			ID:      "go-binary",
-			Install: toolchain.GoBinaryInstall{Source: "example.com/go/binary"},
-		},
-		"archive-tool": {
-			ID:      "archive-tool",
-			Install: testArchiveInstall("linux/amd64"),
-		},
+	tools := []toolchain.Tool{
+		{ID: "go-binary", Name: "Go Tool", PinnedVersion: "1.0.0",
+			Install: toolchain.GoInstall{Source: "example.com/go/binary"}},
+		{ID: "archive-tool", Name: "Archive Tool", PinnedVersion: "2.0.0",
+			Install: testGitHubInstall("linux/amd64")},
 	}
 
 	entries, err := resolveWith(
 		io.Discard,
 		tools,
-		capabilities,
 		stubArchiveResolver(map[string]string{"linux/amd64": "abc"}),
 	)
 	if err != nil {
@@ -174,16 +165,21 @@ func TestResolveFiltersNonArchiveTools(t *testing.T) {
 	}
 }
 
-func TestResolveReportsMissingCapability(t *testing.T) {
+func TestResolveSkipsNonArchiveTools(t *testing.T) {
 	t.Parallel()
 
-	tools := []style.Tool{
-		{ID: "missing", Name: "Missing", PinnedVersion: "1.0.0"},
+	tools := []toolchain.Tool{
+		{ID: "go-binary", Name: "Go Tool", PinnedVersion: "1.0.0",
+			Install: toolchain.GoInstall{Source: "example.com/go/binary"}},
 	}
 
 	var buf bytes.Buffer
-	_, err := resolveWith(&buf, tools, nil, stubArchiveResolver(nil))
-	if err == nil {
-		t.Fatal("expected missing-capability error, got nil")
+	entries, err := resolveWith(&buf, tools, stubArchiveResolver(nil))
+	if err != nil {
+		t.Fatalf("resolveWith: %v", err)
+	}
+
+	if len(entries) != 0 {
+		t.Fatalf("expected 0 entries (non-archive tool skipped), got %d", len(entries))
 	}
 }

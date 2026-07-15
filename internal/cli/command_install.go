@@ -20,19 +20,15 @@ func runInstall(tool Tool, options installOptions) (exitCode int) {
 	if err := installer.Install(
 		layout,
 		tool.stdout,
-		context.Effective.Tools,
-		context.ToolCapabilities,
+		sortedTools(context.Tools),
 		context.Lockfile,
 	); err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	toolIDs := toolIDsFromTools(context.Effective.Tools)
 	statuses, allValid := inspectToolchain(
-		context.Effective.Tools,
-		context.ToolCapabilities,
-		toolIDs,
+		context.Tools,
 		context.ToolEnvironment,
 	)
 	result := report.ToolchainResult{Statuses: statuses}

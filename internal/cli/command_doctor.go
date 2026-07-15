@@ -13,12 +13,8 @@ func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
 		return 1
 	}
 
-	toolIDs := toolIDsFromTools(context.Effective.Tools)
-
 	statuses, allValid := inspectToolchain(
-		context.Effective.Tools,
-		context.ToolCapabilities,
-		toolIDs,
+		context.Tools,
 		context.ToolEnvironment,
 	)
 	result := report.ToolchainResult{Statuses: statuses}

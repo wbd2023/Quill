@@ -13,7 +13,7 @@ func targetCommandDriver(commands runtimebinding.TargetCommands) (driver runner.
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		execution, found := spec.TargetCommandExecution()
 		if !found {
@@ -38,7 +38,7 @@ func targetCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		execution, found := spec.TargetCheckExecution()
 		if !found {

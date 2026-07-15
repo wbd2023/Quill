@@ -32,9 +32,14 @@ func TestRegisteredRulesReferenceKnownTools(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
+	known := make(map[string]bool)
+	for _, id := range registry.Definitions().ToolIDs {
+		known[id] = true
+	}
+
 	for _, rule := range registry.Rules() {
 		for _, toolID := range rule.CheckToolIDs() {
-			if _, found := registry.ToolByID(toolID); found {
+			if known[toolID] {
 				continue
 			}
 
@@ -42,7 +47,7 @@ func TestRegisteredRulesReferenceKnownTools(t *testing.T) {
 		}
 
 		for _, toolID := range rule.FixToolIDs() {
-			if _, found := registry.ToolByID(toolID); found {
+			if known[toolID] {
 				continue
 			}
 

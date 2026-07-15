@@ -16,7 +16,7 @@ var errRuleBlocked = errors.New("rule blocked by toolchain")
 type Driver func(
 	context Context,
 	spec style.ExecutionSpec,
-	toolStatuses map[string]toolchain.Status,
+	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
 
 // DriverSet holds one driver per execution detail type. Fields that are nil are treated as "no
@@ -39,7 +39,7 @@ func IsBlocked(err error) (blocked bool) {
 func RunRule(
 	rule style.Rule,
 	context Context,
-	toolStatuses map[string]toolchain.Status,
+	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, drivers)
@@ -49,7 +49,7 @@ func RunRule(
 func RunFix(
 	rule style.Rule,
 	context Context,
-	toolStatuses map[string]toolchain.Status,
+	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, drivers)
@@ -60,19 +60,19 @@ func runExecution(
 	execution style.ExecutionSpec,
 	toolIDs []string,
 	context Context,
-	toolStatuses map[string]toolchain.Status,
+	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	if execution.Empty() {
 		return style.ExecutionResult{}, nil
 	}
 
-	if len(toolIDs) > 0 && !toolchain.AreAllToolsValid(toolIDs, toolStatuses) {
+	if len(toolIDs) > 0 && !toolStatuses.AreAllValid(toolIDs) {
 		return style.ExecutionResult{
 			Diagnostics: []style.Diagnostic{
 				{
 					Code:    "toolchain/blocked",
-					Message: toolchain.ExplainToolIssues(toolIDs, toolStatuses),
+					Message: toolStatuses.ExplainIssues(toolIDs),
 				},
 			},
 		}, errRuleBlocked

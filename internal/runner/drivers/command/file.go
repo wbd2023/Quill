@@ -36,12 +36,7 @@ func runFileCommand(
 		return style.ExecutionResult{}, nil
 	}
 
-	tool, found := context.Effective.ToolByID(execution.ToolID)
-	if !found {
-		return style.ExecutionResult{}, errUnknownTool(execution.ToolID)
-	}
-
-	capability, found := context.ToolCapabilities[execution.ToolID]
+	tool, found := context.Tools[execution.ToolID]
 	if !found {
 		return style.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
@@ -51,7 +46,7 @@ func runFileCommand(
 	commandResult, runErr := runtime.RunCommand(runtime.CommandRequest{
 		Directory:        context.RepoRoot,
 		Environment:      context.ToolEnvironment,
-		Name:             capability.Command,
+		Name:             tool.Command,
 		Arguments:        arguments,
 		TimeoutSeconds:   tool.TimeoutSeconds,
 		OutputLimitBytes: tool.OutputLimitBytes,

@@ -28,33 +28,22 @@ func (registry Registry) ToolCapabilities() (capabilities []toolchain.Capability
 	return append([]toolchain.Capability{}, registry.capabilities...)
 }
 
-// Tools returns the tool definitions registered in the registry.
-func (registry Registry) Tools() (tools []style.Tool) {
-	return toolchain.Policies(registry.capabilities)
-}
-
 // Rules returns the rule definitions registered in the registry.
 func (registry Registry) Rules() (rules []style.RuleDefinition) {
 	return CloneRules(registry.rules)
 }
 
-// Definitions returns the registered tool and rule definitions.
+// Definitions returns the registered tool IDs and rule definitions.
 func (registry Registry) Definitions() (definitions style.Definitions) {
+	toolIDs := make([]string, len(registry.capabilities))
+	for i, capability := range registry.capabilities {
+		toolIDs[i] = capability.ID
+	}
+
 	return style.Definitions{
-		Tools: registry.Tools(),
-		Rules: registry.Rules(),
+		ToolIDs: toolIDs,
+		Rules:   registry.Rules(),
 	}
-}
-
-// ToolByID returns the named tool capability.
-func (registry Registry) ToolByID(id string) (capability toolchain.Capability, found bool) {
-	for _, capability := range registry.capabilities {
-		if capability.ID == id {
-			return capability, true
-		}
-	}
-
-	return toolchain.Capability{}, false
 }
 
 /* ------------------------------------------ Assembly ------------------------------------------ */
@@ -125,6 +114,10 @@ func validateRegistry(registry Registry) (err error) {
 	for _, tool := range registry.capabilities {
 		if tool.ID == "" {
 			return fmt.Errorf("pack registry contains an empty tool id")
+		}
+
+		if tool.Name == "" {
+			return fmt.Errorf("pack registry contains a tool %q with an empty name", tool.ID)
 		}
 
 		if seenToolIDs[tool.ID] {

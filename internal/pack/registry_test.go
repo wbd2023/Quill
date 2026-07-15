@@ -85,6 +85,21 @@ func TestRegistryRejectsConflictingToolDefinitions(t *testing.T) {
 	}
 }
 
+func TestRegistryRejectsBlankToolName(t *testing.T) {
+	err := validateRegistry(buildRegistry([]Definition{
+		{
+			ID:   "one",
+			Name: "one",
+			Tools: []toolchain.Capability{
+				{ID: "tool", Name: "", Command: "tool"},
+			},
+		},
+	}))
+	if err == nil {
+		t.Fatal("expected blank tool name to be rejected")
+	}
+}
+
 func TestRegistryRejectsDuplicatePackFileSets(t *testing.T) {
 	err := validateRegistry(buildRegistry([]Definition{
 		{

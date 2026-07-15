@@ -5,9 +5,7 @@ import "ciphera/tools/internal/style"
 // Definitions returns rule and tool definitions that match Config.
 func Definitions() (definitions style.Definitions) {
 	return style.Definitions{
-		Tools: []style.Tool{
-			{ID: Tool, Name: "Test tool"},
-		},
+		ToolIDs: []string{Tool},
 		Rules: []style.RuleDefinition{
 			{
 				ID:    Rule,

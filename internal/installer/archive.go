@@ -20,7 +20,7 @@ import (
 func extractBinary(
 	archive string,
 	dir string,
-	spec toolchain.ArchiveSpec,
+	install toolchain.GitHubInstall,
 	version string,
 ) (extracted string, err error) {
 	file, err := os.Open(archive)
@@ -38,7 +38,8 @@ func extractBinary(
 		return "", err
 	}
 
-	expected := fmt.Sprintf(spec.BinaryPathFormat, version)
+	tag := fmt.Sprintf(install.Tag, version)
+	expected := fmt.Sprintf(install.Path, tag)
 	target := filepath.Join(dir, filepath.FromSlash(expected))
 	found := false
 

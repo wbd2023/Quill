@@ -1,29 +1,26 @@
 package toolchain
 
-import "ciphera/tools/internal/style"
-
-/* -------------------------------------------- Types ------------------------------------------- */
-
-// Capability is a pinned external tool and how to inspect and install it.
+// Capability describes an external tool's command and the strategies for detecting its version and
+// installing it.
 type Capability struct {
 	ID      string
 	Name    string
 	Command string
-	Version VersionSpec
-	Install InstallSpec
+
+	Version VersionMethod
+	Install InstallMethod
 }
 
-// VersionSpec selects how a tool's installed version is detected. Sealed: only the variants in
-// this package satisfy it, dispatched by type-switch in detectVersion.
-type VersionSpec interface {
-	versionSpec()
+// VersionMethod selects how a tool's installed version is detected.
+type VersionMethod interface {
+	versionMethod()
 }
 
-// GoCommandVersion runs `go version` and parses the goX.Y.Z token.
-type GoCommandVersion struct{}
+// GoVersion runs `go version` and parses the goX.Y.Z token.
+type GoVersion struct{}
 
-// BuildInfoVersion reads embedded build info and checks the binary's module path.
-type BuildInfoVersion struct {
+// ModuleVersion reads embedded build info; ModulePath, if set, must match the binary's main module.
+type ModuleVersion struct {
 	ModulePath string
 }
 
@@ -33,78 +30,50 @@ type PrefixedLineVersion struct{}
 // FirstTokenVersion runs `<command> --version` and parses the first whitespace-delimited token.
 type FirstTokenVersion struct{}
 
-// InstallSpec selects how a missing tool is installed. Sealed: only the variants in this package
-// satisfy it, dispatched by type-switch in installer.installTool.
-type InstallSpec interface {
-	installSpec()
+// InstallMethod selects how a missing tool is installed.
+type InstallMethod interface {
+	installMethod()
 }
 
 // NoInstall means the tool is never installed by the engine (assumed present on the host).
 type NoInstall struct{}
 
-// GoBinaryInstall runs `go install <Source>@<version>`.
-type GoBinaryInstall struct {
+// GoInstall runs `go install <Source>@<version>`.
+type GoInstall struct {
 	Source string
 }
 
-// NodePackageInstall runs `npm install <Source>@<version>`.
-type NodePackageInstall struct {
+// NpmInstall runs `npm install <Source>@<version>`.
+type NpmInstall struct {
 	Source string
 }
 
-// ArchiveInstall downloads, verifies, and extracts a release archive.
-type ArchiveInstall struct {
-	Spec ArchiveSpec
+// GitHubInstall installs a tool from a GitHub release archive.
+type GitHubInstall struct {
+	Owner      string
+	Repository string
+
+	// Tag is a fmt.Sprintf format string that produces the release tag, taking the version.
+	Tag string
+
+	// Asset is a fmt.Sprintf format string that produces the archive filename, taking the tag and
+	// platform.
+	Asset string
+
+	// Path is a fmt.Sprintf format string that produces the executable path inside the archive,
+	// taking the tag.
+	Path string
+
+	// Platforms maps "os/arch" to the per-platform token substituted into Asset.
+	Platforms map[string]string
 }
 
-// ArchiveSpec describes how to download and extract a binary tool from a release archive. Carried
-// on ArchiveInstall; both format strings are passed to fmt.Sprintf - URLFormat with args
-// (version, platform) using indexed %[1]s for repeats, BinaryPathFormat with arg (version).
-type ArchiveSpec struct {
-	URLFormat        string
-	BinaryPathFormat string
-	Platforms        map[string]string
-}
+func (GoVersion) versionMethod()           {}
+func (ModuleVersion) versionMethod()       {}
+func (PrefixedLineVersion) versionMethod() {}
+func (FirstTokenVersion) versionMethod()   {}
 
-/* ------------------------------------------- Markers ------------------------------------------ */
-
-func (GoCommandVersion) versionSpec()    {}
-func (BuildInfoVersion) versionSpec()    {}
-func (PrefixedLineVersion) versionSpec() {}
-func (FirstTokenVersion) versionSpec()   {}
-
-func (NoInstall) installSpec()          {}
-func (GoBinaryInstall) installSpec()    {}
-func (NodePackageInstall) installSpec() {}
-func (ArchiveInstall) installSpec()     {}
-
-/* ------------------------------------------- Helpers ------------------------------------------ */
-
-func (capability Capability) Tool() (tool style.Tool) {
-	return style.Tool{
-		ID:   capability.ID,
-		Name: capability.Name,
-	}
-}
-
-// Policies converts capabilities to the style tools they represent.
-func Policies(capabilities []Capability) (tools []style.Tool) {
-	tools = make([]style.Tool, 0, len(capabilities))
-	for _, capability := range capabilities {
-		tools = append(tools, capability.Tool())
-	}
-
-	return tools
-}
-
-// CapabilitiesByID indexes tool capabilities by tool ID.
-func CapabilitiesByID(
-	capabilities []Capability,
-) (indexed map[string]Capability) {
-	indexed = make(map[string]Capability, len(capabilities))
-	for _, capability := range capabilities {
-		indexed[capability.ID] = capability
-	}
-
-	return indexed
-}
+func (NoInstall) installMethod()     {}
+func (GoInstall) installMethod()     {}
+func (NpmInstall) installMethod()    {}
+func (GitHubInstall) installMethod() {}

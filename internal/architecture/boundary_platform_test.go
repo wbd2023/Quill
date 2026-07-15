@@ -172,7 +172,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "toolchain depends only on style vocabulary",
+			name:      "toolchain depends only on runtime and toolchain vocabulary",
 			directory: "internal/toolchain",
 			forbidden: []string{
 				"ciphera/tools/internal/architecture",
@@ -187,7 +187,6 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 				"ciphera/tools/internal/pack/shipped",
 				"ciphera/tools/internal/runner",
 				"ciphera/tools/internal/checks",
-				"ciphera/tools/internal/runtime",
 				"ciphera/tools/internal/styleguide",
 			},
 		},

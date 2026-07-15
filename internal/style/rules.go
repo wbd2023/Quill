@@ -6,26 +6,14 @@ type RuleGroup string
 // Definitions holds the raw tool and rule definitions assembled from Packs before the Effective
 // Profile is compiled.
 type Definitions struct {
-	Tools []Tool
-	Rules []RuleDefinition
+	ToolIDs []string
+	Rules   []RuleDefinition
 }
 
-// EffectiveConfig is the compiled configuration: concrete rules bound to enforcement levels and
-// scopes, plus the tools they require.
+// EffectiveConfig is the compiled configuration: concrete rules bound to enforcement levels
+// and scopes.
 type EffectiveConfig struct {
-	Tools []Tool
 	Rules []Rule
-}
-
-// ToolByID returns the tool with the given ID, if present in the config.
-func (effective EffectiveConfig) ToolByID(id string) (tool Tool, found bool) {
-	for _, tool := range effective.Tools {
-		if tool.ID == id {
-			return tool, true
-		}
-	}
-
-	return Tool{}, false
 }
 
 // RuleDefinition is a Pack-declared rule before profile binding. It carries the check and fix

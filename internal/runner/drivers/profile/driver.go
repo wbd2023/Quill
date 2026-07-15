@@ -38,7 +38,7 @@ func profileDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		execution, found := spec.ProfileExecution()
 		if !found {

@@ -14,7 +14,7 @@ func repositoryScanDriver(scanners runtimebinding.RepositoryScanners) (driver ru
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		execution, found := spec.RepositoryScanExecution()
 		if !found {

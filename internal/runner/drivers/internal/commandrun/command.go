@@ -8,32 +8,27 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-// ToolByID looks up a tool configuration by its ID.
+// ToolByID runs a tool's command and returns its stdout.
 func ToolByID(
 	context runner.Context,
 	workDir string,
 	toolID string,
 	arguments ...string,
 ) (output string, err error) {
-	tool, found := context.Effective.ToolByID(toolID)
+	tool, found := context.Tools[toolID]
 	if !found {
 		return "", fmt.Errorf("unknown tool %q", toolID)
-	}
-
-	capability, found := context.ToolCapabilities[toolID]
-	if !found {
-		return "", fmt.Errorf("unknown tool capability %q", toolID)
 	}
 
 	result, err := runtime.RunCommand(runtime.CommandRequest{
 		Directory:        workDir,
 		Environment:      context.GoEnvironment,
-		Name:             capability.Command,
+		Name:             tool.Command,
 		Arguments:        append([]string{}, arguments...),
 		TimeoutSeconds:   tool.TimeoutSeconds,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
-	return runtime.CommandOutput(result, err)
+	return result.Output, err
 }
 
 // Output runs a command and returns its stdout.
@@ -49,7 +44,7 @@ func Output(
 		Name:        name,
 		Arguments:   append([]string{}, arguments...),
 	})
-	return runtime.CommandOutput(result, err)
+	return result.Output, err
 }
 
 // BuildStyleResult projects a runtime.CommandResult onto the style.CommandResult the

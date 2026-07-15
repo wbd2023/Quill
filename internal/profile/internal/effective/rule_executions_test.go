@@ -113,10 +113,8 @@ func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err e
 	}
 
 	_, err = effective.Compile(config, style.Definitions{
-		Tools: []style.Tool{
-			{ID: profiletest.Tool, Name: "Test tool"},
-		},
-		Rules: []style.RuleDefinition{definition},
+		ToolIDs: []string{profiletest.Tool},
+		Rules:   []style.RuleDefinition{definition},
 	})
 	return err
 }

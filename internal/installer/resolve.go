@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -19,36 +18,28 @@ import (
 // independent tools or platforms are collected and returned as a joined error.
 func Resolve(
 	writer io.Writer,
-	tools []style.Tool,
-	capabilities map[string]toolchain.Capability,
+	tools []toolchain.Tool,
 ) (entries []lockfile.Archive, err error) {
-	return resolveWith(writer, tools, capabilities, resolveArchive)
+	return resolveWith(writer, tools, resolveArchive)
 }
 
 // archiveResolver assembles one tool's lockfile entry by resolving each platform. Extracted as a
 // parameter so the iteration and filtering in resolveWith is testable without network I/O.
 type archiveResolver func(
 	writer io.Writer,
-	tool style.Tool,
-	install toolchain.ArchiveInstall,
+	tool toolchain.Tool,
+	install toolchain.GitHubInstall,
 	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error)
 
 func resolveWith(
 	writer io.Writer,
-	tools []style.Tool,
-	capabilities map[string]toolchain.Capability,
+	tools []toolchain.Tool,
 	resolveArchiveStep archiveResolver,
 ) (entries []lockfile.Archive, err error) {
 	var errs []error
 	for _, tool := range tools {
-		capability, found := capabilities[tool.ID]
-		if !found {
-			errs = append(errs, fmt.Errorf("missing tool capability %q", tool.ID))
-			continue
-		}
-
-		install, ok := capability.Install.(toolchain.ArchiveInstall)
+		install, ok := tool.Install.(toolchain.GitHubInstall)
 		if !ok {
 			continue
 		}
@@ -62,30 +53,28 @@ func resolveWith(
 		entries = append(entries, entry)
 	}
 
-	err = errors.Join(errs...)
-	return entries, err
+	return entries, errors.Join(errs...)
 }
 
 // platformResolver hashes one platform's archive for a tool. Extracted as a parameter so the
 // assembly logic in resolveArchive is testable without network I/O.
 type platformResolver func(
 	writer io.Writer,
-	spec toolchain.ArchiveSpec,
-	tool style.Tool,
+	install toolchain.GitHubInstall,
+	tool toolchain.Tool,
 	platformKey string,
 ) (hash string, err error)
 
 func resolveArchive(
 	writer io.Writer,
-	tool style.Tool,
-	install toolchain.ArchiveInstall,
+	tool toolchain.Tool,
+	install toolchain.GitHubInstall,
 	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error) {
-	spec := install.Spec
-	hashes := make(map[string]string, len(spec.Platforms))
+	hashes := make(map[string]string, len(install.Platforms))
 
-	for platformKey := range spec.Platforms {
-		hash, hashErr := resolveOne(writer, spec, tool, platformKey)
+	for platformKey := range install.Platforms {
+		hash, hashErr := resolveOne(writer, install, tool, platformKey)
 		if hashErr != nil {
 			return lockfile.Archive{}, fmt.Errorf(
 				"resolve %s %s: %w",
@@ -107,12 +96,20 @@ func resolveArchive(
 
 func resolvePlatform(
 	writer io.Writer,
-	spec toolchain.ArchiveSpec,
-	tool style.Tool,
+	install toolchain.GitHubInstall,
+	tool toolchain.Tool,
 	platformKey string,
 ) (hash string, err error) {
-	platform := spec.Platforms[platformKey]
-	url := fmt.Sprintf(spec.URLFormat, tool.PinnedVersion, platform)
+	platform := install.Platforms[platformKey]
+	tag := fmt.Sprintf(install.Tag, tool.PinnedVersion)
+	asset := fmt.Sprintf(install.Asset, tag, platform)
+	url := fmt.Sprintf(
+		"https://github.com/%s/%s/releases/download/%s/%s",
+		install.Owner,
+		install.Repository,
+		tag,
+		asset,
+	)
 
 	dir, err := os.MkdirTemp("", "quill-resolve-*")
 	if err != nil {
@@ -122,7 +119,7 @@ func resolvePlatform(
 		_ = os.RemoveAll(dir)
 	}()
 
-	archive := filepath.Join(dir, "archive")
+	archive := filepath.Join(dir, asset)
 	if _, err = fmt.Fprintf(writer, "Resolving %s %s...\n", tool.Name, platformKey); err != nil {
 		return "", err
 	}

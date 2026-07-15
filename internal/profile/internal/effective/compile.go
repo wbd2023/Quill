@@ -15,13 +15,9 @@ func Compile(
 	config policy.Config,
 	definitions style.Definitions,
 ) (effective style.EffectiveConfig, err error) {
-	availableTools, err := indexToolDefinitions(definitions.Tools)
-	if err != nil {
-		return style.EffectiveConfig{}, err
-	}
+	availableTools := indexToolIDs(definitions.ToolIDs)
 
-	tools, err := pinTools(config, definitions.Tools, availableTools)
-	if err != nil {
+	if err = validatePins(config, availableTools); err != nil {
 		return style.EffectiveConfig{}, err
 	}
 
@@ -36,7 +32,6 @@ func Compile(
 	}
 
 	return style.EffectiveConfig{
-		Tools: tools,
 		Rules: rules,
 	}, nil
 }

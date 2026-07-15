@@ -8,7 +8,6 @@ import (
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -27,14 +26,11 @@ func runCheck(tool Tool, options checkOptions) (exitCode int) {
 		tool.writeError(err)
 		return 1
 	}
-	toolStatusList := toolchain.InspectToolsWithEnvironment(
-		context.Effective.Tools,
-		context.ToolCapabilities,
-		runner.ToolIDsForRules(selected),
+	toolStatusList := toolchain.InspectTools(
+		selectTools(context.Tools, runner.ToolIDsForRules(selected)),
 		context.ToolEnvironment,
-		runtime.RunToolchainCommand,
 	)
-	toolStatuses := toolchain.StatusesByID(toolStatusList)
+	toolStatuses := toolchain.NewStatusMap(toolStatusList)
 
 	result := report.CheckResult{
 		Entries: make([]report.CheckEntry, 0, len(selected)),

@@ -7,23 +7,21 @@ import (
 	"path/filepath"
 
 	"ciphera/tools/internal/runtime"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func installNodePackage(
+func installNpm(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool style.Tool,
-	capability toolchain.Capability,
-	install toolchain.NodePackageInstall,
+	tool toolchain.Tool,
+	install toolchain.NpmInstall,
 ) (err error) {
 	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	path := filepath.Join(layout.NodeBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, path)
+	path := filepath.Join(layout.NodeBinaryDirectory(), tool.Command)
+	installed, err := hasPinnedLocalTool(tool, path)
 	if err != nil {
 		return err
 	}

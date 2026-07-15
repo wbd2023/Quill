@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"cmp"
 	"slices"
 
 	"ciphera/tools/internal/toolchain"
@@ -9,7 +10,7 @@ import (
 // BuildAll build all.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{
-		buildBuiltin(Go, "Go", "go", toolchain.GoCommandVersion{}),
+		buildBuiltin(Go, "Go", "go", toolchain.GoVersion{}),
 		buildGoBinary(
 			Goimports,
 			"goimports",
@@ -61,16 +62,8 @@ func Select(toolIDs ...string) (capabilities []toolchain.Capability) {
 		}
 	}
 
-	slices.SortFunc(capabilities, func(left toolchain.Capability, right toolchain.Capability) int {
-		if left.ID < right.ID {
-			return -1
-		}
-
-		if left.ID > right.ID {
-			return 1
-		}
-
-		return 0
+	slices.SortFunc(capabilities, func(a toolchain.Capability, b toolchain.Capability) int {
+		return cmp.Compare(a.ID, b.ID)
 	})
 	return capabilities
 }

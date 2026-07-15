@@ -14,7 +14,7 @@ func CheckDriver(interpreters runtimebinding.FileInterpreters) (driver runner.Dr
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		return runFileCommand(context, spec, interpreters, false)
 	}
@@ -26,7 +26,7 @@ func FixDriver() (driver runner.Driver) {
 	return func(
 		context runner.Context,
 		spec style.ExecutionSpec,
-		_ map[string]toolchain.Status,
+		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
 		return runFileCommand(context, spec, runtimebinding.FileInterpreters{}, true)
 	}
