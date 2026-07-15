@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-// CommandError is command error.
+// CommandError describes a failed command execution: the command name, its arguments,
+// the captured result, and the underlying error.
 type CommandError struct {
 	Name      string
 	Arguments []string
