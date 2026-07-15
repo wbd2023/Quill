@@ -33,7 +33,7 @@ func inspectTool(tool Tool, environment map[string]string) (status Status) {
 	}
 
 	status.Path = path
-	version, err := detectVersion(environment, path, tool.Version)
+	version, err := tool.Version(environment, path)
 	if err != nil {
 		status.Issue = err.Error()
 		return status

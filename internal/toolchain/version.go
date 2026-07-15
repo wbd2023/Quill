@@ -11,72 +11,48 @@ import (
 
 /* ------------------------------------------ Detection ----------------------------------------- */
 
-// detectVersion returns the installed version of the binary at path.
-func detectVersion(
-	environment map[string]string,
-	path string,
-	method VersionMethod,
-) (version string, err error) {
-	switch method := method.(type) {
-	case GoVersion:
-		return detectCommandVersion(environment, path, "version", parseGoVersion)
+// DetectByCommand returns a VersionMethod that runs the tool with argument and extracts the version
+// from its output using extract.
+func DetectByCommand(argument string, extract func(string) (string, error)) (method VersionMethod) {
+	return func(environment map[string]string, path string) (version string, err error) {
+		result, err := runtime.RunCommand(runtime.CommandRequest{
+			Environment: environment,
+			Name:        path,
+			Arguments:   []string{argument},
+		})
+		if err != nil {
+			return "", err
+		}
 
-	case ModuleVersion:
-		return detectModuleVersion(path, method)
-
-	case PrefixedLineVersion:
-		return detectCommandVersion(environment, path, "--version", parsePrefixedLineVersion)
-
-	case FirstTokenVersion:
-		return detectCommandVersion(environment, path, "--version", parseSingleTokenVersion)
-
-	default:
-		return "", fmt.Errorf("unsupported version method %T", method)
+		return extract(result.Output)
 	}
 }
 
-// detectModuleVersion reads embedded build info; ModulePath, if set, must match the binary's main
-// module.
-func detectModuleVersion(path string, method ModuleVersion) (version string, err error) {
-	info, err := buildinfo.ReadFile(path)
-	if err != nil {
-		return "", fmt.Errorf("could not read embedded build info")
+// DetectByGoBinary returns a VersionMethod that reads the version embedded in a Go binary's build
+// info. ModulePath, if set, must match the binary's main module.
+func DetectByGoBinary(modulePath string) (method VersionMethod) {
+	return func(environment map[string]string, path string) (version string, err error) {
+		info, err := buildinfo.ReadFile(path)
+		if err != nil {
+			return "", fmt.Errorf("could not read embedded build info")
+		}
+
+		if modulePath != "" && info.Main.Path != modulePath {
+			return "", fmt.Errorf("unexpected build target %s", info.Main.Path)
+		}
+
+		if info.Main.Version == "" || info.Main.Version == "(devel)" {
+			return "", fmt.Errorf("binary does not expose a pinned module version")
+		}
+
+		return info.Main.Version, nil
 	}
-
-	if method.ModulePath != "" && info.Main.Path != method.ModulePath {
-		return "", fmt.Errorf("unexpected build target %s", info.Main.Path)
-	}
-
-	if info.Main.Version == "" || info.Main.Version == "(devel)" {
-		return "", fmt.Errorf("binary does not expose a pinned module version")
-	}
-
-	return info.Main.Version, nil
-}
-
-// detectCommandVersion runs the binary at path with argument and parses the output.
-func detectCommandVersion(
-	environment map[string]string,
-	path string,
-	argument string,
-	parse func(string) (string, error),
-) (version string, err error) {
-	result, err := runtime.RunCommand(runtime.CommandRequest{
-		Environment: environment,
-		Name:        path,
-		Arguments:   []string{argument},
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return parse(result.Output)
 }
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
-// parseGoVersion extracts the goX.Y.Z token from `go version` output.
-func parseGoVersion(output string) (version string, err error) {
+// ExtractGoToken extracts the goX.Y.Z token from `go version` output.
+func ExtractGoToken(output string) (version string, err error) {
 	for field := range strings.FieldsSeq(output) {
 		if !strings.HasPrefix(field, "go") {
 			continue
@@ -90,8 +66,8 @@ func parseGoVersion(output string) (version string, err error) {
 	return "", fmt.Errorf("could not parse go version")
 }
 
-// parsePrefixedLineVersion finds the first "version:" prefixed line and returns its value.
-func parsePrefixedLineVersion(output string) (version string, err error) {
+// ExtractPrefixedLine finds the first "version:" prefixed line and returns its value.
+func ExtractPrefixedLine(output string) (version string, err error) {
 	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
 		if after, ok := strings.CutPrefix(line, "version:"); ok {
@@ -102,8 +78,8 @@ func parsePrefixedLineVersion(output string) (version string, err error) {
 	return "", fmt.Errorf("could not parse version from prefixed line")
 }
 
-// parseSingleTokenVersion returns the first whitespace-delimited token, stripped of a leading v.
-func parseSingleTokenVersion(output string) (version string, err error) {
+// ExtractFirstToken returns the first whitespace-delimited token, stripped of a leading v.
+func ExtractFirstToken(output string) (version string, err error) {
 	for field := range strings.FieldsSeq(output) {
 		return strings.TrimPrefix(field, "v"), nil
 	}

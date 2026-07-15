@@ -1,28 +1,8 @@
 package toolchain
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
-func TestDetectVersionRejectsUnknownVersionMethod(t *testing.T) {
-	t.Parallel()
-
-	_, err := detectVersion(nil, "/bin/true", unknownVersionMethod{})
-	if err == nil {
-		t.Fatal("expected unknown version method to fail")
-	}
-
-	if !strings.Contains(err.Error(), "unsupported version method") {
-		t.Fatalf("unexpected version error: %v", err)
-	}
-}
-
-type unknownVersionMethod struct{}
-
-func (unknownVersionMethod) versionMethod() {}
-
-func TestParseGoVersionExtractsVersionToken(t *testing.T) {
+func TestExtractGoToken(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -34,21 +14,21 @@ func TestParseGoVersionExtractsVersionToken(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		version, err := parseGoVersion(test.output)
+		version, err := ExtractGoToken(test.output)
 		if err != nil {
-			t.Fatalf("parseGoVersion(%q): %v", test.output, err)
+			t.Fatalf("ExtractGoToken(%q): %v", test.output, err)
 		}
 
 		if version != test.want {
-			t.Errorf("parseGoVersion(%q) = %q, want %q", test.output, version, test.want)
+			t.Errorf("ExtractGoToken(%q) = %q, want %q", test.output, version, test.want)
 		}
 	}
 }
 
-func TestParseGoVersionRejectsUnparseableOutput(t *testing.T) {
+func TestExtractGoTokenRejectsUnparseableOutput(t *testing.T) {
 	t.Parallel()
 
-	_, err := parseGoVersion("not a go version string")
+	_, err := ExtractGoToken("not a go version string")
 	if err == nil {
 		t.Fatal("expected unparseable output to fail")
 	}
