@@ -10,7 +10,7 @@ import (
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
-// command constants.
+// Default limits applied when a request omits its own timeout or output cap.
 const (
 	defaultCommandTimeoutSeconds = 120
 	defaultOutputLimitBytes      = 1 << 20
@@ -18,7 +18,8 @@ const (
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
-// CommandRequest is command request.
+// CommandRequest describes a command to run: its working directory, environment,
+// executable, arguments, and execution limits.
 type CommandRequest struct {
 	Directory        string
 	Environment      map[string]string
@@ -28,7 +29,8 @@ type CommandRequest struct {
 	OutputLimitBytes int64
 }
 
-// CommandResult is command result.
+// CommandResult holds the outcome of a command: its captured output, exit status, and
+// whether it timed out or had its output truncated.
 type CommandResult struct {
 	Output    string
 	ExitCode  int
@@ -38,7 +40,9 @@ type CommandResult struct {
 
 /* -------------------------------------- Command Execution ------------------------------------- */
 
-// RunCommand run command.
+// RunCommand executes the command described by request, applying its timeout and output
+// limit, and returns the captured output and exit status. A non-zero exit or timeout is
+// returned as a CommandError carrying the result.
 func RunCommand(request CommandRequest) (result CommandResult, err error) {
 	commandPath, err := ResolveCommandPath(request.Name, request.Environment)
 	if err != nil {
