@@ -33,7 +33,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		RepositoryScan: func(
 			_ Context,
 			_ style.ExecutionSpec,
-			_ map[string]toolchain.Status,
+			_ toolchain.StatusMap,
 		) (result style.ExecutionResult, err error) {
 			return style.ExecutionResult{Diagnostics: []style.Diagnostic{{Message: "ran"}}}, nil
 		},

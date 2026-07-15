@@ -8,7 +8,6 @@ import (
 
 	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/runtime"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
@@ -23,52 +22,41 @@ const standardPermissions os.FileMode = 0o755
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
-	tools []style.Tool,
-	capabilities map[string]toolchain.Capability,
+	tools []toolchain.Tool,
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	var errs []error
 	for _, tool := range tools {
-		capability, found := capabilities[tool.ID]
-		if !found {
-			errs = append(errs, fmt.Errorf("missing tool capability %q", tool.ID))
-			continue
-		}
-
-		if installErr := installTool(
-			layout, writer, tool, capability, lockfile,
-		); installErr != nil {
+		if installErr := installTool(layout, writer, tool, lockfile); installErr != nil {
 			errs = append(errs, installErr)
 		}
 	}
 
-	err = errors.Join(errs...)
-	return err
+	return errors.Join(errs...)
 }
 
 func installTool(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool style.Tool,
-	capability toolchain.Capability,
+	tool toolchain.Tool,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	switch install := capability.Install.(type) {
+	switch install := tool.Install.(type) {
 
 	case toolchain.NoInstall:
 		return nil
 
-	case toolchain.GoBinaryInstall:
-		return installGoBinary(layout, writer, tool, capability, install)
+	case toolchain.GoInstall:
+		return installGo(layout, writer, tool, install)
 
-	case toolchain.NodePackageInstall:
-		return installNodePackage(layout, writer, tool, capability, install)
+	case toolchain.NpmInstall:
+		return installNpm(layout, writer, tool, install)
 
-	case toolchain.ArchiveInstall:
-		return installArchive(layout, writer, tool, capability, install, lockfile)
+	case toolchain.GitHubInstall:
+		return installGitHub(layout, writer, tool, install, lockfile)
 
 	default:
-		return fmt.Errorf("unsupported install spec %T for tool %s", install, tool.ID)
+		return fmt.Errorf("unsupported install method %T for tool %s", install, tool.ID)
 	}
 }
 
@@ -77,8 +65,7 @@ func installTool(
 // hasPinnedLocalTool reports whether a tool matching the pinned version is already installed at the
 // given path.
 func hasPinnedLocalTool(
-	tool style.Tool,
-	capability toolchain.Capability,
+	tool toolchain.Tool,
 	path string,
 ) (installed bool, err error) {
 	if _, err = os.Stat(path); err != nil {
@@ -89,14 +76,11 @@ func hasPinnedLocalTool(
 		return false, err
 	}
 
-	probe := capability
+	probe := tool
 	probe.Command = path
-	statuses := toolchain.InspectToolsWithEnvironment(
-		[]style.Tool{tool},
-		map[string]toolchain.Capability{tool.ID: probe},
-		[]string{tool.ID},
+	statuses := toolchain.InspectTools(
+		map[string]toolchain.Tool{tool.ID: probe},
 		nil,
-		runtime.RunToolchainCommand,
 	)
 	if len(statuses) != 1 {
 		return false, fmt.Errorf("inspect local tool %s: missing status", tool.ID)

@@ -9,12 +9,13 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-// testShellcheckSpec mirrors the shellcheck ArchiveSpec from
+// testInstall mirrors the shellcheck GitHubInstall from
 // pack/shipped/tool/builders.go without importing that package, so the
 // installer's archive extraction is tested against a fixed shape.
-func testShellcheckSpec() (spec toolchain.ArchiveSpec) {
-	return toolchain.ArchiveSpec{
-		BinaryPathFormat: "shellcheck-v%[1]s/shellcheck",
+func testInstall() (install toolchain.GitHubInstall) {
+	return toolchain.GitHubInstall{
+		Tag:  "v%s",
+		Path: "shellcheck-%s/shellcheck",
 	}
 }
 
@@ -40,7 +41,7 @@ func TestExtractBinaryExtractsExpectedAsset(t *testing.T) {
 	)
 
 	dir := t.TempDir()
-	binary, err := extractBinary(archive, dir, testShellcheckSpec(), "0.10.0")
+	binary, err := extractBinary(archive, dir, testInstall(), "0.10.0")
 	if err != nil {
 		t.Fatalf("extract: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestExtractBinaryRejectsPathTraversal(t *testing.T) {
 		},
 	)
 
-	if _, err := extractBinary(archive, t.TempDir(), testShellcheckSpec(), "0.10.0"); err == nil {
+	if _, err := extractBinary(archive, t.TempDir(), testInstall(), "0.10.0"); err == nil {
 		t.Fatal("expected path traversal entry to fail")
 	}
 }
@@ -97,7 +98,7 @@ func TestExtractBinaryRejectsLinks(t *testing.T) {
 		},
 	)
 
-	if _, err := extractBinary(archive, t.TempDir(), testShellcheckSpec(), "0.10.0"); err == nil {
+	if _, err := extractBinary(archive, t.TempDir(), testInstall(), "0.10.0"); err == nil {
 		t.Fatal("expected link entry to fail")
 	}
 }

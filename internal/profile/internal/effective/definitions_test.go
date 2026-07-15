@@ -39,25 +39,3 @@ func TestCompileRejectsBlankRuleDefinitionGroup(t *testing.T) {
 	_, err := effective.Compile(config, definitions)
 	requireErrorContains(t, err, "empty group")
 }
-
-func TestCompileRejectsBlankToolDefinitionName(t *testing.T) {
-	t.Parallel()
-
-	config := profiletest.Config()
-
-	definitions := profiletest.Definitions()
-	definitions.Tools[0].Name = " "
-	_, err := effective.Compile(config, definitions)
-	requireErrorContains(t, err, "empty name")
-}
-
-func TestCompileRejectsDuplicateToolDefinitions(t *testing.T) {
-	t.Parallel()
-
-	config := profiletest.Config()
-
-	definitions := profiletest.Definitions()
-	definitions.Tools = append(definitions.Tools, definitions.Tools[0])
-	_, err := effective.Compile(config, definitions)
-	requireErrorContains(t, err, "duplicate tool definition")
-}

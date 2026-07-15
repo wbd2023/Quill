@@ -9,22 +9,18 @@ import (
 
 	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/runtime"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func installArchive(
+func installGitHub(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool style.Tool,
-	capability toolchain.Capability,
-	install toolchain.ArchiveInstall,
+	tool toolchain.Tool,
+	install toolchain.GitHubInstall,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	spec := install.Spec
-
-	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, path)
+	path := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
+	installed, err := hasPinnedLocalTool(tool, path)
 	if err != nil {
 		return err
 	}
@@ -33,7 +29,7 @@ func installArchive(
 		return nil
 	}
 
-	platform, ok := spec.Platforms[goruntime.GOOS+"/"+goruntime.GOARCH]
+	platform, ok := install.Platforms[goruntime.GOOS+"/"+goruntime.GOARCH]
 	if !ok {
 		return fmt.Errorf(
 			"unsupported platform %s/%s for tool %s",
@@ -43,13 +39,21 @@ func installArchive(
 		)
 	}
 
-	url := fmt.Sprintf(spec.URLFormat, tool.PinnedVersion, platform)
+	tag := fmt.Sprintf(install.Tag, tool.PinnedVersion)
+	asset := fmt.Sprintf(install.Asset, tag, platform)
+	url := fmt.Sprintf(
+		"https://github.com/%s/%s/releases/download/%s/%s",
+		install.Owner,
+		install.Repository,
+		tag,
+		asset,
+	)
 	hash, err := lockfile.HashFor(tool.ID, tool.PinnedVersion, goruntime.GOOS, goruntime.GOARCH)
 	if err != nil {
 		return err
 	}
 
-	dir, err := os.MkdirTemp("", "quill-archive-*")
+	dir, err := os.MkdirTemp("", "quill-github-*")
 	if err != nil {
 		return err
 	}
@@ -57,7 +61,7 @@ func installArchive(
 		_ = os.RemoveAll(dir)
 	}()
 
-	archive := filepath.Join(dir, "archive")
+	archive := filepath.Join(dir, asset)
 	if _, err = fmt.Fprintf(
 		writer,
 		"Installing %s@%s...\n",
@@ -75,7 +79,7 @@ func installArchive(
 		return err
 	}
 
-	extracted, err := extractBinary(archive, dir, spec, tool.PinnedVersion)
+	extracted, err := extractBinary(archive, dir, install, tool.PinnedVersion)
 	if err != nil {
 		return err
 	}

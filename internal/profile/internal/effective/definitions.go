@@ -6,11 +6,9 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-/* -------------------------------------- Rule Definitions -------------------------------------- */
-
 func indexRuleDefinitions(
 	definitions []style.RuleDefinition,
-	availableTools map[string]style.Tool,
+	availableTools map[string]bool,
 ) (availableRules map[string]style.RuleDefinition, err error) {
 	availableRules = make(map[string]style.RuleDefinition, len(definitions))
 	for _, definition := range definitions {
@@ -30,7 +28,7 @@ func indexRuleDefinitions(
 
 func validateRuleDefinition(
 	definition style.RuleDefinition,
-	availableTools map[string]style.Tool,
+	availableTools map[string]bool,
 ) (err error) {
 	if isBlank(definition.ID) {
 		return fmt.Errorf("rule definition has an empty id")
@@ -62,29 +60,4 @@ func validateRuleDefinition(
 	}
 
 	return nil
-}
-
-/* -------------------------------------- Tool Definitions -------------------------------------- */
-
-func indexToolDefinitions(
-	definitions []style.Tool,
-) (availableTools map[string]style.Tool, err error) {
-	availableTools = make(map[string]style.Tool, len(definitions))
-	for _, definition := range definitions {
-		if isBlank(definition.ID) {
-			return nil, fmt.Errorf("tool definition has an empty id")
-		}
-
-		if isBlank(definition.Name) {
-			return nil, fmt.Errorf("tool definition %q has an empty name", definition.ID)
-		}
-
-		if _, found := availableTools[definition.ID]; found {
-			return nil, fmt.Errorf("duplicate tool definition %q", definition.ID)
-		}
-
-		availableTools[definition.ID] = definition
-	}
-
-	return availableTools, nil
 }

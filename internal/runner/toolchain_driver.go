@@ -11,7 +11,7 @@ import (
 func ToolchainDriver(
 	_ Context,
 	spec style.ExecutionSpec,
-	toolStatuses map[string]toolchain.Status,
+	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error) {
 	execution, found := spec.ToolchainExecution()
 	if !found {
@@ -29,7 +29,7 @@ func ToolchainDriver(
 		foundFailure = true
 		diagnostics = append(diagnostics, style.Diagnostic{
 			Code:    "toolchain/invalid",
-			Message: toolchain.ExplainToolIssues([]string{toolID}, toolStatuses),
+			Message: toolStatuses.ExplainIssues([]string{toolID}),
 		})
 	}
 

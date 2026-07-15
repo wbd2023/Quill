@@ -41,7 +41,7 @@ func (validator ruleExecutionValidator) validateToolReference(toolID string) (er
 		)
 	}
 
-	if _, found := validator.tools[toolID]; !found {
+	if _, found := validator.toolIDs[toolID]; !found {
 		return fmt.Errorf(
 			"rule definition %q %s references unknown tool %q",
 			validator.ruleID,

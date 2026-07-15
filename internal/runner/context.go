@@ -9,17 +9,18 @@ import (
 
 // Context carries loaded profile and toolchain state through a check or install run.
 type Context struct {
-	RepoRoot         string
-	Scope            style.Scope
-	Profile          policy.Config
-	Effective        style.EffectiveConfig
-	ToolCapabilities map[string]toolchain.Capability
-	ToolEnvironment  map[string]string
-	GoEnvironment    map[string]string
-	Lockfile         lockfile.Lockfile
+	RepoRoot        string
+	Scope           style.Scope
+	Profile         policy.Config
+	Effective       style.EffectiveConfig
+	Tools           map[string]toolchain.Tool
+	ToolEnvironment map[string]string
+	GoEnvironment   map[string]string
+	Lockfile        lockfile.Lockfile
 }
 
-// NewContext constructs a Context from loaded profile and toolchain state.
+// NewContext constructs a Context from loaded profile and toolchain state. It joins each
+// capability with its pinned version and execution limits into a toolchain.Tool.
 func NewContext(
 	repoRoot string,
 	scope style.Scope,
@@ -30,14 +31,29 @@ func NewContext(
 	goEnvironment map[string]string,
 	lockfile lockfile.Lockfile,
 ) (context Context) {
+	tools := make(map[string]toolchain.Tool, len(capabilities))
+	for _, capability := range capabilities {
+		pin, _ := config.Tools.Lookup(capability.ID)
+		tools[capability.ID] = toolchain.Tool{
+			ID:               capability.ID,
+			Name:             capability.Name,
+			PinnedVersion:    pin.Version,
+			TimeoutSeconds:   pin.TimeoutSeconds,
+			OutputLimitBytes: pin.OutputLimitBytes,
+			Command:          capability.Command,
+			Version:          capability.Version,
+			Install:          capability.Install,
+		}
+	}
+
 	return Context{
-		RepoRoot:         repoRoot,
-		Scope:            scope,
-		Profile:          config,
-		Effective:        effective,
-		ToolCapabilities: toolchain.CapabilitiesByID(capabilities),
-		ToolEnvironment:  toolEnvironment,
-		GoEnvironment:    goEnvironment,
-		Lockfile:         lockfile,
+		RepoRoot:        repoRoot,
+		Scope:           scope,
+		Profile:         config,
+		Effective:       effective,
+		Tools:           tools,
+		ToolEnvironment: toolEnvironment,
+		GoEnvironment:   goEnvironment,
+		Lockfile:        lockfile,
 	}
 }

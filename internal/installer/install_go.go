@@ -7,23 +7,21 @@ import (
 	"path/filepath"
 
 	"ciphera/tools/internal/runtime"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
 
-func installGoBinary(
+func installGo(
 	layout runtime.Layout,
 	writer io.Writer,
-	tool style.Tool,
-	capability toolchain.Capability,
-	install toolchain.GoBinaryInstall,
+	tool toolchain.Tool,
+	install toolchain.GoInstall,
 ) (err error) {
 	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	path := filepath.Join(layout.ToolBinaryDirectory(), capability.Command)
-	installed, err := hasPinnedLocalTool(tool, capability, path)
+	path := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
+	installed, err := hasPinnedLocalTool(tool, path)
 	if err != nil {
 		return err
 	}

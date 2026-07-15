@@ -19,9 +19,9 @@ func TestInstallerRecognisesShippedPackInstallSpecs(t *testing.T) {
 		switch capability.Install.(type) {
 
 		case toolchain.NoInstall,
-			toolchain.GoBinaryInstall,
-			toolchain.NodePackageInstall,
-			toolchain.ArchiveInstall:
+			toolchain.GoInstall,
+			toolchain.NpmInstall,
+			toolchain.GitHubInstall:
 
 		default:
 			t.Fatalf(

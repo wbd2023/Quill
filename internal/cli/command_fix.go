@@ -29,9 +29,7 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 
 	toolIDs := runner.ToolIDsForFixes(rules)
 	statuses, allValid := inspectToolchain(
-		context.Effective.Tools,
-		context.ToolCapabilities,
-		toolIDs,
+		selectTools(context.Tools, toolIDs),
 		context.ToolEnvironment,
 	)
 	result := report.ToolchainResult{Statuses: statuses}
@@ -44,7 +42,7 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 		return 1
 	}
 
-	statusIndex := toolchain.StatusesByID(statuses)
+	statusIndex := toolchain.NewStatusMap(statuses)
 	fixers := drivers.FixDrivers(bindings.Build())
 	for _, rule := range rules {
 		if _, err := runner.RunFix(rule, context, statusIndex, fixers); err != nil {

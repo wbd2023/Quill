@@ -21,8 +21,7 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 
 	entries, err := installer.Resolve(
 		tool.stdout,
-		context.Effective.Tools,
-		context.ToolCapabilities,
+		sortedTools(context.Tools),
 	)
 	if err != nil {
 		tool.writeError(err)

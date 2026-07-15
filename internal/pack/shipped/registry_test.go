@@ -24,7 +24,15 @@ func TestDefaultRegistryLoadsEnabledPacks(t *testing.T) {
 		t.Fatal("expected enabled packs to register rules")
 	}
 
-	if _, found := registry.ToolByID(tool.Markdownlint); !found {
+	capabilities := registry.ToolCapabilities()
+	found := false
+	for _, capability := range capabilities {
+		if capability.ID == tool.Markdownlint {
+			found = true
+			break
+		}
+	}
+	if !found {
 		t.Fatal("expected markdown pack tool to be registered")
 	}
 }

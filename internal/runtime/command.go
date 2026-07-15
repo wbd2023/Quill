@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"time"
-
-	"ciphera/tools/internal/toolchain"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
@@ -42,7 +40,7 @@ type CommandResult struct {
 
 // RunCommand run command.
 func RunCommand(request CommandRequest) (result CommandResult, err error) {
-	commandPath, err := toolchain.ResolveCommandPath(request.Name, request.Environment)
+	commandPath, err := ResolveCommandPath(request.Name, request.Environment)
 	if err != nil {
 		return CommandResult{}, err
 	}
@@ -76,15 +74,6 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 	}
 
 	return result, nil
-}
-
-// CommandOutput command output.
-func CommandOutput(result CommandResult, err error) (output string, commandErr error) {
-	if err == nil {
-		return result.Output, nil
-	}
-
-	return result.Output, err
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */

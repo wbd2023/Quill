@@ -7,21 +7,21 @@ import (
 )
 
 type ruleExecutionValidator struct {
-	ruleID string
-	label  string
-	tools  map[string]style.Tool
+	ruleID  string
+	label   string
+	toolIDs map[string]bool
 }
 
 func validateRuleExecution(
 	ruleID string,
 	label string,
 	execution style.ExecutionSpec,
-	tools map[string]style.Tool,
+	toolIDs map[string]bool,
 ) (err error) {
 	validator := ruleExecutionValidator{
-		ruleID: ruleID,
-		label:  label,
-		tools:  tools,
+		ruleID:  ruleID,
+		label:   label,
+		toolIDs: toolIDs,
 	}
 	return validator.validate(execution)
 }

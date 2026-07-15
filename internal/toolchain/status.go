@@ -2,81 +2,62 @@ package toolchain
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
-
-	"ciphera/tools/internal/style"
 )
 
-// Status reports the outcome of inspecting one tool: whether it was found, its detected
-// version, and whether that version matches the pin.
+// Status represents the outcome of inspecting one tool.
 type Status struct {
-	Tool    style.Tool
+	Tool    Tool
 	Path    string
 	Version string
 	Valid   bool
 	Issue   string
 }
 
-// StatusesByID indexes tool statuses by tool ID.
-func StatusesByID(statuses []Status) (indexed map[string]Status) {
-	indexed = make(map[string]Status, len(statuses))
-	for _, status := range statuses {
-		indexed[status.Tool.ID] = status
-	}
+// StatusMap is a tool-status lookup keyed by tool ID.
+type StatusMap map[string]Status
 
-	return indexed
+// NewStatusMap indexes statuses by tool ID.
+func NewStatusMap(statuses []Status) (m StatusMap) {
+	m = make(StatusMap, len(statuses))
+	for _, status := range statuses {
+		m[status.Tool.ID] = status
+	}
+	return m
 }
 
-// AreAllToolsValid reports whether every tool ID in toolIDs has a valid entry in indexed.
-func AreAllToolsValid(toolIDs []string, indexed map[string]Status) (valid bool) {
-	for _, toolID := range SortedUniqueToolIDs(toolIDs) {
-		status, found := indexed[toolID]
-		if !found || !status.Valid {
+// AreAllValid reports whether every tool ID has a valid status.
+func (m StatusMap) AreAllValid(ids []string) (valid bool) {
+	for _, id := range ids {
+		if status, ok := m[id]; !ok || !status.Valid {
 			return false
 		}
 	}
-
 	return true
 }
 
-// ExplainToolIssues renders a newline-joined list of invalid-tool status lines for the given
-// tool IDs, in sorted order. Returns an empty string when all tools are valid.
-func ExplainToolIssues(toolIDs []string, indexed map[string]Status) (message string) {
-	var parts []string
-	for _, toolID := range SortedUniqueToolIDs(toolIDs) {
-		status, found := indexed[toolID]
-		if !found || status.Valid {
+// ExplainIssues renders one line per invalid tool, joined with newlines in tool-ID order, or the
+// empty string if all the given tools are valid.
+func (m StatusMap) ExplainIssues(ids []string) (message string) {
+	ordered := slices.Clone(ids)
+	slices.Sort(ordered)
+
+	var lines []string
+	for _, id := range ordered {
+		status, ok := m[id]
+		if !ok || status.Valid {
 			continue
 		}
 
-		parts = append(parts, formatToolStatusLine(status))
-	}
-
-	return strings.Join(parts, "\n")
-}
-
-// SortedUniqueToolIDs dedupes and sorts tool IDs.
-func SortedUniqueToolIDs(toolIDs []string) (deduped []string) {
-	seen := make(map[string]bool)
-	for _, toolID := range toolIDs {
-		if seen[toolID] {
-			continue
+		name := status.Tool.Name
+		if status.Version != "" {
+			lines = append(lines, fmt.Sprintf(
+				"%s: %s (found %s)", name, status.Issue, status.Version))
+		} else {
+			lines = append(lines, fmt.Sprintf("%s: %s", name, status.Issue))
 		}
-
-		seen[toolID] = true
-		deduped = append(deduped, toolID)
 	}
 
-	sort.Strings(deduped)
-	return deduped
-}
-
-func formatToolStatusLine(status Status) (line string) {
-	name := status.Tool.Name
-	if status.Version != "" {
-		return fmt.Sprintf("%s: %s (found %s)", name, status.Issue, status.Version)
-	}
-
-	return fmt.Sprintf("%s: %s", name, status.Issue)
+	return strings.Join(lines, "\n")
 }

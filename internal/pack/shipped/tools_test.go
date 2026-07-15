@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/testutil"
 	"ciphera/tools/internal/testutil/profiles"
 	"ciphera/tools/internal/toolchain"
@@ -43,15 +41,15 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 		switch install := capability.Install.(type) {
 
 		case toolchain.NoInstall,
-			toolchain.ArchiveInstall:
+			toolchain.GitHubInstall:
 			_ = install
 
-		case toolchain.GoBinaryInstall:
+		case toolchain.GoInstall:
 			if install.Source == "" {
 				t.Fatalf("tool %q must define an install source", capability.ID)
 			}
 
-		case toolchain.NodePackageInstall:
+		case toolchain.NpmInstall:
 			if install.Source == "" {
 				t.Fatalf("tool %q must define an install source", capability.ID)
 			}
@@ -75,8 +73,8 @@ func TestRegistryToolsUseSupportedVersionDetectors(t *testing.T) {
 	for _, capability := range registry.ToolCapabilities() {
 		switch capability.Version.(type) {
 
-		case toolchain.GoCommandVersion,
-			toolchain.BuildInfoVersion,
+		case toolchain.GoVersion,
+			toolchain.ModuleVersion,
 			toolchain.PrefixedLineVersion,
 			toolchain.FirstTokenVersion:
 
@@ -94,7 +92,7 @@ func TestRegistryToolsUseSupportedVersionDetectors(t *testing.T) {
 
 func TestPinnedGoVersionMatchesModuleFiles(t *testing.T) {
 	goDirectivePattern := regexp.MustCompile(`(?m)^go ([0-9]+\.[0-9]+(?:\.[0-9]+)?)$`)
-	goTool := toolByID(t, tool.Go)
+	goTool := pinnedVersion(t, tool.Go)
 
 	rootModule := readRepoFile(t, "go.mod")
 	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
@@ -105,11 +103,11 @@ func TestPinnedGoVersionMatchesModuleFiles(t *testing.T) {
 			t.Fatalf("could not find go directive in module contents:\n%s", contents)
 		}
 
-		if matches[1] != goTool.PinnedVersion {
+		if matches[1] != goTool {
 			t.Fatalf(
 				"go directive %q does not match pinned version %q",
 				matches[1],
-				goTool.PinnedVersion,
+				goTool,
 			)
 		}
 	}
@@ -119,7 +117,7 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 	requireLinePattern := regexp.MustCompile(
 		`(?m)^\s*golang\.org/x/tools (v[0-9]+\.[0-9]+\.[0-9]+)(?:$| // indirect$)`,
 	)
-	goimportsTool := toolByID(t, tool.Goimports)
+	goimportsTool := pinnedVersion(t, tool.Goimports)
 
 	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
 	matches := requireLinePattern.FindStringSubmatch(styleModule)
@@ -127,37 +125,27 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 		t.Fatalf("could not find golang.org/x/tools requirement in tools/go.mod")
 	}
 
-	if matches[1] != goimportsTool.PinnedVersion {
+	if matches[1] != goimportsTool {
 		t.Fatalf(
 			"tools/go.mod pins golang.org/x/tools at %q, want %q",
 			matches[1],
-			goimportsTool.PinnedVersion,
+			goimportsTool,
 		)
 	}
 }
 
 /* -------------------------------------- Repository Files -------------------------------------- */
 
-func toolByID(t *testing.T, toolID string) (tool style.Tool) {
+func pinnedVersion(t *testing.T, toolID string) (version string) {
 	t.Helper()
 
 	config := profiles.Current(t)
-	registry, err := DefaultRegistry(config.EnabledPacks)
-	if err != nil {
-		t.Fatalf("DefaultRegistry: %v", err)
-	}
-
-	compiled, err := profile.Compile(config, registry)
-	if err != nil {
-		t.Fatalf("profile.Compile: %v", err)
-	}
-
-	tool, found := compiled.Effective.ToolByID(toolID)
+	pinnedTool, found := config.Tools.Lookup(toolID)
 	if !found {
-		t.Fatalf("missing %s tool in registry", toolID)
+		t.Fatalf("missing %s tool in config", toolID)
 	}
 
-	return tool
+	return pinnedTool.Version
 }
 
 func readRepoFile(t *testing.T, relativePath string) (contents string) {
