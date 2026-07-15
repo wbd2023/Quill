@@ -8,7 +8,7 @@ import (
 func TestDetectVersionRejectsUnknownVersionMethod(t *testing.T) {
 	t.Parallel()
 
-	_, err := detectVersion(unknownVersionMethod{}, "/bin/true", nil)
+	_, err := detectVersion(nil, "/bin/true", unknownVersionMethod{})
 	if err == nil {
 		t.Fatal("expected unknown version method to fail")
 	}

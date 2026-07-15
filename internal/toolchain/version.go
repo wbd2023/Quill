@@ -13,22 +13,22 @@ import (
 
 // detectVersion returns the installed version of the binary at path.
 func detectVersion(
-	method VersionMethod,
-	path string,
 	environment map[string]string,
+	path string,
+	method VersionMethod,
 ) (version string, err error) {
 	switch method := method.(type) {
 	case GoVersion:
-		return detectCommandVersion(path, "version", environment, parseGoVersion)
+		return detectCommandVersion(environment, path, "version", parseGoVersion)
 
 	case ModuleVersion:
-		return detectModuleVersion(method, path)
+		return detectModuleVersion(path, method)
 
 	case PrefixedLineVersion:
-		return detectCommandVersion(path, "--version", environment, parsePrefixedLineVersion)
+		return detectCommandVersion(environment, path, "--version", parsePrefixedLineVersion)
 
 	case FirstTokenVersion:
-		return detectCommandVersion(path, "--version", environment, parseSingleTokenVersion)
+		return detectCommandVersion(environment, path, "--version", parseSingleTokenVersion)
 
 	default:
 		return "", fmt.Errorf("unsupported version method %T", method)
@@ -37,7 +37,7 @@ func detectVersion(
 
 // detectModuleVersion reads embedded build info; ModulePath, if set, must match the binary's main
 // module.
-func detectModuleVersion(method ModuleVersion, path string) (version string, err error) {
+func detectModuleVersion(path string, method ModuleVersion) (version string, err error) {
 	info, err := buildinfo.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("could not read embedded build info")
@@ -56,9 +56,9 @@ func detectModuleVersion(method ModuleVersion, path string) (version string, err
 
 // detectCommandVersion runs the binary at path with argument and parses the output.
 func detectCommandVersion(
+	environment map[string]string,
 	path string,
 	argument string,
-	environment map[string]string,
 	parse func(string) (string, error),
 ) (version string, err error) {
 	result, err := runtime.RunCommand(runtime.CommandRequest{
@@ -92,7 +92,7 @@ func parseGoVersion(output string) (version string, err error) {
 
 // parsePrefixedLineVersion finds the first "version:" prefixed line and returns its value.
 func parsePrefixedLineVersion(output string) (version string, err error) {
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
 		if after, ok := strings.CutPrefix(line, "version:"); ok {
 			return strings.TrimSpace(after), nil
@@ -104,12 +104,11 @@ func parsePrefixedLineVersion(output string) (version string, err error) {
 
 // parseSingleTokenVersion returns the first whitespace-delimited token, stripped of a leading v.
 func parseSingleTokenVersion(output string) (version string, err error) {
-	fields := strings.Fields(output)
-	if len(fields) == 0 {
-		return "", fmt.Errorf("could not parse version output")
+	for field := range strings.FieldsSeq(output) {
+		return strings.TrimPrefix(field, "v"), nil
 	}
 
-	return strings.TrimPrefix(fields[0], "v"), nil
+	return "", fmt.Errorf("could not parse version output")
 }
 
 /* ---------------------------------------- Normalisation --------------------------------------- */
