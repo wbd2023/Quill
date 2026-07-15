@@ -10,7 +10,8 @@ import (
 // BuildAll build all.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{
-		buildBuiltin(Go, "Go", "go", toolchain.GoVersion{}),
+		buildBuiltin(Go, "Go", "go",
+			toolchain.DetectByCommand("version", toolchain.ExtractGoToken)),
 		buildGoBinary(
 			Goimports,
 			"goimports",

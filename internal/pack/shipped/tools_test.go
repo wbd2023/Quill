@@ -64,30 +64,6 @@ func TestRegistryToolsUseSupportedInstallStrategies(t *testing.T) {
 	}
 }
 
-func TestRegistryToolsUseSupportedVersionDetectors(t *testing.T) {
-	registry, err := DefaultRegistry(nil)
-	if err != nil {
-		t.Fatalf("DefaultRegistry: %v", err)
-	}
-
-	for _, capability := range registry.ToolCapabilities() {
-		switch capability.Version.(type) {
-
-		case toolchain.GoVersion,
-			toolchain.ModuleVersion,
-			toolchain.PrefixedLineVersion,
-			toolchain.FirstTokenVersion:
-
-		default:
-			t.Fatalf(
-				"tool %q uses unsupported version spec %T",
-				capability.ID,
-				capability.Version,
-			)
-		}
-	}
-}
-
 /* ---------------------------------------- Version Pins ---------------------------------------- */
 
 func TestPinnedGoVersionMatchesModuleFiles(t *testing.T) {

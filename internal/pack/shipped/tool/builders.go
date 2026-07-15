@@ -28,7 +28,7 @@ func buildGoBinary(
 		ID:      id,
 		Name:    name,
 		Command: command,
-		Version: toolchain.ModuleVersion{ModulePath: modulePath},
+		Version: toolchain.DetectByGoBinary(modulePath),
 		Install: toolchain.GoInstall{Source: installSource},
 	}
 }
@@ -43,7 +43,7 @@ func buildNodePackage(
 		ID:      id,
 		Name:    name,
 		Command: command,
-		Version: toolchain.FirstTokenVersion{},
+		Version: toolchain.DetectByCommand("--version", toolchain.ExtractFirstToken),
 		Install: toolchain.NpmInstall{Source: installSource},
 	}
 }
@@ -53,7 +53,7 @@ func buildShellcheckArchive() (capability toolchain.Capability) {
 		ID:      Shellcheck,
 		Name:    "shellcheck",
 		Command: "shellcheck",
-		Version: toolchain.PrefixedLineVersion{},
+		Version: toolchain.DetectByCommand("--version", toolchain.ExtractPrefixedLine),
 		Install: toolchain.GitHubInstall{
 			Owner:      "koalaman",
 			Repository: "shellcheck",

@@ -11,24 +11,9 @@ type Capability struct {
 	Install InstallMethod
 }
 
-// VersionMethod selects how a tool's installed version is detected.
-type VersionMethod interface {
-	versionMethod()
-}
-
-// GoVersion runs `go version` and parses the goX.Y.Z token.
-type GoVersion struct{}
-
-// ModuleVersion reads embedded build info; ModulePath, if set, must match the binary's main module.
-type ModuleVersion struct {
-	ModulePath string
-}
-
-// PrefixedLineVersion runs `<command> --version` and finds a "version:" prefixed line.
-type PrefixedLineVersion struct{}
-
-// FirstTokenVersion runs `<command> --version` and parses the first whitespace-delimited token.
-type FirstTokenVersion struct{}
+// VersionMethod detects the installed version of the binary at path, using environment for any
+// command it runs.
+type VersionMethod func(environment map[string]string, path string) (version string, err error)
 
 // InstallMethod selects how a missing tool is installed.
 type InstallMethod interface {
@@ -67,11 +52,6 @@ type GitHubInstall struct {
 	// Platforms maps "os/arch" to the per-platform token substituted into Asset.
 	Platforms map[string]string
 }
-
-func (GoVersion) versionMethod()           {}
-func (ModuleVersion) versionMethod()       {}
-func (PrefixedLineVersion) versionMethod() {}
-func (FirstTokenVersion) versionMethod()   {}
 
 func (NoInstall) installMethod()     {}
 func (GoInstall) installMethod()     {}
