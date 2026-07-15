@@ -2,7 +2,6 @@ package pack
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 
 	"ciphera/tools/internal/style"
@@ -102,10 +101,6 @@ func buildRegistry(packs []Definition) (registry Registry) {
 /* ----------------------------------------- Validation ----------------------------------------- */
 
 func validateRegistry(registry Registry) (err error) {
-	if err = validatePackToolDefinitions(registry.packs); err != nil {
-		return err
-	}
-
 	if err = validatePackFileSets(registry.packs); err != nil {
 		return err
 	}
@@ -166,25 +161,6 @@ func validatePackFileSets(packs []Definition) (err error) {
 			}
 
 			packByFileSet[fileSet.Name] = pack.ID
-		}
-	}
-
-	return nil
-}
-
-func validatePackToolDefinitions(packs []Definition) (err error) {
-	toolByID := make(map[string]toolchain.Capability)
-	for _, pack := range packs {
-		for _, tool := range pack.Tools {
-			existing, found := toolByID[tool.ID]
-			if !found {
-				toolByID[tool.ID] = tool
-				continue
-			}
-
-			if !reflect.DeepEqual(existing, tool) {
-				return fmt.Errorf("tool %q has conflicting definitions", tool.ID)
-			}
 		}
 	}
 

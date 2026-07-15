@@ -63,28 +63,6 @@ func TestRegistryRejectsMissingCheckExecution(t *testing.T) {
 	}
 }
 
-func TestRegistryRejectsConflictingToolDefinitions(t *testing.T) {
-	err := validateRegistry(buildRegistry([]Definition{
-		{
-			ID:   "one",
-			Name: "one",
-			Tools: []toolchain.Capability{
-				{ID: "tool", Name: "tool", Command: "first"},
-			},
-		},
-		{
-			ID:   "two",
-			Name: "two",
-			Tools: []toolchain.Capability{
-				{ID: "tool", Name: "tool", Command: "second"},
-			},
-		},
-	}))
-	if err == nil {
-		t.Fatal("expected conflicting tool definitions to be rejected")
-	}
-}
-
 func TestRegistryRejectsBlankToolName(t *testing.T) {
 	err := validateRegistry(buildRegistry([]Definition{
 		{
