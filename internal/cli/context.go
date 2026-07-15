@@ -36,8 +36,14 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 	}
 
 	layout := runtime.NewLayout(repoRoot)
-	goEnvironment := layout.GoEnvironment()
-	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
+	toolEnvironment := map[string]string{"PATH": layout.SearchPath()}
+	goEnvironment := map[string]string{
+		"PATH":                layout.SearchPath(),
+		"GOCACHE":             layout.GoBuildCache(),
+		"GOMODCACHE":          layout.GoModuleCache(),
+		"GOPATH":              layout.GoPath(),
+		"GOLANGCI_LINT_CACHE": filepath.Join(layout.CacheDirectory(), "golangci"),
+	}
 
 	lockfile, err := lockfile.Load(repoRoot)
 	if err != nil {
@@ -50,7 +56,7 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 		compiled.Profile,
 		compiled.Effective,
 		registry.ToolCapabilities(),
-		layout.ToolEnvironment(),
+		toolEnvironment,
 		goEnvironment,
 		lockfile,
 	), nil

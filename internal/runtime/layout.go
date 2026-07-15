@@ -102,20 +102,3 @@ func (layout Layout) SearchPath() (value string) {
 		string(os.PathListSeparator),
 	)
 }
-
-// ToolEnvironment returns the environment variables for running non-Go tools (PATH only).
-func (layout Layout) ToolEnvironment() (environment map[string]string) {
-	return map[string]string{
-		"PATH": layout.SearchPath(),
-	}
-}
-
-// GoEnvironment returns the environment variables for running Go tools (PATH plus Go-specific
-// cache and module paths).
-func (layout Layout) GoEnvironment() (environment map[string]string) {
-	environment = layout.ToolEnvironment()
-	environment["GOCACHE"] = layout.GoBuildCache()
-	environment["GOMODCACHE"] = layout.GoModuleCache()
-	environment["GOPATH"] = layout.GoPath()
-	return environment
-}
