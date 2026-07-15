@@ -35,8 +35,14 @@ func testContext(
 	}
 
 	layout := runtime.NewLayout(repoRoot)
-	goEnvironment := layout.GoEnvironment()
-	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
+	toolEnvironment := map[string]string{"PATH": layout.SearchPath()}
+	goEnvironment := map[string]string{
+		"PATH":                layout.SearchPath(),
+		"GOCACHE":             layout.GoBuildCache(),
+		"GOMODCACHE":          layout.GoModuleCache(),
+		"GOPATH":              layout.GoPath(),
+		"GOLANGCI_LINT_CACHE": filepath.Join(layout.CacheDirectory(), "golangci"),
+	}
 
 	return runner.NewContext(
 		repoRoot,
@@ -44,7 +50,7 @@ func testContext(
 		compiled.Profile,
 		compiled.Effective,
 		registry.ToolCapabilities(),
-		layout.ToolEnvironment(),
+		toolEnvironment,
 		goEnvironment,
 		lockfile.Lockfile{},
 	)
