@@ -8,6 +8,7 @@ import (
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
+	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -27,6 +28,7 @@ func runCheck(tool Tool, options checkOptions) (exitCode int) {
 		return 1
 	}
 	toolStatusList := toolchain.InspectTools(
+		runtime.Runner{},
 		selectTools(context.Tools, runner.ToolIDsForRules(selected)),
 		context.ToolEnvironment,
 	)

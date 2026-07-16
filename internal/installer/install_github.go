@@ -20,7 +20,7 @@ func installGitHub(
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	path := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(tool, path)
+	installed, err := toolchain.IsInstalled(runtime.Runner{}, tool, path)
 	if err != nil {
 		return err
 	}

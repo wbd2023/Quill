@@ -7,10 +7,11 @@ import (
 )
 
 func inspectToolchain(
+	runner toolchain.CommandRunner,
 	tools map[string]toolchain.Tool,
 	environment map[string]string,
 ) (statuses []toolchain.Status, allValid bool) {
-	statuses = toolchain.InspectTools(tools, environment)
+	statuses = toolchain.InspectTools(runner, tools, environment)
 	statusMap := toolchain.NewStatusMap(statuses)
 	allValid = statusMap.AreAllValid(sortedToolIDs(tools))
 	return statuses, allValid

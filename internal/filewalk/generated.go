@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
-	"ciphera/tools/internal/policy"
 )
 
 // generated constants.
@@ -19,7 +17,7 @@ var generatedCommentPrefixes = []string{"//", "#", ";", "--"}
 
 /* ------------------------------------- Generated Detection ------------------------------------ */
 
-func isGeneratedFile(path string, repository policy.RepositoryConfig) (generated bool) {
+func isGeneratedFile(path string, marker string) (generated bool) {
 	file, err := os.Open(path)
 	if err != nil {
 		return false
@@ -38,7 +36,7 @@ func isGeneratedFile(path string, repository policy.RepositoryConfig) (generated
 		return false
 	}
 
-	return hasGeneratedHeader(string(buffer[:count]), repository.GeneratedMarker)
+	return hasGeneratedHeader(string(buffer[:count]), marker)
 }
 
 /* --------------------------------------- Header Matching -------------------------------------- */

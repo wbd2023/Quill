@@ -11,6 +11,8 @@ import (
 	"ciphera/tools/internal/style"
 )
 
+/* ------------------------------------- File Set Collection ------------------------------------ */
+
 func collectFileSetCandidates(
 	context Context,
 	fileSet policy.FileSetConfig,
@@ -27,10 +29,13 @@ func collectFileSetCandidates(
 		}
 	}
 
-	files, err = filewalk.CollectFilesInScopes(
-		context.RepoRoot,
-		context.Profile.Repository,
-		scopes,
+	roots := resolveScopeRoots(context.RepoRoot, context.Profile.Repository, scopes)
+	files, err = filewalk.CollectFilesInRoots(
+		filewalk.WalkConfig{
+			ExcludedDirectories: context.Profile.Repository.ExcludedDirectories,
+			GeneratedMarker:     context.Profile.Repository.GeneratedMarker,
+		},
+		roots,
 		fileSet.Include.Extensions...,
 	)
 	if err != nil {
@@ -41,6 +46,8 @@ func collectFileSetCandidates(
 	sort.Strings(files)
 	return dedupeCandidatePaths(files), nil
 }
+
+/* -------------------------------------- Scope Resolution -------------------------------------- */
 
 func findOverlappingScopes(
 	repository policy.RepositoryConfig,
@@ -83,6 +90,8 @@ func explicitFileCandidates(
 	return files
 }
 
+/* ---------------------------------------- Deduplication --------------------------------------- */
+
 func dedupeCandidatePaths(paths []string) (deduped []string) {
 	seen := make(map[string]bool, len(paths))
 	for _, path := range paths {
@@ -95,4 +104,26 @@ func dedupeCandidatePaths(paths []string) (deduped []string) {
 	}
 
 	return deduped
+}
+
+func resolveScopeRoots(
+	repoRoot string,
+	repository policy.RepositoryConfig,
+	scopes []style.Scope,
+) (roots []string) {
+	seen := make(map[string]bool)
+	for _, scope := range scopes {
+		for _, root := range repository.ResolveScopeRoots(repoRoot, scope) {
+			clean := filepath.Clean(root)
+			if seen[clean] {
+				continue
+			}
+
+			seen[clean] = true
+			roots = append(roots, clean)
+		}
+	}
+
+	sort.Strings(roots)
+	return roots
 }

@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"ciphera/tools/internal/report"
+	"ciphera/tools/internal/runtime"
 )
 
 func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
@@ -14,6 +15,7 @@ func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
 	}
 
 	statuses, allValid := inspectToolchain(
+		runtime.Runner{},
 		context.Tools,
 		context.ToolEnvironment,
 	)

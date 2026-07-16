@@ -125,7 +125,10 @@ func checkEnforcementLevels() (output string, err error) {
 }
 
 func checkExcludedDirectories(repository policy.RepositoryConfig) (output string, err error) {
-	if err = filewalk.ValidateCollectorPolicy(repository); err != nil {
+	if err = filewalk.ValidateCollectorPolicy(filewalk.WalkConfig{
+		ExcludedDirectories: repository.ExcludedDirectories,
+		GeneratedMarker:     repository.GeneratedMarker,
+	}); err != nil {
 		return err.Error(), err
 	}
 

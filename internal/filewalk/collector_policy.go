@@ -3,12 +3,11 @@ package filewalk
 import (
 	"fmt"
 	"strings"
-
-	"ciphera/tools/internal/policy"
 )
 
-// ValidateCollectorPolicy validate collector policy.
-func ValidateCollectorPolicy(repository policy.RepositoryConfig) (err error) {
+// ValidateCollectorPolicy reports an error if config does not exclude standard directories or if
+// the generated-file marker is empty.
+func ValidateCollectorPolicy(config WalkConfig) (err error) {
 	requiredDirectories := []string{
 		".cache",
 		".git",
@@ -20,14 +19,14 @@ func ValidateCollectorPolicy(repository policy.RepositoryConfig) (err error) {
 	}
 
 	for _, directory := range requiredDirectories {
-		if isExcludedDirectory(repository, directory) {
+		if isExcludedDirectory(config, directory) {
 			continue
 		}
 
 		return fmt.Errorf("collector must exclude %q", directory)
 	}
 
-	if strings.TrimSpace(repository.GeneratedMarker) == "" {
+	if strings.TrimSpace(config.GeneratedMarker) == "" {
 		return fmt.Errorf("collector generated-file marker must not be empty")
 	}
 

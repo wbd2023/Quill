@@ -1,6 +1,7 @@
-package effective_test
+package pack_test
 
 import (
+	"strings"
 	"testing"
 
 	"ciphera/tools/internal/checks/textpolicy"
@@ -12,7 +13,6 @@ import (
 	"ciphera/tools/internal/pack/shipped/text"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/effective"
 )
 
 /* ----------------------------------------- Validation ----------------------------------------- */
@@ -25,7 +25,7 @@ func TestResolvePacksRejectsMissingRequiredConfig(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	_, err := effective.ResolvePacks(config, registry.Packs())
+	_, err := pack.ResolvePacks(config, registry.Packs())
 	requireErrorContains(t, err, "packs.vocabulary")
 }
 
@@ -44,7 +44,7 @@ func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	_, err := effective.ResolvePacks(config, registry.Packs())
+	_, err := pack.ResolvePacks(config, registry.Packs())
 	requireErrorContains(t, err, "packs.vocabulary.go.type_suffixes")
 }
 
@@ -59,7 +59,7 @@ func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	_, err := effective.ResolvePacks(config, registry.Packs())
+	_, err := pack.ResolvePacks(config, registry.Packs())
 	requireErrorContains(t, err, "packs.text.section_headers")
 }
 
@@ -74,7 +74,7 @@ func TestResolvePacksRejectsUnsupportedConfig(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	_, err := effective.ResolvePacks(config, registry.Packs())
+	_, err := pack.ResolvePacks(config, registry.Packs())
 	requireErrorContains(t, err, "packs.markdown config is not supported")
 }
 
@@ -86,7 +86,7 @@ func TestResolvePacksAcceptsPacksWithoutConfig(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	if _, err := effective.ResolvePacks(config, registry.Packs()); err != nil {
+	if _, err := pack.ResolvePacks(config, registry.Packs()); err != nil {
 		t.Fatalf("ResolvePacks: %v", err)
 	}
 }
@@ -101,7 +101,7 @@ func TestResolvePacksAppliesPackDefaultFileSets(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	resolved, err := effective.ResolvePacks(config, registry.Packs())
+	resolved, err := pack.ResolvePacks(config, registry.Packs())
 	if err != nil {
 		t.Fatalf("ResolvePacks: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestResolvePacksLetsProfileFileSetsOverridePackDefaults(t *testing.T) {
 	}
 	registry := registryFor(t, config)
 
-	resolved, err := effective.ResolvePacks(config, registry.Packs())
+	resolved, err := pack.ResolvePacks(config, registry.Packs())
 	if err != nil {
 		t.Fatalf("ResolvePacks: %v", err)
 	}
@@ -153,4 +153,16 @@ func registryFor(t *testing.T, config policy.Config) (registry pack.Registry) {
 	}
 
 	return registry
+}
+
+func requireErrorContains(tb testing.TB, err error, text string) {
+	tb.Helper()
+
+	if err == nil {
+		tb.Fatalf("expected error containing %q, got nil", text)
+	}
+
+	if !strings.Contains(err.Error(), text) {
+		tb.Fatalf("expected error containing %q, got %q", text, err.Error())
+	}
 }

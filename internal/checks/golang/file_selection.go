@@ -9,5 +9,12 @@ func goFilesInDirectories(
 	directories []string,
 	repository policy.RepositoryConfig,
 ) (paths []string, err error) {
-	return filewalk.CollectFilesInRoots(repository, directories, ".go")
+	return filewalk.CollectFilesInRoots(
+		filewalk.WalkConfig{
+			ExcludedDirectories: repository.ExcludedDirectories,
+			GeneratedMarker:     repository.GeneratedMarker,
+		},
+		directories,
+		".go",
+	)
 }

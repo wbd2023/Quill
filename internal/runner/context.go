@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
@@ -16,7 +15,6 @@ type Context struct {
 	Tools           map[string]toolchain.Tool
 	ToolEnvironment map[string]string
 	GoEnvironment   map[string]string
-	Lockfile        lockfile.Lockfile
 }
 
 // NewContext constructs a Context from loaded profile and toolchain state. It joins each
@@ -29,7 +27,6 @@ func NewContext(
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,
-	lockfile lockfile.Lockfile,
 ) (context Context) {
 	tools := make(map[string]toolchain.Tool, len(capabilities))
 	for _, capability := range capabilities {
@@ -54,6 +51,5 @@ func NewContext(
 		Tools:           tools,
 		ToolEnvironment: toolEnvironment,
 		GoEnvironment:   goEnvironment,
-		Lockfile:        lockfile,
 	}
 }

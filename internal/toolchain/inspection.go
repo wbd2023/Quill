@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"slices"
-
-	"ciphera/tools/internal/runtime"
 )
 
 // InspectTools reports the status of each tool in tools, sorted by tool ID.
-func InspectTools(tools map[string]Tool, environment map[string]string) (statuses []Status) {
+func InspectTools(
+	runner CommandRunner,
+	tools map[string]Tool,
+	environment map[string]string,
+) (statuses []Status) {
 	ids := make([]string, 0, len(tools))
 	for id := range tools {
 		ids = append(ids, id)
@@ -19,23 +21,23 @@ func InspectTools(tools map[string]Tool, environment map[string]string) (statuse
 	statuses = make([]Status, 0, len(ids))
 
 	for _, id := range ids {
-		statuses = append(statuses, inspectTool(tools[id], environment))
+		statuses = append(statuses, inspectTool(runner, tools[id], environment))
 	}
 
 	return statuses
 }
 
-func inspectTool(tool Tool, environment map[string]string) (status Status) {
+func inspectTool(runner CommandRunner, tool Tool, environment map[string]string) (status Status) {
 	status = Status{Tool: tool}
 
-	path, err := runtime.ResolveCommandPath(environment, tool.Command)
+	path, err := runner.ResolvePath(environment, tool.Command)
 	if err != nil {
 		status.Issue = "missing from PATH"
 		return status
 	}
 
 	status.Path = path
-	version, err := tool.Version(environment, path)
+	version, err := tool.Version(runner, environment, path)
 	if err != nil {
 		status.Issue = err.Error()
 		return status
@@ -53,7 +55,7 @@ func inspectTool(tool Tool, environment map[string]string) (status Status) {
 
 // IsInstalled reports whether a tool matching the pinned version is already installed at the given
 // path.
-func IsInstalled(tool Tool, path string) (installed bool, err error) {
+func IsInstalled(runner CommandRunner, tool Tool, path string) (installed bool, err error) {
 	if _, err = os.Stat(path); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return false, nil
@@ -65,6 +67,7 @@ func IsInstalled(tool Tool, path string) (installed bool, err error) {
 	probe := tool
 	probe.Command = path
 	statuses := InspectTools(
+		runner,
 		map[string]Tool{tool.ID: probe},
 		nil,
 	)
