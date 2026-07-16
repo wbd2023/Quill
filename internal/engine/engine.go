@@ -7,13 +7,13 @@ import (
 
 	"ciphera/tools/internal/ecosystem/golang"
 	"ciphera/tools/internal/ecosystem/node"
+	"ciphera/tools/internal/execution"
+	"ciphera/tools/internal/execution/drivers"
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/pack/shipped/bindings"
 	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 	"ciphera/tools/internal/workspace"
@@ -108,8 +108,8 @@ type PackProvider interface {
 // definitions.
 type PackEnvironment struct {
 	Registry     pack.Registry
-	CheckDrivers runner.DriverSet
-	FixDrivers   runner.DriverSet
+	CheckDrivers execution.DriverSet
+	FixDrivers   execution.DriverSet
 }
 
 // defaultPackProvider wraps shipped packs, shipped bindings, and standard drivers.
@@ -172,10 +172,10 @@ func (engine *Engine) loadCompiledProfile(
 func (engine *Engine) prepareRunnerContext(
 	operationContext context.Context,
 	scope style.Scope,
-) (context runner.Context, packs PackEnvironment, prepareError error) {
+) (context execution.Context, packs PackEnvironment, prepareError error) {
 	config, err := profile.Load(engine.repositoryRoot)
 	if err != nil {
-		return runner.Context{}, PackEnvironment{}, err
+		return execution.Context{}, PackEnvironment{}, err
 	}
 
 	if scope == "" {
@@ -183,22 +183,22 @@ func (engine *Engine) prepareRunnerContext(
 	}
 
 	if !config.Repository.HasScope(scope) {
-		return runner.Context{}, PackEnvironment{}, errUnknownScope(scope)
+		return execution.Context{}, PackEnvironment{}, errUnknownScope(scope)
 	}
 
 	packs, err = engine.packProvider.Load(operationContext, config.EnabledPacks)
 	if err != nil {
-		return runner.Context{}, PackEnvironment{}, err
+		return execution.Context{}, PackEnvironment{}, err
 	}
 
 	config, err = pack.ResolvePacks(config, packs.Registry.Packs())
 	if err != nil {
-		return runner.Context{}, PackEnvironment{}, err
+		return execution.Context{}, PackEnvironment{}, err
 	}
 
 	compiled, err := profile.Compile(config, packs.Registry.Definitions())
 	if err != nil {
-		return runner.Context{}, PackEnvironment{}, err
+		return execution.Context{}, PackEnvironment{}, err
 	}
 
 	layout := workspace.NewLayout(engine.repositoryRoot)
@@ -207,7 +207,7 @@ func (engine *Engine) prepareRunnerContext(
 	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
-	return runner.NewContext(
+	return execution.NewContext(
 		engine.repositoryRoot,
 		scope,
 		compiled.Profile,

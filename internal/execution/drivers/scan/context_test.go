@@ -1,7 +1,8 @@
-package cli
+package scan
 
 import (
 	"path/filepath"
+	"testing"
 
 	"ciphera/tools/internal/ecosystem/golang"
 	"ciphera/tools/internal/ecosystem/node"
@@ -13,33 +14,31 @@ import (
 	"ciphera/tools/internal/workspace"
 )
 
-func loadContext(repoRoot string, scope style.Scope) (context execution.Context, err error) {
+func testContext(
+	t *testing.T,
+	repoRoot string,
+	scope style.Scope,
+) (context execution.Context) {
+	t.Helper()
+
 	config, err := profile.Load(repoRoot)
 	if err != nil {
-		return execution.Context{}, err
-	}
-
-	if scope == "" {
-		scope = config.Repository.DefaultScope
-	}
-
-	if !config.Repository.HasScope(scope) {
-		return execution.Context{}, errUnknownScope(scope)
+		t.Fatalf("Load: %v", err)
 	}
 
 	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
-		return execution.Context{}, err
+		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
 	config, err = pack.ResolvePacks(config, registry.Packs())
 	if err != nil {
-		return execution.Context{}, err
+		t.Fatalf("ResolvePacks: %v", err)
 	}
 
 	compiled, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
-		return execution.Context{}, err
+		t.Fatalf("Compile: %v", err)
 	}
 
 	layout := workspace.NewLayout(repoRoot)
@@ -56,5 +55,5 @@ func loadContext(repoRoot string, scope style.Scope) (context execution.Context,
 		registry.ToolCapabilities(),
 		toolEnvironment,
 		goEnvironment,
-	), nil
+	)
 }
