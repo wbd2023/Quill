@@ -39,10 +39,7 @@ func installTool(
 	tool toolchain.Tool,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	path := runtime.SearchPath(
-		layout.ToolBinaryDirectory(),
-		node.BinaryDirectory(layout),
-	)
+	path := layout.BuildPath(node.BinaryDirectory(layout))
 
 	switch install := tool.Install.(type) {
 

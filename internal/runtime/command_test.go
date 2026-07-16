@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"ciphera/tools/internal/testutil"
 )
@@ -47,7 +48,7 @@ func TestRunCommandTimesOut(t *testing.T) {
 		Name:             "slow-tool",
 		Environment:      map[string]string{"PATH": commandSearchPath(tempDir)},
 		Directory:        tempDir,
-		TimeoutSeconds:   1,
+		Timeout:          time.Second,
 		OutputLimitBytes: 1024,
 	})
 	if err == nil {
@@ -59,8 +60,12 @@ func TestRunCommandTimesOut(t *testing.T) {
 		t.Fatalf("expected CommandError, got %T", err)
 	}
 
-	if !result.TimedOut || !commandErr.TimedOut {
+	if !result.TimedOut {
 		t.Fatalf("expected timeout result, got %+v", result)
+	}
+
+	if !strings.Contains(commandErr.Error(), "timed out") {
+		t.Fatalf("expected timeout error message, got %q", commandErr.Error())
 	}
 }
 

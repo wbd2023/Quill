@@ -1,37 +1,33 @@
 package runtime
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"strings"
 )
 
-// CommandError represents a failed command execution: the command name, its arguments, whether it
-// timed out, and the underlying error.
+// CommandError represents a failed command execution: the command name, its arguments, and the
+// underlying error.
 type CommandError struct {
 	Name      string
 	Arguments []string
-	TimedOut  bool
 	Err       error
 }
 
 func (err CommandError) Error() (message string) {
-	formatted := formatCommand(err.Name, err.Arguments)
-
-	if err.TimedOut {
-		return fmt.Sprintf("%s timed out", formatted)
+	command := err.Name
+	if len(err.Arguments) > 0 {
+		command += " " + strings.Join(err.Arguments, " ")
 	}
 
-	return fmt.Sprintf("%s failed: %v", formatted, err.Err)
+	if errors.Is(err.Err, context.DeadlineExceeded) {
+		return fmt.Sprintf("%s timed out", command)
+	}
+
+	return fmt.Sprintf("%s failed: %v", command, err.Err)
 }
 
 func (err CommandError) Unwrap() (wrapped error) {
 	return err.Err
-}
-
-func formatCommand(name string, arguments []string) (command string) {
-	if len(arguments) == 0 {
-		return name
-	}
-
-	return name + " " + strings.Join(arguments, " ")
 }

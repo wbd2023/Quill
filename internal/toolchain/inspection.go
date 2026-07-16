@@ -28,7 +28,7 @@ func InspectTools(tools map[string]Tool, environment map[string]string) (statuse
 func inspectTool(tool Tool, environment map[string]string) (status Status) {
 	status = Status{Tool: tool}
 
-	path, err := runtime.ResolveCommandPath(tool.Command, environment)
+	path, err := runtime.ResolveCommandPath(environment, tool.Command)
 	if err != nil {
 		status.Issue = "missing from PATH"
 		return status
