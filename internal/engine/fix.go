@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 
-	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -47,7 +47,7 @@ func (engine *Engine) Fix(
 	result.Scope = context.Scope
 
 	rules := selectRulesForFix(context.Effective.Rules, context)
-	toolIDs := runner.ToolIDsForFixes(rules)
+	toolIDs := execution.ToolIDsForFixes(rules)
 	result.Toolchain = engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment)
 
 	if !result.Toolchain.AllValid {
@@ -57,7 +57,7 @@ func (engine *Engine) Fix(
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 	result.Rules = make([]RuleFixResult, 0, len(rules))
 	for _, rule := range rules {
-		execution, executionError := runner.RunFix(
+		execution, executionError := execution.RunFix(
 			rule,
 			context,
 			toolStatuses,
@@ -77,7 +77,7 @@ func (engine *Engine) Fix(
 	return result, nil
 }
 
-func selectRulesForFix(available []style.Rule, context runner.Context) (rules []style.Rule) {
+func selectRulesForFix(available []style.Rule, context execution.Context) (rules []style.Rule) {
 	for _, rule := range available {
 		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue

@@ -15,14 +15,14 @@ type Requirements struct {
 }
 
 // Template is an unbound execution strategy declared by a pack. The profile compiler calls Describe
-// to inspect requirements, then Bind to produce a Job for the runner.
+// to inspect requirements, then Bind to produce a Job for the execution.
 type Template interface {
 	isTemplate()
 	describe() (requirements Requirements)
 	bind(targets []string) (job Job)
 }
 
-// Job is a bound execution ready for the runner.
+// Job is a bound execution ready for the execution.
 type Job interface {
 	isJob()
 	toolIDs() (ids []string)

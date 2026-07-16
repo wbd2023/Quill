@@ -3,10 +3,10 @@ package engine
 import (
 	"testing"
 
+	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/style"
 )
 
@@ -29,7 +29,7 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 		},
 	}
 
-	context := runner.Context{
+	context := execution.Context{
 		Scope: style.Scope("tools"),
 		Profile: policy.Config{
 			Repository: policy.RepositoryConfig{

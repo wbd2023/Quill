@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 
-	"ciphera/tools/internal/runner"
+	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -89,13 +89,13 @@ func (engine *Engine) Check(
 	result.Scope = context.Scope
 
 	selected := selectRulesForCheck(context.Effective.Rules, context, options.Mode)
-	toolIDs := runner.ToolIDsForRules(selected)
+	toolIDs := execution.ToolIDsForRules(selected)
 	result.Toolchain = engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment)
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 
 	result.Rules = make([]RuleCheckResult, 0, len(selected))
 	for _, rule := range selected {
-		execution, executionError := runner.RunRule(
+		executionResult, executionError := execution.RunRule(
 			rule,
 			context,
 			toolStatuses,
@@ -103,10 +103,10 @@ func (engine *Engine) Check(
 		)
 		result.Rules = append(result.Rules, RuleCheckResult{
 			Rule: rule,
-			Status: runner.CheckStatus(
-				rule, execution, executionError, options.StrictRecommendations,
+			Status: execution.CheckStatus(
+				rule, executionResult, executionError, options.StrictRecommendations,
 			),
-			Execution:      execution,
+			Execution:      executionResult,
 			ExecutionError: executionError,
 		})
 	}
@@ -116,7 +116,7 @@ func (engine *Engine) Check(
 
 func selectRulesForCheck(
 	available []style.Rule,
-	context runner.Context,
+	context execution.Context,
 	mode style.CheckMode,
 ) (rules []style.Rule) {
 	for _, rule := range available {

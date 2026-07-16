@@ -1,6 +1,7 @@
 package bindings
 
 import (
+	"ciphera/tools/internal/execution/drivers"
 	"ciphera/tools/internal/pack/shipped/bash"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/project"
@@ -8,7 +9,6 @@ import (
 	"ciphera/tools/internal/pack/shipped/text"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/pack/shipped/vocabulary"
-	"ciphera/tools/internal/runner/drivers"
 )
 
 // Build wires every shipped pack's scanners, commands, checks, and interpreters into a single
