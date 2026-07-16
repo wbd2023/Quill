@@ -1,4 +1,4 @@
-package cli
+package engine
 
 import (
 	"testing"
@@ -10,7 +10,9 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-func TestFixableRulesUsePackFixes(t *testing.T) {
+func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
+	t.Parallel()
+
 	rules := []style.Rule{
 		{
 			ID: "go/lint",
@@ -38,8 +40,9 @@ func TestFixableRulesUsePackFixes(t *testing.T) {
 			},
 		},
 	}
-	selected := fixableRules(rules, context)
+
+	selected := selectRulesForFix(rules, context)
 	if len(selected) != 1 || selected[0].ID != "go/lint" {
-		t.Fatalf("fixableRules = %v", selected)
+		t.Fatalf("selectRulesForFix = %v", selected)
 	}
 }

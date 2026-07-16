@@ -1,56 +1,49 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"io"
 
-	"ciphera/tools/internal/pack/shipped/bindings"
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
 )
 
 /* ---------------------------------------- Check Command --------------------------------------- */
 
 func runCheck(tool Tool, options checkOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, options.scope)
+	checker, err := engine.New(options.repoRoot)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	selected, err := selectedRules(context.Effective.Rules, context, options.mode)
+	result, err := checker.Check(context.Background(), engine.CheckOptions{
+		Scope:                 options.scope,
+		Mode:                  options.mode,
+		StrictRecommendations: options.strictRecommendations,
+	})
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
-	toolStatusList := toolchain.InspectTools(
-		runtime.Runner{},
-		selectTools(context.Tools, runner.ToolIDsForRules(selected)),
-		context.ToolEnvironment,
-	)
-	toolStatuses := toolchain.NewStatusMap(toolStatusList)
 
-	result := report.CheckResult{
-		Entries: make([]report.CheckEntry, 0, len(selected)),
+	checkResult := report.CheckResult{
+		Entries: make([]report.CheckEntry, 0, len(result.Rules)),
 	}
-	checkers := drivers.CheckDrivers(bindings.Build())
-	for _, rule := range selected {
-		execution, err := runner.RunRule(rule, context, toolStatuses, checkers)
-		result.Entries = append(
-			result.Entries,
+	for _, ruleResult := range result.Rules {
+		checkResult.Entries = append(
+			checkResult.Entries,
 			report.NewCheckEntry(
-				rule,
-				statusForRuleResult(rule, execution, err, options.strictRecommendations),
-				execution,
+				ruleResult.Rule,
+				ruleResult.Status,
+				ruleResult.Execution,
 			),
 		)
 	}
 
-	summary, err := writeCheckResult(tool.stdout, result, options)
+	summary, err := writeCheckResult(tool.stdout, checkResult, options)
 	if err != nil {
 		tool.writeError(err)
 		return 1
@@ -140,29 +133,6 @@ func checkUsageText() (usage string) {
 	return commandUsage("check", summary, newCheckFlagSet(&options, &scope, &mode, &format))
 }
 
-/* --------------------------------------- Rule Selection --------------------------------------- */
-
-func selectedRules(
-	available []style.Rule,
-	context runner.Context,
-	mode style.CheckMode,
-) (rules []style.Rule, err error) {
-	for _, rule := range available {
-		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
-			continue
-		}
-
-		if mode == style.CheckModeRequired &&
-			rule.Enforcement == style.EnforcementRecommendation {
-			continue
-		}
-
-		rules = append(rules, rule)
-	}
-
-	return rules, nil
-}
-
 /* ------------------------------------------ Rendering ----------------------------------------- */
 
 func writeCheckResult(
@@ -172,15 +142,4 @@ func writeCheckResult(
 ) (summary report.CheckSummary, err error) {
 	view := report.NewCheckView(result)
 	return report.WriteCheck(writer, options.format, view, options.verbose)
-}
-
-/* --------------------------------------- Status Mapping --------------------------------------- */
-
-func statusForRuleResult(
-	rule style.Rule,
-	result style.ExecutionResult,
-	err error,
-	strictRecommendations bool,
-) (status style.CheckStatus) {
-	return runner.CheckStatus(rule, result, err, strictRecommendations)
 }
