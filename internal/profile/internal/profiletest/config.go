@@ -11,8 +11,7 @@ func Config() (config policy.Config) {
 		SchemaVersion: policy.SchemaVersion,
 		Repository:    baselineRepository(),
 		StyleGuide: policy.StyleGuideConfig{
-			Path:     "STYLE.md",
-			IDScheme: style.SectionSlug,
+			Path: "STYLE.md",
 		},
 		PathRoles: policy.PathRoles{
 			PathRole: {"internal/"},

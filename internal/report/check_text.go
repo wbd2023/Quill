@@ -99,13 +99,13 @@ func writeRuleDetails(writer io.Writer, entry CheckEntry, verbose bool) (err err
 		}
 	}
 
-	if commandMetadataPresent(entry.Result.Command) {
+	if entry.Result.HasCommand() {
 		if _, err = fmt.Fprintf(
 			writer,
 			"    command: exit_code=%d timed_out=%t truncated=%t\n",
-			entry.Result.Command.ExitCode,
-			entry.Result.Command.TimedOut,
-			entry.Result.Command.Truncated,
+			entry.Result.ExitCode,
+			entry.Result.TimedOut,
+			entry.Result.Truncated,
 		); err != nil {
 			return err
 		}

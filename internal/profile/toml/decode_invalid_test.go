@@ -63,7 +63,6 @@ app_scan_roots = ["cmd"]
 
 [styleguide]
 path = "STYLE.md"
-id_scheme = "section_slug"
 `,
 		},
 		{

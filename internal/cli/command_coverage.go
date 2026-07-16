@@ -87,7 +87,6 @@ func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err er
 
 	document, err := styleguide.Load(repoRoot, styleguide.Config{
 		Filename: config.StyleGuide.Path,
-		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		return coverage.Report{}, err

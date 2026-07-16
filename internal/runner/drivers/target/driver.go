@@ -15,7 +15,7 @@ func targetCommandDriver(commands runtimebinding.TargetCommands) (driver runner.
 		spec style.ExecutionSpec,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.TargetCommandExecution()
+		execution, found := spec.Detail.(style.TargetCommandExecution)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf(
 				"target command driver received empty spec",
@@ -40,7 +40,7 @@ func targetCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver
 		spec style.ExecutionSpec,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.TargetCheckExecution()
+		execution, found := spec.Detail.(style.TargetCheckExecution)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf("target check driver received empty spec")
 		}

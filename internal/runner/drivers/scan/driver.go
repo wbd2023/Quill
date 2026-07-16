@@ -16,7 +16,7 @@ func repositoryScanDriver(scanners runtimebinding.RepositoryScanners) (driver ru
 		spec style.ExecutionSpec,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.RepositoryScanExecution()
+		execution, found := spec.Detail.(style.RepositoryScanExecution)
 		if !found {
 			return style.ExecutionResult{},
 				errors.New("repository-scan driver received empty spec")

@@ -47,7 +47,6 @@ func Check(config policy.Config) (err error) {
 
 	if err = validateRules(
 		config.Repository,
-		config.StyleGuide.IDScheme,
 		config.Rules,
 	); err != nil {
 		return err

@@ -1,5 +1,7 @@
 package style
 
+import "slices"
+
 // ExecutionSpec describes how a rule is executed. The concrete Detail type determines which driver
 // handles the rule.
 type ExecutionSpec struct {
@@ -53,13 +55,6 @@ type RepositoryScanExecution struct {
 	FileSet string
 }
 
-// CommandResult holds the raw outcome of an external command execution.
-type CommandResult struct {
-	ExitCode  int
-	TimedOut  bool
-	Truncated bool
-}
-
 /* ------------------------------------------- Markers ------------------------------------------ */
 
 func (ToolchainExecution) executionDetail() {}
@@ -81,52 +76,13 @@ func (spec ExecutionSpec) Empty() (empty bool) {
 	return spec.Detail == nil
 }
 
-// ToolchainExecution returns the toolchain execution detail, if the spec holds one.
-func (spec ExecutionSpec) ToolchainExecution() (execution ToolchainExecution, found bool) {
-	execution, found = spec.Detail.(ToolchainExecution)
-	return execution, found
-}
-
-// ProfileExecution returns the profile execution detail, if the spec holds one.
-func (spec ExecutionSpec) ProfileExecution() (execution ProfileExecution, found bool) {
-	execution, found = spec.Detail.(ProfileExecution)
-	return execution, found
-}
-
-// FileCommandExecution returns the file-command execution detail, if the spec holds one.
-func (spec ExecutionSpec) FileCommandExecution() (execution FileCommandExecution, found bool) {
-	execution, found = spec.Detail.(FileCommandExecution)
-	return execution, found
-}
-
-// TargetCommandExecution returns the target-command execution detail, if the spec holds one.
-func (spec ExecutionSpec) TargetCommandExecution() (execution TargetCommandExecution, found bool) {
-	execution, found = spec.Detail.(TargetCommandExecution)
-	return execution, found
-}
-
-// TargetCheckExecution returns the target-check execution detail, if the spec holds one.
-func (spec ExecutionSpec) TargetCheckExecution() (execution TargetCheckExecution, found bool) {
-	execution, found = spec.Detail.(TargetCheckExecution)
-	return execution, found
-}
-
-// RepositoryScanExecution returns the repository-scan execution detail, if the spec holds one.
-func (spec ExecutionSpec) RepositoryScanExecution() (
-	execution RepositoryScanExecution,
-	found bool,
-) {
-	execution, found = spec.Detail.(RepositoryScanExecution)
-	return execution, found
-}
-
 /* ------------------------------------------- Queries ------------------------------------------ */
 
 // RequiredToolIDs returns the tool IDs the spec needs to execute, or nil if none.
 func (spec ExecutionSpec) RequiredToolIDs() (toolIDs []string) {
 	switch execution := spec.Detail.(type) {
 	case ToolchainExecution:
-		return append([]string{}, execution.ToolIDs...)
+		return slices.Clone(execution.ToolIDs)
 
 	case FileCommandExecution:
 		if execution.ToolID == "" {
@@ -135,10 +91,10 @@ func (spec ExecutionSpec) RequiredToolIDs() (toolIDs []string) {
 		return []string{execution.ToolID}
 
 	case TargetCommandExecution:
-		return append([]string{}, execution.ToolIDs...)
+		return slices.Clone(execution.ToolIDs)
 
 	case TargetCheckExecution:
-		return append([]string{}, execution.ToolIDs...)
+		return slices.Clone(execution.ToolIDs)
 
 	default:
 		return nil
@@ -189,9 +145,9 @@ func (spec ExecutionSpec) RequiresTargetCheckPaths() (requires bool) {
 func (spec ExecutionSpec) Targets() (targets []string) {
 	switch execution := spec.Detail.(type) {
 	case TargetCommandExecution:
-		return append([]string{}, execution.Targets...)
+		return slices.Clone(execution.Targets)
 	case TargetCheckExecution:
-		return append([]string{}, execution.Targets...)
+		return slices.Clone(execution.Targets)
 	}
 
 	return nil
@@ -202,11 +158,11 @@ func (spec ExecutionSpec) WithTargets(targets []string) (bound ExecutionSpec) {
 	bound = spec
 	switch execution := spec.Detail.(type) {
 	case TargetCommandExecution:
-		execution.Targets = append([]string{}, targets...)
+		execution.Targets = slices.Clone(targets)
 		bound.Detail = execution
 
 	case TargetCheckExecution:
-		execution.Targets = append([]string{}, targets...)
+		execution.Targets = slices.Clone(targets)
 		bound.Detail = execution
 	}
 

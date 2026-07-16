@@ -5,13 +5,6 @@ import (
 	"strings"
 )
 
-// SectionSlug names requirement IDs written as "<section>.<slug>". For example, section "3.8" with
-// slug "constructor-category-order".
-const SectionSlug IDScheme = "section_slug"
-
-// IDScheme selects a requirement ID grammar.
-type IDScheme string
-
 // RequirementID is a parsed STYLE.md requirement identifier.
 type RequirementID struct {
 	value   string
@@ -21,12 +14,8 @@ type RequirementID struct {
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
 
-// ParseRequirementID parses a STYLE.md requirement identifier according to scheme.
-func ParseRequirementID(value string, scheme IDScheme) (id RequirementID, err error) {
-	if scheme != SectionSlug {
-		return RequirementID{}, fmt.Errorf("unsupported requirement id scheme %q", scheme)
-	}
-
+// ParseRequirementID parses a STYLE.md requirement identifier in "<section>.<slug>" form.
+func ParseRequirementID(value string) (id RequirementID, err error) {
 	major, rest, found := strings.Cut(value, ".")
 	if !found {
 		return RequirementID{}, fmt.Errorf("missing requirement id section")

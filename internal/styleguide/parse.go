@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/style"
-
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/text"
 )
@@ -17,39 +15,28 @@ func Load(root string, config Config) (document Document, err error) {
 		return Document{}, fmt.Errorf("styleguide filename must not be empty")
 	}
 
-	scheme := config.IDScheme
-	if err := validateIDScheme(scheme); err != nil {
-		return Document{}, err
-	}
-
-	filename := config.Filename
-	path := filepath.Join(root, filename)
+	path := filepath.Join(root, config.Filename)
 	source, err := os.ReadFile(path)
 	if err != nil {
 		return Document{}, err
 	}
 
-	return parse(newSourceFile(filename, source), scheme)
+	return parse(newSourceFile(config.Filename, source))
 }
 
 // Parse parses STYLE.md source bytes.
 func Parse(source []byte, config Config) (document Document, err error) {
-	scheme := config.IDScheme
-	if err := validateIDScheme(scheme); err != nil {
-		return Document{}, err
-	}
-
 	filename := config.Filename
 	if filename == "" {
 		filename = defaultFilename
 	}
 
-	return parse(newSourceFile(filename, source), scheme)
+	return parse(newSourceFile(filename, source))
 }
 
-func parse(file sourceFile, scheme style.IDScheme) (document Document, err error) {
+func parse(file sourceFile) (document Document, err error) {
 	tree := goldmark.DefaultParser().Parse(text.NewReader(file.contents))
 	events := scanMarkdown(tree, file)
-	compiler := newDocumentCompiler(file, scheme)
+	compiler := newDocumentCompiler(file)
 	return compiler.compile(events)
 }

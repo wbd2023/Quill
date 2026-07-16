@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/styleguide"
 
 	"github.com/google/go-cmp/cmp"
@@ -22,7 +21,7 @@ func TestParseExposesDocumentModelThroughPublicAPI(t *testing.T) {
 			"<!-- style: id=1.1.example -->",
 			"* Public parsing should expose requirements.",
 		)),
-		styleguide.Config{IDScheme: style.SectionSlug},
+		styleguide.Config{},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -53,7 +52,7 @@ func TestParseExposesReviewMetadataThroughPublicAPI(t *testing.T) {
 			`<!-- style: id=1.1.example mode=review_only reason="Review this manually." -->`,
 			"* Public parsing should expose review metadata.",
 		)),
-		styleguide.Config{IDScheme: style.SectionSlug},
+		styleguide.Config{},
 	)
 	if err != nil {
 		t.Fatalf("Parse: %v", err)
@@ -80,34 +79,6 @@ func TestParseExposesReviewMetadataThroughPublicAPI(t *testing.T) {
 	})
 }
 
-func TestParseRejectsInvalidConfig(t *testing.T) {
-	cases := []struct {
-		name     string
-		config   styleguide.Config
-		expected string
-	}{
-		{
-			name:     "missing requirement id scheme",
-			config:   styleguide.Config{},
-			expected: "requirement id scheme must not be empty",
-		},
-		{
-			name: "unsupported requirement id scheme",
-			config: styleguide.Config{
-				IDScheme: "section",
-			},
-			expected: "unsupported styleguide requirement id scheme",
-		},
-	}
-
-	for _, test := range cases {
-		t.Run(test.name, func(t *testing.T) {
-			_, err := styleguide.Parse(nil, test.config)
-			requireErrorContains(t, err, test.expected)
-		})
-	}
-}
-
 /* -------------------------------------------- Load -------------------------------------------- */
 
 func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
@@ -129,7 +100,6 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 
 	document, err := styleguide.Load(root, styleguide.Config{
 		Filename: filename,
-		IDScheme: style.SectionSlug,
 	})
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -153,9 +123,7 @@ func TestLoadReadsConfiguredStyleGuide(t *testing.T) {
 }
 
 func TestLoadRejectsMissingFilename(t *testing.T) {
-	_, err := styleguide.Load(t.TempDir(), styleguide.Config{
-		IDScheme: style.SectionSlug,
-	})
+	_, err := styleguide.Load(t.TempDir(), styleguide.Config{})
 	requireErrorContains(t, err, "styleguide filename must not be empty")
 }
 

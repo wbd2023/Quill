@@ -17,7 +17,6 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	config := profiles.Current(t)
 	document, err := styleguide.Load(testutil.RepositoryRoot(t), styleguide.Config{
 		Filename: config.StyleGuide.Path,
-		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		t.Fatalf("styleguide.Load: %v", err)

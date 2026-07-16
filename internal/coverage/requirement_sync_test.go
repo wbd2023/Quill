@@ -44,7 +44,7 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 
 func TestStyleGuideRequirementIDsMatchTheirSection(t *testing.T) {
 	for _, requirement := range loadStyleRequirements(t) {
-		id, err := style.ParseRequirementID(requirement.ID, style.SectionSlug)
+		id, err := style.ParseRequirementID(requirement.ID)
 		if err != nil {
 			t.Fatalf("parse requirement ID %q: %v", requirement.ID, err)
 		}
@@ -95,7 +95,6 @@ func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement)
 	config := profiles.Current(t)
 	document, err := styleguide.Load(testutil.RepositoryRoot(t), styleguide.Config{
 		Filename: config.StyleGuide.Path,
-		IDScheme: config.StyleGuide.IDScheme,
 	})
 	if err != nil {
 		t.Fatalf("load STYLE.md: %v", err)
