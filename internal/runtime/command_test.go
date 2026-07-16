@@ -59,7 +59,7 @@ func TestRunCommandTimesOut(t *testing.T) {
 		t.Fatalf("expected CommandError, got %T", err)
 	}
 
-	if !result.TimedOut || !commandErr.Result.TimedOut {
+	if !result.TimedOut || !commandErr.TimedOut {
 		t.Fatalf("expected timeout result, got %+v", result)
 	}
 }
