@@ -22,20 +22,23 @@ type RuleDefinition struct {
 	ID    string
 	Name  string
 	Group RuleGroup
+
 	Check ExecutionSpec
 	Fix   ExecutionSpec
 }
 
 // Rule represents a profile-bound, enforceable style requirement.
 type Rule struct {
-	ID             string
-	Name           string
-	Group          RuleGroup
+	ID    string
+	Name  string
+	Group RuleGroup
+
 	Enforcement    Enforcement
 	Scope          Scope
 	RequirementIDs []string
-	Check          ExecutionSpec
-	Fix            ExecutionSpec
+
+	Check ExecutionSpec
+	Fix   ExecutionSpec
 }
 
 // CheckToolIDs returns the tool IDs required by the rule's check execution spec.
