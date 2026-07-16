@@ -26,27 +26,33 @@ type ProfileExecution struct {
 
 // FileCommandExecution represents running a tool against files selected by a file set.
 type FileCommandExecution struct {
-	ToolID         string
-	FileSet        string
-	Arguments      []string
+	ToolID  string
+	FileSet string
+
+	Arguments []string
+
 	ConfigArgument string
 	ConfigFile     string
 }
 
 // TargetCommandExecution represents running a tool against language-specific targets.
 type TargetCommandExecution struct {
-	ToolIDs  []string
+	ToolIDs []string
+
 	Action   string
 	Language string
-	Targets  []string
+
+	Targets []string
 }
 
 // TargetCheckExecution represents a language-specific check against targets.
 type TargetCheckExecution struct {
-	ToolIDs  []string
+	ToolIDs []string
+
 	Check    string
 	Language string
-	Targets  []string
+
+	Targets []string
 }
 
 // RepositoryScanExecution represents a repository-wide scan over files from a file set.
