@@ -1,10 +1,9 @@
-package effective_test
+package profile
 
 import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/profiletest"
 )
 
@@ -14,8 +13,8 @@ func TestCompileRequiresActivePinnedTools(t *testing.T) {
 	config := profiletest.Config()
 
 	config.Tools = config.Tools[1:]
-	_, err := effective.Compile(config, profiletest.Definitions())
-	requireErrorContains(t, err, "missing a pinned tool")
+	_, err := compilePlan(config, profiletest.Definitions())
+	requireErrorContainsInternal(t, err, "missing a pinned tool")
 }
 
 func TestCompileRejectsUnknownPinnedTools(t *testing.T) {
@@ -24,6 +23,6 @@ func TestCompileRejectsUnknownPinnedTools(t *testing.T) {
 	config := profiletest.Config()
 
 	config.Tools = append(config.Tools, policy.PinnedTool{ID: "unknown", Version: "1.0.0"})
-	_, err := effective.Compile(config, profiletest.Definitions())
-	requireErrorContains(t, err, "unknown")
+	_, err := compilePlan(config, profiletest.Definitions())
+	requireErrorContainsInternal(t, err, "unknown")
 }

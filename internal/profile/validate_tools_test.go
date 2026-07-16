@@ -1,11 +1,11 @@
-package validation_test
+package profile_test
 
 import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
+	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/profile/internal/profiletest"
-	"ciphera/tools/internal/profile/internal/validation"
 )
 
 func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {
@@ -39,7 +39,7 @@ func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {
 			config := profiletest.Config()
 
 			test.adjust(&config.Tools[0])
-			err := validation.Check(config)
+			err := profile.Validate(config)
 			requireErrorContains(t, err, test.error)
 		})
 	}
