@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// RequirementID is a parsed STYLE.md requirement identifier.
+// RequirementID represents a parsed STYLE.md requirement identifier.
 type RequirementID struct {
 	value   string
 	section string

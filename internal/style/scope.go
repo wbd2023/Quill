@@ -10,9 +10,9 @@ const (
 
 // CheckMode selects which rules run: only MUST-level rules or all rules.
 const (
-	// CheckModeRequired runs only MUST-level rules.
+	// CheckModeRequired means only MUST-level rules run.
 	CheckModeRequired CheckMode = "required"
-	// CheckModeAll runs both MUST-level and recommendation rules.
+	// CheckModeAll means both MUST-level and recommendation rules run.
 	CheckModeAll CheckMode = "all"
 )
 
@@ -31,14 +31,14 @@ const (
 	CheckStatusError CheckStatus = "error"
 )
 
-// Enforcement is a rule's enforcement level: required or recommendation.
+// Enforcement represents a rule's enforcement level: required or recommendation.
 type Enforcement string
 
-// CheckMode selects which rules run in a check pass.
+// CheckMode represents which rules a check pass runs.
 type CheckMode string
 
-// Scope names a repository area, for example app, tools, or all.
+// Scope represents a repository area, for example app, tools, or all.
 type Scope string
 
-// CheckStatus is the per-rule outcome of a check run.
+// CheckStatus represents the per-rule outcome of a check run.
 type CheckStatus string

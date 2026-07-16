@@ -2,29 +2,29 @@ package style
 
 import "slices"
 
-// ExecutionSpec describes how a rule is executed. The concrete Detail type determines which driver
+// ExecutionSpec represents how a rule is executed. The concrete Detail type determines which driver
 // handles the rule.
 type ExecutionSpec struct {
 	Detail ExecutionDetail
 }
 
-// ExecutionDetail is a sealed interface implemented by each execution detail type. The marker
-// method is unexported so only types in this package can satisfy it.
+// ExecutionDetail represents an execution strategy for a rule. Implementations are defined in
+// this package.
 type ExecutionDetail interface {
 	executionDetail()
 }
 
-// ToolchainExecution validates that pinned external tools are installed and healthy.
+// ToolchainExecution represents a check that verifies pinned external tools are installed.
 type ToolchainExecution struct {
 	ToolIDs []string
 }
 
-// ProfileExecution validates the profile configuration identified by its check ID.
+// ProfileExecution represents a check that validates the profile configuration.
 type ProfileExecution struct {
 	Check string
 }
 
-// FileCommandExecution runs a tool against files selected by a file set.
+// FileCommandExecution represents running a tool against files selected by a file set.
 type FileCommandExecution struct {
 	ToolID         string
 	FileSet        string
@@ -33,7 +33,7 @@ type FileCommandExecution struct {
 	ConfigFile     string
 }
 
-// TargetCommandExecution runs a tool against language-specific targets.
+// TargetCommandExecution represents running a tool against language-specific targets.
 type TargetCommandExecution struct {
 	ToolIDs  []string
 	Action   string
@@ -41,7 +41,7 @@ type TargetCommandExecution struct {
 	Targets  []string
 }
 
-// TargetCheckExecution runs a language-specific check against targets.
+// TargetCheckExecution represents a language-specific check against targets.
 type TargetCheckExecution struct {
 	ToolIDs  []string
 	Check    string
@@ -49,7 +49,7 @@ type TargetCheckExecution struct {
 	Targets  []string
 }
 
-// RepositoryScanExecution runs a repository-wide scanner over files from a file set.
+// RepositoryScanExecution represents a repository-wide scan over files from a file set.
 type RepositoryScanExecution struct {
 	Scanner string
 	FileSet string
