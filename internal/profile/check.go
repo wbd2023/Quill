@@ -1,4 +1,4 @@
-package validation
+package profile
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"ciphera/tools/internal/policy"
 )
 
-// Check checks config for supported schema version and internal consistency.
-func Check(config policy.Config) (err error) {
+// check checks config for supported schema version and internal consistency.
+func check(config policy.Config) (err error) {
 	if config.SchemaVersion != policy.SchemaVersion {
 		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
 	}

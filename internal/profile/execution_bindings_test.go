@@ -1,9 +1,8 @@
-package effective_test
+package profile
 
 import (
 	"testing"
 
-	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/profiletest"
 )
 
@@ -13,6 +12,6 @@ func TestCompileRejectsUnknownFileSetBinding(t *testing.T) {
 	config := profiletest.Config()
 
 	config.FileSets = nil
-	_, err := effective.Compile(config, profiletest.FileCommandDefinitions())
-	requireErrorContains(t, err, "unknown file set")
+	_, err := compilePlan(config, profiletest.FileCommandDefinitions())
+	requireErrorContainsInternal(t, err, "unknown file set")
 }

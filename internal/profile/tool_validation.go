@@ -1,4 +1,4 @@
-package effective
+package profile
 
 import (
 	"fmt"

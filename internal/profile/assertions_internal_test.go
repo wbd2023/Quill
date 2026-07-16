@@ -1,11 +1,11 @@
-package effective_test
+package profile
 
 import (
 	"strings"
 	"testing"
 )
 
-func requireErrorContains(tb testing.TB, err error, text string) {
+func requireErrorContainsInternal(tb testing.TB, err error, text string) {
 	tb.Helper()
 
 	if err == nil {

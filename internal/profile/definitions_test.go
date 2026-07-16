@@ -1,9 +1,8 @@
-package effective_test
+package profile
 
 import (
 	"testing"
 
-	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/profiletest"
 )
 
@@ -14,8 +13,8 @@ func TestCompileRejectsDuplicateRuleDefinitions(t *testing.T) {
 
 	definitions := profiletest.Definitions()
 	definitions.Rules = append(definitions.Rules, definitions.Rules[0])
-	_, err := effective.Compile(config, definitions)
-	requireErrorContains(t, err, "duplicate rule definition")
+	_, err := compilePlan(config, definitions)
+	requireErrorContainsInternal(t, err, "duplicate rule definition")
 }
 
 func TestCompileRejectsBlankRuleDefinitionName(t *testing.T) {
@@ -25,8 +24,8 @@ func TestCompileRejectsBlankRuleDefinitionName(t *testing.T) {
 
 	definitions := profiletest.Definitions()
 	definitions.Rules[0].Name = " "
-	_, err := effective.Compile(config, definitions)
-	requireErrorContains(t, err, "empty name")
+	_, err := compilePlan(config, definitions)
+	requireErrorContainsInternal(t, err, "empty name")
 }
 
 func TestCompileRejectsBlankRuleDefinitionGroup(t *testing.T) {
@@ -36,6 +35,6 @@ func TestCompileRejectsBlankRuleDefinitionGroup(t *testing.T) {
 
 	definitions := profiletest.Definitions()
 	definitions.Rules[0].Group = ""
-	_, err := effective.Compile(config, definitions)
-	requireErrorContains(t, err, "empty group")
+	_, err := compilePlan(config, definitions)
+	requireErrorContainsInternal(t, err, "empty group")
 }

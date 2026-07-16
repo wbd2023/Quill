@@ -1,10 +1,9 @@
-package effective_test
+package profile
 
 import (
 	"testing"
 
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/profiletest"
 	"ciphera/tools/internal/style"
 )
@@ -20,7 +19,7 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 			ToolID: profiletest.Tool,
 		},
 	})
-	requireErrorContains(t, err, "must define a file set")
+	requireErrorContainsInternal(t, err, "must define a file set")
 }
 
 func TestCompileRejectsMissingRuleCheck(t *testing.T) {
@@ -29,7 +28,7 @@ func TestCompileRejectsMissingRuleCheck(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/missing-check",
 	})
-	requireErrorContains(t, err, "must define check execution")
+	requireErrorContainsInternal(t, err, "must define check execution")
 }
 
 func TestCompileRejectsUnknownExecutionDetail(t *testing.T) {
@@ -49,7 +48,7 @@ func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 			ToolIDs: []string{" "},
 		},
 	})
-	requireErrorContains(t, err, "empty tool ID")
+	requireErrorContainsInternal(t, err, "empty tool ID")
 }
 
 func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
@@ -64,7 +63,7 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 			},
 		},
 	})
-	requireErrorContains(t, err, "duplicates tool")
+	requireErrorContainsInternal(t, err, "duplicates tool")
 }
 
 func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
@@ -76,7 +75,7 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 			ToolIDs: []string{"unknown"},
 		},
 	})
-	requireErrorContains(t, err, "references unknown tool")
+	requireErrorContainsInternal(t, err, "references unknown tool")
 }
 
 /* ------------------------------------------- Support ------------------------------------------ */
@@ -104,7 +103,7 @@ func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err e
 		{ID: profiletest.Tool, Version: "1.0.0"},
 	}
 
-	_, err = effective.Compile(config, style.Definitions{
+	_, err = compilePlan(config, style.Definitions{
 		ToolIDs: []string{profiletest.Tool},
 		Rules:   []style.RuleDefinition{definition},
 	})

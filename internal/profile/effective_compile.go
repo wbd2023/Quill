@@ -1,8 +1,7 @@
-package effective
+package profile
 
 import (
 	"fmt"
-	"strings"
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
@@ -10,8 +9,8 @@ import (
 
 /* ----------------------------------------- Compilation ---------------------------------------- */
 
-// Compile resolves a validated style profile against available rule and tool definitions.
-func Compile(
+// compilePlan resolves a validated style profile against available rule and tool definitions.
+func compilePlan(
 	config policy.Config,
 	definitions style.Definitions,
 ) (effective style.Plan, err error) {
@@ -109,8 +108,4 @@ func resolveExecution(
 	}
 
 	return style.Bind(template, targets), nil
-}
-
-func isBlank(value string) (blank bool) {
-	return strings.TrimSpace(value) == ""
 }

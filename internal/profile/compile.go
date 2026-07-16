@@ -2,7 +2,6 @@ package profile
 
 import (
 	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/style"
 )
 
@@ -21,7 +20,7 @@ func Compile(
 		return EffectiveProfile{}, err
 	}
 
-	compiled.Effective, err = effective.Compile(config, definitions)
+	compiled.Effective, err = compilePlan(config, definitions)
 	if err != nil {
 		return EffectiveProfile{}, err
 	}
