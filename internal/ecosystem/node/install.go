@@ -13,19 +13,14 @@ import (
 // standardPermissions is the filesystem mode for created directories.
 const standardPermissions os.FileMode = 0o755
 
-// Install runs npm install for the tool using an isolated NPM environment derived from layout. It
+// Install runs npm install for the tool using an isolated npm environment derived from layout. It
 // skips installation when the tool is already present at the pinned version.
 func Install(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
-	install toolchain.NpmInstall,
 	path string,
 ) (err error) {
-	if install.Source == "" {
-		return fmt.Errorf("tool %s does not define an install source", tool.ID)
-	}
-
 	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
 	installed, err := toolchain.IsInstalled(tool, binary)
 	if err != nil {
@@ -45,32 +40,47 @@ func Install(
 		return err
 	}
 
-	if err = os.MkdirAll(Directory(layout), standardPermissions); err != nil {
+	command, err := command(layout, tool, path)
+	if err != nil {
 		return err
 	}
 
-	_, err = runtime.RunCommand(runtime.CommandRequest{
-		Directory:   Directory(layout),
-		Environment: Environment(layout, path),
-		Name:        "npm",
-		Arguments:   npmArguments(install.Source, tool.PinnedVersion),
-	})
-	if err != nil {
+	if err = os.MkdirAll(command.Directory, standardPermissions); err != nil {
+		return err
+	}
+
+	if _, err = runtime.RunCommand(command); err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
 	}
 
 	return nil
 }
 
-// npmArguments builds the arguments for npm install. --ignore-scripts prevents arbitrary
-// postinstall scripts from running; the rest pin the exact version and suppress side output.
-func npmArguments(source string, version string) (arguments []string) {
-	return []string{
-		"install",
-		"--save-exact",
-		"--ignore-scripts",
-		"--no-audit",
-		"--no-fund",
-		source + "@" + version,
+// command builds the CommandRequest for running npm install with an isolated npm environment.
+// --ignore-scripts prevents arbitrary postinstall scripts from running; the remaining flags pin
+// the exact version and suppress side output.
+func command(
+	layout runtime.Layout,
+	tool toolchain.Tool,
+	path string,
+) (cmd runtime.CommandRequest, err error) {
+	install, ok := tool.Install.(toolchain.NpmInstall)
+	if !ok {
+		return cmd, fmt.Errorf("tool %s is not an NPM install", tool.ID)
 	}
+
+	if install.Source == "" {
+		return cmd, fmt.Errorf("tool %s does not define an install source", tool.ID)
+	}
+
+	return runtime.CommandRequest{
+		Environment: Environment(layout, path),
+		Directory:   InstallDirectory(layout),
+		Name:        "npm",
+		Arguments: []string{
+			"install",
+			"--save-exact", "--ignore-scripts", "--no-audit", "--no-fund",
+			install.Source + "@" + tool.PinnedVersion,
+		},
+	}, nil
 }

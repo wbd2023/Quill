@@ -6,30 +6,28 @@ import (
 	"ciphera/tools/internal/runtime"
 )
 
-// BuildCache returns the Go build cache directory for the given layout.
-func BuildCache(layout runtime.Layout) (cache string) {
+// BuildCacheDirectory returns the Go build cache directory.
+func BuildCacheDirectory(layout runtime.Layout) (cache string) {
 	return filepath.Join(layout.CacheDirectory(), "go-build")
 }
 
-// ModuleCache returns the Go module cache directory for the given layout.
-func ModuleCache(layout runtime.Layout) (cache string) {
+// ModuleCacheDirectory returns the Go module cache directory.
+func ModuleCacheDirectory(layout runtime.Layout) (cache string) {
 	return filepath.Join(layout.CacheDirectory(), "go-mod")
 }
 
-// GoPath returns the GOPATH directory for the given layout.
+// GoPath returns the GOPATH directory.
 func GoPath(layout runtime.Layout) (path string) {
 	return filepath.Join(layout.CacheDirectory(), "gopath")
 }
 
-// Environment builds the Go environment variables for running Go tooling within the engine's
-// isolated layout. path is the PATH value that makes installed tool binaries discoverable.
-// Callers may add consumer-specific variables (eg GOLANGCI_LINT_CACHE for the checker, GOBIN for
-// the installer) to the result.
+// Environment returns the environment variables for executing Go tooling with isolated caches.
+// GOCACHE, GOMODCACHE, and GOPATH are set to layout-derived paths; PATH is the path argument.
 func Environment(layout runtime.Layout, path string) (environment map[string]string) {
 	return map[string]string{
 		"PATH":       path,
-		"GOCACHE":    BuildCache(layout),
-		"GOMODCACHE": ModuleCache(layout),
+		"GOCACHE":    BuildCacheDirectory(layout),
+		"GOMODCACHE": ModuleCacheDirectory(layout),
 		"GOPATH":     GoPath(layout),
 	}
 }

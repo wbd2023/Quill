@@ -19,13 +19,8 @@ func Install(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
-	install toolchain.GoInstall,
 	path string,
 ) (err error) {
-	if install.Source == "" {
-		return fmt.Errorf("tool %s does not define an install source", tool.ID)
-	}
-
 	binary := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
 	installed, err := toolchain.IsInstalled(tool, binary)
 	if err != nil {
@@ -45,22 +40,44 @@ func Install(
 		return err
 	}
 
-	if err = os.MkdirAll(layout.StateDirectory(), standardPermissions); err != nil {
+	command, err := command(layout, tool, path)
+	if err != nil {
 		return err
+	}
+
+	if err = os.MkdirAll(command.Directory, standardPermissions); err != nil {
+		return err
+	}
+
+	if _, err = runtime.RunCommand(command); err != nil {
+		return fmt.Errorf("install %s: %w", tool.Name, err)
+	}
+
+	return nil
+}
+
+// command builds the CommandRequest for running go install with an isolated Go environment.
+func command(
+	layout runtime.Layout,
+	tool toolchain.Tool,
+	path string,
+) (command runtime.CommandRequest, err error) {
+	install, ok := tool.Install.(toolchain.GoInstall)
+	if !ok {
+		return command, fmt.Errorf("tool %s is not a Go install", tool.ID)
+	}
+
+	if install.Source == "" {
+		return command, fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
 	environment := Environment(layout, path)
 	environment["GOBIN"] = layout.ToolBinaryDirectory()
 
-	_, err = runtime.RunCommand(runtime.CommandRequest{
-		Directory:   layout.StateDirectory(),
+	return runtime.CommandRequest{
 		Environment: environment,
+		Directory:   layout.StateDirectory(),
 		Name:        "go",
 		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
-	})
-	if err != nil {
-		return fmt.Errorf("install %s: %w", tool.Name, err)
-	}
-
-	return nil
+	}, nil
 }
