@@ -12,7 +12,7 @@ type Context struct {
 	RepoRoot        string
 	Scope           style.Scope
 	Profile         policy.Config
-	Effective       style.EffectiveConfig
+	Effective       style.Plan
 	Tools           map[string]toolchain.Tool
 	ToolEnvironment map[string]string
 	GoEnvironment   map[string]string
@@ -25,7 +25,7 @@ func NewContext(
 	repoRoot string,
 	scope style.Scope,
 	config policy.Config,
-	effective style.EffectiveConfig,
+	effective style.Plan,
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,

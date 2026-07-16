@@ -7,8 +7,8 @@ import (
 
 func TestAutomatedRequirementsReferenceRules(t *testing.T) {
 	ruleIDs := make(map[string]bool)
-	effective := loadEffectiveConfig(t)
-	for _, rule := range effective.Rules {
+	plan := loadPlan(t)
+	for _, rule := range plan.Rules {
 		ruleIDs[rule.ID] = true
 	}
 

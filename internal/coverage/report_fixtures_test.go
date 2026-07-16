@@ -25,7 +25,7 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 	return document
 }
 
-func loadEffectiveConfig(t *testing.T) (effectiveConfig style.EffectiveConfig) {
+func loadPlan(t *testing.T) (plan style.Plan) {
 	t.Helper()
 
 	config := profiles.Current(t)
@@ -45,7 +45,7 @@ func loadEffectiveConfig(t *testing.T) (effectiveConfig style.EffectiveConfig) {
 func loadCoverageReport(t *testing.T) (report Report) {
 	t.Helper()
 
-	return Build(loadDocument(t), loadEffectiveConfig(t).Rules)
+	return Build(loadDocument(t), loadPlan(t).Rules)
 }
 
 func coverageRequirementByID(

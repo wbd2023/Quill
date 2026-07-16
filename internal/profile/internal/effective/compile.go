@@ -14,24 +14,24 @@ import (
 func Compile(
 	config policy.Config,
 	definitions style.Definitions,
-) (effective style.EffectiveConfig, err error) {
+) (effective style.Plan, err error) {
 	availableTools := indexToolIDs(definitions.ToolIDs)
 
 	if err = validatePins(config, availableTools); err != nil {
-		return style.EffectiveConfig{}, err
+		return style.Plan{}, err
 	}
 
 	availableRules, err := indexRuleDefinitions(definitions.Rules, availableTools)
 	if err != nil {
-		return style.EffectiveConfig{}, err
+		return style.Plan{}, err
 	}
 
 	rules, err := resolveRules(config, availableRules)
 	if err != nil {
-		return style.EffectiveConfig{}, err
+		return style.Plan{}, err
 	}
 
-	return style.EffectiveConfig{
+	return style.Plan{
 		Rules: rules,
 	}, nil
 }

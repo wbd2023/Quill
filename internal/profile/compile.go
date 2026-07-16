@@ -10,7 +10,7 @@ import (
 // EffectiveProfile is the resolved Profile and executable rule/tool configuration.
 type EffectiveProfile struct {
 	Profile   policy.Config
-	Effective style.EffectiveConfig
+	Effective style.Plan
 }
 
 // Compile validates config, applies Pack defaults, and builds an Effective Profile.
