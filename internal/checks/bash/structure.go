@@ -25,7 +25,11 @@ func CheckStructure(
 	repository policy.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
-	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
+	files, err := filewalk.CollectFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		walkConfig(repository),
+		".sh",
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

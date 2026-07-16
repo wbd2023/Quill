@@ -15,7 +15,10 @@ func CheckTestHygiene(
 	repository policy.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
-	files, err := filewalk.CollectAllFiles(repoRoot, repository, scope)
+	files, err := filewalk.CollectAllFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		walkConfig(repository),
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

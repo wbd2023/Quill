@@ -6,22 +6,18 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
 )
 
 /* ----------------------------------------- Collection ----------------------------------------- */
 
-// CollectFiles collect files.
+// CollectFiles collects files under roots that match any of extensions. If no extensions are
+// given, every regular file is collected.
 func CollectFiles(
-	repoRoot string,
-	repository policy.RepositoryConfig,
-	scope style.Scope,
+	roots []string,
+	config WalkConfig,
 	extensions ...string,
 ) (paths []string, err error) {
-	roots := repository.ResolveScopeRoots(repoRoot, scope)
-	return collectFilesInRoots(roots, repository, func(path string) bool {
+	return collectFilesInRoots(roots, config, func(path string) bool {
 		if len(extensions) == 0 {
 			return true
 		}
@@ -36,13 +32,14 @@ func CollectFiles(
 	})
 }
 
-// CollectFilesInRoots collect files in roots.
+// CollectFilesInRoots collects files in roots that match any of extensions. If no extensions are
+// given, every regular file is collected.
 func CollectFilesInRoots(
-	repository policy.RepositoryConfig,
+	config WalkConfig,
 	roots []string,
 	extensions ...string,
 ) (paths []string, err error) {
-	return collectFilesInRoots(roots, repository, func(path string) bool {
+	return collectFilesInRoots(roots, config, func(path string) bool {
 		if len(extensions) == 0 {
 			info, statErr := os.Stat(path)
 			if statErr != nil {
@@ -62,28 +59,9 @@ func CollectFilesInRoots(
 	})
 }
 
-// CollectFilesInScopes collect files in scopes.
-func CollectFilesInScopes(
-	repoRoot string,
-	repository policy.RepositoryConfig,
-	scopes []style.Scope,
-	extensions ...string,
-) (paths []string, err error) {
-	return CollectFilesInRoots(
-		repository,
-		collectScopeRoots(repoRoot, repository, scopes),
-		extensions...,
-	)
-}
-
-// CollectAllFiles collect all files.
-func CollectAllFiles(
-	repoRoot string,
-	repository policy.RepositoryConfig,
-	scope style.Scope,
-) (paths []string, err error) {
-	roots := repository.ResolveScopeRoots(repoRoot, scope)
-	return collectFilesInRoots(roots, repository, func(path string) bool {
+// CollectAllFiles collects all regular files under roots.
+func CollectAllFiles(roots []string, config WalkConfig) (paths []string, err error) {
+	return collectFilesInRoots(roots, config, func(path string) bool {
 		info, statErr := os.Stat(path)
 		if statErr != nil {
 			return false
@@ -95,7 +73,7 @@ func CollectAllFiles(
 
 func collectFilesInRoots(
 	roots []string,
-	repository policy.RepositoryConfig,
+	config WalkConfig,
 	include func(path string) bool,
 ) (paths []string, err error) {
 	for _, root := range roots {
@@ -110,7 +88,7 @@ func collectFilesInRoots(
 					return walkErr
 				}
 
-				if entry.IsDir() && isExcludedDirectory(repository, entry.Name()) {
+				if entry.IsDir() && isExcludedDirectory(config, entry.Name()) {
 					return filepath.SkipDir
 				}
 
@@ -118,7 +96,7 @@ func collectFilesInRoots(
 					return nil
 				}
 
-				if isGeneratedFile(path, repository) {
+				if isGeneratedFile(path, config.GeneratedMarker) {
 					return nil
 				}
 

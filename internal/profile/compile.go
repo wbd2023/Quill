@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/style"
@@ -13,25 +12,16 @@ type EffectiveProfile struct {
 	Effective style.Plan
 }
 
-// Compile validates config, applies Pack defaults, and builds an Effective Profile.
+// Compile validates config and builds an executable plan from definitions.
 func Compile(
 	config policy.Config,
-	registry pack.Registry,
+	definitions style.Definitions,
 ) (compiled EffectiveProfile, err error) {
 	if err := Validate(config); err != nil {
 		return EffectiveProfile{}, err
 	}
 
-	config, err = effective.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		return EffectiveProfile{}, err
-	}
-
-	if err := Validate(config); err != nil {
-		return EffectiveProfile{}, err
-	}
-
-	compiled.Effective, err = effective.Compile(config, registry.Definitions())
+	compiled.Effective, err = effective.Compile(config, definitions)
 	if err != nil {
 		return EffectiveProfile{}, err
 	}

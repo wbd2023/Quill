@@ -7,6 +7,7 @@ import (
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
+	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
 )
@@ -27,6 +28,7 @@ func runFix(tool Tool, options fixOptions) (exitCode int) {
 
 	toolIDs := runner.ToolIDsForFixes(rules)
 	statuses, allValid := inspectToolchain(
+		runtime.Runner{},
 		selectTools(context.Tools, toolIDs),
 		context.ToolEnvironment,
 	)

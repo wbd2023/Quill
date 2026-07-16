@@ -33,7 +33,11 @@ func CheckMagicValues(
 	comparisonPattern := regexp.MustCompile(`-(eq|ne|gt|lt|ge|le)\s+(-?\d+)`)
 	headLimitPattern := regexp.MustCompile(`\bhead\s+-([0-9]+)\b`)
 
-	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
+	files, err := filewalk.CollectFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		walkConfig(repository),
+		".sh",
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

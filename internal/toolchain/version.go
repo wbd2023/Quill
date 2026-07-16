@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"ciphera/tools/internal/runtime"
 )
 
 /* ------------------------------------------ Detection ----------------------------------------- */
@@ -14,24 +12,28 @@ import (
 // DetectByCommand returns a VersionMethod that runs the tool with argument and extracts the version
 // from its output using extract.
 func DetectByCommand(argument string, extract func(string) (string, error)) (method VersionMethod) {
-	return func(environment map[string]string, path string) (version string, err error) {
-		result, err := runtime.RunCommand(runtime.CommandRequest{
-			Name:        path,
-			Arguments:   []string{argument},
-			Environment: environment,
-		})
+	return func(
+		runner CommandRunner,
+		environment map[string]string,
+		path string,
+	) (version string, err error) {
+		output, err := runner.Run(environment, path, []string{argument})
 		if err != nil {
 			return "", err
 		}
 
-		return extract(result.Output)
+		return extract(output)
 	}
 }
 
 // DetectByGoBinary returns a VersionMethod that reads the version embedded in a Go binary's build
 // info. ModulePath, if set, must match the binary's main module.
 func DetectByGoBinary(modulePath string) (method VersionMethod) {
-	return func(environment map[string]string, path string) (version string, err error) {
+	return func(
+		runner CommandRunner,
+		environment map[string]string,
+		path string,
+	) (version string, err error) {
 		info, err := buildinfo.ReadFile(path)
 		if err != nil {
 			return "", fmt.Errorf("could not read embedded build info")

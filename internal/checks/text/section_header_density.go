@@ -17,7 +17,14 @@ func CheckSectionHeaderDensity(
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
-	files, err := filewalk.CollectFiles(repoRoot, repository, scope, ".go", ".sh")
+	files, err := filewalk.CollectFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		filewalk.WalkConfig{
+			ExcludedDirectories: repository.ExcludedDirectories,
+			GeneratedMarker:     repository.GeneratedMarker,
+		},
+		".go", ".sh",
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

@@ -40,7 +40,13 @@ func CheckSecrets(
 ) (result style.ExecutionResult, err error) {
 	patterns := committedSecretPatterns()
 
-	files, err := filewalk.CollectAllFiles(repoRoot, repository, scope)
+	files, err := filewalk.CollectAllFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		filewalk.WalkConfig{
+			ExcludedDirectories: repository.ExcludedDirectories,
+			GeneratedMarker:     repository.GeneratedMarker,
+		},
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

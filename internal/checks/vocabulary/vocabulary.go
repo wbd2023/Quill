@@ -18,12 +18,18 @@ func CheckVocabulary(
 	config vocabularypolicy.Config,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
-	goFiles, err := filewalk.CollectFiles(repoRoot, repository, scope, ".go")
+	roots := repository.ResolveScopeRoots(repoRoot, scope)
+	walkConfig := filewalk.WalkConfig{
+		ExcludedDirectories: repository.ExcludedDirectories,
+		GeneratedMarker:     repository.GeneratedMarker,
+	}
+
+	goFiles, err := filewalk.CollectFiles(roots, walkConfig, ".go")
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
 
-	shellFiles, err := filewalk.CollectFiles(repoRoot, repository, scope, ".sh")
+	shellFiles, err := filewalk.CollectFiles(roots, walkConfig, ".sh")
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

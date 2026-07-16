@@ -12,8 +12,12 @@ type Capability struct {
 }
 
 // VersionMethod detects the installed version of the binary at path, using environment for any
-// command it runs.
-type VersionMethod func(environment map[string]string, path string) (version string, err error)
+// command it runs. The runner executes version-detection commands.
+type VersionMethod func(
+	runner CommandRunner,
+	environment map[string]string,
+	path string,
+) (version string, err error)
 
 // InstallMethod selects how a missing tool is installed.
 type InstallMethod interface {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"ciphera/tools/internal/installer"
+	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/report"
 	"ciphera/tools/internal/runtime"
 )
@@ -17,17 +18,24 @@ func runInstall(tool Tool, options installOptions) (exitCode int) {
 	}
 
 	layout := runtime.NewLayout(context.RepoRoot)
+	loaded, err := lockfile.Load(context.RepoRoot)
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
 	if err := installer.Install(
 		layout,
 		tool.stdout,
 		sortedTools(context.Tools),
-		context.Lockfile,
+		loaded,
 	); err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
 	statuses, allValid := inspectToolchain(
+		runtime.Runner{},
 		context.Tools,
 		context.ToolEnvironment,
 	)

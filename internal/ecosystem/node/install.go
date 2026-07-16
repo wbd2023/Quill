@@ -22,7 +22,7 @@ func Install(
 	path string,
 ) (err error) {
 	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
-	installed, err := toolchain.IsInstalled(tool, binary)
+	installed, err := toolchain.IsInstalled(runtime.Runner{}, tool, binary)
 	if err != nil {
 		return err
 	}

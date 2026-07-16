@@ -3,6 +3,7 @@ package shipped
 import (
 	"testing"
 
+	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/testutil/profiles"
@@ -64,7 +65,12 @@ func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	compiled, err := profile.Compile(config, registry)
+	config, err = pack.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		t.Fatalf("ResolvePacks: %v", err)
+	}
+
+	compiled, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}

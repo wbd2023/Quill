@@ -17,7 +17,13 @@ func CheckASCII(
 	repository policy.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
-	files, err := filewalk.CollectAllFiles(repoRoot, repository, scope)
+	files, err := filewalk.CollectAllFiles(
+		repository.ResolveScopeRoots(repoRoot, scope),
+		filewalk.WalkConfig{
+			ExcludedDirectories: repository.ExcludedDirectories,
+			GeneratedMarker:     repository.GeneratedMarker,
+		},
+	)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
