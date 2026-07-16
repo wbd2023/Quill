@@ -1,13 +1,11 @@
 package target
 
 import (
-	"errors"
 	"strings"
 
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -87,7 +85,7 @@ func runGolangciLint(
 	workDir string,
 	golangciLintToolID string,
 ) (output string, err error) {
-	output, err = commandrun.ToolByID(
+	result, err := commandrun.ToolByID(
 		context,
 		workDir,
 		golangciLintToolID,
@@ -98,12 +96,11 @@ func runGolangciLint(
 		return "", nil
 	}
 
-	var cmdErr runtime.CommandError
-	if errors.As(err, &cmdErr) && cmdErr.Result.ExitCode == 1 {
-		return output, nil
+	if result.ExitCode == 1 {
+		return result.Output, nil
 	}
 
-	return output, err
+	return result.Output, err
 }
 
 func runGoFormatChecks(
@@ -117,7 +114,7 @@ func runGoFormatChecks(
 		return "", nil
 	}
 
-	gofmtOutput, err := commandrun.Output(
+	gofmtResult, err := commandrun.Output(
 		workDir,
 		context.GoEnvironment,
 		"gofmt",
@@ -127,11 +124,11 @@ func runGoFormatChecks(
 		return "", err
 	}
 
-	if strings.TrimSpace(gofmtOutput) != "" {
-		output = "Go files require gofmt formatting:\n" + strings.TrimSpace(gofmtOutput)
+	if strings.TrimSpace(gofmtResult.Output) != "" {
+		output = "Go files require gofmt formatting:\n" + strings.TrimSpace(gofmtResult.Output)
 	}
 
-	goimportsOutput, err := commandrun.ToolByID(
+	goimportsResult, err := commandrun.ToolByID(
 		context,
 		workDir,
 		goimportsToolID,
@@ -141,11 +138,12 @@ func runGoFormatChecks(
 		return "", err
 	}
 
-	if strings.TrimSpace(goimportsOutput) != "" {
+	if strings.TrimSpace(goimportsResult.Output) != "" {
 		if output != "" {
 			output += "\n"
 		}
-		output += "Go files require goimports formatting:\n" + strings.TrimSpace(goimportsOutput)
+		output += "Go files require goimports formatting:\n" +
+			strings.TrimSpace(goimportsResult.Output)
 	}
 
 	return output, nil

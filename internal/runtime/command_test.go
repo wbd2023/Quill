@@ -21,9 +21,9 @@ func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 	)
 
 	result, err := RunCommand(CommandRequest{
-		Directory:   tempDir,
-		Environment: map[string]string{"PATH": tempDir},
 		Name:        "test-tool",
+		Environment: map[string]string{"PATH": tempDir},
+		Directory:   tempDir,
 	})
 	if err != nil {
 		t.Fatalf("RunCommand: %v", err)
@@ -44,9 +44,9 @@ func TestRunCommandTimesOut(t *testing.T) {
 	)
 
 	result, err := RunCommand(CommandRequest{
-		Directory:        tempDir,
-		Environment:      map[string]string{"PATH": commandSearchPath(tempDir)},
 		Name:             "slow-tool",
+		Environment:      map[string]string{"PATH": commandSearchPath(tempDir)},
+		Directory:        tempDir,
 		TimeoutSeconds:   1,
 		OutputLimitBytes: 1024,
 	})
@@ -64,7 +64,7 @@ func TestRunCommandTimesOut(t *testing.T) {
 	}
 }
 
-func commandSearchPath(tempDir string) (value string) {
+func commandSearchPath(tempDir string) (path string) {
 	return tempDir + string(os.PathListSeparator) + os.Getenv("PATH")
 }
 
@@ -78,9 +78,9 @@ func TestRunCommandCapsOutput(t *testing.T) {
 	)
 
 	result, err := RunCommand(CommandRequest{
-		Directory:        tempDir,
-		Environment:      map[string]string{"PATH": tempDir},
 		Name:             "loud-tool",
+		Environment:      map[string]string{"PATH": tempDir},
+		Directory:        tempDir,
 		OutputLimitBytes: 4,
 	})
 	if err != nil {
@@ -92,7 +92,7 @@ func TestRunCommandCapsOutput(t *testing.T) {
 	}
 }
 
-func TestCommandErrorIncludesExitCodeAndOutput(t *testing.T) {
+func TestRunCommandReturnsExitCodeAndOutput(t *testing.T) {
 	tempDir := t.TempDir()
 	testutil.WriteExecutable(
 		t,
@@ -102,9 +102,9 @@ func TestCommandErrorIncludesExitCodeAndOutput(t *testing.T) {
 	)
 
 	result, err := RunCommand(CommandRequest{
-		Directory:        tempDir,
-		Environment:      map[string]string{"PATH": tempDir},
 		Name:             "bad-tool",
+		Environment:      map[string]string{"PATH": tempDir},
+		Directory:        tempDir,
 		OutputLimitBytes: 1024,
 	})
 	if err == nil {

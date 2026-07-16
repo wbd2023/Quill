@@ -5,12 +5,13 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"slices"
 	"time"
 )
 
 /* ------------------------------------------ Constants ----------------------------------------- */
 
-// Default limits applied when a request omits its own timeout or output cap.
+// Default limits applied when a request omits its own timeout or output limit.
 const (
 	defaultCommandTimeoutSeconds = 120
 	defaultOutputLimitBytes      = 1 << 20
@@ -18,19 +19,19 @@ const (
 
 /* -------------------------------------------- Types ------------------------------------------- */
 
-// CommandRequest describes a command to run: its working directory, environment,
-// executable, arguments, and execution limits.
+// CommandRequest represents a command to execute: the executable name, arguments, environment,
+// working directory, and execution limits.
 type CommandRequest struct {
-	Directory        string
-	Environment      map[string]string
 	Name             string
 	Arguments        []string
+	Environment      map[string]string
+	Directory        string
 	TimeoutSeconds   int
 	OutputLimitBytes int64
 }
 
-// CommandResult holds the outcome of a command: its captured output, exit status, and
-// whether it timed out or had its output truncated.
+// CommandResult represents the outcome of running a command: captured output, exit status, timeout
+// status, and output truncation.
 type CommandResult struct {
 	Output    string
 	ExitCode  int
@@ -40,40 +41,50 @@ type CommandResult struct {
 
 /* -------------------------------------- Command Execution ------------------------------------- */
 
-// RunCommand executes the command described by request, applying its timeout and output
-// limit, and returns the captured output and exit status. A non-zero exit or timeout is
-// returned as a CommandError carrying the result.
+// RunCommand executes the command described by request, applying its timeout and output limit, and
+// returns the captured output and exit status. A non-zero exit or timeout is returned as a
+// CommandError carrying the result.
 func RunCommand(request CommandRequest) (result CommandResult, err error) {
-	commandPath, err := ResolveCommandPath(request.Name, request.Environment)
+	path, err := ResolveCommandPath(request.Name, request.Environment)
 	if err != nil {
 		return CommandResult{}, err
 	}
 
-	timeout := commandTimeout(request.TimeoutSeconds)
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	seconds := request.TimeoutSeconds
+	if seconds <= 0 {
+		seconds = defaultCommandTimeoutSeconds
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
 	defer cancel()
 
-	command := exec.CommandContext(ctx, commandPath, request.Arguments...)
-	command.Dir = commandDirectory(request.Directory)
+	command := exec.CommandContext(ctx, path, request.Arguments...)
+	command.Dir = request.Directory
+	if command.Dir == "" {
+		command.Dir = "."
+	}
 	command.Env = append(os.Environ(), environmentEntries(request.Environment)...)
 
-	buffer := &limitedBuffer{limit: commandOutputLimit(request.OutputLimitBytes)}
+	limit := request.OutputLimitBytes
+	if limit <= 0 {
+		limit = defaultOutputLimitBytes
+	}
+	buffer := &limitedBuffer{limit: limit}
 	command.Stdout = buffer
 	command.Stderr = buffer
 
-	runErr := command.Run()
+	err = command.Run()
 	result = CommandResult{
 		Output:    buffer.String(),
-		ExitCode:  commandExitCode(runErr),
+		ExitCode:  exitCode(err),
 		TimedOut:  ctx.Err() != nil,
 		Truncated: buffer.truncated,
 	}
-	if runErr != nil {
+	if err != nil {
 		return result, CommandError{
 			Name:      request.Name,
 			Arguments: append([]string{}, request.Arguments...),
 			Result:    result,
-			Err:       runErr,
+			Err:       err,
 		}
 	}
 
@@ -82,31 +93,26 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
-func commandDirectory(directory string) (normalised string) {
-	if directory == "" {
-		return "."
+func environmentEntries(environment map[string]string) (entries []string) {
+	if len(environment) == 0 {
+		return nil
 	}
 
-	return directory
-}
+	keys := make([]string, 0, len(environment))
+	for key := range environment {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
 
-func commandTimeout(seconds int) (timeout time.Duration) {
-	if seconds <= 0 {
-		seconds = defaultCommandTimeoutSeconds
+	entries = make([]string, 0, len(keys))
+	for _, key := range keys {
+		entries = append(entries, key+"="+environment[key])
 	}
 
-	return time.Duration(seconds) * time.Second
+	return entries
 }
 
-func commandOutputLimit(limit int64) (normalised int64) {
-	if limit <= 0 {
-		return defaultOutputLimitBytes
-	}
-
-	return limit
-}
-
-func commandExitCode(err error) (exitCode int) {
+func exitCode(err error) (code int) {
 	if err == nil {
 		return 0
 	}

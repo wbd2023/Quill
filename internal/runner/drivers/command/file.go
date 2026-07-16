@@ -44,10 +44,10 @@ func runFileCommand(
 	arguments := runner.FileCommandArguments(context.RepoRoot, spec)
 	arguments = append(arguments, files...)
 	commandResult, runErr := runtime.RunCommand(runtime.CommandRequest{
-		Directory:        context.RepoRoot,
-		Environment:      context.ToolEnvironment,
 		Name:             tool.Command,
 		Arguments:        arguments,
+		Environment:      context.ToolEnvironment,
+		Directory:        context.RepoRoot,
 		TimeoutSeconds:   tool.TimeoutSeconds,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})

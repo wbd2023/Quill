@@ -16,9 +16,9 @@ import (
 func DetectByCommand(argument string, extract func(string) (string, error)) (method VersionMethod) {
 	return func(environment map[string]string, path string) (version string, err error) {
 		result, err := runtime.RunCommand(runtime.CommandRequest{
-			Environment: environment,
 			Name:        path,
 			Arguments:   []string{argument},
+			Environment: environment,
 		})
 		if err != nil {
 			return "", err

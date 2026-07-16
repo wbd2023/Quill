@@ -50,19 +50,19 @@ func runGoFormat(
 		}
 
 		workDir := targetWorkDir(context.RepoRoot, target)
-		output, err := commandrun.Output(
+		commandResult, err := commandrun.Output(
 			workDir,
 			context.GoEnvironment,
 			"gofmt",
 			append([]string{"-w"}, target.FormatPaths...)...,
 		)
 		if err != nil {
-			diagnostics = appendDiagnostics(diagnostics, output, "go/format")
+			diagnostics = appendDiagnostics(diagnostics, commandResult.Output, "go/format")
 			joined = errors.Join(joined, err)
 			continue
 		}
 
-		output, err = commandrun.ToolByID(
+		commandResult, err = commandrun.ToolByID(
 			context,
 			workDir,
 			goimportsToolID,
@@ -71,7 +71,7 @@ func runGoFormat(
 				target.FormatPaths...,
 			)...,
 		)
-		diagnostics = appendDiagnostics(diagnostics, output, "go/format")
+		diagnostics = appendDiagnostics(diagnostics, commandResult.Output, "go/format")
 		joined = errors.Join(joined, err)
 	}
 
