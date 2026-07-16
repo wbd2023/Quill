@@ -50,10 +50,10 @@ func installTool(
 		return nil
 
 	case toolchain.GoInstall:
-		return golang.Install(layout, writer, tool, install, path)
+		return golang.Install(layout, writer, tool, path)
 
 	case toolchain.NpmInstall:
-		return node.Install(layout, writer, tool, install, path)
+		return node.Install(layout, writer, tool, path)
 
 	case toolchain.GitHubInstall:
 		return installGitHub(layout, writer, tool, install, lockfile)
