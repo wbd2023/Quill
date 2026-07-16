@@ -1,7 +1,9 @@
 package toolchain
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"slices"
 
 	"ciphera/tools/internal/runtime"
@@ -47,4 +49,28 @@ func inspectTool(tool Tool, environment map[string]string) (status Status) {
 
 	status.Valid = true
 	return status
+}
+
+// IsInstalled reports whether a tool matching the pinned version is already installed at the given
+// path.
+func IsInstalled(tool Tool, path string) (installed bool, err error) {
+	if _, err = os.Stat(path); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	probe := tool
+	probe.Command = path
+	statuses := InspectTools(
+		map[string]Tool{tool.ID: probe},
+		nil,
+	)
+	if len(statuses) != 1 {
+		return false, fmt.Errorf("inspect local tool %s: missing status", tool.ID)
+	}
+
+	return statuses[0].Valid, nil
 }

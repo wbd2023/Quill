@@ -15,21 +15,15 @@ func TestLayoutDerivesPathsFromRepositoryRoot(t *testing.T) {
 		t.Fatalf("ToolBinaryDirectory = %q, want %q",
 			layout.ToolBinaryDirectory(), "/repo/.cache/quill/bin")
 	}
-
-	if layout.GoBuildCache() != "/repo/.cache/quill/cache/go-build" {
-		t.Fatalf("GoBuildCache = %q, want %q",
-			layout.GoBuildCache(), "/repo/.cache/quill/cache/go-build")
-	}
 }
 
-func TestLayoutSearchPathPrependsToolAndNodeBins(t *testing.T) {
+func TestSearchPathPrependsBinaryDirectories(t *testing.T) {
 	t.Setenv("PATH", "/usr/bin")
 
-	layout := NewLayout("/repo")
-
-	expected := layout.ToolBinaryDirectory() + ":" + layout.NodeBinaryDirectory() + ":/usr/bin"
-	if actual := layout.SearchPath(); actual != expected {
-		t.Fatalf("PATH = %q, want %q", actual, expected)
+	actual := SearchPath("/tool/bin", "/node/bin")
+	expected := "/tool/bin:/node/bin:/usr/bin"
+	if actual != expected {
+		t.Fatalf("SearchPath = %q, want %q", actual, expected)
 	}
 }
 
