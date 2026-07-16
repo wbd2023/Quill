@@ -83,7 +83,7 @@ func RunCommand(request CommandRequest) (result CommandResult, err error) {
 		return result, CommandError{
 			Name:      request.Name,
 			Arguments: append([]string{}, request.Arguments...),
-			Result:    result,
+			TimedOut:  result.TimedOut,
 			Err:       err,
 		}
 	}

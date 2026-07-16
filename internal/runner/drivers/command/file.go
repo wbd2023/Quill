@@ -55,7 +55,10 @@ func runFileCommand(
 	styleCommand := commandrun.BuildStyleResult(commandResult)
 
 	if isFix {
-		return style.ExecutionResult{Command: styleCommand}, runErr
+		return style.ExecutionResult{
+			Command: styleCommand,
+			Output:  commandResult.Output,
+		}, runErr
 	}
 
 	interpreter, found := interpreters.Lookup(execution.ToolID)
