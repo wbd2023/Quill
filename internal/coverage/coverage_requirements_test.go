@@ -21,8 +21,8 @@ func TestRequirementsCoverEveryStyleRequirement(t *testing.T) {
 }
 
 func TestReviewOnlyRequirementsAreNotAlsoAutomated(t *testing.T) {
-	effective := loadEffectiveConfig(t)
-	automated := ruleIDsByRequirement(effective.Rules)
+	plan := loadPlan(t)
+	automated := ruleIDsByRequirement(plan.Rules)
 
 	report := loadCoverageReport(t)
 	for _, requirement := range report.Requirements {

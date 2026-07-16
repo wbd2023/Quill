@@ -10,9 +10,9 @@ type Definitions struct {
 	Rules   []RuleDefinition
 }
 
-// EffectiveConfig represents the compiled configuration: concrete rules bound to enforcement
-// levels and scopes.
-type EffectiveConfig struct {
+// Plan represents a compiled execution plan: concrete rules with bound enforcement levels, scopes,
+// and execution jobs.
+type Plan struct {
 	Rules []Rule
 }
 
