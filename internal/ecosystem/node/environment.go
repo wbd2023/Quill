@@ -8,7 +8,7 @@ import (
 
 // InstallDirectory returns the directory where npm install operates.
 func InstallDirectory(layout runtime.Layout) (directory string) {
-	return filepath.Join(layout.StateDirectory(), "npm")
+	return filepath.Join(layout.StateDirectory, "npm")
 }
 
 // BinaryDirectory returns the directory where Node-installed binaries live.

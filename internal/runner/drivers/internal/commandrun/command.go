@@ -2,6 +2,7 @@ package commandrun
 
 import (
 	"fmt"
+	"time"
 
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runtime"
@@ -25,7 +26,7 @@ func ToolByID(
 		Arguments:        append([]string{}, arguments...),
 		Environment:      context.GoEnvironment,
 		Directory:        workDir,
-		TimeoutSeconds:   tool.TimeoutSeconds,
+		Timeout:          time.Duration(tool.TimeoutSeconds) * time.Second,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
 }

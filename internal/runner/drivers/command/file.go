@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/commandrun"
@@ -48,7 +49,7 @@ func runFileCommand(
 		Arguments:        arguments,
 		Environment:      context.ToolEnvironment,
 		Directory:        context.RepoRoot,
-		TimeoutSeconds:   tool.TimeoutSeconds,
+		Timeout:          time.Duration(tool.TimeoutSeconds) * time.Second,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
 

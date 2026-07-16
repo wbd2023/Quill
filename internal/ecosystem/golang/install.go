@@ -21,7 +21,7 @@ func Install(
 	tool toolchain.Tool,
 	path string,
 ) (err error) {
-	binary := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
+	binary := filepath.Join(layout.BinaryDirectory(), tool.Command)
 	installed, err := toolchain.IsInstalled(tool, binary)
 	if err != nil {
 		return err
@@ -72,12 +72,12 @@ func command(
 	}
 
 	environment := Environment(layout, path)
-	environment["GOBIN"] = layout.ToolBinaryDirectory()
+	environment["GOBIN"] = layout.BinaryDirectory()
 
 	return runtime.CommandRequest{
 		Name:        "go",
 		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
 		Environment: environment,
-		Directory:   layout.StateDirectory(),
+		Directory:   layout.StateDirectory,
 	}, nil
 }
