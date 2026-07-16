@@ -19,7 +19,8 @@ const (
 
 /* ---------------------------------------- Spacing Rules --------------------------------------- */
 
-// CheckSwitchCaseSpacing check switch case spacing.
+// CheckSwitchCaseSpacing checks that non-trivial switch statements separate case blocks with blank
+// lines. Blank lines between cases are always acceptable; they are never flagged.
 func CheckSwitchCaseSpacing(
 	fileSet *token.FileSet,
 	file *ast.File,
@@ -60,9 +61,7 @@ func switchSpacingViolations(
 		return nil
 	}
 
-	verySmall := isVerySmallSwitch(fileSet, caseClauses)
-	nonTrivial := isNonTrivialSwitch(fileSet, caseClauses)
-	if !verySmall && !nonTrivial {
+	if !isNonTrivialSwitch(fileSet, caseClauses) {
 		return nil
 	}
 
@@ -71,26 +70,15 @@ func switchSpacingViolations(
 		nextClause := caseClauses[index+1]
 
 		if hasBlankLineBetween(fileSet, lines, previousClause, nextClause) {
-			if verySmall {
-				violations = append(violations, analysis.Violation{
-					Position: fileSet.Position(nextClause.Pos()),
-					Rule:     analysis.DiagnosticSwitchCaseSpacing,
-					Message: "very small switch statements should stay compact " +
-						"without blank lines between case blocks",
-				})
-			}
-
 			continue
 		}
 
-		if nonTrivial {
-			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(nextClause.Pos()),
-				Rule:     analysis.DiagnosticSwitchCaseSpacing,
-				Message: "non-trivial switch statements should separate case blocks " +
-					"with a blank line",
-			})
-		}
+		violations = append(violations, analysis.Violation{
+			Position: fileSet.Position(nextClause.Pos()),
+			Rule:     analysis.DiagnosticSwitchCaseSpacing,
+			Message: "non-trivial switch statements should separate case blocks " +
+				"with a blank line",
+		})
 	}
 
 	return violations
@@ -110,20 +98,6 @@ func collectCaseClauses(statements []ast.Stmt) (clauses []*ast.CaseClause) {
 	}
 
 	return clauses
-}
-
-func isVerySmallSwitch(fileSet *token.FileSet, clauses []*ast.CaseClause) (found bool) {
-	if len(clauses) < minSwitchCaseCount || len(clauses) > maxVerySmallSwitchClauses {
-		return false
-	}
-
-	for _, clause := range clauses {
-		if !isVerySmallCaseClause(fileSet, clause) {
-			return false
-		}
-	}
-
-	return true
 }
 
 func isNonTrivialSwitch(fileSet *token.FileSet, clauses []*ast.CaseClause) (found bool) {

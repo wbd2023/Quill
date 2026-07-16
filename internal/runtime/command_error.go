@@ -18,8 +18,10 @@ func (err CommandError) Error() (message string) {
 	switch {
 	case err.Result.TimedOut:
 		return fmt.Sprintf("%s timed out", formatCommand(err.Name, err.Arguments))
+
 	case err.Err != nil:
 		return fmt.Sprintf("%s failed: %v", formatCommand(err.Name, err.Arguments), err.Err)
+
 	default:
 		return fmt.Sprintf("%s failed with exit code %d",
 			formatCommand(err.Name, err.Arguments),
