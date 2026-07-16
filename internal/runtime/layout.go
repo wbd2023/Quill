@@ -61,7 +61,7 @@ func (layout Layout) ToolBinaryDirectory() (directory string) {
 // SearchPath joins the given binary directories and the system PATH, producing a PATH value that
 // makes installed tool binaries discoverable. The caller provides the ecosystem-specific binary
 // directories (eg the engine's tool binary directory and a Node binary directory).
-func SearchPath(binaryDirectories ...string) (value string) {
+func SearchPath(binaryDirectories ...string) (path string) {
 	directories := append([]string{}, binaryDirectories...)
 	directories = append(directories, os.Getenv("PATH"))
 	return strings.Join(directories, string(os.PathListSeparator))

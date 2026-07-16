@@ -33,10 +33,11 @@ func scanGoArchitecture(
 }
 
 func runGoList(context runner.Context, arguments ...string) (output string, err error) {
-	return commandrun.Output(
+	result, err := commandrun.Output(
 		context.RepoRoot,
 		context.GoEnvironment,
 		"go",
 		append([]string{"list"}, arguments...)...,
 	)
+	return result.Output, err
 }

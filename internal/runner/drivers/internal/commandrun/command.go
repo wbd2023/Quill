@@ -8,43 +8,41 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-// ToolByID runs a tool's command and returns its stdout.
+// ToolByID runs a tool identified by toolID and returns its result.
 func ToolByID(
 	context runner.Context,
 	workDir string,
 	toolID string,
 	arguments ...string,
-) (output string, err error) {
+) (result runtime.CommandResult, err error) {
 	tool, found := context.Tools[toolID]
 	if !found {
-		return "", fmt.Errorf("unknown tool %q", toolID)
+		return runtime.CommandResult{}, fmt.Errorf("unknown tool %q", toolID)
 	}
 
-	result, err := runtime.RunCommand(runtime.CommandRequest{
-		Directory:        workDir,
-		Environment:      context.GoEnvironment,
+	return runtime.RunCommand(runtime.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        append([]string{}, arguments...),
+		Environment:      context.GoEnvironment,
+		Directory:        workDir,
 		TimeoutSeconds:   tool.TimeoutSeconds,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
-	return result.Output, err
 }
 
-// Output runs a command and returns its stdout.
+// Output runs a command and returns its result.
 func Output(
 	workDir string,
 	environment map[string]string,
 	name string,
 	arguments ...string,
-) (output string, err error) {
-	result, err := runtime.RunCommand(runtime.CommandRequest{
-		Directory:   workDir,
-		Environment: environment,
+) (result runtime.CommandResult, err error) {
+	return runtime.RunCommand(runtime.CommandRequest{
 		Name:        name,
 		Arguments:   append([]string{}, arguments...),
+		Environment: environment,
+		Directory:   workDir,
 	})
-	return result.Output, err
 }
 
 // BuildStyleResult projects a runtime.CommandResult onto the style.CommandResult the

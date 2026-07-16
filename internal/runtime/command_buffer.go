@@ -2,6 +2,8 @@ package runtime
 
 import "strings"
 
+// limitedBuffer is a strings.Builder wrapper that caps the total bytes written and tracks whether
+// output was truncated.
 type limitedBuffer struct {
 	builder   strings.Builder
 	limit     int64

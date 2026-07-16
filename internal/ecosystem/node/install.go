@@ -74,13 +74,13 @@ func command(
 	}
 
 	return runtime.CommandRequest{
-		Environment: Environment(layout, path),
-		Directory:   InstallDirectory(layout),
-		Name:        "npm",
+		Name: "npm",
 		Arguments: []string{
 			"install",
 			"--save-exact", "--ignore-scripts", "--no-audit", "--no-fund",
 			install.Source + "@" + tool.PinnedVersion,
 		},
+		Environment: Environment(layout, path),
+		Directory:   InstallDirectory(layout),
 	}, nil
 }

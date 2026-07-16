@@ -75,9 +75,9 @@ func command(
 	environment["GOBIN"] = layout.ToolBinaryDirectory()
 
 	return runtime.CommandRequest{
-		Environment: environment,
-		Directory:   layout.StateDirectory(),
 		Name:        "go",
 		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
+		Environment: environment,
+		Directory:   layout.StateDirectory(),
 	}, nil
 }
