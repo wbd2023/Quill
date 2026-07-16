@@ -6,12 +6,13 @@ import (
 	"ciphera/tools/internal/style"
 )
 
-// FileCommandArguments file command arguments.
+// FileCommandArguments extracts the command arguments from a file-command job, resolving config
+// file paths against the repository root.
 func FileCommandArguments(
 	repoRoot string,
-	spec style.ExecutionSpec,
+	job style.Job,
 ) (arguments []string) {
-	execution, found := spec.Detail.(style.FileCommandExecution)
+	execution, found := job.(style.FileCommandExecution)
 	if !found {
 		return nil
 	}

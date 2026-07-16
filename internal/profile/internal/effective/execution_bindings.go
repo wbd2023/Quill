@@ -12,13 +12,13 @@ import (
 func validateRuleExecutionBinding(
 	config policy.Config,
 	binding policy.RuleBinding,
-	execution style.ExecutionSpec,
+	template style.Template,
 ) (err error) {
-	if execution.Empty() {
+	if template == nil {
 		return nil
 	}
 
-	if fileSet := execution.FileSetName(); !isBlank(fileSet) {
+	if fileSet := style.Describe(template).FileSet; !isBlank(fileSet) {
 		if _, found := config.FileSets.Lookup(fileSet); !found {
 			return fmt.Errorf(
 				"rule %q references unknown file set %q",
@@ -34,9 +34,10 @@ func validateRuleExecutionBinding(
 func resolveTargets(
 	config policy.Config,
 	binding policy.RuleBinding,
-	execution style.ExecutionSpec,
+	template style.Template,
 ) (targets []string, err error) {
-	if !execution.UsesTargets() {
+	requirements := style.Describe(template)
+	if !requirements.NeedsTargets {
 		return nil, nil
 	}
 
@@ -44,8 +45,8 @@ func resolveTargets(
 		config,
 		binding.RuleID,
 		binding.Scope,
-		execution.TargetLanguage(),
-		execution.RequiresTargetCheckPaths(),
+		requirements.TargetLanguage,
+		requirements.NeedsCheckPaths,
 	)
 }
 

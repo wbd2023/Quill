@@ -37,12 +37,12 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 func profileDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
-		spec style.ExecutionSpec,
+		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.Detail.(style.ProfileExecution)
+		execution, found := job.(style.ProfileExecution)
 		if !found {
-			return style.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
+			return style.ExecutionResult{}, fmt.Errorf("project driver received empty job")
 		}
 
 		check, found := checks.Lookup(execution.Check)

@@ -6,15 +6,14 @@ import (
 
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/style"
 )
 
 func goTargets(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	names []string,
 	goLanguage string,
 ) (targets []policy.TargetConfig, err error) {
-	for _, name := range spec.Targets() {
+	for _, name := range names {
 		target, err := goTarget(context.Profile, name, goLanguage)
 		if err != nil {
 			return nil, err

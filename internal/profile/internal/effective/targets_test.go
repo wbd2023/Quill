@@ -6,6 +6,7 @@ import (
 
 	"ciphera/tools/internal/profile/internal/effective"
 	"ciphera/tools/internal/profile/internal/profiletest"
+	"ciphera/tools/internal/style"
 )
 
 func TestCompileInfersTargetsFromRuleScope(t *testing.T) {
@@ -20,12 +21,14 @@ func TestCompileInfersTargetsFromRuleScope(t *testing.T) {
 	}
 
 	rule := compiled.Rules[0]
-	if !slices.Equal(rule.Check.Targets(), want) {
-		t.Fatalf("check targets = %v, want %v", rule.Check.Targets(), want)
+	checkJob := rule.Check.(style.TargetCommandJob)
+	if !slices.Equal(checkJob.Targets, want) {
+		t.Fatalf("check targets = %v, want %v", checkJob.Targets, want)
 	}
 
-	if !slices.Equal(rule.Fix.Targets(), want) {
-		t.Fatalf("fix targets = %v, want %v", rule.Fix.Targets(), want)
+	fixJob := rule.Fix.(style.TargetCommandJob)
+	if !slices.Equal(fixJob.Targets, want) {
+		t.Fatalf("fix targets = %v, want %v", fixJob.Targets, want)
 	}
 }
 

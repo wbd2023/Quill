@@ -18,23 +18,23 @@ func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
 	checkers := CheckDrivers(bindings)
 	fixers := FixDrivers(bindings)
 	for _, rule := range registry.Rules() {
-		driver := driverForDetail(rule.Check.Detail, checkers)
+		driver := driverForDetail(rule.Check, checkers)
 		if driver == nil {
-			t.Fatalf("rule %q check detail %T has no checker driver", rule.ID, rule.Check.Detail)
+			t.Fatalf("rule %q check detail %T has no checker driver", rule.ID, rule.Check)
 		}
 
-		if rule.Fix.Empty() {
+		if rule.Fix == nil {
 			continue
 		}
 
-		driver = driverForDetail(rule.Fix.Detail, fixers)
+		driver = driverForDetail(rule.Fix, fixers)
 		if driver == nil {
-			t.Fatalf("rule %q fix detail %T has no fixer driver", rule.ID, rule.Fix.Detail)
+			t.Fatalf("rule %q fix detail %T has no fixer driver", rule.ID, rule.Fix)
 		}
 	}
 }
 
-func driverForDetail(detail style.ExecutionDetail, set runner.DriverSet) (driver runner.Driver) {
+func driverForDetail(detail style.Template, set runner.DriverSet) (driver runner.Driver) {
 	switch detail.(type) {
 
 	case style.ToolchainExecution:
@@ -46,10 +46,10 @@ func driverForDetail(detail style.ExecutionDetail, set runner.DriverSet) (driver
 	case style.FileCommandExecution:
 		return set.FileCommand
 
-	case style.TargetCommandExecution:
+	case style.TargetCommandTemplate:
 		return set.TargetCommand
 
-	case style.TargetCheckExecution:
+	case style.TargetCheckTemplate:
 		return set.TargetCheck
 
 	case style.RepositoryScanExecution:

@@ -12,13 +12,13 @@ import (
 func targetCommandDriver(commands runtimebinding.TargetCommands) (driver runner.Driver) {
 	return func(
 		context runner.Context,
-		spec style.ExecutionSpec,
+		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.Detail.(style.TargetCommandExecution)
+		execution, found := job.(style.TargetCommandJob)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf(
-				"target command driver received empty spec",
+				"target command driver received empty job",
 			)
 		}
 
@@ -30,19 +30,19 @@ func targetCommandDriver(commands runtimebinding.TargetCommands) (driver runner.
 			)
 		}
 
-		return command(context, spec)
+		return command(context, job)
 	}
 }
 
 func targetCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver) {
 	return func(
 		context runner.Context,
-		spec style.ExecutionSpec,
+		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.Detail.(style.TargetCheckExecution)
+		execution, found := job.(style.TargetCheckJob)
 		if !found {
-			return style.ExecutionResult{}, fmt.Errorf("target check driver received empty spec")
+			return style.ExecutionResult{}, fmt.Errorf("target check driver received empty job")
 		}
 
 		check, found := checks.Lookup(execution.Language)
@@ -53,6 +53,6 @@ func targetCheckDriver(checks runtimebinding.TargetChecks) (driver runner.Driver
 			)
 		}
 
-		return check(context, spec)
+		return check(context, job)
 	}
 }

@@ -42,7 +42,7 @@ func validateRuleDefinition(
 		return fmt.Errorf("rule definition %q has an empty group", definition.ID)
 	}
 
-	if definition.Check.Empty() {
+	if definition.Check == nil {
 		return fmt.Errorf("rule definition %q must define check execution", definition.ID)
 	}
 
@@ -55,7 +55,7 @@ func validateRuleDefinition(
 		return err
 	}
 
-	if !definition.Fix.Empty() {
+	if definition.Fix != nil {
 		return validateRuleExecution(definition.ID, "fix", definition.Fix, availableTools)
 	}
 

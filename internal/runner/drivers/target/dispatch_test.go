@@ -21,7 +21,7 @@ func TestShippedPackGoChecksHaveDispatch(t *testing.T) {
 	}
 
 	for _, rule := range registry.Rules() {
-		execution, found := rule.Check.Detail.(style.TargetCheckExecution)
+		execution, found := rule.Check.(style.TargetCheckTemplate)
 		if !found {
 			continue
 		}

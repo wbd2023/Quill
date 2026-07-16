@@ -14,16 +14,14 @@ import (
 func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("app"))
 
-	spec := style.ExecutionSpec{
-		Detail: style.TargetCommandExecution{
-			ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
-			Action:   golang.TargetActionGolangci,
-			Language: golang.Language,
-			Targets:  []string{"app_go"},
-		},
+	job := style.TargetCommandJob{
+		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
+		Action:   golang.TargetActionGolangci,
+		Language: golang.Language,
+		Targets:  []string{"app_go"},
 	}
 
-	result, err := testTargetCommandDriver()(context, spec, nil)
+	result, err := testTargetCommandDriver()(context, job, nil)
 	if err != nil {
 		t.Fatalf("golangciDriver(app): %v", err)
 	}
@@ -36,16 +34,14 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
-	spec := style.ExecutionSpec{
-		Detail: style.TargetCommandExecution{
-			ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
-			Action:   golang.TargetActionGolangci,
-			Language: golang.Language,
-			Targets:  []string{"tools_go"},
-		},
+	job := style.TargetCommandJob{
+		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
+		Action:   golang.TargetActionGolangci,
+		Language: golang.Language,
+		Targets:  []string{"tools_go"},
 	}
 
-	result, err := testTargetCommandDriver()(context, spec, nil)
+	result, err := testTargetCommandDriver()(context, job, nil)
 	if err != nil {
 		t.Fatalf("golangciDriver(tools): %v", err)
 	}

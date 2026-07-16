@@ -18,13 +18,13 @@ import (
 // not produce findings to interpret.
 func runFileCommand(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 	interpreters runtimebinding.FileInterpreters,
 	isFix bool,
 ) (result style.ExecutionResult, err error) {
-	execution, found := spec.Detail.(style.FileCommandExecution)
+	execution, found := job.(style.FileCommandExecution)
 	if !found {
-		return style.ExecutionResult{}, errors.New("file-command driver received empty spec")
+		return style.ExecutionResult{}, errors.New("file-command driver received empty job")
 	}
 
 	files, err := runner.CollectFileSetFiles(context, execution.FileSet)
@@ -41,7 +41,7 @@ func runFileCommand(
 		return style.ExecutionResult{}, errUnknownTool(execution.ToolID)
 	}
 
-	arguments := runner.FileCommandArguments(context.RepoRoot, spec)
+	arguments := runner.FileCommandArguments(context.RepoRoot, job)
 	arguments = append(arguments, files...)
 	commandResult, runErr := runtime.RunCommand(runtime.CommandRequest{
 		Name:             tool.Command,

@@ -18,10 +18,8 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		Rules: []style.RuleDefinition{
 			{
 				ID: "custom/rule",
-				Check: style.ExecutionSpec{
-					Detail: style.FileCommandExecution{
-						Arguments: []string{"-w"},
-					},
+				Check: style.FileCommandExecution{
+					Arguments: []string{"-w"},
 				},
 			},
 		},
@@ -39,7 +37,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 	clone.Tools[0].Command = "changed"
 	clone.FileSets[0].Include.Extensions[0] = ".txt"
 
-	execution := clone.Rules[0].Check.Detail.(style.FileCommandExecution)
+	execution := clone.Rules[0].Check.(style.FileCommandExecution)
 	execution.Arguments[0] = "-changed"
 
 	if got := original.Tools[0].Command; got != "tool" {
@@ -50,7 +48,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		t.Fatalf("original file set extension = %q, want .go", got)
 	}
 
-	execution = original.Rules[0].Check.Detail.(style.FileCommandExecution)
+	execution = original.Rules[0].Check.(style.FileCommandExecution)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("original rule argument = %q, want -w", got)
 	}

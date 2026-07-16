@@ -13,13 +13,13 @@ import (
 func repositoryScanDriver(scanners runtimebinding.RepositoryScanners) (driver runner.Driver) {
 	return func(
 		context runner.Context,
-		spec style.ExecutionSpec,
+		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.Detail.(style.RepositoryScanExecution)
+		execution, found := job.(style.RepositoryScanExecution)
 		if !found {
 			return style.ExecutionResult{},
-				errors.New("repository-scan driver received empty spec")
+				errors.New("repository-scan driver received empty job")
 		}
 
 		scanner, found := scanners.Lookup(execution.Scanner)

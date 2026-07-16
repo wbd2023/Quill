@@ -13,10 +13,8 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := style.Rule{
 		ID: "test/rule",
-		Check: style.ExecutionSpec{
-			Detail: style.RepositoryScanExecution{
-				Scanner: "test",
-			},
+		Check: style.RepositoryScanExecution{
+			Scanner: "test",
 		},
 	}
 	context := NewContext(
@@ -32,7 +30,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	drivers := DriverSet{
 		RepositoryScan: func(
 			_ Context,
-			_ style.ExecutionSpec,
+			_ style.Job,
 			_ toolchain.StatusMap,
 		) (result style.ExecutionResult, err error) {
 			return style.ExecutionResult{Diagnostics: []style.Diagnostic{{Message: "ran"}}}, nil
@@ -53,10 +51,8 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := style.Rule{
 		ID: "test/unsupported",
-		Check: style.ExecutionSpec{
-			Detail: style.ToolchainExecution{
-				ToolIDs: []string{"go"},
-			},
+		Check: style.ToolchainExecution{
+			ToolIDs: []string{"go"},
 		},
 	}
 	context := NewContext(

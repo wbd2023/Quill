@@ -63,7 +63,7 @@ func (validator ruleExecutionValidator) validateFileCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCommandExecution(
-	execution style.TargetCommandExecution,
+	execution style.TargetCommandTemplate,
 ) (err error) {
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
 		return err
@@ -89,7 +89,7 @@ func (validator ruleExecutionValidator) validateTargetCommandExecution(
 }
 
 func (validator ruleExecutionValidator) validateTargetCheckExecution(
-	execution style.TargetCheckExecution,
+	execution style.TargetCheckTemplate,
 ) (err error) {
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
 		return err

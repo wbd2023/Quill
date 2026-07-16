@@ -12,15 +12,15 @@ import (
 
 var errRuleBlocked = errors.New("rule blocked by toolchain")
 
-// Driver executes one rule's check or fix against the repository.
+// Driver executes one rule's check or fix job against the repository.
 type Driver func(
 	context Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
 
-// DriverSet holds one driver per execution detail type. Fields that are nil are treated as "no
-// driver for this execution" and produce an empty result.
+// DriverSet holds one driver per execution job type. Fields that are nil are treated as "no driver
+// for this job" and produce an empty result.
 type DriverSet struct {
 	Toolchain      Driver
 	Profile        Driver
@@ -57,13 +57,13 @@ func RunFix(
 
 func runExecution(
 	ruleID string,
-	execution style.ExecutionSpec,
+	job style.Job,
 	toolIDs []string,
 	context Context,
 	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
-	if execution.Empty() {
+	if job == nil {
 		return style.ExecutionResult{}, nil
 	}
 
@@ -78,24 +78,24 @@ func runExecution(
 		}, errRuleBlocked
 	}
 
-	driver, err := driverFor(execution.Detail, drivers)
+	driver, err := driverFor(job, drivers)
 	if err != nil {
 		return style.ExecutionResult{}, fmt.Errorf("rule %s: %w", ruleID, err)
 	}
 
 	if driver == nil {
 		return style.ExecutionResult{}, fmt.Errorf(
-			"rule %s: no driver registered for execution detail %T",
+			"rule %s: no driver registered for execution job %T",
 			ruleID,
-			execution.Detail,
+			job,
 		)
 	}
 
-	return driver(context, execution, toolStatuses)
+	return driver(context, job, toolStatuses)
 }
 
-func driverFor(detail style.ExecutionDetail, drivers DriverSet) (driver Driver, err error) {
-	switch detail.(type) {
+func driverFor(job style.Job, drivers DriverSet) (driver Driver, err error) {
+	switch job.(type) {
 
 	case style.ToolchainExecution:
 		return drivers.Toolchain, nil
@@ -106,16 +106,16 @@ func driverFor(detail style.ExecutionDetail, drivers DriverSet) (driver Driver, 
 	case style.FileCommandExecution:
 		return drivers.FileCommand, nil
 
-	case style.TargetCommandExecution:
+	case style.TargetCommandJob:
 		return drivers.TargetCommand, nil
 
-	case style.TargetCheckExecution:
+	case style.TargetCheckJob:
 		return drivers.TargetCheck, nil
 
 	case style.RepositoryScanExecution:
 		return drivers.RepositoryScan, nil
 
 	default:
-		return nil, fmt.Errorf("unknown execution detail type %T", detail)
+		return nil, fmt.Errorf("unknown execution job type %T", job)
 	}
 }

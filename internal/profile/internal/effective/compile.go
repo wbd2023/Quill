@@ -93,22 +93,22 @@ func resolveRule(
 func resolveExecution(
 	config policy.Config,
 	binding policy.RuleBinding,
-	execution style.ExecutionSpec,
-) (resolved style.ExecutionSpec, err error) {
-	if err := validateRuleExecutionBinding(config, binding, execution); err != nil {
-		return style.ExecutionSpec{}, err
+	template style.Template,
+) (resolved style.Job, err error) {
+	if template == nil {
+		return nil, nil
 	}
 
-	targets, err := resolveTargets(config, binding, execution)
+	if err = validateRuleExecutionBinding(config, binding, template); err != nil {
+		return nil, err
+	}
+
+	targets, err := resolveTargets(config, binding, template)
 	if err != nil {
-		return style.ExecutionSpec{}, err
+		return nil, err
 	}
 
-	if execution.UsesTargets() {
-		return execution.WithTargets(targets), nil
-	}
-
-	return execution, nil
+	return style.Bind(template, targets), nil
 }
 
 func isBlank(value string) (blank bool) {
