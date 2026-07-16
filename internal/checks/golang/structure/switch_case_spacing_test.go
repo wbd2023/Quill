@@ -67,9 +67,9 @@ func TestCheckSwitchCaseSpacingAllowsSeparatedNonTrivialSwitches(t *testing.T) {
 	}
 }
 
-/* -------------------------------------- Compact Switches -------------------------------------- */
+/* --------------------------------------- Small Switches --------------------------------------- */
 
-func TestCheckSwitchCaseSpacingRejectsOverSpacedVerySmallSwitches(t *testing.T) {
+func TestCheckSwitchCaseSpacingAllowsSpacedSmallSwitches(t *testing.T) {
 	source := strings.Join([]string{
 		"package example",
 		"",
@@ -87,17 +87,12 @@ func TestCheckSwitchCaseSpacingRejectsOverSpacedVerySmallSwitches(t *testing.T) 
 	fileSet, file := parseGoSource(t, source)
 
 	violations := CheckSwitchCaseSpacing(fileSet, file, sourceLines(source))
-	if !hasViolationAt(
-		violations,
-		analysis.DiagnosticSwitchCaseSpacing,
-		8,
-		"very small switch statements should stay compact",
-	) {
-		t.Fatalf("expected over-spaced switch violation, got: %#v", violations)
+	if len(violations) != 0 {
+		t.Fatalf("expected no violations for spaced small switch, got: %#v", violations)
 	}
 }
 
-func TestCheckSwitchCaseSpacingAllowsCompactVerySmallSwitches(t *testing.T) {
+func TestCheckSwitchCaseSpacingAllowsCompactSmallSwitches(t *testing.T) {
 	source := strings.Join([]string{
 		"package example",
 		"",
@@ -115,6 +110,6 @@ func TestCheckSwitchCaseSpacingAllowsCompactVerySmallSwitches(t *testing.T) {
 
 	violations := CheckSwitchCaseSpacing(fileSet, file, sourceLines(source))
 	if len(violations) != 0 {
-		t.Fatalf("expected no compact switch violations, got: %#v", violations)
+		t.Fatalf("expected no violations for compact small switch, got: %#v", violations)
 	}
 }
