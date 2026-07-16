@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/commandrun"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
@@ -17,7 +17,7 @@ func RunGolangci(
 	golangciLintToolID string,
 	goimportsToolID string,
 	goLanguage string,
-) (command runtimebinding.TargetCommand) {
+) (command driverkit.TargetCommand) {
 	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
 		return runGolangci(context, job, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
 	}

@@ -7,12 +7,12 @@ import (
 
 	"ciphera/tools/internal/checks/golang"
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
 // CheckGoStyle check go style.
-func CheckGoStyle(goPackID string, goLanguage string) (check runtimebinding.TargetCheck) {
+func CheckGoStyle(goPackID string, goLanguage string) (check driverkit.TargetCheck) {
 	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
 		return runGoStyleCheck(context, job, goPackID, goLanguage)
 	}

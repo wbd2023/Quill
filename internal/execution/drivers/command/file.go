@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/style"
 )
@@ -19,7 +19,7 @@ import (
 func runFileCommand(
 	context execution.Context,
 	job style.Job,
-	interpreters runtimebinding.FileInterpreters,
+	interpreters driverkit.FileInterpreters,
 	isFix bool,
 ) (result style.ExecutionResult, err error) {
 	fileCommand, found := job.(style.FileCommandExecution)

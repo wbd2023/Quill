@@ -34,7 +34,7 @@ func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
 	}
 }
 
-func driverForDetail(detail style.Template, set execution.DriverSet) (driver execution.Driver) {
+func driverForDetail(detail style.Template, set execution.ExecutorSet) (driver execution.Executor) {
 	switch detail.(type) {
 
 	case style.ToolchainExecution:

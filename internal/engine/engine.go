@@ -108,8 +108,8 @@ type PackProvider interface {
 // definitions.
 type PackEnvironment struct {
 	Registry     pack.Registry
-	CheckDrivers execution.DriverSet
-	FixDrivers   execution.DriverSet
+	CheckDrivers execution.ExecutorSet
+	FixDrivers   execution.ExecutorSet
 }
 
 // defaultPackProvider wraps shipped packs, shipped bindings, and standard drivers.

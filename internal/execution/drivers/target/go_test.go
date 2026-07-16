@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/pack/shipped/golang"
 	"ciphera/tools/internal/pack/shipped/tool"
 	"ciphera/tools/internal/style"
@@ -51,8 +51,8 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 	}
 }
 
-func testTargetCommandDriver() (driver execution.Driver) {
-	commands := runtimebinding.NewTargetCommands()
+func testTargetCommandDriver() (driver execution.Executor) {
+	commands := driverkit.NewTargetCommands()
 	commands.Add(
 		golang.TargetActionGolangci,
 		RunGolangci(golang.PackID, tool.GolangciLint, tool.Goimports, golang.Language),
