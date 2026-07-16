@@ -22,10 +22,10 @@ func Cache(layout runtime.Layout) (cache string) {
 }
 
 // Environment builds the NPM environment variables for installing Node tooling within the engine's
-// isolated layout. searchPath is the PATH value that makes installed tool binaries discoverable.
-func Environment(layout runtime.Layout, searchPath string) (environment map[string]string) {
+// isolated layout. path is the PATH value that makes installed tool binaries discoverable.
+func Environment(layout runtime.Layout, path string) (environment map[string]string) {
 	return map[string]string{
-		"PATH":             searchPath,
+		"PATH":             path,
 		"npm_config_cache": Cache(layout),
 	}
 }

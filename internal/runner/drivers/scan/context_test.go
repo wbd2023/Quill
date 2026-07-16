@@ -37,9 +37,9 @@ func testContext(
 	}
 
 	layout := runtime.NewLayout(repoRoot)
-	searchPath := runtime.SearchPath(layout.ToolBinaryDirectory(), node.BinaryDirectory(layout))
-	toolEnvironment := map[string]string{"PATH": searchPath}
-	goEnvironment := golang.Environment(layout, searchPath)
+	path := runtime.SearchPath(layout.ToolBinaryDirectory(), node.BinaryDirectory(layout))
+	toolEnvironment := map[string]string{"PATH": path}
+	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	return runner.NewContext(
