@@ -9,8 +9,8 @@ import (
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
+	"ciphera/tools/internal/workspace"
 )
 
 func loadContext(repoRoot string, scope style.Scope) (context runner.Context, err error) {
@@ -42,7 +42,7 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 		return runner.Context{}, err
 	}
 
-	layout := runtime.NewLayout(repoRoot)
+	layout := workspace.NewLayout(repoRoot)
 	path := layout.BuildPath(node.BinaryDirectory(layout))
 	toolEnvironment := map[string]string{"PATH": path}
 	goEnvironment := golang.Environment(layout, path)

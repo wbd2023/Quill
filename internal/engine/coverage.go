@@ -7,9 +7,9 @@ import (
 	"ciphera/tools/internal/coverage"
 	"ciphera/tools/internal/installer"
 	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/styleguide"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 /* ------------------------------------- Coverage Reporting ------------------------------------- */
@@ -53,7 +53,7 @@ func (engine *Engine) Install(
 		return InstallResult{}, err
 	}
 
-	layout := runtime.NewLayout(engine.repositoryRoot)
+	layout := workspace.NewLayout(engine.repositoryRoot)
 	loaded, err := lockfile.Load(engine.repositoryRoot)
 	if err != nil {
 		return InstallResult{}, err

@@ -5,8 +5,8 @@ import (
 	"slices"
 	"time"
 
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runtime"
 )
 
 // ToolByID runs a tool identified by toolID and returns its result.
@@ -15,13 +15,13 @@ func ToolByID(
 	workDir string,
 	toolID string,
 	arguments ...string,
-) (result runtime.CommandResult, err error) {
+) (result process.CommandResult, err error) {
 	tool, found := context.Tools[toolID]
 	if !found {
-		return runtime.CommandResult{}, fmt.Errorf("unknown tool %q", toolID)
+		return process.CommandResult{}, fmt.Errorf("unknown tool %q", toolID)
 	}
 
-	return runtime.RunCommand(runtime.CommandRequest{
+	return process.RunCommand(process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        slices.Clone(arguments),
 		Environment:      context.GoEnvironment,
@@ -37,8 +37,8 @@ func Output(
 	environment map[string]string,
 	name string,
 	arguments ...string,
-) (result runtime.CommandResult, err error) {
-	return runtime.RunCommand(runtime.CommandRequest{
+) (result process.CommandResult, err error) {
+	return process.RunCommand(process.CommandRequest{
 		Name:        name,
 		Arguments:   slices.Clone(arguments),
 		Environment: environment,

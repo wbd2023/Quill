@@ -1,4 +1,4 @@
-package runtime
+package process
 
 // Runner resolves and executes commands using the operating system. It satisfies
 // toolchain.CommandRunner without importing toolchain (structural typing).

@@ -6,8 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 // standardPermissions is the filesystem mode for created directories.
@@ -16,13 +17,13 @@ const standardPermissions os.FileMode = 0o755
 // Install runs npm install for the tool using an isolated npm environment derived from layout. It
 // skips installation when the tool is already present at the pinned version.
 func Install(
-	layout runtime.Layout,
+	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
 	path string,
 ) (err error) {
 	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
-	installed, err := toolchain.IsInstalled(runtime.Runner{}, tool, binary)
+	installed, err := toolchain.IsInstalled(process.Runner{}, tool, binary)
 	if err != nil {
 		return err
 	}
@@ -49,7 +50,7 @@ func Install(
 		return err
 	}
 
-	if _, err = runtime.RunCommand(command); err != nil {
+	if _, err = process.RunCommand(command); err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
 	}
 
@@ -60,10 +61,10 @@ func Install(
 // --ignore-scripts prevents arbitrary postinstall scripts from running; the remaining flags pin
 // the exact version and suppress side output.
 func command(
-	layout runtime.Layout,
+	layout workspace.Layout,
 	tool toolchain.Tool,
 	path string,
-) (cmd runtime.CommandRequest, err error) {
+) (cmd process.CommandRequest, err error) {
 	install, ok := tool.Install.(toolchain.NpmInstall)
 	if !ok {
 		return cmd, fmt.Errorf("tool %s is not an NPM install", tool.ID)
@@ -73,7 +74,7 @@ func command(
 		return cmd, fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	return runtime.CommandRequest{
+	return process.CommandRequest{
 		Name: "npm",
 		Arguments: []string{
 			"install",

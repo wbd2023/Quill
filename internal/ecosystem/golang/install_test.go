@@ -3,12 +3,12 @@ package golang
 import (
 	"testing"
 
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 func TestCommandBuildsGoInstallRequest(t *testing.T) {
-	layout := runtime.NewLayout("/repo")
+	layout := workspace.NewLayout("/repo")
 	tool := toolchain.Tool{
 		ID:            "goimports",
 		Name:          "goimports",

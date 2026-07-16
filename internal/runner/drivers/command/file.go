@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -43,7 +43,7 @@ func runFileCommand(
 
 	arguments := runner.FileCommandArguments(context.RepoRoot, job)
 	arguments = append(arguments, files...)
-	commandResult, runErr := runtime.RunCommand(runtime.CommandRequest{
+	commandResult, runErr := process.RunCommand(process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        arguments,
 		Environment:      context.ToolEnvironment,
@@ -72,7 +72,7 @@ func runFileCommand(
 	}
 
 	if runErr != nil {
-		var cmdErr runtime.CommandError
+		var cmdErr process.CommandError
 		if !errors.As(runErr, &cmdErr) {
 			return result, runErr
 		}

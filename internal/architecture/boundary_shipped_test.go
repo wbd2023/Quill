@@ -24,7 +24,8 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 				"ciphera/tools/internal/profile",
 				"ciphera/tools/internal/report",
 				"ciphera/tools/internal/runner",
-				"ciphera/tools/internal/runtime",
+				"ciphera/tools/internal/process",
+				"ciphera/tools/internal/workspace",
 				"ciphera/tools/internal/styleguide",
 			},
 		})
@@ -53,7 +54,8 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 			"ciphera/tools/internal/pack/shipped/text",
 			"ciphera/tools/internal/pack/shipped/vocabulary",
 			"ciphera/tools/internal/checks",
-			"ciphera/tools/internal/runtime",
+			"ciphera/tools/internal/process",
+			"ciphera/tools/internal/workspace",
 			"ciphera/tools/internal/styleguide",
 		},
 	})

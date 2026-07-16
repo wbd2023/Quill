@@ -10,12 +10,13 @@ import (
 	"ciphera/tools/internal/pack"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/pack/shipped/bindings"
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/profile"
 	"ciphera/tools/internal/runner"
 	"ciphera/tools/internal/runner/drivers"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 /* ----------------------------------------- Engine Core ---------------------------------------- */
@@ -48,7 +49,7 @@ type engineConfiguration struct {
 func New(repositoryRoot string, options ...Option) (engine *Engine, optionError error) {
 	configuration := engineConfiguration{
 		repositoryRoot: repositoryRoot,
-		commandRunner:  runtime.Runner{},
+		commandRunner:  process.Runner{},
 		packProvider:   defaultPackProvider{},
 		progressWriter: io.Discard,
 	}
@@ -200,7 +201,7 @@ func (engine *Engine) prepareRunnerContext(
 		return runner.Context{}, PackEnvironment{}, err
 	}
 
-	layout := runtime.NewLayout(engine.repositoryRoot)
+	layout := workspace.NewLayout(engine.repositoryRoot)
 	path := layout.BuildPath(node.BinaryDirectory(layout))
 	toolEnvironment := map[string]string{"PATH": path}
 	goEnvironment := golang.Environment(layout, path)
