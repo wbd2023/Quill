@@ -90,7 +90,7 @@ func checkEntryListJSON(entries []CheckEntry) (payload []checkEntryJSON) {
 			Status:       entry.Status,
 			Requirements: append([]string{}, entry.Rule.RequirementIDs...),
 			Diagnostics:  diagnosticListJSON(entry.Result.Diagnostics),
-			Command:      commandResultJSONFor(entry.Result.Command),
+			Command:      commandResultJSONFor(entry.Result),
 		})
 	}
 
@@ -112,18 +112,14 @@ func diagnosticListJSON(diagnostics []style.Diagnostic) (payload []diagnosticJSO
 	return payload
 }
 
-func commandResultJSONFor(command style.CommandResult) (payload *commandResultJSON) {
-	if !commandMetadataPresent(command) {
+func commandResultJSONFor(result style.ExecutionResult) (payload *commandResultJSON) {
+	if !result.HasCommand() {
 		return nil
 	}
 
 	return &commandResultJSON{
-		ExitCode:  command.ExitCode,
-		TimedOut:  command.TimedOut,
-		Truncated: command.Truncated,
+		ExitCode:  result.ExitCode,
+		TimedOut:  result.TimedOut,
+		Truncated: result.Truncated,
 	}
-}
-
-func commandMetadataPresent(command style.CommandResult) (present bool) {
-	return command != style.CommandResult{}
 }

@@ -24,7 +24,7 @@ func runGoStyleCheck(
 	goPackID string,
 	goLanguage string,
 ) (result style.ExecutionResult, err error) {
-	execution, found := spec.TargetCheckExecution()
+	execution, found := spec.Detail.(style.TargetCheckExecution)
 	if !found {
 		return style.ExecutionResult{}, fmt.Errorf("go style check received empty spec")
 	}

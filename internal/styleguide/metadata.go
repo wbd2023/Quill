@@ -138,11 +138,8 @@ func (fields *metadataFields) setField(field metadataField, value string) (err e
 
 /* ------------------------------------ Requirement Metadata ------------------------------------ */
 
-func buildRequirementMetadata(
-	fields metadataFields,
-	scheme style.IDScheme,
-) (metadata requirementMetadata, err error) {
-	id, err := style.ParseRequirementID(fields.id, scheme)
+func buildRequirementMetadata(fields metadataFields) (metadata requirementMetadata, err error) {
+	id, err := style.ParseRequirementID(fields.id)
 	if err != nil {
 		return requirementMetadata{}, fmt.Errorf(
 			"invalid requirement id in style metadata comment: %w",

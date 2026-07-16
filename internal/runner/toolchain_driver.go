@@ -13,7 +13,7 @@ func ToolchainDriver(
 	spec style.ExecutionSpec,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error) {
-	execution, found := spec.ToolchainExecution()
+	execution, found := spec.Detail.(style.ToolchainExecution)
 	if !found {
 		return style.ExecutionResult{}, fmt.Errorf("toolchain driver received empty spec")
 	}

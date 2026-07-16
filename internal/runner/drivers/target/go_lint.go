@@ -31,7 +31,7 @@ func runGolangci(
 	goimportsToolID string,
 	goLanguage string,
 ) (result style.ExecutionResult, err error) {
-	if _, found := spec.TargetCommandExecution(); !found {
+	if _, found := spec.Detail.(style.TargetCommandExecution); !found {
 		return style.ExecutionResult{}, errEmptyTargetAction("golangci")
 	}
 

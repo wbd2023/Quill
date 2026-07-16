@@ -40,7 +40,7 @@ func profileDriver(checks runtimebinding.ProfileChecks) (driver runner.Driver) {
 		spec style.ExecutionSpec,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := spec.ProfileExecution()
+		execution, found := spec.Detail.(style.ProfileExecution)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf("project driver received empty spec")
 		}

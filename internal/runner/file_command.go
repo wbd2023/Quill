@@ -11,7 +11,7 @@ func FileCommandArguments(
 	repoRoot string,
 	spec style.ExecutionSpec,
 ) (arguments []string) {
-	execution, found := spec.FileCommandExecution()
+	execution, found := spec.Detail.(style.FileCommandExecution)
 	if !found {
 		return nil
 	}

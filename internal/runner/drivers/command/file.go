@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers/internal/commandrun"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
 	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
@@ -23,7 +22,7 @@ func runFileCommand(
 	interpreters runtimebinding.FileInterpreters,
 	isFix bool,
 ) (result style.ExecutionResult, err error) {
-	execution, found := spec.FileCommandExecution()
+	execution, found := spec.Detail.(style.FileCommandExecution)
 	if !found {
 		return style.ExecutionResult{}, errors.New("file-command driver received empty spec")
 	}
@@ -53,13 +52,15 @@ func runFileCommand(
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
 
-	styleCommand := commandrun.BuildStyleResult(commandResult)
+	result = style.ExecutionResult{
+		ExitCode:  commandResult.ExitCode,
+		TimedOut:  commandResult.TimedOut,
+		Truncated: commandResult.Truncated,
+	}
 
 	if isFix {
-		return style.ExecutionResult{
-			Command: styleCommand,
-			Output:  commandResult.Output,
-		}, runErr
+		result.Output = commandResult.Output
+		return result, runErr
 	}
 
 	interpreter, found := interpreters.Lookup(execution.ToolID)
@@ -73,16 +74,17 @@ func runFileCommand(
 	if runErr != nil {
 		var cmdErr runtime.CommandError
 		if !errors.As(runErr, &cmdErr) {
-			return style.ExecutionResult{Command: styleCommand}, runErr
+			return result, runErr
 		}
 	}
 
 	diagnostics, interpErr := interpreter(commandResult)
+	result.Diagnostics = diagnostics
 	if interpErr != nil {
-		return style.ExecutionResult{Diagnostics: diagnostics, Command: styleCommand}, interpErr
+		return result, interpErr
 	}
 
-	return style.ExecutionResult{Diagnostics: diagnostics, Command: styleCommand}, nil
+	return result, nil
 }
 
 func errUnknownTool(toolID string) (err error) {

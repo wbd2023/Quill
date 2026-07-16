@@ -6,6 +6,7 @@ import (
 	"ciphera/tools/internal/checks/golang/check"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/pack/shipped/golang"
+	"ciphera/tools/internal/style"
 )
 
 func TestShippedPackGoChecksHaveDispatch(t *testing.T) {
@@ -20,7 +21,7 @@ func TestShippedPackGoChecksHaveDispatch(t *testing.T) {
 	}
 
 	for _, rule := range registry.Rules() {
-		execution, found := rule.Check.TargetCheckExecution()
+		execution, found := rule.Check.Detail.(style.TargetCheckExecution)
 		if !found {
 			continue
 		}

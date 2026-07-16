@@ -9,7 +9,6 @@ import (
 
 func validateRules(
 	repository policy.RepositoryConfig,
-	scheme style.IDScheme,
 	rules []policy.RuleBinding,
 ) (err error) {
 	if len(rules) == 0 {
@@ -60,7 +59,7 @@ func validateRules(
 				)
 			}
 
-			if _, err = style.ParseRequirementID(id, scheme); err != nil {
+			if _, err = style.ParseRequirementID(id); err != nil {
 				return fmt.Errorf(
 					"rule %q has invalid requirement id %q: %w",
 					binding.RuleID,

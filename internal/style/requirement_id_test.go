@@ -11,7 +11,6 @@ import (
 func TestParseRequirementID(t *testing.T) {
 	id, err := style.ParseRequirementID(
 		"3.8.constructor-category-order",
-		style.SectionSlug,
 	)
 	if err != nil {
 		t.Fatalf("parse requirement id: %v", err)
@@ -49,18 +48,11 @@ func TestParseRequirementIDRejectsInvalidID(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			_, err := style.ParseRequirementID(test.value, style.SectionSlug)
+			_, err := style.ParseRequirementID(test.value)
 			if err == nil {
 				t.Fatalf("expected requirement id %q to be rejected", test.value)
 			}
 		})
-	}
-}
-
-func TestParseRequirementIDRejectsUnsupportedScheme(t *testing.T) {
-	_, err := style.ParseRequirementID("3.8.constructor-category-order", "unknown")
-	if err == nil {
-		t.Fatalf("expected unsupported requirement id scheme to be rejected")
 	}
 }
 

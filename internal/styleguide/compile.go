@@ -3,15 +3,12 @@ package styleguide
 import (
 	"fmt"
 	"strings"
-
-	"ciphera/tools/internal/style"
 )
 
 /* --------------------------------------- Compiler State --------------------------------------- */
 
 type documentCompiler struct {
 	file             sourceFile
-	scheme           style.IDScheme
 	document         Document
 	activeSection    string
 	pendingMetadata  *requirementMetadata
@@ -19,10 +16,9 @@ type documentCompiler struct {
 	seenRequirements map[string]bool
 }
 
-func newDocumentCompiler(file sourceFile, scheme style.IDScheme) (compiler documentCompiler) {
+func newDocumentCompiler(file sourceFile) (compiler documentCompiler) {
 	return documentCompiler{
-		file:   file,
-		scheme: scheme,
+		file: file,
 		document: Document{
 			Headings:     make([]Heading, 0),
 			Requirements: make([]Requirement, 0),
@@ -91,7 +87,7 @@ func (c *documentCompiler) enterHTMLBlock(text string, location position) (err e
 		return c.enterBoundary()
 	}
 
-	metadata, err := buildRequirementMetadata(fields, c.scheme)
+	metadata, err := buildRequirementMetadata(fields)
 	if err != nil {
 		return c.file.errorf(location, "%v", err)
 	}

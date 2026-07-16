@@ -3,14 +3,11 @@ package styleguide
 import (
 	"strings"
 	"testing"
-
-	"ciphera/tools/internal/style"
 )
 
 func testStyleGuideConfig() (config Config) {
 	return Config{
 		Filename: "STYLE.md",
-		IDScheme: style.SectionSlug,
 	}
 }
 
