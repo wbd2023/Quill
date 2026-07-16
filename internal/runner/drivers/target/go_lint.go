@@ -18,24 +18,25 @@ func RunGolangci(
 	goimportsToolID string,
 	goLanguage string,
 ) (command runtimebinding.TargetCommand) {
-	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
-		return runGolangci(context, spec, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
+	return func(context runner.Context, job style.Job) (style.ExecutionResult, error) {
+		return runGolangci(context, job, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
 	}
 }
 
 func runGolangci(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 	goPackID string,
 	golangciLintToolID string,
 	goimportsToolID string,
 	goLanguage string,
 ) (result style.ExecutionResult, err error) {
-	if _, found := spec.Detail.(style.TargetCommandExecution); !found {
+	execution, found := job.(style.TargetCommandJob)
+	if !found {
 		return style.ExecutionResult{}, errEmptyTargetAction("golangci")
 	}
 
-	targets, err := goTargets(context, spec, goLanguage)
+	targets, err := goTargets(context, execution.Targets, goLanguage)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

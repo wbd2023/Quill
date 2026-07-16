@@ -78,10 +78,8 @@ func toolchainRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupProject,
-		Check: style.ExecutionSpec{
-			Detail: style.ToolchainExecution{
-				ToolIDs: append([]string{}, toolIDs...),
-			},
+		Check: style.ToolchainExecution{
+			ToolIDs: append([]string{}, toolIDs...),
 		},
 	}
 }
@@ -95,10 +93,8 @@ func projectRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupProject,
-		Check: style.ExecutionSpec{
-			Detail: style.ProfileExecution{
-				Check: check,
-			},
+		Check: style.ProfileExecution{
+			Check: check,
 		},
 	}
 }

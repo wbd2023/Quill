@@ -15,7 +15,7 @@ type ruleExecutionValidator struct {
 func validateRuleExecution(
 	ruleID string,
 	label string,
-	execution style.ExecutionSpec,
+	template style.Template,
 	toolIDs map[string]bool,
 ) (err error) {
 	validator := ruleExecutionValidator{
@@ -23,15 +23,15 @@ func validateRuleExecution(
 		label:   label,
 		toolIDs: toolIDs,
 	}
-	return validator.validate(execution)
+	return validator.validate(template)
 }
 
-func (validator ruleExecutionValidator) validate(execution style.ExecutionSpec) (err error) {
-	if execution.Detail == nil {
+func (validator ruleExecutionValidator) validate(template style.Template) (err error) {
+	if template == nil {
 		return fmt.Errorf("rule definition %q %s is missing", validator.ruleID, validator.label)
 	}
 
-	switch detail := execution.Detail.(type) {
+	switch detail := template.(type) {
 	case style.ToolchainExecution:
 		return validator.validateToolchainExecution(detail)
 
@@ -41,10 +41,10 @@ func (validator ruleExecutionValidator) validate(execution style.ExecutionSpec) 
 	case style.FileCommandExecution:
 		return validator.validateFileCommandExecution(detail)
 
-	case style.TargetCommandExecution:
+	case style.TargetCommandTemplate:
 		return validator.validateTargetCommandExecution(detail)
 
-	case style.TargetCheckExecution:
+	case style.TargetCheckTemplate:
 		return validator.validateTargetCheckExecution(detail)
 
 	case style.RepositoryScanExecution:

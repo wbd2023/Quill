@@ -16,18 +16,18 @@ type EffectiveConfig struct {
 	Rules []Rule
 }
 
-// RuleDefinition represents a pack-declared rule before profile binding. It carries the check and
-// fix execution specs but not enforcement or scope.
+// RuleDefinition represents a pack-declared rule before profile binding. It carries check and fix
+// execution templates but not enforcement or scope.
 type RuleDefinition struct {
 	ID    string
 	Name  string
 	Group RuleGroup
 
-	Check ExecutionSpec
-	Fix   ExecutionSpec
+	Check Template
+	Fix   Template
 }
 
-// Rule represents a profile-bound, enforceable style requirement.
+// Rule represents a profile-bound, enforceable style requirement with bound execution jobs.
 type Rule struct {
 	ID    string
 	Name  string
@@ -37,26 +37,38 @@ type Rule struct {
 	Scope          Scope
 	RequirementIDs []string
 
-	Check ExecutionSpec
-	Fix   ExecutionSpec
+	Check Job
+	Fix   Job
 }
 
-// CheckToolIDs returns the tool IDs required by the rule's check execution spec.
+// CheckToolIDs returns the tool IDs required by the rule's check template.
 func (rule RuleDefinition) CheckToolIDs() (toolIDs []string) {
-	return rule.Check.RequiredToolIDs()
+	if rule.Check == nil {
+		return nil
+	}
+	return Describe(rule.Check).ToolIDs
 }
 
-// FixToolIDs returns the tool IDs required by the rule's fix execution spec.
+// FixToolIDs returns the tool IDs required by the rule's fix template.
 func (rule RuleDefinition) FixToolIDs() (toolIDs []string) {
-	return rule.Fix.RequiredToolIDs()
+	if rule.Fix == nil {
+		return nil
+	}
+	return Describe(rule.Fix).ToolIDs
 }
 
-// CheckToolIDs returns the tool IDs required by the rule's check execution spec.
+// CheckToolIDs returns the tool IDs required by the rule's check job.
 func (rule Rule) CheckToolIDs() (toolIDs []string) {
-	return rule.Check.RequiredToolIDs()
+	if rule.Check == nil {
+		return nil
+	}
+	return ToolIDs(rule.Check)
 }
 
-// FixToolIDs returns the tool IDs required by the rule's fix execution spec.
+// FixToolIDs returns the tool IDs required by the rule's fix job.
 func (rule Rule) FixToolIDs() (toolIDs []string) {
-	return rule.Fix.RequiredToolIDs()
+	if rule.Fix == nil {
+		return nil
+	}
+	return ToolIDs(rule.Fix)
 }

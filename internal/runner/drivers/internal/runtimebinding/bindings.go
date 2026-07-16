@@ -19,13 +19,13 @@ type RepositoryScanner func(
 // TargetCommand is target command.
 type TargetCommand func(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 ) (result style.ExecutionResult, err error)
 
 // TargetCheck is target check.
 type TargetCheck func(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 ) (result style.ExecutionResult, err error)
 
 // ProfileCheck is project check.

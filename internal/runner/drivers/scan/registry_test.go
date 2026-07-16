@@ -12,10 +12,8 @@ func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 	driver := repositoryScanDriver(runtimebinding.NewRepositoryScanners())
 	_, err := driver(
 		runner.Context{},
-		style.ExecutionSpec{
-			Detail: style.RepositoryScanExecution{
-				Scanner: "missing",
-			},
+		style.RepositoryScanExecution{
+			Scanner: "missing",
 		},
 		nil,
 	)

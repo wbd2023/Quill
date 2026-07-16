@@ -124,11 +124,9 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 	}
 }
 
-func repositoryScanSpec(scanner string) (spec style.ExecutionSpec) {
-	return style.ExecutionSpec{
-		Detail: style.RepositoryScanExecution{
-			Scanner: scanner,
-		},
+func repositoryScanSpec(scanner string) (job style.Job) {
+	return style.RepositoryScanExecution{
+		Scanner: scanner,
 	}
 }
 

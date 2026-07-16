@@ -53,10 +53,10 @@ func fileCommandRuleWithConfig(
 	configFile string,
 ) (rule style.RuleDefinition) {
 	rule = fileCommandRule(id, name, toolID, fileSet, arguments)
-	execution := rule.Check.Detail.(style.FileCommandExecution)
+	execution := rule.Check.(style.FileCommandExecution)
 	execution.ConfigArgument = configArgument
 	execution.ConfigFile = configFile
-	rule.Check.Detail = execution
+	rule.Check = execution
 	return rule
 }
 
@@ -71,12 +71,10 @@ func fileCommandRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupExternal,
-		Check: style.ExecutionSpec{
-			Detail: style.FileCommandExecution{
-				ToolID:    toolID,
-				FileSet:   fileSet,
-				Arguments: append([]string{}, arguments...),
-			},
+		Check: style.FileCommandExecution{
+			ToolID:    toolID,
+			FileSet:   fileSet,
+			Arguments: append([]string{}, arguments...),
 		},
 	}
 }

@@ -128,7 +128,7 @@ func validateRegistry(registry Registry) (err error) {
 			return fmt.Errorf("pack registry contains an empty rule id")
 		}
 
-		if rule.Check.Empty() {
+		if rule.Check == nil {
 			return fmt.Errorf("rule %q has no check execution", rule.ID)
 		}
 

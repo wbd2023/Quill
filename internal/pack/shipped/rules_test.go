@@ -100,17 +100,14 @@ func TestRegisteredRulesHaveExecutionDetails(t *testing.T) {
 	}
 
 	for _, rule := range registry.Rules() {
-		if rule.Check.Detail == nil {
+		if rule.Check == nil {
 			t.Fatalf("rule %q has no check execution detail", rule.ID)
 		}
 
-		if rule.Fix.Empty() {
+		if rule.Fix == nil {
 			continue
 		}
 
-		if rule.Fix.Detail == nil {
-			t.Fatalf("rule %q has no fix execution detail", rule.ID)
-		}
 	}
 }
 

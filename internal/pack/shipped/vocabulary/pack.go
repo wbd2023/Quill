@@ -28,10 +28,8 @@ func Pack() (definition pack.Definition) {
 				ID:    "vocabulary/project-terms",
 				Name:  "Project vocabulary",
 				Group: ruleGroupVocabulary,
-				Check: style.ExecutionSpec{
-					Detail: style.RepositoryScanExecution{
-						Scanner: ScannerVocabulary,
-					},
+				Check: style.RepositoryScanExecution{
+					Scanner: ScannerVocabulary,
 				},
 			},
 		},

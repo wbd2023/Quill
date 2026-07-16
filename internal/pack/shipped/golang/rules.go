@@ -84,26 +84,22 @@ func golangciRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupLanguage,
-		Check: style.ExecutionSpec{
-			Detail: style.TargetCommandExecution{
-				ToolIDs: []string{
-					tool.Go,
-					tool.Goimports,
-					tool.GolangciLint,
-				},
-				Action:   TargetActionGolangci,
-				Language: Language,
+		Check: style.TargetCommandTemplate{
+			ToolIDs: []string{
+				tool.Go,
+				tool.Goimports,
+				tool.GolangciLint,
 			},
+			Action:   TargetActionGolangci,
+			Language: Language,
 		},
-		Fix: style.ExecutionSpec{
-			Detail: style.TargetCommandExecution{
-				ToolIDs: []string{
-					tool.Go,
-					tool.Goimports,
-				},
-				Action:   TargetActionGoFormat,
-				Language: Language,
+		Fix: style.TargetCommandTemplate{
+			ToolIDs: []string{
+				tool.Go,
+				tool.Goimports,
 			},
+			Action:   TargetActionGoFormat,
+			Language: Language,
 		},
 	}
 }
@@ -117,12 +113,10 @@ func styleRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupLanguage,
-		Check: style.ExecutionSpec{
-			Detail: style.TargetCheckExecution{
-				ToolIDs:  []string{tool.Go},
-				Check:    checkID,
-				Language: Language,
-			},
+		Check: style.TargetCheckTemplate{
+			ToolIDs:  []string{tool.Go},
+			Check:    checkID,
+			Language: Language,
 		},
 	}
 }
@@ -132,10 +126,8 @@ func architectureRule() (rule style.RuleDefinition) {
 		ID:    "go/architecture-imports",
 		Name:  "Architecture imports",
 		Group: ruleGroupLanguage,
-		Check: style.ExecutionSpec{
-			Detail: style.RepositoryScanExecution{
-				Scanner: ScannerArchitecture,
-			},
+		Check: style.RepositoryScanExecution{
+			Scanner: ScannerArchitecture,
 		},
 	}
 }

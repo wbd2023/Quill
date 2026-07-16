@@ -15,23 +15,24 @@ func RunGoFormat(
 	goimportsToolID string,
 	goLanguage string,
 ) (command runtimebinding.TargetCommand) {
-	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
-		return runGoFormat(context, spec, goPackID, goimportsToolID, goLanguage)
+	return func(context runner.Context, job style.Job) (style.ExecutionResult, error) {
+		return runGoFormat(context, job, goPackID, goimportsToolID, goLanguage)
 	}
 }
 
 func runGoFormat(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 	goPackID string,
 	goimportsToolID string,
 	goLanguage string,
 ) (result style.ExecutionResult, err error) {
-	if _, found := spec.Detail.(style.TargetCommandExecution); !found {
+	execution, found := job.(style.TargetCommandJob)
+	if !found {
 		return style.ExecutionResult{}, errEmptyTargetAction("go format")
 	}
 
-	targets, err := goTargets(context, spec, goLanguage)
+	targets, err := goTargets(context, execution.Targets, goLanguage)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

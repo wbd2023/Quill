@@ -14,12 +14,10 @@ func TestFixableRulesUsePackFixes(t *testing.T) {
 	rules := []style.Rule{
 		{
 			ID: "go/lint",
-			Fix: style.ExecutionSpec{
-				Detail: style.TargetCommandExecution{
-					ToolIDs:  []string{tool.Go},
-					Action:   golang.TargetActionGoFormat,
-					Language: golang.Language,
-				},
+			Fix: style.TargetCommandJob{
+				ToolIDs:  []string{tool.Go},
+				Action:   golang.TargetActionGoFormat,
+				Language: golang.Language,
 			},
 			Scope: style.Scope("tools"),
 		},

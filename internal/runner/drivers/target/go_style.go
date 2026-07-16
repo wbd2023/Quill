@@ -13,23 +13,23 @@ import (
 
 // CheckGoStyle check go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check runtimebinding.TargetCheck) {
-	return func(context runner.Context, spec style.ExecutionSpec) (style.ExecutionResult, error) {
-		return runGoStyleCheck(context, spec, goPackID, goLanguage)
+	return func(context runner.Context, job style.Job) (style.ExecutionResult, error) {
+		return runGoStyleCheck(context, job, goPackID, goLanguage)
 	}
 }
 
 func runGoStyleCheck(
 	context runner.Context,
-	spec style.ExecutionSpec,
+	job style.Job,
 	goPackID string,
 	goLanguage string,
 ) (result style.ExecutionResult, err error) {
-	execution, found := spec.Detail.(style.TargetCheckExecution)
+	execution, found := job.(style.TargetCheckJob)
 	if !found {
-		return style.ExecutionResult{}, fmt.Errorf("go style check received empty spec")
+		return style.ExecutionResult{}, fmt.Errorf("go style check received empty job")
 	}
 
-	targets, err := goTargets(context, spec, goLanguage)
+	targets, err := goTargets(context, execution.Targets, goLanguage)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}

@@ -111,7 +111,7 @@ func fixableRules(
 			continue
 		}
 
-		if rule.Fix.Empty() {
+		if rule.Fix == nil {
 			continue
 		}
 

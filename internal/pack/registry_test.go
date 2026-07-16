@@ -19,10 +19,8 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 				{
 					ID:   "duplicate",
 					Name: "first",
-					Check: style.ExecutionSpec{
-						Detail: style.RepositoryScanExecution{
-							Scanner: "test",
-						},
+					Check: style.RepositoryScanExecution{
+						Scanner: "test",
 					},
 				},
 			},
@@ -34,10 +32,8 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 				{
 					ID:   "duplicate",
 					Name: "second",
-					Check: style.ExecutionSpec{
-						Detail: style.RepositoryScanExecution{
-							Scanner: "test",
-						},
+					Check: style.RepositoryScanExecution{
+						Scanner: "test",
 					},
 				},
 			},
@@ -154,10 +150,8 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 				{
 					ID:   "custom/rule",
 					Name: "Custom rule",
-					Check: style.ExecutionSpec{
-						Detail: style.FileCommandExecution{
-							Arguments: []string{"-w"},
-						},
+					Check: style.FileCommandExecution{
+						Arguments: []string{"-w"},
 					},
 				},
 			},
@@ -165,11 +159,11 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 	})
 
 	rules := registry.Rules()
-	execution := rules[0].Check.Detail.(style.FileCommandExecution)
+	execution := rules[0].Check.(style.FileCommandExecution)
 	execution.Arguments[0] = "-changed"
 
 	rules = registry.Rules()
-	execution = rules[0].Check.Detail.(style.FileCommandExecution)
+	execution = rules[0].Check.(style.FileCommandExecution)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("registry rule argument = %q, want -w", got)
 	}
@@ -183,10 +177,8 @@ func testPack(id string) (definition Definition) {
 			{
 				ID:   id + "/rule",
 				Name: id + " rule",
-				Check: style.ExecutionSpec{
-					Detail: style.RepositoryScanExecution{
-						Scanner: "test",
-					},
+				Check: style.RepositoryScanExecution{
+					Scanner: "test",
 				},
 			},
 		},

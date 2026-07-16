@@ -1,6 +1,8 @@
 package pack
 
 import (
+	"slices"
+
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
 	"ciphera/tools/internal/toolchain"
@@ -53,38 +55,29 @@ func CloneRules(rules []style.RuleDefinition) (clones []style.RuleDefinition) {
 
 func cloneRule(rule style.RuleDefinition) (clone style.RuleDefinition) {
 	clone = rule
-	clone.Check = cloneExecutionSpec(rule.Check)
-	clone.Fix = cloneExecutionSpec(rule.Fix)
+	clone.Check = cloneTemplate(rule.Check)
+	clone.Fix = cloneTemplate(rule.Fix)
 	return clone
 }
-
-func cloneExecutionSpec(spec style.ExecutionSpec) (clone style.ExecutionSpec) {
-	clone = spec
-	clone.Detail = cloneExecutionDetail(spec.Detail)
-	return clone
-}
-
-func cloneExecutionDetail(detail style.ExecutionDetail) (clone style.ExecutionDetail) {
-	switch execution := detail.(type) {
+func cloneTemplate(template style.Template) (clone style.Template) {
+	switch detail := template.(type) {
 	case style.ToolchainExecution:
-		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
-		return execution
+		detail.ToolIDs = slices.Clone(detail.ToolIDs)
+		return detail
 
 	case style.FileCommandExecution:
-		execution.Arguments = append([]string{}, execution.Arguments...)
-		return execution
+		detail.Arguments = slices.Clone(detail.Arguments)
+		return detail
 
-	case style.TargetCommandExecution:
-		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
-		execution.Targets = append([]string{}, execution.Targets...)
-		return execution
+	case style.TargetCommandTemplate:
+		detail.ToolIDs = slices.Clone(detail.ToolIDs)
+		return detail
 
-	case style.TargetCheckExecution:
-		execution.ToolIDs = append([]string{}, execution.ToolIDs...)
-		execution.Targets = append([]string{}, execution.Targets...)
-		return execution
+	case style.TargetCheckTemplate:
+		detail.ToolIDs = slices.Clone(detail.ToolIDs)
+		return detail
 
 	default:
-		return detail
+		return template
 	}
 }

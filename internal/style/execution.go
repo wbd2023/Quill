@@ -2,17 +2,48 @@ package style
 
 import "slices"
 
-// ExecutionSpec represents how a rule is executed. The concrete Detail type determines which driver
-// handles the rule.
-type ExecutionSpec struct {
-	Detail ExecutionDetail
+/* -------------------------------------- Core Abstractions ------------------------------------- */
+
+// Requirements describes what a template needs to compile into a job.
+type Requirements struct {
+	ToolIDs []string
+	FileSet string
+
+	NeedsTargets    bool
+	TargetLanguage  string
+	NeedsCheckPaths bool
 }
 
-// ExecutionDetail represents an execution strategy for a rule. Implementations are defined in
-// this package.
-type ExecutionDetail interface {
-	executionDetail()
+// Template is an unbound execution strategy declared by a pack. The profile compiler calls Describe
+// to inspect requirements, then Bind to produce a Job for the runner.
+type Template interface {
+	isTemplate()
+	describe() (requirements Requirements)
+	bind(targets []string) (job Job)
 }
+
+// Job is a bound execution ready for the runner.
+type Job interface {
+	isJob()
+	toolIDs() (ids []string)
+}
+
+// Describe returns the requirements of a template.
+func Describe(template Template) (requirements Requirements) {
+	return template.describe()
+}
+
+// Bind resolves targets into a bound job.
+func Bind(template Template, targets []string) (job Job) {
+	return template.bind(targets)
+}
+
+// ToolIDs returns the tool IDs a job requires.
+func ToolIDs(job Job) (ids []string) {
+	return job.toolIDs()
+}
+
+/* --------------------------------------- Execution Types -------------------------------------- */
 
 // ToolchainExecution represents a check that verifies pinned external tools are installed.
 type ToolchainExecution struct {
@@ -35,142 +66,135 @@ type FileCommandExecution struct {
 	ConfigFile     string
 }
 
-// TargetCommandExecution represents running a tool against language-specific targets.
-type TargetCommandExecution struct {
-	ToolIDs []string
-
-	Action   string
-	Language string
-
-	Targets []string
-}
-
-// TargetCheckExecution represents a language-specific check against targets.
-type TargetCheckExecution struct {
-	ToolIDs []string
-
-	Check    string
-	Language string
-
-	Targets []string
-}
-
 // RepositoryScanExecution represents a repository-wide scan over files from a file set.
 type RepositoryScanExecution struct {
 	Scanner string
 	FileSet string
 }
 
-/* ------------------------------------------- Markers ------------------------------------------ */
+// TargetCommandTemplate represents running a tool against language-specific targets before target
+// resolution.
+type TargetCommandTemplate struct {
+	ToolIDs []string
 
-func (ToolchainExecution) executionDetail() {}
-
-func (ProfileExecution) executionDetail() {}
-
-func (FileCommandExecution) executionDetail() {}
-
-func (TargetCommandExecution) executionDetail() {}
-
-func (TargetCheckExecution) executionDetail() {}
-
-func (RepositoryScanExecution) executionDetail() {}
-
-/* ------------------------------------------ Accessors ----------------------------------------- */
-
-// Empty reports whether the spec has no detail.
-func (spec ExecutionSpec) Empty() (empty bool) {
-	return spec.Detail == nil
+	Action   string
+	Language string
 }
 
-/* ------------------------------------------- Queries ------------------------------------------ */
+// TargetCheckTemplate represents a language-specific check before target resolution.
+type TargetCheckTemplate struct {
+	ToolIDs []string
 
-// RequiredToolIDs returns the tool IDs the spec needs to execute, or nil if none.
-func (spec ExecutionSpec) RequiredToolIDs() (toolIDs []string) {
-	switch execution := spec.Detail.(type) {
-	case ToolchainExecution:
-		return slices.Clone(execution.ToolIDs)
+	Check    string
+	Language string
+}
 
-	case FileCommandExecution:
-		if execution.ToolID == "" {
-			return nil
-		}
-		return []string{execution.ToolID}
+// TargetCommandJob represents a tool run against resolved language-specific targets.
+type TargetCommandJob struct {
+	ToolIDs []string
 
-	case TargetCommandExecution:
-		return slices.Clone(execution.ToolIDs)
+	Action   string
+	Language string
+	Targets  []string
+}
 
-	case TargetCheckExecution:
-		return slices.Clone(execution.ToolIDs)
+// TargetCheckJob represents a language-specific check against resolved targets.
+type TargetCheckJob struct {
+	ToolIDs []string
 
-	default:
+	Check    string
+	Language string
+	Targets  []string
+}
+
+/* -------------------------------------- Interface Methods ------------------------------------- */
+
+func (ToolchainExecution) isTemplate()      {}
+func (ProfileExecution) isTemplate()        {}
+func (FileCommandExecution) isTemplate()    {}
+func (RepositoryScanExecution) isTemplate() {}
+func (TargetCommandTemplate) isTemplate()   {}
+func (TargetCheckTemplate) isTemplate()     {}
+
+func (ToolchainExecution) isJob()      {}
+func (ProfileExecution) isJob()        {}
+func (FileCommandExecution) isJob()    {}
+func (RepositoryScanExecution) isJob() {}
+func (TargetCommandJob) isJob()        {}
+func (TargetCheckJob) isJob()          {}
+
+func (e ToolchainExecution) describe() (requirements Requirements) {
+	return Requirements{ToolIDs: slices.Clone(e.ToolIDs)}
+}
+
+func (ProfileExecution) describe() (requirements Requirements) {
+	return Requirements{}
+}
+
+func (e FileCommandExecution) describe() (requirements Requirements) {
+	toolIDs := []string(nil)
+	if e.ToolID != "" {
+		toolIDs = []string{e.ToolID}
+	}
+	return Requirements{ToolIDs: toolIDs, FileSet: e.FileSet}
+}
+
+func (e RepositoryScanExecution) describe() (requirements Requirements) {
+	return Requirements{FileSet: e.FileSet}
+}
+
+func (e TargetCommandTemplate) describe() (requirements Requirements) {
+	return Requirements{
+		ToolIDs:        slices.Clone(e.ToolIDs),
+		NeedsTargets:   true,
+		TargetLanguage: e.Language,
+	}
+}
+
+func (e TargetCheckTemplate) describe() (requirements Requirements) {
+	return Requirements{
+		ToolIDs:         slices.Clone(e.ToolIDs),
+		NeedsTargets:    true,
+		TargetLanguage:  e.Language,
+		NeedsCheckPaths: true,
+	}
+}
+
+func (e ToolchainExecution) bind([]string) (job Job)      { return e }
+func (e ProfileExecution) bind([]string) (job Job)        { return e }
+func (e FileCommandExecution) bind([]string) (job Job)    { return e }
+func (e RepositoryScanExecution) bind([]string) (job Job) { return e }
+
+func (e TargetCommandTemplate) bind(targets []string) (job Job) {
+	return TargetCommandJob{
+		ToolIDs:  slices.Clone(e.ToolIDs),
+		Action:   e.Action,
+		Language: e.Language,
+		Targets:  slices.Clone(targets),
+	}
+}
+
+func (e TargetCheckTemplate) bind(targets []string) (job Job) {
+	return TargetCheckJob{
+		ToolIDs:  slices.Clone(e.ToolIDs),
+		Check:    e.Check,
+		Language: e.Language,
+		Targets:  slices.Clone(targets),
+	}
+}
+
+func (e ToolchainExecution) toolIDs() (ids []string) { return slices.Clone(e.ToolIDs) }
+
+func (ProfileExecution) toolIDs() (ids []string) { return nil }
+
+func (e FileCommandExecution) toolIDs() (ids []string) {
+	if e.ToolID == "" {
 		return nil
 	}
+	return []string{e.ToolID}
 }
 
-// FileSetName returns the file set name used by the spec, or empty if none.
-func (spec ExecutionSpec) FileSetName() (name string) {
-	switch execution := spec.Detail.(type) {
-	case FileCommandExecution:
-		return execution.FileSet
-	case RepositoryScanExecution:
-		return execution.FileSet
-	default:
-		return ""
-	}
-}
+func (e TargetCommandJob) toolIDs() (ids []string) { return slices.Clone(e.ToolIDs) }
+func (e TargetCheckJob) toolIDs() (ids []string)   { return slices.Clone(e.ToolIDs) }
 
-// UsesTargets reports whether the spec executes against language-specific targets.
-func (spec ExecutionSpec) UsesTargets() (uses bool) {
-	switch spec.Detail.(type) {
-	case TargetCommandExecution, TargetCheckExecution:
-		return true
-	default:
-		return false
-	}
-}
-
-// TargetLanguage returns the language for target execution, or empty if none.
-func (spec ExecutionSpec) TargetLanguage() (language string) {
-	switch execution := spec.Detail.(type) {
-	case TargetCommandExecution:
-		return execution.Language
-	case TargetCheckExecution:
-		return execution.Language
-	}
-
-	return ""
-}
-
-// RequiresTargetCheckPaths reports whether the spec is a target check needing path arguments.
-func (spec ExecutionSpec) RequiresTargetCheckPaths() (requires bool) {
-	_, requires = spec.Detail.(TargetCheckExecution)
-	return requires
-}
-
-// Targets returns the target paths bound to the spec, or nil if none.
-func (spec ExecutionSpec) Targets() (targets []string) {
-	switch execution := spec.Detail.(type) {
-	case TargetCommandExecution:
-		return slices.Clone(execution.Targets)
-	case TargetCheckExecution:
-		return slices.Clone(execution.Targets)
-	}
-
-	return nil
-}
-
-// WithTargets returns a copy of the spec with the given targets bound to it.
-func (spec ExecutionSpec) WithTargets(targets []string) (bound ExecutionSpec) {
-	bound = spec
-	switch execution := spec.Detail.(type) {
-	case TargetCommandExecution:
-		execution.Targets = slices.Clone(targets)
-		bound.Detail = execution
-
-	case TargetCheckExecution:
-		execution.Targets = slices.Clone(targets)
-		bound.Detail = execution
-	}
-
-	return bound
-}
+func (RepositoryScanExecution) toolIDs() (ids []string) { return nil }
