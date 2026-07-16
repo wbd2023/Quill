@@ -1,23 +1,23 @@
 package style
 
-// RuleGroup categorises rules by concern, for example Go syntax or repository text.
+// RuleGroup represents a rule category, for example Go syntax or repository text.
 type RuleGroup string
 
-// Definitions holds the raw tool and rule definitions assembled from Packs before the Effective
-// Profile is compiled.
+// Definitions represents raw tool and rule definitions assembled from packs before the effective
+// profile is compiled.
 type Definitions struct {
 	ToolIDs []string
 	Rules   []RuleDefinition
 }
 
-// EffectiveConfig is the compiled configuration: concrete rules bound to enforcement levels
-// and scopes.
+// EffectiveConfig represents the compiled configuration: concrete rules bound to enforcement
+// levels and scopes.
 type EffectiveConfig struct {
 	Rules []Rule
 }
 
-// RuleDefinition is a Pack-declared rule before profile binding. It carries the check and fix
-// execution specs but not enforcement or scope.
+// RuleDefinition represents a pack-declared rule before profile binding. It carries the check and
+// fix execution specs but not enforcement or scope.
 type RuleDefinition struct {
 	ID    string
 	Name  string
@@ -26,8 +26,7 @@ type RuleDefinition struct {
 	Fix   ExecutionSpec
 }
 
-// Rule is a profile-bound, enforceable style requirement with a concrete enforcement level, scope,
-// and requirement IDs.
+// Rule represents a profile-bound, enforceable style requirement.
 type Rule struct {
 	ID             string
 	Name           string

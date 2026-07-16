@@ -9,9 +9,7 @@ type Diagnostic struct {
 	Message string
 }
 
-// ExecutionResult holds the outcome of running one check or fix against a rule. A non-empty
-// Diagnostics slice signals findings; the error return is reserved for operational failures (the
-// rule could not run). Output carries captured command output for fix failures.
+// ExecutionResult represents the outcome of running one check or fix against a rule.
 type ExecutionResult struct {
 	Diagnostics []Diagnostic
 
@@ -21,13 +19,12 @@ type ExecutionResult struct {
 	Truncated bool
 }
 
-// Empty reports whether the result has no diagnostics, command data, or output.
+// Empty reports whether the result has no diagnostics or command metadata.
 func (result ExecutionResult) Empty() (empty bool) {
 	return len(result.Diagnostics) == 0 &&
 		result.ExitCode == 0 &&
 		!result.TimedOut &&
-		!result.Truncated &&
-		result.Output == ""
+		!result.Truncated
 }
 
 // HasCommand reports whether the result carries command execution metadata.
