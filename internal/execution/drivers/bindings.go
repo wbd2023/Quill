@@ -1,39 +1,39 @@
 package drivers
 
-import "ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+import "ciphera/tools/internal/execution/drivers/internal/driverkit"
 
 // RepositoryScanner is repository scanner.
-type RepositoryScanner = runtimebinding.RepositoryScanner
+type RepositoryScanner = driverkit.RepositoryScanner
 
 // TargetCommand is target command.
-type TargetCommand = runtimebinding.TargetCommand
+type TargetCommand = driverkit.TargetCommand
 
 // TargetCheck is target check.
-type TargetCheck = runtimebinding.TargetCheck
+type TargetCheck = driverkit.TargetCheck
 
 // ProfileCheck is project check.
-type ProfileCheck = runtimebinding.ProfileCheck
+type ProfileCheck = driverkit.ProfileCheck
 
 // FileInterpreter converts a tool's raw command output into style diagnostics.
-type FileInterpreter = runtimebinding.FileInterpreter
+type FileInterpreter = driverkit.FileInterpreter
 
 // Bindings is bindings.
 type Bindings struct {
-	repositoryScanners runtimebinding.RepositoryScanners
-	targetCommands     runtimebinding.TargetCommands
-	targetChecks       runtimebinding.TargetChecks
-	projectChecks      runtimebinding.ProfileChecks
-	fileInterpreters   runtimebinding.FileInterpreters
+	repositoryScanners driverkit.RepositoryScanners
+	targetCommands     driverkit.TargetCommands
+	targetChecks       driverkit.TargetChecks
+	projectChecks      driverkit.ProfileChecks
+	fileInterpreters   driverkit.FileInterpreters
 }
 
 // NewBindings new bindings.
 func NewBindings() (bindings Bindings) {
 	return Bindings{
-		repositoryScanners: runtimebinding.NewRepositoryScanners(),
-		targetCommands:     runtimebinding.NewTargetCommands(),
-		targetChecks:       runtimebinding.NewTargetChecks(),
-		projectChecks:      runtimebinding.NewProjectChecks(),
-		fileInterpreters:   runtimebinding.NewFileInterpreters(),
+		repositoryScanners: driverkit.NewRepositoryScanners(),
+		targetCommands:     driverkit.NewTargetCommands(),
+		targetChecks:       driverkit.NewTargetChecks(),
+		projectChecks:      driverkit.NewProjectChecks(),
+		fileInterpreters:   driverkit.NewFileInterpreters(),
 	}
 }
 

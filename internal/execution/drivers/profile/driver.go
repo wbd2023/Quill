@@ -8,7 +8,7 @@ import (
 
 	"ciphera/tools/internal/checks/projectpolicy"
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/filewalk"
 	"ciphera/tools/internal/policy"
 	"ciphera/tools/internal/style"
@@ -34,7 +34,7 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 
 /* --------------------------------------- Project Checks --------------------------------------- */
 
-func profileDriver(checks runtimebinding.ProfileChecks) (driver execution.Driver) {
+func profileDriver(checks driverkit.ProfileChecks) (driver execution.Executor) {
 	return func(
 		context execution.Context,
 		job style.Job,
@@ -58,7 +58,7 @@ func profileDriver(checks runtimebinding.ProfileChecks) (driver execution.Driver
 }
 
 // CheckEnforcementLevels check enforcement levels.
-func CheckEnforcementLevels() (check runtimebinding.ProfileCheck) {
+func CheckEnforcementLevels() (check driverkit.ProfileCheck) {
 	return func(
 		_ execution.Context,
 		_ style.ProfileExecution,
@@ -69,7 +69,7 @@ func CheckEnforcementLevels() (check runtimebinding.ProfileCheck) {
 }
 
 // CheckExcludedDirectories check excluded directories.
-func CheckExcludedDirectories() (check runtimebinding.ProfileCheck) {
+func CheckExcludedDirectories() (check driverkit.ProfileCheck) {
 	return func(
 		context execution.Context,
 		_ style.ProfileExecution,
@@ -80,7 +80,7 @@ func CheckExcludedDirectories() (check runtimebinding.ProfileCheck) {
 }
 
 // CheckCommands check commands.
-func CheckCommands(profilePackID string) (check runtimebinding.ProfileCheck) {
+func CheckCommands(profilePackID string) (check driverkit.ProfileCheck) {
 	return func(
 		context execution.Context,
 		_ style.ProfileExecution,

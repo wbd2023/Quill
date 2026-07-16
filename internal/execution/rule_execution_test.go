@@ -25,7 +25,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		nil,
 		nil,
 	)
-	drivers := DriverSet{
+	drivers := ExecutorSet{
 		RepositoryScan: func(
 			_ Context,
 			_ style.Job,
@@ -62,7 +62,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 		nil,
 		nil,
 	)
-	drivers := DriverSet{}
+	drivers := ExecutorSet{}
 
 	_, err := RunRule(rule, context, nil, drivers)
 	if err == nil {

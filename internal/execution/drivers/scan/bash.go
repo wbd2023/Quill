@@ -3,12 +3,12 @@ package scan
 import (
 	"ciphera/tools/internal/checks/bash"
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
 // CheckBashMagicValues check bash magic values.
-func CheckBashMagicValues() (scanner runtimebinding.RepositoryScanner) {
+func CheckBashMagicValues() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -22,7 +22,7 @@ func CheckBashMagicValues() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckBashSafety check bash safety.
-func CheckBashSafety() (scanner runtimebinding.RepositoryScanner) {
+func CheckBashSafety() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -32,7 +32,7 @@ func CheckBashSafety() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckBashStructure check bash structure.
-func CheckBashStructure() (scanner runtimebinding.RepositoryScanner) {
+func CheckBashStructure() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -46,7 +46,7 @@ func CheckBashStructure() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckBashTestHygiene check bash test hygiene.
-func CheckBashTestHygiene() (scanner runtimebinding.RepositoryScanner) {
+func CheckBashTestHygiene() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,

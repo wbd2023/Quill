@@ -5,7 +5,7 @@ import (
 
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/commandrun"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
@@ -14,7 +14,7 @@ func RunGoFormat(
 	goPackID string,
 	goimportsToolID string,
 	goLanguage string,
-) (command runtimebinding.TargetCommand) {
+) (command driverkit.TargetCommand) {
 	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
 		return runGoFormat(context, job, goPackID, goimportsToolID, goLanguage)
 	}

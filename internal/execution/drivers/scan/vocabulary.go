@@ -3,12 +3,12 @@ package scan
 import (
 	"ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
 // CheckVocabulary check vocabulary.
-func CheckVocabulary(vocabularyPackID string) (scanner runtimebinding.RepositoryScanner) {
+func CheckVocabulary(vocabularyPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		execution style.RepositoryScanExecution,

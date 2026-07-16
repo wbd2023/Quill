@@ -3,12 +3,12 @@ package scan
 import (
 	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
 // CheckASCII scans for non-ASCII characters in text files.
-func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
+func CheckASCII() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -18,7 +18,7 @@ func CheckASCII() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckExceptionMarkers check exception markers.
-func CheckExceptionMarkers() (scanner runtimebinding.RepositoryScanner) {
+func CheckExceptionMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -32,12 +32,12 @@ func CheckExceptionMarkers() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckLineLengths check line lengths.
-func CheckLineLengths() (scanner runtimebinding.RepositoryScanner) {
+func CheckLineLengths() (scanner driverkit.RepositoryScanner) {
 	return scanLineLengths
 }
 
 // CheckMaintenanceMarkers check maintenance markers.
-func CheckMaintenanceMarkers() (scanner runtimebinding.RepositoryScanner) {
+func CheckMaintenanceMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		_ style.RepositoryScanExecution,
@@ -51,7 +51,7 @@ func CheckMaintenanceMarkers() (scanner runtimebinding.RepositoryScanner) {
 }
 
 // CheckSectionHeaderNames check section header names.
-func CheckSectionHeaderNames(textPackID string) (scanner runtimebinding.RepositoryScanner) {
+func CheckSectionHeaderNames(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		execution style.RepositoryScanExecution,
@@ -61,7 +61,7 @@ func CheckSectionHeaderNames(textPackID string) (scanner runtimebinding.Reposito
 }
 
 // CheckSectionHeaderDensity check section header density.
-func CheckSectionHeaderDensity(textPackID string) (scanner runtimebinding.RepositoryScanner) {
+func CheckSectionHeaderDensity(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		execution style.RepositoryScanExecution,
@@ -71,7 +71,7 @@ func CheckSectionHeaderDensity(textPackID string) (scanner runtimebinding.Reposi
 }
 
 // CheckSectionHeaders check section headers.
-func CheckSectionHeaders(textPackID string) (scanner runtimebinding.RepositoryScanner) {
+func CheckSectionHeaders(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
 		context execution.Context,
 		execution style.RepositoryScanExecution,

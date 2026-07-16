@@ -2,10 +2,10 @@ package scan
 
 import (
 	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/runtimebinding"
+	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 )
 
 // CheckDriver returns the repository-scan driver for check execution.
-func CheckDriver(scanners runtimebinding.RepositoryScanners) (driver execution.Driver) {
+func CheckDriver(scanners driverkit.RepositoryScanners) (driver execution.Executor) {
 	return repositoryScanDriver(scanners)
 }
