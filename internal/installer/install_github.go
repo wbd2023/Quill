@@ -5,22 +5,23 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	goruntime "runtime"
+	"runtime"
 
 	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/runtime"
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 func installGitHub(
-	layout runtime.Layout,
+	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.GitHubInstall,
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	path := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(runtime.Runner{}, tool, path)
+	installed, err := toolchain.IsInstalled(process.Runner{}, tool, path)
 	if err != nil {
 		return err
 	}
@@ -29,12 +30,12 @@ func installGitHub(
 		return nil
 	}
 
-	platform, ok := install.Platforms[goruntime.GOOS+"/"+goruntime.GOARCH]
+	platform, ok := install.Platforms[runtime.GOOS+"/"+runtime.GOARCH]
 	if !ok {
 		return fmt.Errorf(
 			"unsupported platform %s/%s for tool %s",
-			goruntime.GOOS,
-			goruntime.GOARCH,
+			runtime.GOOS,
+			runtime.GOARCH,
 			tool.ID,
 		)
 	}
@@ -48,7 +49,7 @@ func installGitHub(
 		tag,
 		asset,
 	)
-	hash, err := lockfile.HashFor(tool.ID, tool.PinnedVersion, goruntime.GOOS, goruntime.GOARCH)
+	hash, err := lockfile.HashFor(tool.ID, tool.PinnedVersion, runtime.GOOS, runtime.GOARCH)
 	if err != nil {
 		return err
 	}

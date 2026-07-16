@@ -3,12 +3,12 @@ package node
 import (
 	"testing"
 
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 func TestCommandBuildsNpmInstallRequest(t *testing.T) {
-	layout := runtime.NewLayout("/repo")
+	layout := workspace.NewLayout("/repo")
 	tool := toolchain.Tool{
 		ID:            "markdownlint",
 		Name:          "markdownlint",

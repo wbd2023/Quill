@@ -9,8 +9,8 @@ import (
 	"ciphera/tools/internal/ecosystem/golang"
 	"ciphera/tools/internal/ecosystem/node"
 	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/toolchain"
+	"ciphera/tools/internal/workspace"
 )
 
 const standardPermissions os.FileMode = 0o755
@@ -18,7 +18,7 @@ const standardPermissions os.FileMode = 0o755
 // Install downloads and installs the pinned external tools declared in the profile. All tools are
 // attempted; failures from independent tools are collected and returned as a joined error.
 func Install(
-	layout runtime.Layout,
+	layout workspace.Layout,
 	writer io.Writer,
 	tools []toolchain.Tool,
 	lockfile lockfile.Lockfile,
@@ -34,7 +34,7 @@ func Install(
 }
 
 func installTool(
-	layout runtime.Layout,
+	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
 	lockfile lockfile.Lockfile,

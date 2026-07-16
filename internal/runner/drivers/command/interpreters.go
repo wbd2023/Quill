@@ -3,8 +3,8 @@ package command
 import (
 	"strings"
 
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/runner/drivers/internal/runtimebinding"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -21,7 +21,7 @@ const (
 // that does not decompose cleanly per line (shellcheck, markdownlint, misspell). When the tool
 // exits with code, its trimmed output becomes a single diagnostic with the given code label.
 func InterpretPlainText(code int, codeLabel string) (interpreter runtimebinding.FileInterpreter) {
-	return func(result runtime.CommandResult) ([]style.Diagnostic, error) {
+	return func(result process.CommandResult) ([]style.Diagnostic, error) {
 		if result.ExitCode != code {
 			return nil, nil
 		}
@@ -42,7 +42,7 @@ func InterpretPlainText(code int, codeLabel string) (interpreter runtimebinding.
 // (gofmt -l, shfmt -d). When the tool exits with code, each non-empty trimmed line becomes a
 // diagnostic with the given code label.
 func InterpretLines(code int, codeLabel string) (interpreter runtimebinding.FileInterpreter) {
-	return func(result runtime.CommandResult) ([]style.Diagnostic, error) {
+	return func(result process.CommandResult) ([]style.Diagnostic, error) {
 		if result.ExitCode != code {
 			return nil, nil
 		}

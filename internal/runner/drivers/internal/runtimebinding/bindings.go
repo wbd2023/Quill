@@ -3,8 +3,8 @@ package runtimebinding
 import (
 	"fmt"
 
+	"ciphera/tools/internal/process"
 	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runtime"
 	"ciphera/tools/internal/style"
 )
 
@@ -40,7 +40,7 @@ type ProfileCheck func(
 // interpreter returns nil diagnostics for a clean run. Non-nil error means the command genuinely
 // failed (launch error, timeout, unexpected exit) and the diagnostics, if any, are diagnostic
 // context for that failure.
-type FileInterpreter func(result runtime.CommandResult) (diagnostics []style.Diagnostic, err error)
+type FileInterpreter func(result process.CommandResult) (diagnostics []style.Diagnostic, err error)
 
 // RepositoryScanners is repository scanners.
 type RepositoryScanners struct {
