@@ -1,56 +1,52 @@
 package cli
 
 import (
+	"context"
 	"flag"
 
-	"ciphera/tools/internal/pack/shipped/bindings"
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runner"
-	"ciphera/tools/internal/runner/drivers"
-	"ciphera/tools/internal/runtime"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
 )
 
 /* ----------------------------------------- Fix Command ---------------------------------------- */
 
 func runFix(tool Tool, options fixOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, options.scope)
+	fixer, err := engine.New(options.repoRoot)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	rules := fixableRules(context.Effective.Rules, context)
-	if len(rules) == 0 {
-		return 0
-	}
-
-	toolIDs := runner.ToolIDsForFixes(rules)
-	statuses, allValid := inspectToolchain(
-		runtime.Runner{},
-		selectTools(context.Tools, toolIDs),
-		context.ToolEnvironment,
-	)
-	result := report.ToolchainResult{Statuses: statuses}
-	if _, err := renderToolchainStatus(tool.stderr, report.FormatText, result); err != nil {
+	result, err := fixer.Fix(context.Background(), engine.FixOptions{
+		Scope: options.scope,
+	})
+	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	if !allValid {
+	if len(result.Rules) == 0 {
+		return 0
+	}
+
+	toolchainResult := report.ToolchainResult{Statuses: result.Toolchain.Statuses}
+	if _, err := renderToolchainStatus(
+		tool.stderr, report.FormatText, toolchainResult,
+	); err != nil {
+		tool.writeError(err)
 		return 1
 	}
 
-	statusIndex := toolchain.NewStatusMap(statuses)
-	fixers := drivers.FixDrivers(bindings.Build())
-	for _, rule := range rules {
-		fixResult, err := runner.RunFix(rule, context, statusIndex, fixers)
-		if err != nil {
-			if fixResult.Output != "" {
-				tool.writeCommandOutput(fixResult.Output)
+	if !result.Toolchain.AllValid {
+		return 1
+	}
+
+	for _, ruleResult := range result.Rules {
+		if ruleResult.ExecutionError != nil {
+			if ruleResult.Execution.Output != "" {
+				tool.writeCommandOutput(ruleResult.Execution.Output)
 			} else {
-				tool.writeError(err)
+				tool.writeError(ruleResult.ExecutionError)
 			}
 			return 1
 		}
@@ -100,25 +96,4 @@ func fixUsageText() (usage string) {
 	var options fixOptions
 	var scope string
 	return commandUsage("fix", summary, newFixFlagSet(&options, &scope))
-}
-
-/* --------------------------------------- Rule Selection --------------------------------------- */
-
-func fixableRules(
-	available []style.Rule,
-	context runner.Context,
-) (rules []style.Rule) {
-	for _, rule := range available {
-		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
-			continue
-		}
-
-		if rule.Fix == nil {
-			continue
-		}
-
-		rules = append(rules, rule)
-	}
-
-	return rules
 }

@@ -1,32 +1,33 @@
 package cli
 
 import (
+	"context"
 	"flag"
 
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runtime"
 )
 
 func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, "")
+	doctor, err := engine.New(options.repoRoot)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	statuses, allValid := inspectToolchain(
-		runtime.Runner{},
-		context.Tools,
-		context.ToolEnvironment,
-	)
-	result := report.ToolchainResult{Statuses: statuses}
-	_, err = renderToolchainStatus(tool.stdout, options.format, result)
+	inspection, err := doctor.Inspect(context.Background())
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	if allValid {
+	result := report.ToolchainResult{Statuses: inspection.Statuses}
+	if _, err = renderToolchainStatus(tool.stdout, options.format, result); err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	if inspection.AllValid {
 		return 0
 	}
 

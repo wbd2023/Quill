@@ -1,51 +1,37 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
-	"ciphera/tools/internal/installer"
-	"ciphera/tools/internal/lockfile"
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/runtime"
 )
 
 func runInstall(tool Tool, options installOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, "")
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	layout := runtime.NewLayout(context.RepoRoot)
-	loaded, err := lockfile.Load(context.RepoRoot)
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	if err := installer.Install(
-		layout,
-		tool.stdout,
-		sortedTools(context.Tools),
-		loaded,
-	); err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	statuses, allValid := inspectToolchain(
-		runtime.Runner{},
-		context.Tools,
-		context.ToolEnvironment,
+	installer, err := engine.New(
+		options.repoRoot,
+		engine.WithProgressWriter(tool.stdout),
 	)
-	result := report.ToolchainResult{Statuses: statuses}
-	if _, err = renderToolchainStatus(tool.stdout, report.FormatText, result); err != nil {
+	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	if !allValid {
+	result, err := installer.Install(context.Background())
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	toolchainResult := report.ToolchainResult{Statuses: result.Toolchain.Statuses}
+	if _, err = renderToolchainStatus(tool.stdout, report.FormatText, toolchainResult); err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	if !result.Toolchain.AllValid {
 		return 1
 	}
 

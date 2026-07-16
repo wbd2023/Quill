@@ -1,21 +1,25 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"io"
 
 	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/profile"
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/styleguide"
 )
 
 /* -------------------------------------- Coverage Command -------------------------------------- */
 
 func runCoverage(tool Tool, options coverageOptions) (exitCode int) {
-	coverageReport, err := loadCoverageReport(options.repoRoot)
+	engine, err := engine.New(options.repoRoot)
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	coverageReport, err := engine.Coverage(context.Background())
 	if err != nil {
 		tool.writeError(err)
 		return 1
@@ -76,39 +80,6 @@ func coverageUsageText() (usage string) {
 	var options coverageOptions
 	var format string
 	return commandUsage("coverage", summary, newCoverageFlagSet(&options, &format))
-}
-
-/* -------------------------------------- Coverage Loading -------------------------------------- */
-
-func loadCoverageReport(repoRoot string) (coverageReport coverage.Report, err error) {
-	config, err := profile.Load(repoRoot)
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	document, err := styleguide.Load(repoRoot, styleguide.Config{
-		Filename: config.StyleGuide.Path,
-	})
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	config, err = pack.ResolvePacks(config, registry.Packs())
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	compiled, err := profile.Compile(config, registry.Definitions())
-	if err != nil {
-		return coverage.Report{}, err
-	}
-
-	return coverage.Build(document, compiled.Effective.Rules), nil
 }
 
 /* ------------------------------------------ Rendering ----------------------------------------- */
