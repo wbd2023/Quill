@@ -20,14 +20,14 @@ func Install(
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.NpmInstall,
-	searchPath string,
+	path string,
 ) (err error) {
 	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	path := filepath.Join(BinaryDirectory(layout), tool.Command)
-	installed, err := toolchain.IsInstalled(tool, path)
+	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
+	installed, err := toolchain.IsInstalled(tool, binary)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func Install(
 
 	_, err = runtime.RunCommand(runtime.CommandRequest{
 		Directory:   Directory(layout),
-		Environment: Environment(layout, searchPath),
+		Environment: Environment(layout, path),
 		Name:        "npm",
 		Arguments:   npmArguments(install.Source, tool.PinnedVersion),
 	})

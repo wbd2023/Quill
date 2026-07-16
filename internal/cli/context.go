@@ -38,9 +38,9 @@ func loadContext(repoRoot string, scope style.Scope) (context runner.Context, er
 	}
 
 	layout := runtime.NewLayout(repoRoot)
-	searchPath := runtime.SearchPath(layout.ToolBinaryDirectory(), node.BinaryDirectory(layout))
-	toolEnvironment := map[string]string{"PATH": searchPath}
-	goEnvironment := golang.Environment(layout, searchPath)
+	path := runtime.SearchPath(layout.ToolBinaryDirectory(), node.BinaryDirectory(layout))
+	toolEnvironment := map[string]string{"PATH": path}
+	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	lockfile, err := lockfile.Load(repoRoot)

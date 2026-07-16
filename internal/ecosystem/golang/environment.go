@@ -22,12 +22,12 @@ func GoPath(layout runtime.Layout) (path string) {
 }
 
 // Environment builds the Go environment variables for running Go tooling within the engine's
-// isolated layout. searchPath is the PATH value that makes installed tool binaries discoverable.
+// isolated layout. path is the PATH value that makes installed tool binaries discoverable.
 // Callers may add consumer-specific variables (eg GOLANGCI_LINT_CACHE for the checker, GOBIN for
 // the installer) to the result.
-func Environment(layout runtime.Layout, searchPath string) (environment map[string]string) {
+func Environment(layout runtime.Layout, path string) (environment map[string]string) {
 	return map[string]string{
-		"PATH":       searchPath,
+		"PATH":       path,
 		"GOCACHE":    BuildCache(layout),
 		"GOMODCACHE": ModuleCache(layout),
 		"GOPATH":     GoPath(layout),

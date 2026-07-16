@@ -39,7 +39,7 @@ func installTool(
 	tool toolchain.Tool,
 	lockfile lockfile.Lockfile,
 ) (err error) {
-	searchPath := runtime.SearchPath(
+	path := runtime.SearchPath(
 		layout.ToolBinaryDirectory(),
 		node.BinaryDirectory(layout),
 	)
@@ -50,10 +50,10 @@ func installTool(
 		return nil
 
 	case toolchain.GoInstall:
-		return golang.Install(layout, writer, tool, install, searchPath)
+		return golang.Install(layout, writer, tool, install, path)
 
 	case toolchain.NpmInstall:
-		return node.Install(layout, writer, tool, install, searchPath)
+		return node.Install(layout, writer, tool, install, path)
 
 	case toolchain.GitHubInstall:
 		return installGitHub(layout, writer, tool, install, lockfile)

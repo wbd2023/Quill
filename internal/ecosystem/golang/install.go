@@ -20,14 +20,14 @@ func Install(
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.GoInstall,
-	searchPath string,
+	path string,
 ) (err error) {
 	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	path := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(tool, path)
+	binary := filepath.Join(layout.ToolBinaryDirectory(), tool.Command)
+	installed, err := toolchain.IsInstalled(tool, binary)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func Install(
 		return err
 	}
 
-	environment := Environment(layout, searchPath)
+	environment := Environment(layout, path)
 	environment["GOBIN"] = layout.ToolBinaryDirectory()
 
 	_, err = runtime.RunCommand(runtime.CommandRequest{
