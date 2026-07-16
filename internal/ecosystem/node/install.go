@@ -1,4 +1,4 @@
-package installer
+package node
 
 import (
 	"fmt"
@@ -10,18 +10,24 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-func installNpm(
+// standardPermissions is the filesystem mode for created directories.
+const standardPermissions os.FileMode = 0o755
+
+// Install runs npm install for the tool using an isolated NPM environment derived from layout. It
+// skips installation when the tool is already present at the pinned version.
+func Install(
 	layout runtime.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.NpmInstall,
+	searchPath string,
 ) (err error) {
 	if install.Source == "" {
 		return fmt.Errorf("tool %s does not define an install source", tool.ID)
 	}
 
-	path := filepath.Join(layout.NodeBinaryDirectory(), tool.Command)
-	installed, err := hasPinnedLocalTool(tool, path)
+	path := filepath.Join(BinaryDirectory(layout), tool.Command)
+	installed, err := toolchain.IsInstalled(tool, path)
 	if err != nil {
 		return err
 	}
@@ -39,18 +45,15 @@ func installNpm(
 		return err
 	}
 
-	if err = os.MkdirAll(layout.NodeDirectory(), standardPermissions); err != nil {
+	if err = os.MkdirAll(Directory(layout), standardPermissions); err != nil {
 		return err
 	}
 
 	_, err = runtime.RunCommand(runtime.CommandRequest{
-		Directory: layout.NodeDirectory(),
-		Environment: map[string]string{
-			"PATH":             layout.SearchPath(),
-			"npm_config_cache": layout.NpmCache(),
-		},
-		Name:      "npm",
-		Arguments: npmArguments(install.Source, tool.PinnedVersion),
+		Directory:   Directory(layout),
+		Environment: Environment(layout, searchPath),
+		Name:        "npm",
+		Arguments:   npmArguments(install.Source, tool.PinnedVersion),
 	})
 	if err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
@@ -59,7 +62,7 @@ func installNpm(
 	return nil
 }
 
-// npmArguments builds the arguments for `npm install`. --ignore-scripts prevents arbitrary
+// npmArguments builds the arguments for npm install. --ignore-scripts prevents arbitrary
 // postinstall scripts from running; the rest pin the exact version and suppress side output.
 func npmArguments(source string, version string) (arguments []string) {
 	return []string{

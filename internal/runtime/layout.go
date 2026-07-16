@@ -17,8 +17,6 @@ func WithStateDirectory(directory string) (option Option) {
 	}
 }
 
-/* ------------------------------------------- Layout ------------------------------------------- */
-
 // Layout holds the repository root and state directory from which all engine paths are derived.
 // Construct one with NewLayout.
 type Layout struct {
@@ -38,8 +36,6 @@ func NewLayout(repositoryRoot string, options ...Option) (layout Layout) {
 	}
 	return layout
 }
-
-/* ---------------------------------------- Derived Paths --------------------------------------- */
 
 // RepositoryRoot returns the repository root the engine is operating on.
 func (layout Layout) RepositoryRoot() (root string) {
@@ -62,43 +58,11 @@ func (layout Layout) ToolBinaryDirectory() (directory string) {
 	return filepath.Join(layout.stateDirectory, "bin")
 }
 
-// NodeDirectory returns the directory where Node tooling state lives.
-func (layout Layout) NodeDirectory() (directory string) {
-	return filepath.Join(layout.stateDirectory, "npm")
-}
-
-// NodeBinaryDirectory returns the directory where Node-installed binaries live.
-func (layout Layout) NodeBinaryDirectory() (directory string) {
-	return filepath.Join(layout.NodeDirectory(), "node_modules", ".bin")
-}
-
-// NpmCache returns the NPM cache directory.
-func (layout Layout) NpmCache() (cache string) {
-	return filepath.Join(layout.CacheDirectory(), "npm")
-}
-
-// GoBuildCache returns the Go build cache directory.
-func (layout Layout) GoBuildCache() (cache string) {
-	return filepath.Join(layout.CacheDirectory(), "go-build")
-}
-
-// GoModuleCache returns the Go module cache directory.
-func (layout Layout) GoModuleCache() (cache string) {
-	return filepath.Join(layout.CacheDirectory(), "go-mod")
-}
-
-// GoPath returns the GOPATH directory.
-func (layout Layout) GoPath() (path string) {
-	return filepath.Join(layout.CacheDirectory(), "gopath")
-}
-
-/* ----------------------------------------- Environment ---------------------------------------- */
-
-// SearchPath returns the PATH value that makes installed tool binaries and Node binaries
-// discoverable.
-func (layout Layout) SearchPath() (value string) {
-	return strings.Join(
-		[]string{layout.ToolBinaryDirectory(), layout.NodeBinaryDirectory(), os.Getenv("PATH")},
-		string(os.PathListSeparator),
-	)
+// SearchPath joins the given binary directories and the system PATH, producing a PATH value that
+// makes installed tool binaries discoverable. The caller provides the ecosystem-specific binary
+// directories (eg the engine's tool binary directory and a Node binary directory).
+func SearchPath(binaryDirectories ...string) (value string) {
+	directories := append([]string{}, binaryDirectories...)
+	directories = append(directories, os.Getenv("PATH"))
+	return strings.Join(directories, string(os.PathListSeparator))
 }

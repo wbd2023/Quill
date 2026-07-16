@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"ciphera/tools/internal/ecosystem/golang"
+	"ciphera/tools/internal/ecosystem/node"
 	"ciphera/tools/internal/lockfile"
 	"ciphera/tools/internal/pack/shipped"
 	"ciphera/tools/internal/profile"
@@ -35,14 +37,10 @@ func testContext(
 	}
 
 	layout := runtime.NewLayout(repoRoot)
-	toolEnvironment := map[string]string{"PATH": layout.SearchPath()}
-	goEnvironment := map[string]string{
-		"PATH":                layout.SearchPath(),
-		"GOCACHE":             layout.GoBuildCache(),
-		"GOMODCACHE":          layout.GoModuleCache(),
-		"GOPATH":              layout.GoPath(),
-		"GOLANGCI_LINT_CACHE": filepath.Join(layout.CacheDirectory(), "golangci"),
-	}
+	searchPath := runtime.SearchPath(layout.ToolBinaryDirectory(), node.BinaryDirectory(layout))
+	toolEnvironment := map[string]string{"PATH": searchPath}
+	goEnvironment := golang.Environment(layout, searchPath)
+	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	return runner.NewContext(
 		repoRoot,
