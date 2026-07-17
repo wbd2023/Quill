@@ -23,7 +23,7 @@ func (engine *Engine) Lock(
 	}
 
 	tools := sortedTools(context.Tools)
-	archives, err := installer.Resolve(engine.progressWriter, tools)
+	archives, err := installer.Resolve(operationContext, engine.progressWriter, tools)
 	if err != nil {
 		return LockResult{}, err
 	}

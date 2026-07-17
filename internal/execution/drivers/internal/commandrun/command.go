@@ -1,6 +1,7 @@
 package commandrun
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 // ToolByID runs a tool identified by toolID and returns its result.
 func ToolByID(
+	ctx context.Context,
 	context execution.RunContext,
 	workDir string,
 	toolID string,
@@ -21,7 +23,7 @@ func ToolByID(
 		return process.CommandResult{}, fmt.Errorf("unknown tool %q", toolID)
 	}
 
-	return process.RunCommand(process.CommandRequest{
+	return process.RunCommand(ctx, process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        slices.Clone(arguments),
 		Environment:      context.GoEnvironment,
@@ -33,12 +35,13 @@ func ToolByID(
 
 // Output runs a command and returns its result.
 func Output(
+	ctx context.Context,
 	workDir string,
 	environment map[string]string,
 	name string,
 	arguments ...string,
 ) (result process.CommandResult, err error) {
-	return process.RunCommand(process.CommandRequest{
+	return process.RunCommand(ctx, process.CommandRequest{
 		Name:        name,
 		Arguments:   slices.Clone(arguments),
 		Environment: environment,

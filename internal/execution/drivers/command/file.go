@@ -1,6 +1,7 @@
 package command
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,7 @@ import (
 // driver runs the tool and returns empty success on exit 0, or an error otherwise. Fix tools do
 // not produce findings to interpret.
 func runFileCommand(
+	ctx context.Context,
 	context execution.RunContext,
 	job style.Job,
 	interpreters driverkit.FileInterpreters,
@@ -42,8 +44,7 @@ func runFileCommand(
 	}
 
 	arguments := execution.FileCommandArguments(context.RepoRoot, job)
-	arguments = append(arguments, files...)
-	commandResult, runErr := process.RunCommand(process.CommandRequest{
+	commandResult, runErr := process.RunCommand(ctx, process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        arguments,
 		Environment:      context.ToolEnvironment,

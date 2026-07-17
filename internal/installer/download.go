@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -19,10 +20,17 @@ const (
 
 /* ------------------------------------------ Download ------------------------------------------ */
 
-// downloadFile fetches a URL and writes it to destination via an atomic temp-file rename. The
-// download is capped at limit bytes to prevent unbounded memory or disk usage.
-func downloadFile(url string, destination string) (err error) {
-	response, err := (&http.Client{Timeout: timeout}).Get(url)
+func downloadFile(
+	ctx context.Context,
+	url string,
+	destination string,
+) (err error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	response, err := (&http.Client{Timeout: timeout}).Do(request)
 	if err != nil {
 		return err
 	}

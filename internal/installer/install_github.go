@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -14,6 +15,7 @@ import (
 )
 
 func installGitHub(
+	ctx context.Context,
 	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
@@ -21,7 +23,7 @@ func installGitHub(
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	path := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(process.Runner{}, tool, path)
+	installed, err := toolchain.IsInstalled(ctx, process.Runner{}, tool, path)
 	if err != nil {
 		return err
 	}
@@ -72,7 +74,7 @@ func installGitHub(
 		return err
 	}
 
-	if err = downloadFile(url, archive); err != nil {
+	if err = downloadFile(ctx, url, archive); err != nil {
 		return err
 	}
 

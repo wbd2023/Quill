@@ -1,6 +1,7 @@
 package toolchain
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 // InspectTools reports the status of each tool in tools, sorted by tool ID.
 func InspectTools(
+	ctx context.Context,
 	runner CommandRunner,
 	tools map[string]Tool,
 	environment map[string]string,
@@ -21,23 +23,28 @@ func InspectTools(
 	statuses = make([]Status, 0, len(ids))
 
 	for _, id := range ids {
-		statuses = append(statuses, inspectTool(runner, tools[id], environment))
+		statuses = append(statuses, inspectTool(ctx, runner, tools[id], environment))
 	}
 
 	return statuses
 }
 
-func inspectTool(runner CommandRunner, tool Tool, environment map[string]string) (status Status) {
+func inspectTool(
+	ctx context.Context,
+	runner CommandRunner,
+	tool Tool,
+	environment map[string]string,
+) (status Status) {
 	status = Status{Tool: tool}
 
-	path, err := runner.ResolvePath(environment, tool.Command)
+	path, err := runner.ResolvePath(ctx, environment, tool.Command)
 	if err != nil {
 		status.Issue = "missing from PATH"
 		return status
 	}
 
 	status.Path = path
-	version, err := tool.Version(runner, environment, path)
+	version, err := tool.Version(ctx, runner, environment, path)
 	if err != nil {
 		status.Issue = err.Error()
 		return status
@@ -55,7 +62,12 @@ func inspectTool(runner CommandRunner, tool Tool, environment map[string]string)
 
 // IsInstalled reports whether a tool matching the pinned version is already installed at the given
 // path.
-func IsInstalled(runner CommandRunner, tool Tool, path string) (installed bool, err error) {
+func IsInstalled(
+	ctx context.Context,
+	runner CommandRunner,
+	tool Tool,
+	path string,
+) (installed bool, err error) {
 	if _, err = os.Stat(path); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return false, nil
@@ -67,6 +79,7 @@ func IsInstalled(runner CommandRunner, tool Tool, path string) (installed bool, 
 	probe := tool
 	probe.Command = path
 	statuses := InspectTools(
+		ctx,
 		runner,
 		map[string]Tool{tool.ID: probe},
 		nil,

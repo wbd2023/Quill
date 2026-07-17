@@ -1,6 +1,7 @@
 package execution
 
 import (
+	"context"
 	"testing"
 
 	"ciphera/tools/internal/policy"
@@ -16,7 +17,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 			Scanner: "test",
 		},
 	}
-	context := NewRunContext(
+	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
 		policy.Config{},
@@ -27,6 +28,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	)
 	drivers := ExecutorSet{
 		RepositoryScan: func(
+			_ context.Context,
 			_ RunContext,
 			_ style.Job,
 			_ toolchain.StatusMap,
@@ -35,7 +37,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		},
 	}
 
-	result, err := RunRule(rule, context, nil, drivers)
+	result, err := RunRule(context.Background(), rule, runCtx, nil, drivers)
 	if err != nil {
 		t.Fatalf("RunRule: %v", err)
 	}
@@ -53,7 +55,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 			ToolIDs: []string{"go"},
 		},
 	}
-	context := NewRunContext(
+	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
 		policy.Config{},
@@ -64,7 +66,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 	)
 	drivers := ExecutorSet{}
 
-	_, err := RunRule(rule, context, nil, drivers)
+	_, err := RunRule(context.Background(), rule, runCtx, nil, drivers)
 	if err == nil {
 		t.Fatal("expected error for execution with no registered driver, got nil")
 	}

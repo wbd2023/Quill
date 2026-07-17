@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"context"
 	"testing"
 
 	"ciphera/tools/internal/execution"
@@ -11,6 +12,7 @@ import (
 func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 	driver := repositoryScanDriver(driverkit.NewRepositoryScanners())
 	_, err := driver(
+		context.Background(),
 		execution.RunContext{},
 		style.RepositoryScanExecution{
 			Scanner: "missing",
@@ -24,6 +26,7 @@ func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 
 func TestRepositoryScannersRejectDuplicateScannerID(t *testing.T) {
 	scanner := func(
+		_ context.Context,
 		_ execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {

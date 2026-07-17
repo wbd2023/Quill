@@ -17,12 +17,13 @@ type ToolchainInspection struct {
 }
 
 func (engine *Engine) inspectTools(
+	ctx context.Context,
 	tools map[string]toolchain.Tool,
 	toolIDs []string,
 	environment map[string]string,
 ) (inspection ToolchainInspection) {
 	selected := selectTools(tools, toolIDs)
-	statuses := toolchain.InspectTools(engine.commandRunner, selected, environment)
+	statuses := toolchain.InspectTools(ctx, engine.commandRunner, selected, environment)
 	return ToolchainInspection{
 		Statuses: statuses,
 		AllValid: toolchain.NewStatusMap(statuses).AreAllValid(toolIDs),
@@ -90,12 +91,14 @@ func (engine *Engine) Check(
 
 	selected := selectRulesForCheck(context.Effective.Rules, context, options.Mode)
 	toolIDs := execution.ToolIDsForRules(selected)
-	result.Toolchain = engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment)
+	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
+		context.ToolEnvironment)
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 
 	result.Rules = make([]RuleCheckResult, 0, len(selected))
 	for _, rule := range selected {
 		executionResult, executionError := execution.RunRule(
+			operationContext,
 			rule,
 			context,
 			toolStatuses,

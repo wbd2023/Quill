@@ -1,15 +1,20 @@
 package scan
 
 import (
+	"context"
+
 	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
 )
 
+/* ---------------------------------------- Text Scanners --------------------------------------- */
+
 // CheckASCII scans for non-ASCII characters in text files.
 func CheckASCII() (scanner driverkit.RepositoryScanner) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
@@ -20,6 +25,7 @@ func CheckASCII() (scanner driverkit.RepositoryScanner) {
 // CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
@@ -39,6 +45,7 @@ func CheckLineLengths() (scanner driverkit.RepositoryScanner) {
 // CheckMaintenanceMarkers check maintenance markers.
 func CheckMaintenanceMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
@@ -53,34 +60,38 @@ func CheckMaintenanceMarkers() (scanner driverkit.RepositoryScanner) {
 // CheckSectionHeaderNames check section header names.
 func CheckSectionHeaderNames(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
-		return scanSectionHeaderNames(context, execution, textPackID)
+		return scanSectionHeaderNames(ctx, context, execution, textPackID)
 	}
 }
 
 // CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
-		return scanSectionHeaderDensity(context, execution, textPackID)
+		return scanSectionHeaderDensity(ctx, context, execution, textPackID)
 	}
 }
 
 // CheckSectionHeaders check section headers.
 func CheckSectionHeaders(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
-		return scanSectionHeaders(context, execution, textPackID)
+		return scanSectionHeaders(ctx, context, execution, textPackID)
 	}
 }
 
 func scanLineLengths(
+	_ context.Context,
 	context execution.RunContext,
 	scanExec style.RepositoryScanExecution,
 ) (result style.ExecutionResult, err error) {

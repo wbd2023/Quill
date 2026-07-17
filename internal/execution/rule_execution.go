@@ -1,6 +1,7 @@
 package execution
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -14,7 +15,8 @@ var errRuleBlocked = errors.New("rule blocked by toolchain")
 
 // Executor executes one rule's check or fix job against the repository.
 type Executor func(
-	context RunContext,
+	ctx context.Context,
+	run RunContext,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
@@ -37,29 +39,32 @@ func IsBlocked(err error) (blocked bool) {
 
 // RunRule executes a rule's check against the repository.
 func RunRule(
+	ctx context.Context,
 	rule style.Rule,
-	context RunContext,
+	run RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {
-	return runExecution(rule.ID, rule.Check, rule.CheckToolIDs(), context, toolStatuses, drivers)
+	return runExecution(ctx, rule.ID, rule.Check, rule.CheckToolIDs(), run, toolStatuses, drivers)
 }
 
 // RunFix executes a rule's fix against the repository.
 func RunFix(
+	ctx context.Context,
 	rule style.Rule,
-	context RunContext,
+	run RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {
-	return runExecution(rule.ID, rule.Fix, rule.FixToolIDs(), context, toolStatuses, drivers)
+	return runExecution(ctx, rule.ID, rule.Fix, rule.FixToolIDs(), run, toolStatuses, drivers)
 }
 
 func runExecution(
+	ctx context.Context,
 	ruleID string,
 	job style.Job,
 	toolIDs []string,
-	context RunContext,
+	run RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {
@@ -91,7 +96,7 @@ func runExecution(
 		)
 	}
 
-	return driver(context, job, toolStatuses)
+	return driver(ctx, run, job, toolStatuses)
 }
 
 func driverFor(job style.Job, drivers ExecutorSet) (driver Executor, err error) {

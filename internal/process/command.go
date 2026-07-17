@@ -52,15 +52,19 @@ type CommandResult struct {
 
 // RunCommand executes the command described by request, applying its timeout and output limit, and
 // returns the captured output and exit status. A non-zero exit or timeout is returned as a
-// CommandError wrapping the underlying cause.
-func RunCommand(request CommandRequest) (result CommandResult, err error) {
+// CommandError wrapping the underlying cause. The caller's context is honoured: cancellation
+// propagates to the child process.
+func RunCommand(
+	ctx context.Context,
+	request CommandRequest,
+) (result CommandResult, err error) {
 	path, err := ResolveCommandPath(request.Environment, request.Name)
 	if err != nil {
 		return CommandResult{}, err
 	}
 
 	ctx, cancel := context.WithTimeout(
-		context.Background(),
+		ctx,
 		resolveTimeout(request.Timeout),
 	)
 	defer cancel()

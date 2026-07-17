@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"errors"
 
 	"ciphera/tools/internal/execution"
@@ -15,12 +16,14 @@ func RunGoFormat(
 	goimportsToolID string,
 	goLanguage string,
 ) (command driverkit.TargetCommand) {
-	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
-		return runGoFormat(context, job, goPackID, goimportsToolID, goLanguage)
+	return func(ctx context.Context, context execution.RunContext,
+		job style.Job) (style.ExecutionResult, error) {
+		return runGoFormat(ctx, context, job, goPackID, goimportsToolID, goLanguage)
 	}
 }
 
 func runGoFormat(
+	ctx context.Context,
 	context execution.RunContext,
 	job style.Job,
 	goPackID string,
@@ -52,6 +55,7 @@ func runGoFormat(
 
 		workDir := targetWorkDir(context.RepoRoot, target)
 		commandResult, err := commandrun.Output(
+			ctx,
 			workDir,
 			context.GoEnvironment,
 			"gofmt",
@@ -64,6 +68,7 @@ func runGoFormat(
 		}
 
 		commandResult, err = commandrun.ToolByID(
+			ctx,
 			context,
 			workDir,
 			goimportsToolID,

@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"testing"
 
 	"ciphera/tools/internal/execution"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
-	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("app"))
+	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("app"))
 
 	job := style.TargetCommandJob{
 		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
@@ -21,7 +22,7 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 		Targets:  []string{"app_go"},
 	}
 
-	result, err := testTargetCommandDriver()(context, job, nil)
+	result, err := testTargetCommandDriver()(context.Background(), runCtx, job, nil)
 	if err != nil {
 		t.Fatalf("golangciDriver(app): %v", err)
 	}
@@ -32,7 +33,7 @@ func TestRunGolangciRulePassesCurrentAppScope(t *testing.T) {
 }
 
 func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
-	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
+	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
 	job := style.TargetCommandJob{
 		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
@@ -41,7 +42,7 @@ func TestRunGolangciRulePassesCurrentToolsScope(t *testing.T) {
 		Targets:  []string{"tools_go"},
 	}
 
-	result, err := testTargetCommandDriver()(context, job, nil)
+	result, err := testTargetCommandDriver()(context.Background(), runCtx, job, nil)
 	if err != nil {
 		t.Fatalf("golangciDriver(tools): %v", err)
 	}

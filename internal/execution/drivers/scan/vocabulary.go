@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"context"
+
 	"ciphera/tools/internal/checks/vocabulary"
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/driverkit"
@@ -10,14 +12,16 @@ import (
 // CheckVocabulary check vocabulary.
 func CheckVocabulary(vocabularyPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
-		return scanVocabulary(context, execution, vocabularyPackID)
+		return scanVocabulary(ctx, context, execution, vocabularyPackID)
 	}
 }
 
 func scanVocabulary(
+	ctx context.Context,
 	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	vocabularyPackID string,
