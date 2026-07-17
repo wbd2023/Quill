@@ -1,36 +1,37 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/installer"
+	"ciphera/tools/internal/engine"
 	"ciphera/tools/internal/lockfile"
 )
 
 /* ------------------------------------------- Command ------------------------------------------ */
 
 func runLock(tool Tool, options lockOptions) (exitCode int) {
-	context, err := loadContext(options.repoRoot, "")
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	entries, err := installer.Resolve(
-		tool.stdout,
-		sortedTools(context.Tools),
+	engineInstance, err := engine.New(
+		options.repoRoot,
+		engine.WithProgressWriter(tool.stdout),
 	)
 	if err != nil {
 		tool.writeError(err)
 		return 1
 	}
 
-	archiveByID := make(map[string]lockfile.Archive, len(entries))
-	for _, entry := range entries {
-		archiveByID[entry.Tool] = entry
+	result, err := engineInstance.Lock(context.Background())
+	if err != nil {
+		tool.writeError(err)
+		return 1
+	}
+
+	archiveByID := make(map[string]lockfile.Archive, len(result.Archives))
+	for _, archive := range result.Archives {
+		archiveByID[archive.Tool] = archive
 	}
 
 	contents, err := lockfile.Encode(lockfile.Lockfile{Archives: archiveByID})
@@ -45,7 +46,9 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 		return 1
 	}
 
-	if _, err = fmt.Fprintf(tool.stdout, "Wrote %s (%d tools)\n", path, len(entries)); err != nil {
+	if _, err = fmt.Fprintf(
+		tool.stdout, "Wrote %s (%d tools)\n", path, len(result.Archives),
+	); err != nil {
 		tool.writeError(err)
 		return 1
 	}
