@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -13,12 +14,14 @@ import (
 
 // CheckGoStyle check go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check driverkit.TargetCheck) {
-	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
-		return runGoStyleCheck(context, job, goPackID, goLanguage)
+	return func(ctx context.Context, context execution.RunContext,
+		job style.Job) (style.ExecutionResult, error) {
+		return runGoStyleCheck(ctx, context, job, goPackID, goLanguage)
 	}
 }
 
 func runGoStyleCheck(
+	ctx context.Context,
 	context execution.RunContext,
 	job style.Job,
 	goPackID string,

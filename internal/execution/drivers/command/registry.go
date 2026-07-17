@@ -1,6 +1,8 @@
 package command
 
 import (
+	"context"
+
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/driverkit"
 	"ciphera/tools/internal/style"
@@ -12,11 +14,12 @@ import (
 // unsupported rather than silently dumping raw output.
 func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		return runFileCommand(context, job, interpreters, false)
+		return runFileCommand(ctx, context, job, interpreters, false)
 	}
 }
 
@@ -24,10 +27,11 @@ func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Exec
 // they either succeed (exit 0, empty result) or fail (non-zero exit, error).
 func FixDriver() (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		return runFileCommand(context, job, driverkit.FileInterpreters{}, true)
+		return runFileCommand(ctx, context, job, driverkit.FileInterpreters{}, true)
 	}
 }

@@ -1,6 +1,7 @@
 package toolchain
 
 import (
+	"context"
 	"debug/buildinfo"
 	"fmt"
 	"strconv"
@@ -13,11 +14,12 @@ import (
 // from its output using extract.
 func DetectByCommand(argument string, extract func(string) (string, error)) (method VersionMethod) {
 	return func(
+		ctx context.Context,
 		runner CommandRunner,
 		environment map[string]string,
 		path string,
 	) (version string, err error) {
-		output, err := runner.Run(environment, path, []string{argument})
+		output, err := runner.Run(ctx, environment, path, []string{argument})
 		if err != nil {
 			return "", err
 		}
@@ -30,6 +32,7 @@ func DetectByCommand(argument string, extract func(string) (string, error)) (met
 // info. ModulePath, if set, must match the binary's main module.
 func DetectByGoBinary(modulePath string) (method VersionMethod) {
 	return func(
+		ctx context.Context,
 		runner CommandRunner,
 		environment map[string]string,
 		path string,

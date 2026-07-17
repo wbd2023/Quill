@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"fmt"
 
 	"ciphera/tools/internal/execution"
@@ -11,6 +12,7 @@ import (
 
 func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
@@ -30,12 +32,13 @@ func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Ex
 			)
 		}
 
-		return command(context, job)
+		return command(ctx, context, job)
 	}
 }
 
 func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
@@ -53,6 +56,6 @@ func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Executor
 			)
 		}
 
-		return check(context, job)
+		return check(ctx, context, job)
 	}
 }

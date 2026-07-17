@@ -2,6 +2,7 @@ package installer
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"sort"
@@ -35,6 +36,7 @@ func stubResolver(
 	failErr error,
 ) (resolver platformResolver) {
 	return func(
+		_ context.Context,
 		_ io.Writer,
 		_ toolchain.GitHubInstall,
 		_ toolchain.Tool,
@@ -61,6 +63,7 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	}
 
 	archive, err := resolveArchive(
+		context.Background(),
 		io.Discard,
 		tool,
 		install,
@@ -104,6 +107,7 @@ func TestResolveArchivePropagatesPlatformError(t *testing.T) {
 	platformErr := errors.New("network down")
 
 	_, err := resolveArchive(
+		context.Background(),
 		io.Discard,
 		tool,
 		install,
@@ -124,6 +128,7 @@ func stubArchiveResolver(
 	hashesByPlatform map[string]string,
 ) (resolver archiveResolver) {
 	return func(
+		_ context.Context,
 		_ io.Writer,
 		tool toolchain.Tool,
 		_ toolchain.GitHubInstall,
@@ -148,6 +153,7 @@ func TestResolveFiltersNonArchiveTools(t *testing.T) {
 	}
 
 	entries, err := resolveWith(
+		context.Background(),
 		io.Discard,
 		tools,
 		stubArchiveResolver(map[string]string{"linux/amd64": "abc"}),
@@ -174,7 +180,7 @@ func TestResolveSkipsNonArchiveTools(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	entries, err := resolveWith(&buf, tools, stubArchiveResolver(nil))
+	entries, err := resolveWith(context.Background(), &buf, tools, stubArchiveResolver(nil))
 	if err != nil {
 		t.Fatalf("resolveWith: %v", err)
 	}

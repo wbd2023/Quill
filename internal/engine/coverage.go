@@ -61,7 +61,8 @@ func (engine *Engine) Install(
 
 	tools := sortedTools(context.Tools)
 
-	if err = installer.Install(layout, engine.progressWriter, tools, loaded); err != nil {
+	if err = installer.Install(operationContext, layout, engine.progressWriter, tools,
+		loaded); err != nil {
 		return InstallResult{}, err
 	}
 
@@ -70,7 +71,8 @@ func (engine *Engine) Install(
 		toolIDs = append(toolIDs, toolID)
 	}
 
-	result.Toolchain = engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment)
+	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
+		context.ToolEnvironment)
 	return result, nil
 }
 

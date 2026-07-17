@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -17,15 +18,17 @@ import (
 // profile, hashes each one, and returns the entries that make up quill.lock. Failures from
 // independent tools or platforms are collected and returned as a joined error.
 func Resolve(
+	ctx context.Context,
 	writer io.Writer,
 	tools []toolchain.Tool,
 ) (entries []lockfile.Archive, err error) {
-	return resolveWith(writer, tools, resolveArchive)
+	return resolveWith(ctx, writer, tools, resolveArchive)
 }
 
 // archiveResolver assembles one tool's lockfile entry by resolving each platform. Extracted as a
 // parameter so the iteration and filtering in resolveWith is testable without network I/O.
 type archiveResolver func(
+	ctx context.Context,
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.GitHubInstall,
@@ -33,6 +36,7 @@ type archiveResolver func(
 ) (archive lockfile.Archive, err error)
 
 func resolveWith(
+	ctx context.Context,
 	writer io.Writer,
 	tools []toolchain.Tool,
 	resolveArchiveStep archiveResolver,
@@ -44,7 +48,7 @@ func resolveWith(
 			continue
 		}
 
-		entry, resolveErr := resolveArchiveStep(writer, tool, install, resolvePlatform)
+		entry, resolveErr := resolveArchiveStep(ctx, writer, tool, install, resolvePlatform)
 		if resolveErr != nil {
 			errs = append(errs, resolveErr)
 			continue
@@ -59,6 +63,7 @@ func resolveWith(
 // platformResolver hashes one platform's archive for a tool. Extracted as a parameter so the
 // assembly logic in resolveArchive is testable without network I/O.
 type platformResolver func(
+	ctx context.Context,
 	writer io.Writer,
 	install toolchain.GitHubInstall,
 	tool toolchain.Tool,
@@ -66,6 +71,7 @@ type platformResolver func(
 ) (hash string, err error)
 
 func resolveArchive(
+	ctx context.Context,
 	writer io.Writer,
 	tool toolchain.Tool,
 	install toolchain.GitHubInstall,
@@ -74,7 +80,7 @@ func resolveArchive(
 	hashes := make(map[string]string, len(install.Platforms))
 
 	for platformKey := range install.Platforms {
-		hash, hashErr := resolveOne(writer, install, tool, platformKey)
+		hash, hashErr := resolveOne(ctx, writer, install, tool, platformKey)
 		if hashErr != nil {
 			return lockfile.Archive{}, fmt.Errorf(
 				"resolve %s %s: %w",
@@ -95,6 +101,7 @@ func resolveArchive(
 }
 
 func resolvePlatform(
+	ctx context.Context,
 	writer io.Writer,
 	install toolchain.GitHubInstall,
 	tool toolchain.Tool,
@@ -124,7 +131,7 @@ func resolvePlatform(
 		return "", err
 	}
 
-	if err = downloadFile(url, archive); err != nil {
+	if err = downloadFile(ctx, url, archive); err != nil {
 		return "", err
 	}
 

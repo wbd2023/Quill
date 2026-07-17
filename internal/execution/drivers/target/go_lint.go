@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"strings"
 
 	"ciphera/tools/internal/execution"
@@ -18,12 +19,15 @@ func RunGolangci(
 	goimportsToolID string,
 	goLanguage string,
 ) (command driverkit.TargetCommand) {
-	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
-		return runGolangci(context, job, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
+	return func(ctx context.Context, context execution.RunContext,
+		job style.Job) (style.ExecutionResult, error) {
+		return runGolangci(ctx, context, job, goPackID, golangciLintToolID, goimportsToolID,
+			goLanguage)
 	}
 }
 
 func runGolangci(
+	ctx context.Context,
 	context execution.RunContext,
 	job style.Job,
 	goPackID string,
@@ -51,6 +55,7 @@ func runGolangci(
 	for _, target := range targets {
 		workDir := targetWorkDir(context.RepoRoot, target)
 		output, err := runGoFormatChecks(
+			ctx,
 			context,
 			workDir,
 			target.FormatPaths,
@@ -61,8 +66,8 @@ func runGolangci(
 			return style.ExecutionResult{}, err
 		}
 		diagnostics = appendDiagnostics(diagnostics, output, "go/format")
-
 		output, err = runGolangciLint(
+			ctx,
 			context,
 			workDir,
 			golangciLintToolID,
@@ -82,11 +87,13 @@ func runGolangci(
 // finds issues; that output is findings (data), not an operational error. Only command-execution
 // failures (tool missing, timeout) produce a non-nil error.
 func runGolangciLint(
+	ctx context.Context,
 	context execution.RunContext,
 	workDir string,
 	golangciLintToolID string,
 ) (output string, err error) {
 	result, err := commandrun.ToolByID(
+		ctx,
 		context,
 		workDir,
 		golangciLintToolID,
@@ -105,6 +112,7 @@ func runGolangciLint(
 }
 
 func runGoFormatChecks(
+	ctx context.Context,
 	context execution.RunContext,
 	workDir string,
 	paths []string,
@@ -116,6 +124,7 @@ func runGoFormatChecks(
 	}
 
 	gofmtResult, err := commandrun.Output(
+		ctx,
 		workDir,
 		context.GoEnvironment,
 		"gofmt",
@@ -130,6 +139,7 @@ func runGoFormatChecks(
 	}
 
 	goimportsResult, err := commandrun.ToolByID(
+		ctx,
 		context,
 		workDir,
 		goimportsToolID,

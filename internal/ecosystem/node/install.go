@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -17,13 +18,14 @@ const standardPermissions os.FileMode = 0o755
 // Install runs npm install for the tool using an isolated npm environment derived from layout. It
 // skips installation when the tool is already present at the pinned version.
 func Install(
+	ctx context.Context,
 	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
 	path string,
 ) (err error) {
 	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
-	installed, err := toolchain.IsInstalled(process.Runner{}, tool, binary)
+	installed, err := toolchain.IsInstalled(ctx, process.Runner{}, tool, binary)
 	if err != nil {
 		return err
 	}
@@ -50,7 +52,7 @@ func Install(
 		return err
 	}
 
-	if _, err = process.RunCommand(command); err != nil {
+	if _, err = process.RunCommand(ctx, command); err != nil {
 		return fmt.Errorf("install %s: %w", tool.Name, err)
 	}
 

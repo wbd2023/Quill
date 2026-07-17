@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"context"
+
 	"ciphera/tools/internal/checks/security"
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/execution/drivers/internal/driverkit"
@@ -10,6 +12,7 @@ import (
 // CheckSecrets check secrets.
 func CheckSecrets() (scanner driverkit.RepositoryScanner) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {

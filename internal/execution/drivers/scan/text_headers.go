@@ -1,12 +1,15 @@
 package scan
 
 import (
+	"context"
+
 	"ciphera/tools/internal/checks/text"
 	"ciphera/tools/internal/execution"
 	"ciphera/tools/internal/style"
 )
 
 func scanSectionHeaders(
+	ctx context.Context,
 	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,
@@ -25,6 +28,7 @@ func scanSectionHeaders(
 }
 
 func scanSectionHeaderDensity(
+	ctx context.Context,
 	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,
@@ -43,6 +47,7 @@ func scanSectionHeaderDensity(
 }
 
 func scanSectionHeaderNames(
+	ctx context.Context,
 	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,

@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -18,10 +19,11 @@ import (
 /* ------------------------------------- Repository Scanners ------------------------------------ */
 
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
-	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
+	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
 
 	if _, err := testRepositoryScanDriver()(
-		context,
+		context.Background(),
+		runCtx,
 		repositoryScanSpec(text.ScannerASCII),
 		nil,
 	); err != nil {
@@ -30,10 +32,11 @@ func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
 }
 
 func TestRunRepositoryScanRuleRejectsUnknownScanner(t *testing.T) {
-	context := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
+	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
 
 	_, err := testRepositoryScanDriver()(
-		context,
+		context.Background(),
+		runCtx,
 		repositoryScanSpec("unknown"),
 		nil,
 	)
@@ -92,17 +95,18 @@ func TestRunRepositoryScanRuleSupportsAlternateProfile(t *testing.T) {
 		"package domain\n\ntype Message struct{}\n",
 	)
 
-	context := testContext(t, fixtureRoot, style.Scope("all"))
+	runCtx := testContext(t, fixtureRoot, style.Scope("all"))
 	if _, err := testRepositoryScanDriver()(
-		context,
+		context.Background(),
+		runCtx,
 		repositoryScanSpec(golang.ScannerArchitecture),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanDriver(architecture): %v", err)
 	}
-
 	result, err := testRepositoryScanDriver()(
-		context,
+		context.Background(),
+		runCtx,
 		repositoryScanSpec(vocabulary.ScannerVocabulary),
 		nil,
 	)

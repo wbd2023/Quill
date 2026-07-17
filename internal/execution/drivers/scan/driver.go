@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -12,6 +13,7 @@ import (
 
 func repositoryScanDriver(scanners driverkit.RepositoryScanners) (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
@@ -30,6 +32,6 @@ func repositoryScanDriver(scanners driverkit.RepositoryScanners) (driver executi
 			)
 		}
 
-		return scanner(context, execution)
+		return scanner(ctx, context, execution)
 	}
 }

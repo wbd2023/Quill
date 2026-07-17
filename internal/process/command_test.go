@@ -1,6 +1,7 @@
 package process
 
 import (
+	"context"
 	"errors"
 	"os"
 	"strings"
@@ -21,7 +22,7 @@ func TestRunCommandResolvesCommandsFromProvidedPath(t *testing.T) {
 		"#!/bin/sh\necho resolved\n",
 	)
 
-	result, err := RunCommand(CommandRequest{
+	result, err := RunCommand(context.Background(), CommandRequest{
 		Name:        "test-tool",
 		Environment: map[string]string{"PATH": tempDir},
 		Directory:   tempDir,
@@ -44,7 +45,7 @@ func TestRunCommandTimesOut(t *testing.T) {
 		"#!/bin/sh\nsleep 5\n",
 	)
 
-	result, err := RunCommand(CommandRequest{
+	result, err := RunCommand(context.Background(), CommandRequest{
 		Name:             "slow-tool",
 		Environment:      map[string]string{"PATH": commandSearchPath(tempDir)},
 		Directory:        tempDir,
@@ -82,7 +83,7 @@ func TestRunCommandCapsOutput(t *testing.T) {
 		"#!/bin/sh\nprintf 1234567890\n",
 	)
 
-	result, err := RunCommand(CommandRequest{
+	result, err := RunCommand(context.Background(), CommandRequest{
 		Name:             "loud-tool",
 		Environment:      map[string]string{"PATH": tempDir},
 		Directory:        tempDir,
@@ -106,7 +107,7 @@ func TestRunCommandReturnsExitCodeAndOutput(t *testing.T) {
 		"#!/bin/sh\necho failure\nexit 7\n",
 	)
 
-	result, err := RunCommand(CommandRequest{
+	result, err := RunCommand(context.Background(), CommandRequest{
 		Name:             "bad-tool",
 		Environment:      map[string]string{"PATH": tempDir},
 		Directory:        tempDir,

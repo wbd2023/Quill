@@ -48,7 +48,8 @@ func (engine *Engine) Fix(
 
 	rules := selectRulesForFix(context.Effective.Rules, context)
 	toolIDs := execution.ToolIDsForFixes(rules)
-	result.Toolchain = engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment)
+	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
+		context.ToolEnvironment)
 
 	if !result.Toolchain.AllValid {
 		return result, nil
@@ -58,6 +59,7 @@ func (engine *Engine) Fix(
 	result.Rules = make([]RuleFixResult, 0, len(rules))
 	for _, rule := range rules {
 		execution, executionError := execution.RunFix(
+			operationContext,
 			rule,
 			context,
 			toolStatuses,
@@ -109,5 +111,6 @@ func (engine *Engine) Inspect(
 		toolIDs = append(toolIDs, toolID)
 	}
 
-	return engine.inspectTools(context.Tools, toolIDs, context.ToolEnvironment), nil
+	return engine.inspectTools(operationContext, context.Tools, toolIDs, context.ToolEnvironment),
+		nil
 }

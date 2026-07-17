@@ -1,6 +1,7 @@
 package driverkit
 
 import (
+	"context"
 	"fmt"
 
 	"ciphera/tools/internal/execution"
@@ -12,25 +13,29 @@ import (
 
 // RepositoryScanner is repository scanner.
 type RepositoryScanner func(
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	execution style.RepositoryScanExecution,
 ) (result style.ExecutionResult, err error)
 
 // TargetCommand is target command.
 type TargetCommand func(
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	job style.Job,
 ) (result style.ExecutionResult, err error)
 
 // TargetCheck is target check.
 type TargetCheck func(
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	job style.Job,
 ) (result style.ExecutionResult, err error)
 
 // ProfileCheck is project check.
 type ProfileCheck func(
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	execution style.ProfileExecution,
 ) (result style.ExecutionResult, err error)
 

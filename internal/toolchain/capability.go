@@ -1,5 +1,7 @@
 package toolchain
 
+import "context"
+
 // Capability describes an external tool's command and the strategies for detecting its version and
 // installing it.
 type Capability struct {
@@ -14,6 +16,7 @@ type Capability struct {
 // VersionMethod detects the installed version of the binary at path, using environment for any
 // command it runs. The runner executes version-detection commands.
 type VersionMethod func(
+	ctx context.Context,
 	runner CommandRunner,
 	environment map[string]string,
 	path string,

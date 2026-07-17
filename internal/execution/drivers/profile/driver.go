@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -36,6 +37,7 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 
 func profileDriver(checks driverkit.ProfileChecks) (driver execution.Executor) {
 	return func(
+		ctx context.Context,
 		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
@@ -53,13 +55,14 @@ func profileDriver(checks driverkit.ProfileChecks) (driver execution.Executor) {
 			)
 		}
 
-		return check(context, execution)
+		return check(ctx, context, execution)
 	}
 }
 
 // CheckEnforcementLevels check enforcement levels.
 func CheckEnforcementLevels() (check driverkit.ProfileCheck) {
 	return func(
+		_ context.Context,
 		_ execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
@@ -71,6 +74,7 @@ func CheckEnforcementLevels() (check driverkit.ProfileCheck) {
 // CheckExcludedDirectories check excluded directories.
 func CheckExcludedDirectories() (check driverkit.ProfileCheck) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
@@ -82,6 +86,7 @@ func CheckExcludedDirectories() (check driverkit.ProfileCheck) {
 // CheckCommands check commands.
 func CheckCommands(profilePackID string) (check driverkit.ProfileCheck) {
 	return func(
+		_ context.Context,
 		context execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
