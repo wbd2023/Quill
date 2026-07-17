@@ -7,7 +7,7 @@ import (
 )
 
 // CollectFileSetFiles collect file set files.
-func CollectFileSetFiles(context Context, name string) (files []string, err error) {
+func CollectFileSetFiles(context RunContext, name string) (files []string, err error) {
 	fileSet, found := context.Profile.FileSets.Lookup(name)
 	if !found {
 		return nil, errUnknownFileSet(name)

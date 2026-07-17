@@ -11,7 +11,7 @@ import (
 
 // ToolByID runs a tool identified by toolID and returns its result.
 func ToolByID(
-	context execution.Context,
+	context execution.RunContext,
 	workDir string,
 	toolID string,
 	arguments ...string,

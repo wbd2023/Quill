@@ -9,7 +9,7 @@ import (
 	"ciphera/tools/internal/testutil/profiles"
 )
 
-func TestNewContextLoadsCurrentProfileFixture(t *testing.T) {
+func TestNewRunContextLoadsCurrentProfileFixture(t *testing.T) {
 	fixtureRoot := t.TempDir()
 	profiles.Write(t, fixtureRoot, profiles.Current(t))
 

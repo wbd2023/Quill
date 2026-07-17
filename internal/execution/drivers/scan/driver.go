@@ -12,7 +12,7 @@ import (
 
 func repositoryScanDriver(scanners driverkit.RepositoryScanners) (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {

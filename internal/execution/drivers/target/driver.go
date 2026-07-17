@@ -11,7 +11,7 @@ import (
 
 func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
@@ -36,7 +36,7 @@ func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Ex
 
 func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {

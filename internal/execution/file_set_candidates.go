@@ -14,7 +14,7 @@ import (
 /* ------------------------------------- File Set Collection ------------------------------------ */
 
 func collectFileSetCandidates(
-	context Context,
+	context RunContext,
 	fileSet policy.FileSetConfig,
 ) (files []string, err error) {
 	scopes := []style.Scope{context.Scope}
@@ -71,7 +71,7 @@ func findOverlappingScopes(
 }
 
 func explicitFileCandidates(
-	context Context,
+	context RunContext,
 	fileSet policy.FileSetConfig,
 	scopes []style.Scope,
 ) (files []string) {

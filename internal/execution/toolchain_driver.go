@@ -9,7 +9,7 @@ import (
 
 // ToolchainDriver checks that pinned tools are installed and healthy.
 func ToolchainDriver(
-	_ Context,
+	_ RunContext,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error) {

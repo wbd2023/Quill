@@ -18,13 +18,13 @@ func RunGolangci(
 	goimportsToolID string,
 	goLanguage string,
 ) (command driverkit.TargetCommand) {
-	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
+	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
 		return runGolangci(context, job, goPackID, golangciLintToolID, goimportsToolID, goLanguage)
 	}
 }
 
 func runGolangci(
-	context execution.Context,
+	context execution.RunContext,
 	job style.Job,
 	goPackID string,
 	golangciLintToolID string,
@@ -82,7 +82,7 @@ func runGolangci(
 // finds issues; that output is findings (data), not an operational error. Only command-execution
 // failures (tool missing, timeout) produce a non-nil error.
 func runGolangciLint(
-	context execution.Context,
+	context execution.RunContext,
 	workDir string,
 	golangciLintToolID string,
 ) (output string, err error) {
@@ -105,7 +105,7 @@ func runGolangciLint(
 }
 
 func runGoFormatChecks(
-	context execution.Context,
+	context execution.RunContext,
 	workDir string,
 	paths []string,
 	localPrefix string,

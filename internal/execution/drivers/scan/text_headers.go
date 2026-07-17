@@ -7,7 +7,7 @@ import (
 )
 
 func scanSectionHeaders(
-	context execution.Context,
+	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,
 ) (result style.ExecutionResult, err error) {
@@ -25,7 +25,7 @@ func scanSectionHeaders(
 }
 
 func scanSectionHeaderDensity(
-	context execution.Context,
+	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,
 ) (result style.ExecutionResult, err error) {
@@ -43,7 +43,7 @@ func scanSectionHeaderDensity(
 }
 
 func scanSectionHeaderNames(
-	context execution.Context,
+	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	textPackID string,
 ) (result style.ExecutionResult, err error) {

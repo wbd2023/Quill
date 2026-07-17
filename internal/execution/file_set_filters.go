@@ -12,7 +12,7 @@ import (
 /* ------------------------------------------ Inclusion ----------------------------------------- */
 
 func fileSetCoversPath(
-	context Context,
+	context RunContext,
 	fileSet policy.FileSetConfig,
 	path string,
 ) (covered bool) {

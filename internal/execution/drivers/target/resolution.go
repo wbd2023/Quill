@@ -9,7 +9,7 @@ import (
 )
 
 func goTargets(
-	context execution.Context,
+	context execution.RunContext,
 	names []string,
 	goLanguage string,
 ) (targets []policy.TargetConfig, err error) {

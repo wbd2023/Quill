@@ -17,7 +17,7 @@ import (
 // driver runs the tool and returns empty success on exit 0, or an error otherwise. Fix tools do
 // not produce findings to interpret.
 func runFileCommand(
-	context execution.Context,
+	context execution.RunContext,
 	job style.Job,
 	interpreters driverkit.FileInterpreters,
 	isFix bool,

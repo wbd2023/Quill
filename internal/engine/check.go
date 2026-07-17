@@ -116,7 +116,7 @@ func (engine *Engine) Check(
 
 func selectRulesForCheck(
 	available []style.Rule,
-	context execution.Context,
+	context execution.RunContext,
 	mode style.CheckMode,
 ) (rules []style.Rule) {
 	for _, rule := range available {

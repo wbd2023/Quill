@@ -18,7 +18,7 @@ func testContext(
 	t *testing.T,
 	repoRoot string,
 	scope style.Scope,
-) (context execution.Context) {
+) (context execution.RunContext) {
 	t.Helper()
 
 	config, err := profile.Load(repoRoot)
@@ -47,7 +47,7 @@ func testContext(
 	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
-	return execution.NewContext(
+	return execution.NewRunContext(
 		repoRoot,
 		scope,
 		compiled.Profile,

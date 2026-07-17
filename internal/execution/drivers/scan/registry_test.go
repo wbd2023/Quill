@@ -11,7 +11,7 @@ import (
 func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 	driver := repositoryScanDriver(driverkit.NewRepositoryScanners())
 	_, err := driver(
-		execution.Context{},
+		execution.RunContext{},
 		style.RepositoryScanExecution{
 			Scanner: "missing",
 		},
@@ -24,7 +24,7 @@ func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
 
 func TestRepositoryScannersRejectDuplicateScannerID(t *testing.T) {
 	scanner := func(
-		_ execution.Context,
+		_ execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return style.ExecutionResult{}, nil

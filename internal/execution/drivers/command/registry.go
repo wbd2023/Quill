@@ -12,7 +12,7 @@ import (
 // unsupported rather than silently dumping raw output.
 func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
@@ -24,7 +24,7 @@ func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Exec
 // they either succeed (exit 0, empty result) or fail (non-zero exit, error).
 func FixDriver() (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {

@@ -15,13 +15,13 @@ func RunGoFormat(
 	goimportsToolID string,
 	goLanguage string,
 ) (command driverkit.TargetCommand) {
-	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
+	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
 		return runGoFormat(context, job, goPackID, goimportsToolID, goLanguage)
 	}
 }
 
 func runGoFormat(
-	context execution.Context,
+	context execution.RunContext,
 	job style.Job,
 	goPackID string,
 	goimportsToolID string,

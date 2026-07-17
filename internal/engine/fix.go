@@ -77,7 +77,7 @@ func (engine *Engine) Fix(
 	return result, nil
 }
 
-func selectRulesForFix(available []style.Rule, context execution.Context) (rules []style.Rule) {
+func selectRulesForFix(available []style.Rule, context execution.RunContext) (rules []style.Rule) {
 	for _, rule := range available {
 		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
 			continue
