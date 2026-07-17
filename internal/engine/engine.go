@@ -172,10 +172,10 @@ func (engine *Engine) loadCompiledProfile(
 func (engine *Engine) prepareRunnerContext(
 	operationContext context.Context,
 	scope style.Scope,
-) (context execution.Context, packs PackEnvironment, prepareError error) {
+) (context execution.RunContext, packs PackEnvironment, prepareError error) {
 	config, err := profile.Load(engine.repositoryRoot)
 	if err != nil {
-		return execution.Context{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackEnvironment{}, err
 	}
 
 	if scope == "" {
@@ -183,22 +183,22 @@ func (engine *Engine) prepareRunnerContext(
 	}
 
 	if !config.Repository.HasScope(scope) {
-		return execution.Context{}, PackEnvironment{}, errUnknownScope(scope)
+		return execution.RunContext{}, PackEnvironment{}, errUnknownScope(scope)
 	}
 
 	packs, err = engine.packProvider.Load(operationContext, config.EnabledPacks)
 	if err != nil {
-		return execution.Context{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackEnvironment{}, err
 	}
 
 	config, err = pack.ResolvePacks(config, packs.Registry.Packs())
 	if err != nil {
-		return execution.Context{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackEnvironment{}, err
 	}
 
 	compiled, err := profile.Compile(config, packs.Registry.Definitions())
 	if err != nil {
-		return execution.Context{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackEnvironment{}, err
 	}
 
 	layout := workspace.NewLayout(engine.repositoryRoot)
@@ -207,7 +207,7 @@ func (engine *Engine) prepareRunnerContext(
 	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
-	return execution.NewContext(
+	return execution.NewRunContext(
 		engine.repositoryRoot,
 		scope,
 		compiled.Profile,

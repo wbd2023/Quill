@@ -14,7 +14,7 @@ var errRuleBlocked = errors.New("rule blocked by toolchain")
 
 // Executor executes one rule's check or fix job against the repository.
 type Executor func(
-	context Context,
+	context RunContext,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
@@ -38,7 +38,7 @@ func IsBlocked(err error) (blocked bool) {
 // RunRule executes a rule's check against the repository.
 func RunRule(
 	rule style.Rule,
-	context Context,
+	context RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {
@@ -48,7 +48,7 @@ func RunRule(
 // RunFix executes a rule's fix against the repository.
 func RunFix(
 	rule style.Rule,
-	context Context,
+	context RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {
@@ -59,7 +59,7 @@ func runExecution(
 	ruleID string,
 	job style.Job,
 	toolIDs []string,
-	context Context,
+	context RunContext,
 	toolStatuses toolchain.StatusMap,
 	drivers ExecutorSet,
 ) (result style.ExecutionResult, err error) {

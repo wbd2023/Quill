@@ -9,7 +9,7 @@ import (
 // CheckGoArchitecture check go architecture.
 func CheckGoArchitecture(goPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return scanGoArchitecture(context, execution, goPackID)

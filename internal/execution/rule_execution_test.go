@@ -16,7 +16,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 			Scanner: "test",
 		},
 	}
-	context := NewContext(
+	context := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
 		policy.Config{},
@@ -27,7 +27,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	)
 	drivers := ExecutorSet{
 		RepositoryScan: func(
-			_ Context,
+			_ RunContext,
 			_ style.Job,
 			_ toolchain.StatusMap,
 		) (result style.ExecutionResult, err error) {
@@ -53,7 +53,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 			ToolIDs: []string{"go"},
 		},
 	}
-	context := NewContext(
+	context := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
 		policy.Config{},

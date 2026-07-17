@@ -10,7 +10,7 @@ import (
 // CheckBashMagicValues check bash magic values.
 func CheckBashMagicValues() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return bash.CheckMagicValues(
@@ -24,7 +24,7 @@ func CheckBashMagicValues() (scanner driverkit.RepositoryScanner) {
 // CheckBashSafety check bash safety.
 func CheckBashSafety() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return bash.CheckSafety(context.RepoRoot, context.Profile.Repository, context.Scope)
@@ -34,7 +34,7 @@ func CheckBashSafety() (scanner driverkit.RepositoryScanner) {
 // CheckBashStructure check bash structure.
 func CheckBashStructure() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return bash.CheckStructure(
@@ -48,7 +48,7 @@ func CheckBashStructure() (scanner driverkit.RepositoryScanner) {
 // CheckBashTestHygiene check bash test hygiene.
 func CheckBashTestHygiene() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return bash.CheckTestHygiene(

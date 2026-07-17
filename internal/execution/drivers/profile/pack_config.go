@@ -8,7 +8,7 @@ import (
 )
 
 func decodeProjectConfig(
-	context execution.Context,
+	context execution.RunContext,
 	packID string,
 ) (config projectpolicy.Config, err error) {
 	pack, found := context.Profile.PackConfigs.Lookup(packID)

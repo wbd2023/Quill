@@ -13,13 +13,13 @@ import (
 
 // CheckGoStyle check go style.
 func CheckGoStyle(goPackID string, goLanguage string) (check driverkit.TargetCheck) {
-	return func(context execution.Context, job style.Job) (style.ExecutionResult, error) {
+	return func(context execution.RunContext, job style.Job) (style.ExecutionResult, error) {
 		return runGoStyleCheck(context, job, goPackID, goLanguage)
 	}
 }
 
 func runGoStyleCheck(
-	context execution.Context,
+	context execution.RunContext,
 	job style.Job,
 	goPackID string,
 	goLanguage string,

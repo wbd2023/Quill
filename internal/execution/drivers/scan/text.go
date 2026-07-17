@@ -10,7 +10,7 @@ import (
 // CheckASCII scans for non-ASCII characters in text files.
 func CheckASCII() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return text.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
@@ -20,7 +20,7 @@ func CheckASCII() (scanner driverkit.RepositoryScanner) {
 // CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return text.CheckExceptionMarkers(
@@ -39,7 +39,7 @@ func CheckLineLengths() (scanner driverkit.RepositoryScanner) {
 // CheckMaintenanceMarkers check maintenance markers.
 func CheckMaintenanceMarkers() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return text.CheckMaintenanceMarkers(
@@ -53,7 +53,7 @@ func CheckMaintenanceMarkers() (scanner driverkit.RepositoryScanner) {
 // CheckSectionHeaderNames check section header names.
 func CheckSectionHeaderNames(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return scanSectionHeaderNames(context, execution, textPackID)
@@ -63,7 +63,7 @@ func CheckSectionHeaderNames(textPackID string) (scanner driverkit.RepositorySca
 // CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return scanSectionHeaderDensity(context, execution, textPackID)
@@ -73,7 +73,7 @@ func CheckSectionHeaderDensity(textPackID string) (scanner driverkit.RepositoryS
 // CheckSectionHeaders check section headers.
 func CheckSectionHeaders(textPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return scanSectionHeaders(context, execution, textPackID)
@@ -81,7 +81,7 @@ func CheckSectionHeaders(textPackID string) (scanner driverkit.RepositoryScanner
 }
 
 func scanLineLengths(
-	context execution.Context,
+	context execution.RunContext,
 	scanExec style.RepositoryScanExecution,
 ) (result style.ExecutionResult, err error) {
 	files, err := execution.CollectFileSetFiles(context, scanExec.FileSet)

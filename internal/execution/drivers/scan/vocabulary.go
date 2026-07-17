@@ -10,7 +10,7 @@ import (
 // CheckVocabulary check vocabulary.
 func CheckVocabulary(vocabularyPackID string) (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		execution style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return scanVocabulary(context, execution, vocabularyPackID)
@@ -18,7 +18,7 @@ func CheckVocabulary(vocabularyPackID string) (scanner driverkit.RepositoryScann
 }
 
 func scanVocabulary(
-	context execution.Context,
+	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	vocabularyPackID string,
 ) (result style.ExecutionResult, err error) {

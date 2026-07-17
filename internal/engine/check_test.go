@@ -29,7 +29,7 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 		},
 	}
 
-	context := execution.Context{
+	context := execution.RunContext{
 		Scope: style.Scope("tools"),
 		Profile: policy.Config{
 			Repository: policy.RepositoryConfig{

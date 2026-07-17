@@ -36,7 +36,7 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 
 func profileDriver(checks driverkit.ProfileChecks) (driver execution.Executor) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
@@ -60,7 +60,7 @@ func profileDriver(checks driverkit.ProfileChecks) (driver execution.Executor) {
 // CheckEnforcementLevels check enforcement levels.
 func CheckEnforcementLevels() (check driverkit.ProfileCheck) {
 	return func(
-		_ execution.Context,
+		_ execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
 		message, err := checkEnforcementLevels()
@@ -71,7 +71,7 @@ func CheckEnforcementLevels() (check driverkit.ProfileCheck) {
 // CheckExcludedDirectories check excluded directories.
 func CheckExcludedDirectories() (check driverkit.ProfileCheck) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
 		message, err := checkExcludedDirectories(context.Profile.Repository)
@@ -82,7 +82,7 @@ func CheckExcludedDirectories() (check driverkit.ProfileCheck) {
 // CheckCommands check commands.
 func CheckCommands(profilePackID string) (check driverkit.ProfileCheck) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.ProfileExecution,
 	) (result style.ExecutionResult, err error) {
 		projectConfig, err := decodeProjectConfig(context, profilePackID)

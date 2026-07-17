@@ -6,8 +6,8 @@ import (
 	"ciphera/tools/internal/toolchain"
 )
 
-// Context carries loaded profile and toolchain state through a check or install run.
-type Context struct {
+// RunContext carries loaded profile and toolchain state through a check or install run.
+type RunContext struct {
 	RepoRoot        string
 	Scope           style.Scope
 	Profile         policy.Config
@@ -17,9 +17,9 @@ type Context struct {
 	GoEnvironment   map[string]string
 }
 
-// NewContext constructs a Context from loaded profile and toolchain state. It joins each
+// NewRunContext constructs a RunContext from loaded profile and toolchain state. It joins each
 // capability with its pinned version and execution limits into a toolchain.Tool.
-func NewContext(
+func NewRunContext(
 	repoRoot string,
 	scope style.Scope,
 	config policy.Config,
@@ -27,7 +27,7 @@ func NewContext(
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,
-) (context Context) {
+) (context RunContext) {
 	tools := make(map[string]toolchain.Tool, len(capabilities))
 	for _, capability := range capabilities {
 		pin, _ := config.Tools.Lookup(capability.ID)
@@ -43,7 +43,7 @@ func NewContext(
 		}
 	}
 
-	return Context{
+	return RunContext{
 		RepoRoot:        repoRoot,
 		Scope:           scope,
 		Profile:         config,

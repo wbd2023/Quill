@@ -10,7 +10,7 @@ import (
 )
 
 func scanGoArchitecture(
-	context execution.Context,
+	context execution.RunContext,
 	_ style.RepositoryScanExecution,
 	goPackID string,
 ) (result style.ExecutionResult, err error) {
@@ -32,7 +32,7 @@ func scanGoArchitecture(
 	return architecture.CheckImports(modulePath, packageList, goConfig.Architecture)
 }
 
-func runGoList(context execution.Context, arguments ...string) (output string, err error) {
+func runGoList(context execution.RunContext, arguments ...string) (output string, err error) {
 	result, err := commandrun.Output(
 		context.RepoRoot,
 		context.GoEnvironment,

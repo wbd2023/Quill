@@ -8,7 +8,7 @@ import (
 )
 
 func decodeGoConfig(
-	context execution.Context,
+	context execution.RunContext,
 	packID string,
 ) (config gopolicy.Config, err error) {
 	pack, found := context.Profile.PackConfigs.Lookup(packID)

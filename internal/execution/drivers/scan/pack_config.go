@@ -10,7 +10,7 @@ import (
 )
 
 func decodeGoPackConfig(
-	context execution.Context,
+	context execution.RunContext,
 	packID string,
 ) (config gopolicy.Config, err error) {
 	pack, found := context.Profile.PackConfigs.Lookup(packID)
@@ -22,7 +22,7 @@ func decodeGoPackConfig(
 }
 
 func decodeTextPackConfig(
-	context execution.Context,
+	context execution.RunContext,
 	packID string,
 ) (config textpolicy.Config, err error) {
 	pack, found := context.Profile.PackConfigs.Lookup(packID)
@@ -34,7 +34,7 @@ func decodeTextPackConfig(
 }
 
 func decodeVocabularyPackConfig(
-	context execution.Context,
+	context execution.RunContext,
 	packID string,
 ) (config vocabularypolicy.Config, err error) {
 	pack, found := context.Profile.PackConfigs.Lookup(packID)

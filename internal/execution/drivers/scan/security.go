@@ -10,7 +10,7 @@ import (
 // CheckSecrets check secrets.
 func CheckSecrets() (scanner driverkit.RepositoryScanner) {
 	return func(
-		context execution.Context,
+		context execution.RunContext,
 		_ style.RepositoryScanExecution,
 	) (style.ExecutionResult, error) {
 		return security.CheckSecrets(
