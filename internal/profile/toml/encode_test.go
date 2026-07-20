@@ -3,10 +3,10 @@ package toml_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/toml"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile/toml"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 func TestEncodeRoundTripsLocalProfile(t *testing.T) {
@@ -70,7 +70,7 @@ func TestEncodeRoundTripsLocalProfile(t *testing.T) {
 func TestEncodeRoundTripsCurrentProfile(t *testing.T) {
 	t.Parallel()
 
-	source := testutil.ReadFile(t, testutil.RepositoryRoot(t), "style.toml")
+	source := testutil.ReadFile(t, testutil.RepositoryRoot(t), "quill.toml")
 	config, err := toml.Decode(source)
 	if err != nil {
 		t.Fatalf("Decode: %v", err)

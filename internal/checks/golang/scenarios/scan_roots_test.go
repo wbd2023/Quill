@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/golang"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestGoStyleRejectsMissingScanRoot(t *testing.T) {

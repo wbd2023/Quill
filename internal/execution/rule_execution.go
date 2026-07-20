@@ -5,31 +5,31 @@ import (
 	"errors"
 	"fmt"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */
 
 var errRuleBlocked = errors.New("rule blocked by toolchain")
 
-// Executor executes one rule's check or fix job against the repository.
-type Executor func(
+// Driver executes one rule's check or fix job against the repository.
+type Driver func(
 	ctx context.Context,
 	run RunContext,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
 
-// ExecutorSet holds one executor per execution job type. Fields that are nil are treated as
+// DriverSet holds one Driver per execution job type. Fields that are nil are treated as
 // "no driver" for this job and produce an empty result.
-type ExecutorSet struct {
-	Toolchain      Executor
-	Profile        Executor
-	FileCommand    Executor
-	TargetCommand  Executor
-	TargetCheck    Executor
-	RepositoryScan Executor
+type DriverSet struct {
+	Toolchain      Driver
+	Profile        Driver
+	FileCommand    Driver
+	TargetCommand  Driver
+	TargetCheck    Driver
+	RepositoryScan Driver
 }
 
 // IsBlocked reports whether the error indicates a rule was blocked by toolchain health.
@@ -43,7 +43,7 @@ func RunRule(
 	rule style.Rule,
 	run RunContext,
 	toolStatuses toolchain.StatusMap,
-	drivers ExecutorSet,
+	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(ctx, rule.ID, rule.Check, rule.CheckToolIDs(), run, toolStatuses, drivers)
 }
@@ -54,7 +54,7 @@ func RunFix(
 	rule style.Rule,
 	run RunContext,
 	toolStatuses toolchain.StatusMap,
-	drivers ExecutorSet,
+	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(ctx, rule.ID, rule.Fix, rule.FixToolIDs(), run, toolStatuses, drivers)
 }
@@ -66,7 +66,7 @@ func runExecution(
 	toolIDs []string,
 	run RunContext,
 	toolStatuses toolchain.StatusMap,
-	drivers ExecutorSet,
+	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	if job == nil {
 		return style.ExecutionResult{}, nil
@@ -99,7 +99,7 @@ func runExecution(
 	return driver(ctx, run, job, toolStatuses)
 }
 
-func driverFor(job style.Job, drivers ExecutorSet) (driver Executor, err error) {
+func driverFor(job style.Job, drivers DriverSet) (driver Driver, err error) {
 	switch job.(type) {
 
 	case style.ToolchainExecution:

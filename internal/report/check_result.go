@@ -1,6 +1,6 @@
 package report
 
-import "ciphera/tools/internal/style"
+import "github.com/wbd2023/Quill/internal/style"
 
 // CheckEntry is check entry.
 type CheckEntry struct {

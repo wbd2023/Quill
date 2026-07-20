@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
-func repositoryScanDriver(scanners driverkit.RepositoryScanners) (driver execution.Executor) {
+// CheckDriver returns the repository-scan driver for check execution.
+func CheckDriver(scanners driverkit.RepositoryScanners) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/golang"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // CheckGoStyle check go style.

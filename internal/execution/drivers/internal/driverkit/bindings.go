@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* ----------------------------------------- Registries ----------------------------------------- */
@@ -32,7 +32,7 @@ type TargetCheck func(
 	job style.Job,
 ) (result style.ExecutionResult, err error)
 
-// ProfileCheck is project check.
+// ProfileCheck is a Profile check.
 type ProfileCheck func(
 	ctx context.Context,
 	run execution.RunContext,
@@ -62,7 +62,7 @@ type TargetChecks struct {
 	entries map[string]TargetCheck
 }
 
-// ProfileChecks is project checks.
+// ProfileChecks contains Profile checks by ID.
 type ProfileChecks struct {
 	entries map[string]ProfileCheck
 }
@@ -87,8 +87,8 @@ func NewTargetChecks() (registry TargetChecks) {
 	return TargetChecks{entries: map[string]TargetCheck{}}
 }
 
-// NewProjectChecks new project checks.
-func NewProjectChecks() (registry ProfileChecks) {
+// NewProfileChecks returns an empty Profile Check registry.
+func NewProfileChecks() (registry ProfileChecks) {
 	return ProfileChecks{entries: map[string]ProfileCheck{}}
 }
 
@@ -110,7 +110,7 @@ func (registry *TargetChecks) Add(id string, check TargetCheck) {
 }
 
 func (registry *ProfileChecks) Add(id string, check ProfileCheck) {
-	registry.entries = addBinding(registry.entries, "project check", id, check)
+	registry.entries = addBinding(registry.entries, "profile check", id, check)
 }
 
 func (registry *FileInterpreters) Add(id string, interpreter FileInterpreter) {

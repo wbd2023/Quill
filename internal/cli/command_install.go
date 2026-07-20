@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 
-	"ciphera/tools/internal/engine"
-	"ciphera/tools/internal/report"
+	"github.com/wbd2023/Quill/internal/engine"
+	"github.com/wbd2023/Quill/internal/report"
 )
 
 func runInstall(tool Tool, options installOptions) (exitCode int) {

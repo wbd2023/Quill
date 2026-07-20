@@ -3,7 +3,7 @@ package profile
 import (
 	"fmt"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 // indexToolIDs builds a set of valid tool IDs for reference checking.

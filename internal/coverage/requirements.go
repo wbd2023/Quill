@@ -3,8 +3,8 @@ package coverage
 import (
 	"sort"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/styleguide"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/styleguide"
 )
 
 func buildRequirements(

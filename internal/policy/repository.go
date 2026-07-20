@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // RepositoryConfig defines repository scope roots, exclusions, and generated-file detection.

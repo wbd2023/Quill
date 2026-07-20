@@ -1,6 +1,6 @@
 package profiletest
 
-import "ciphera/tools/internal/style"
+import "github.com/wbd2023/Quill/internal/style"
 
 // identifiers constants.
 const (

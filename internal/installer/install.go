@@ -7,11 +7,11 @@ import (
 	"io"
 	"os"
 
-	"ciphera/tools/internal/ecosystem/golang"
-	"ciphera/tools/internal/ecosystem/node"
-	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/ecosystem/golang"
+	"github.com/wbd2023/Quill/internal/ecosystem/node"
+	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 const standardPermissions os.FileMode = 0o755

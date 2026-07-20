@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"ciphera/tools/internal/profile/internal/profiletest"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestCompileInfersTargetsFromRuleScope(t *testing.T) {

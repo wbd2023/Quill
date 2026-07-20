@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 type diagnosticMatch struct {

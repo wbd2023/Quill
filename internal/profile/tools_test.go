@@ -3,8 +3,8 @@ package profile
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/profiletest"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
 )
 
 func TestCompileRequiresActivePinnedTools(t *testing.T) {

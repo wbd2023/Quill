@@ -3,7 +3,7 @@ package report
 import (
 	"io"
 
-	"ciphera/tools/internal/coverage"
+	"github.com/wbd2023/Quill/internal/coverage"
 )
 
 /* ------------------------------------------ JSON DTOs ----------------------------------------- */

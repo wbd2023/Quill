@@ -47,7 +47,7 @@ func findRepoRoot(start string) (repoRoot string, err error) {
 
 func isRepoRoot(path string) (root bool) {
 	if fileExists(filepath.Join(path, "STYLE.md")) &&
-		fileExists(filepath.Join(path, "style.toml")) {
+		fileExists(filepath.Join(path, "quill.toml")) {
 		return true
 	}
 

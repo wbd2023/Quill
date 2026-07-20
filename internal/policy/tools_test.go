@@ -3,7 +3,7 @@ package policy_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 func TestPinnedToolsLookup(t *testing.T) {

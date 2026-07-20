@@ -4,20 +4,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/golang"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
-func TestStylePlatformPassesGoStyleChecks(t *testing.T) {
-	toolsRoot := testutil.ToolsRoot(t)
+func TestQuillPassesGoStyleChecks(t *testing.T) {
+	repositoryRoot := testutil.RepositoryRoot(t)
 	config := profiles.Current(t)
 
 	result, err := golang.CheckDirectories(
-		filepath.Clean(filepath.Join(toolsRoot, "..")),
+		repositoryRoot,
 		[]string{
-			filepath.Join(toolsRoot, "cmd"),
-			filepath.Join(toolsRoot, "internal"),
+			filepath.Join(repositoryRoot, "cmd"),
+			filepath.Join(repositoryRoot, "internal"),
 		},
 		config.Repository,
 		config.PathRoles,

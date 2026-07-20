@@ -2,17 +2,10 @@ package engine
 
 import (
 	"context"
-	"slices"
 
-	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/installer"
-	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/styleguide"
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/coverage"
+	"github.com/wbd2023/Quill/internal/styleguide"
 )
-
-/* ------------------------------------- Coverage Reporting ------------------------------------- */
 
 // Coverage loads STYLE.md and the compiled effective profile, then builds requirement coverage.
 //
@@ -34,57 +27,4 @@ func (engine *Engine) Coverage(
 	}
 
 	return coverage.Build(document, compiled.profile.Effective.Rules), nil
-}
-
-/* -------------------------------------- Tool Installation ------------------------------------- */
-
-// InstallResult contains post-install tool inspection.
-type InstallResult struct {
-	Toolchain ToolchainInspection
-}
-
-// Install loads the repository and lock file, installs configured tools, and inspects the
-// resulting toolchain.
-func (engine *Engine) Install(
-	operationContext context.Context,
-) (result InstallResult, operationError error) {
-	context, _, err := engine.prepareRunnerContext(operationContext, "")
-	if err != nil {
-		return InstallResult{}, err
-	}
-
-	layout := workspace.NewLayout(engine.repositoryRoot)
-	loaded, err := lockfile.Load(engine.repositoryRoot)
-	if err != nil {
-		return InstallResult{}, err
-	}
-
-	tools := sortedTools(context.Tools)
-
-	if err = installer.Install(operationContext, layout, engine.progressWriter, tools,
-		loaded); err != nil {
-		return InstallResult{}, err
-	}
-
-	toolIDs := make([]string, 0, len(context.Tools))
-	for toolID := range context.Tools {
-		toolIDs = append(toolIDs, toolID)
-	}
-
-	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
-		context.ToolEnvironment)
-	return result, nil
-}
-
-func sortedTools(tools map[string]toolchain.Tool) (sorted []toolchain.Tool) {
-	toolIDs := make([]string, 0, len(tools))
-	for toolID := range tools {
-		toolIDs = append(toolIDs, toolID)
-	}
-
-	slices.Sort(toolIDs)
-	for _, toolID := range toolIDs {
-		sorted = append(sorted, tools[toolID])
-	}
-	return sorted
 }

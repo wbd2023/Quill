@@ -1,11 +1,11 @@
 package project
 
 import (
-	"ciphera/tools/internal/checks/projectpolicy"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/checks/projectpolicy"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.

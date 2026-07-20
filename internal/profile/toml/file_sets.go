@@ -1,6 +1,6 @@
 package toml
 
-import "ciphera/tools/internal/policy"
+import "github.com/wbd2023/Quill/internal/policy"
 
 type schemaFileSetConfig struct {
 	Include schemaFileSetInclude `toml:"include"`

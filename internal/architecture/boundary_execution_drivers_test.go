@@ -11,11 +11,12 @@ func TestRunnerDriverFamiliesStayBehindFacade(t *testing.T) {
 	t.Parallel()
 
 	toolsRoot := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, toolsRoot)
 	families := []string{
-		"ciphera/tools/internal/execution/drivers/command",
-		"ciphera/tools/internal/execution/drivers/profile",
-		"ciphera/tools/internal/execution/drivers/scan",
-		"ciphera/tools/internal/execution/drivers/target",
+		modulePath + "/internal/execution/drivers/command",
+		modulePath + "/internal/execution/drivers/profile",
+		modulePath + "/internal/execution/drivers/scan",
+		modulePath + "/internal/execution/drivers/target",
 	}
 
 	err := filepath.WalkDir(

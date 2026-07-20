@@ -3,7 +3,7 @@ package bash
 import (
 	"strings"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func hasDiagnostic(

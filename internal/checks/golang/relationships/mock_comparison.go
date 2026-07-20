@@ -3,7 +3,7 @@ package relationships
 import (
 	"sort"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 func checkMockOrderAgainstInterfaces(

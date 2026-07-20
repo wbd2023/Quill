@@ -3,9 +3,9 @@ package command
 import (
 	"strings"
 
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // Exit codes that linters use to signal findings rather than failure.

@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/engine"
-	"ciphera/tools/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/engine"
+	"github.com/wbd2023/Quill/internal/lockfile"
 )
 
 /* ------------------------------------------- Command ------------------------------------------ */
@@ -56,12 +56,15 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 	return 0
 }
 
-const standardLockPermissions os.FileMode = 0o755
+const (
+	standardDirectoryPermissions os.FileMode = 0o755
+	standardLockfilePermissions  os.FileMode = 0o644
+)
 
 // writeLockfile writes contents to path atomically via a temp-file rename in the same directory.
 func writeLockfile(path string, contents string) (err error) {
 	dir := filepath.Dir(path)
-	if err = os.MkdirAll(dir, standardLockPermissions); err != nil {
+	if err = os.MkdirAll(dir, standardDirectoryPermissions); err != nil {
 		return err
 	}
 
@@ -78,7 +81,12 @@ func writeLockfile(path string, contents string) (err error) {
 	}()
 
 	if _, err = temp.WriteString(contents); err != nil {
-		_ = temp.Close()
+		_ = temp.Close() // preserve the original write error
+		return err
+	}
+
+	if err = temp.Chmod(standardLockfilePermissions); err != nil {
+		_ = temp.Close() // preserve the original permission error
 		return err
 	}
 

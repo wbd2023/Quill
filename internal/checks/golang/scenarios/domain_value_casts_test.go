@@ -4,8 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
 )
 
 /* ----------------------------------- Domain Identifier Casts ---------------------------------- */
@@ -89,7 +88,7 @@ func Bad(raw string) (id AppIdentityID, err error) {
 
 func TestGoStyleUsesProfileDomainValueVocabulary(t *testing.T) {
 	tempDir := t.TempDir()
-	config := profiles.Current(t)
+	config := scenarioConfig(t)
 	updateGoConfigForTest(t, &config, func(goConfig *gopolicy.Config) {
 		goConfig.DomainValues.RequiredConstructors = gopolicy.DomainValueConstructors{
 			"SessionKey": {"ParseSessionKey"},

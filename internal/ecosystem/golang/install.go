@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 // standardPermissions is the filesystem mode for created directories.

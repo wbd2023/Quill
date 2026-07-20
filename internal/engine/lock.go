@@ -3,8 +3,8 @@ package engine
 import (
 	"context"
 
-	"ciphera/tools/internal/installer"
-	"ciphera/tools/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/installer"
+	"github.com/wbd2023/Quill/internal/lockfile"
 )
 
 // LockResult contains resolved lock file archives.

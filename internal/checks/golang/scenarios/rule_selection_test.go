@@ -4,10 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/golang"
+	"github.com/wbd2023/Quill/internal/checks/golang/check"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* --------------------------------------- Rule Selection --------------------------------------- */
@@ -126,7 +125,7 @@ func runSelectedGoStyleCheck(
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
-	config := profiles.Current(t)
+	config := scenarioConfig(t)
 	result, err = golang.CheckDirectories(
 		targetDirectory,
 		[]string{filepath.Join(targetDirectory, "internal")},

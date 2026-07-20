@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestRepositoryScanDriverRejectsMissingScanner(t *testing.T) {
-	driver := repositoryScanDriver(driverkit.NewRepositoryScanners())
+	driver := CheckDriver(driverkit.NewRepositoryScanners())
 	_, err := driver(
 		context.Background(),
 		execution.RunContext{},

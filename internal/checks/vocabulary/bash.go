@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func checkBashVocabulary(

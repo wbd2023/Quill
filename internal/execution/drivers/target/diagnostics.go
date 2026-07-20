@@ -3,7 +3,7 @@ package target
 import (
 	"strings"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // appendDiagnostics converts non-empty tool output into a diagnostic and appends it. Used by

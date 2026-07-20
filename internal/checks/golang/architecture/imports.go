@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */

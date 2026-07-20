@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 	requirementIDPattern := regexp.MustCompile(`\b[0-9]+\.[0-9]+\.[a-z][a-z0-9-]*\b`)
 	repoRoot := testutil.RepositoryRoot(t)
-	internalRoot := filepath.Join(repoRoot, "tools", "internal")
+	internalRoot := filepath.Join(repoRoot, "internal")
 
 	err := filepath.WalkDir(
 		internalRoot,
@@ -42,7 +42,7 @@ func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 			if match := requirementIDPattern.Find(contents); len(match) > 0 {
 				relativePath, _ := filepath.Rel(repoRoot, path)
 				t.Fatalf(
-					"%s hardcodes requirement ID %q; bind requirements in style.toml instead",
+					"%s hardcodes requirement ID %q; bind requirements in quill.toml instead",
 					filepath.ToSlash(relativePath),
 					string(match),
 				)

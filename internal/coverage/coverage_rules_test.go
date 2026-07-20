@@ -34,12 +34,12 @@ func TestAutomatedRequirementsReferenceRules(t *testing.T) {
 	}
 }
 
-func TestGoStyleCoverageUsesGranularRuleBindings(t *testing.T) {
+func TestQuillCoverageUsesGranularRuleBindings(t *testing.T) {
 	report := loadCoverageReport(t)
 	expected := map[string]string{
-		"2.2.structured-logs":            "go/logging",
-		"3.5.constructor-category-order": "go/parameters",
-		"1.8.blank-line-between-guards":  "go/guard-clause-spacing",
+		"3.8.inline-comments-lowercase": "go/comments",
+		"3.1.adapters-wrap-with-cause":  "go/errors",
+		"3.4.explicit-parameter-types":  "go/parameters",
 	}
 
 	for requirementID, ruleID := range expected {

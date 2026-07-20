@@ -3,7 +3,7 @@ package profile
 import (
 	"testing"
 
-	"ciphera/tools/internal/profile/internal/profiletest"
+	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
 )
 
 func TestCompileRejectsDuplicateRuleDefinitions(t *testing.T) {

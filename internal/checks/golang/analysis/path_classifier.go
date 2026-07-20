@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 // PathClassifier is path classifier.

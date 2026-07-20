@@ -5,9 +5,10 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 /* -------------------------------------- Import Boundaries ------------------------------------- */
@@ -16,6 +17,7 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 	t.Parallel()
 
 	toolsRoot := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, toolsRoot)
 	for _, testCase := range importBoundaryCases() {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
@@ -25,7 +27,7 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 			files := productionGoFiles(t, directory, testCase.recursive)
 			for _, file := range files {
 				for _, imported := range fileImports(t, file) {
-					if !forbiddenImport(imported, testCase.forbidden) {
+					if !forbiddenImport(imported, modulePath, testCase.forbidden) {
 						continue
 					}
 
@@ -40,13 +42,25 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 
 func importBoundaryRoot(t *testing.T) (toolsRoot string) {
 	t.Helper()
+	return testutil.RepositoryRoot(t)
+}
 
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		t.Fatal("resolve import-boundary test path")
+func moduleImportPath(t *testing.T, repositoryRoot string) (modulePath string) {
+	t.Helper()
+
+	contents, err := os.ReadFile(filepath.Join(repositoryRoot, "go.mod"))
+	if err != nil {
+		t.Fatalf("read go.mod: %v", err)
 	}
 
-	return filepath.Clean(filepath.Join(filepath.Dir(file), "..", ".."))
+	for _, line := range strings.Split(string(contents), "\n") {
+		if modulePath, found := strings.CutPrefix(strings.TrimSpace(line), "module "); found {
+			return modulePath
+		}
+	}
+
+	t.Fatal("go.mod has no module directive")
+	return ""
 }
 
 func productionGoFiles(
@@ -119,12 +133,17 @@ func fileImports(t *testing.T, path string) (imports []string) {
 	return imports
 }
 
-func forbiddenImport(imported string, forbidden []string) (found bool) {
+func forbiddenImport(imported string, modulePath string, forbidden []string) (found bool) {
+	localPrefix := modulePath + "/"
+	if !strings.HasPrefix(imported, localPrefix) {
+		return false
+	}
+
+	relative := strings.TrimPrefix(imported, localPrefix)
 	for _, forbiddenPath := range forbidden {
-		if imported == forbiddenPath || strings.HasPrefix(imported, forbiddenPath) {
+		if relative == forbiddenPath || strings.HasPrefix(relative, forbiddenPath) {
 			return true
 		}
 	}
-
 	return false
 }

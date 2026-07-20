@@ -3,8 +3,8 @@ package node
 import (
 	"testing"
 
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 func TestCommandBuildsNpmInstallRequest(t *testing.T) {

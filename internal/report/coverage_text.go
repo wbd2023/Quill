@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/coverage"
+	"github.com/wbd2023/Quill/internal/coverage"
 )
 
 /* ----------------------------------------- Text Output ---------------------------------------- */

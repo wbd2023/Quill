@@ -4,7 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 // CheckAdapterErrorWrapping rejects bare error propagation in adapters.

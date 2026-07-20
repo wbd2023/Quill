@@ -5,9 +5,9 @@ import (
 	"flag"
 	"io"
 
-	"ciphera/tools/internal/coverage"
-	"ciphera/tools/internal/engine"
-	"ciphera/tools/internal/report"
+	"github.com/wbd2023/Quill/internal/coverage"
+	"github.com/wbd2023/Quill/internal/engine"
+	"github.com/wbd2023/Quill/internal/report"
 )
 
 /* -------------------------------------- Coverage Command -------------------------------------- */

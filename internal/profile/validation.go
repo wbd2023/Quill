@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
-// check checks config for supported schema version and internal consistency.
-func check(config policy.Config) (err error) {
+// Validate checks config for supported schema version and internal consistency.
+func Validate(config policy.Config) (err error) {
 	if config.SchemaVersion != policy.SchemaVersion {
 		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
 	}

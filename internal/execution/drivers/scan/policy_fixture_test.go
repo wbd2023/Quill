@@ -1,15 +1,16 @@
 package scan
 
 import (
+	"slices"
 	"testing"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/vocabulary"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Policy Fixture --------------------------------------- */
@@ -18,7 +19,10 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 	t.Helper()
 
 	config = profiles.Current(t)
-	config.Repository.RootMarkers = []string{"STYLE.md", "style.toml", "ALTROOT"}
+	if !slices.Contains(config.EnabledPacks, vocabulary.PackID) {
+		config.EnabledPacks = append(config.EnabledPacks, vocabulary.PackID)
+	}
+	config.Repository.RootMarkers = []string{"STYLE.md", "quill.toml", "ALTROOT"}
 	config.Repository.ScopeRoots = map[style.Scope][]string{
 		"app":   {"cmd", "internal"},
 		"tools": {"tools"},
@@ -68,12 +72,12 @@ func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
 			CheckPaths:       []string{"cmd", "internal"},
 		},
 	}
-	vocabularyConfig, err := vocabularypolicy.DecodeConfig(config.PackConfigs[vocabulary.PackID])
-	if err != nil {
-		t.Fatalf("Decode vocabulary config: %v", err)
+	vocabularyConfig := vocabularypolicy.Config{
+		Go: vocabularypolicy.GoConfig{
+			TypeSuffixes:       map[string][]string{"Store": {"Repository"}},
+			IdentifierSuffixes: map[string][]string{"Store": {"Repository"}},
+		},
 	}
-	vocabularyConfig.Go.TypeSuffixes = map[string][]string{"Store": {"Repository"}}
-	vocabularyConfig.Go.IdentifierSuffixes = map[string][]string{"Store": {"Repository"}}
 	config.PackConfigs[vocabulary.PackID] = vocabularypolicy.EncodeConfig(vocabularyConfig)
 	parameters := &goConfig.Constructors
 	parameters.ParameterOrder = replaceParameterGroup(

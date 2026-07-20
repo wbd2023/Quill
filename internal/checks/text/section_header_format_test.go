@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -51,7 +51,7 @@ func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("expected valid header to pass, diagnostics: %#v", result.Diagnostics)
@@ -72,7 +72,7 @@ func TestCheckSectionHeadersCountsTabsAsFourColumns(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("expected tab-width-aware header to pass, diagnostics: %#v", result.Diagnostics)

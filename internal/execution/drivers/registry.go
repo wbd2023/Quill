@@ -1,18 +1,18 @@
 package drivers
 
 import (
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/command"
-	"ciphera/tools/internal/execution/drivers/profile"
-	"ciphera/tools/internal/execution/drivers/scan"
-	"ciphera/tools/internal/execution/drivers/target"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/command"
+	"github.com/wbd2023/Quill/internal/execution/drivers/profile"
+	"github.com/wbd2023/Quill/internal/execution/drivers/scan"
+	"github.com/wbd2023/Quill/internal/execution/drivers/target"
 )
 
 // CheckDrivers returns the complete driver set for check execution.
-func CheckDrivers(bindings Bindings) (set execution.ExecutorSet) {
-	return execution.ExecutorSet{
-		Toolchain:      execution.ToolchainDriver,
-		Profile:        profile.CheckDriver(bindings.projectChecks),
+func CheckDrivers(bindings Bindings) (set execution.DriverSet) {
+	return execution.DriverSet{
+		Toolchain:      ToolchainDriver,
+		Profile:        profile.CheckDriver(bindings.profileChecks),
 		FileCommand:    command.CheckDriver(bindings.fileInterpreters),
 		TargetCommand:  target.CheckCommandDriver(bindings.targetCommands),
 		TargetCheck:    target.CheckCheckDriver(bindings.targetChecks),
@@ -21,8 +21,8 @@ func CheckDrivers(bindings Bindings) (set execution.ExecutorSet) {
 }
 
 // FixDrivers returns the driver set for fix execution (command and target only).
-func FixDrivers(bindings Bindings) (set execution.ExecutorSet) {
-	return execution.ExecutorSet{
+func FixDrivers(bindings Bindings) (set execution.DriverSet) {
+	return execution.DriverSet{
 		FileCommand:   command.FixDriver(),
 		TargetCommand: target.FixCommandDriver(bindings.targetCommands),
 	}

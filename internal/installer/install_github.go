@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 func installGitHub(
@@ -23,13 +23,20 @@ func installGitHub(
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	path := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(ctx, process.Runner{}, tool, path)
+	path, _, exists, err := prepareExecutableDestination(layout.RepositoryRoot, path)
 	if err != nil {
 		return err
 	}
 
-	if installed {
-		return nil
+	if exists {
+		installed, inspectErr := toolchain.IsInstalled(ctx, process.Runner{}, tool, path)
+		if inspectErr != nil {
+			return inspectErr
+		}
+
+		if installed {
+			return nil
+		}
 	}
 
 	platform, ok := install.Platforms[runtime.GOOS+"/"+runtime.GOARCH]
@@ -87,5 +94,5 @@ func installGitHub(
 		return err
 	}
 
-	return copyExecutable(extracted, path)
+	return copyExecutable(layout.RepositoryRoot, extracted, path)
 }

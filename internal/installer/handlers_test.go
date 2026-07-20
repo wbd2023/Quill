@@ -3,8 +3,8 @@ package installer
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 func TestInstallerRecognisesShippedPackInstallSpecs(t *testing.T) {

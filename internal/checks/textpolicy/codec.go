@@ -3,7 +3,7 @@ package textpolicy
 import (
 	"fmt"
 
-	corepolicy "ciphera/tools/internal/policy"
+	corepolicy "github.com/wbd2023/Quill/internal/policy"
 )
 
 // DecodeConfig decodes the Text Pack Policy subtree.

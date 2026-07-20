@@ -1,18 +1,17 @@
-package profile
+package project
 
 import (
-	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/checks/projectpolicy"
-	projectpack "ciphera/tools/internal/pack/shipped/project"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/projectpolicy"
+	projectpack "github.com/wbd2023/Quill/internal/pack/shipped/project"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
-	if _, err := checkExcludedDirectories(profiles.Current(t).Repository); err != nil {
-		t.Fatalf("checkExcludedDirectories: %v", err)
+	if _, err := CheckExcludedDirectories(profiles.Current(t).Repository); err != nil {
+		t.Fatalf("CheckExcludedDirectories: %v", err)
 	}
 }
 
@@ -21,32 +20,32 @@ func TestCheckCommandsAcceptsExpectedShape(t *testing.T) {
 	testutil.WriteFile(
 		t,
 		repoRoot,
-		filepath.Join("mk", "quality.mk"),
+		"Makefile",
 		`LINT_REQUIRED_ARGS = --mode required
 LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
 
-lint: $(STYLE_BIN)
-	@$(STYLE_CMD) check $(LINT_FULL_ARGS)
+lint:
+	@$(QUILL_CMD) check $(LINT_FULL_ARGS)
 
-lint-required: $(STYLE_BIN)
-	@$(STYLE_CMD) check $(LINT_REQUIRED_ARGS)
+lint-required:
+	@$(QUILL_CMD) check $(LINT_REQUIRED_ARGS)
 
-lint-fix: $(STYLE_BIN)
-	@$(STYLE_CMD) fix --scope all
+lint-fix:
+	@$(QUILL_CMD) fix --scope all
 
-style-install: $(STYLE_BIN)
-	@$(STYLE_CMD) install
+style-install:
+	@$(QUILL_CMD) install
 
-style-doctor: $(STYLE_BIN)
-	@$(STYLE_CMD) doctor
+style-doctor:
+	@$(QUILL_CMD) doctor
 
-style-coverage: $(STYLE_BIN)
-	@$(STYLE_CMD) coverage
+style-coverage:
+	@$(QUILL_CMD) coverage
 	`,
 	)
 
-	if _, err := checkCommands(repoRoot, currentCommands(t)); err != nil {
-		t.Fatalf("checkCommands: %v", err)
+	if _, err := CheckCommands(repoRoot, currentCommands(t)); err != nil {
+		t.Fatalf("CheckCommands: %v", err)
 	}
 }
 
@@ -55,15 +54,15 @@ func TestCheckCommandsRejectsMissingRequiredRecipe(t *testing.T) {
 	testutil.WriteFile(
 		t,
 		repoRoot,
-		filepath.Join("mk", "quality.mk"),
+		"Makefile",
 		`LINT_REQUIRED_ARGS = --mode required
 LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
-lint: $(STYLE_BIN)
-	@$(STYLE_CMD) check $(LINT_FULL_ARGS)
+lint:
+	@$(QUILL_CMD) check $(LINT_FULL_ARGS)
 	`,
 	)
 
-	if output, _ := checkCommands(repoRoot, currentCommands(t)); output == "" {
+	if output, _ := CheckCommands(repoRoot, currentCommands(t)); output == "" {
 		t.Fatal("expected missing lint-required recipe to fail")
 	}
 }

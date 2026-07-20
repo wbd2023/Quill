@@ -1,5 +1,5 @@
 usage:
-  style <command> [flags]
+  quill <command> [flags]
 
 commands:
   check     run STYLE.md checks
@@ -8,5 +8,6 @@ commands:
   coverage  show STYLE.md automation coverage
   install   install pinned style tools
   lock      resolve archive-tool hashes to quill.lock
+  version   print the Quill version
 
-run `style help <command>` or `style <command> -h` to see command-specific flags
+run `quill help <command>` or `quill <command> -h` to see command-specific flags

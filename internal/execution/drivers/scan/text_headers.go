@@ -3,9 +3,9 @@ package scan
 import (
 	"context"
 
-	"ciphera/tools/internal/checks/text"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/text"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func scanSectionHeaders(

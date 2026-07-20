@@ -14,8 +14,8 @@ import (
 /* ------------------------------------------ Constants ----------------------------------------- */
 
 const (
-	limit   = 128 << 20
-	timeout = 30 * time.Second
+	maxDownloadSize = 128 << 20
+	timeout         = 30 * time.Second
 )
 
 /* ------------------------------------------ Download ------------------------------------------ */
@@ -24,6 +24,15 @@ func downloadFile(
 	ctx context.Context,
 	url string,
 	destination string,
+) (err error) {
+	return downloadFileUpTo(ctx, url, destination, maxDownloadSize)
+}
+
+func downloadFileUpTo(
+	ctx context.Context,
+	url string,
+	destination string,
+	maxSize int64,
 ) (err error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -59,15 +68,15 @@ func downloadFile(
 		}
 	}()
 
-	reader := &io.LimitedReader{R: response.Body, N: limit + 1}
+	reader := &io.LimitedReader{R: response.Body, N: maxSize + 1}
 	written, err := io.Copy(file, reader)
 	if err != nil {
-		_ = file.Close()
+		_ = file.Close() // preserve the original copy error
 		return err
 	}
 
-	if written > limit {
-		_ = file.Close()
+	if written > maxSize {
+		_ = file.Close() // the size violation is authoritative
 		return fmt.Errorf("download exceeds maximum size")
 	}
 

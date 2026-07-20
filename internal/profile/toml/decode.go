@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 
 	codec "github.com/BurntSushi/toml"
 )
@@ -22,7 +22,7 @@ func Decode(source string) (config policy.Config, err error) {
 			continue
 		}
 
-		return policy.Config{}, fmt.Errorf("unknown style.toml key %q", key.String())
+		return policy.Config{}, fmt.Errorf("unknown quill.toml key %q", key.String())
 	}
 
 	return decodeConfig(schema)

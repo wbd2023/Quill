@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected short-file header density warning")
@@ -55,7 +55,7 @@ func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf(
@@ -79,7 +79,7 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected over-dense header warning")

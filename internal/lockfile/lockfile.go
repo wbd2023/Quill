@@ -1,5 +1,5 @@
 // Package lockfile reads and writes quill.lock, the resolved-state file for
-// archive-installed tools. The profile (style.toml) declares intent (which
+// archive-installed tools. The Profile (quill.toml) declares intent (which
 // version); the lockfile records what was verified (the per-platform hashes).
 package lockfile
 

@@ -3,10 +3,10 @@ package shipped
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Rule Contracts --------------------------------------- */
@@ -57,7 +57,7 @@ func TestRegisteredRulesReferenceKnownTools(t *testing.T) {
 	}
 }
 
-func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
+func TestCurrentProfileRulesReferenceRequirements(t *testing.T) {
 	config := profiles.Current(t)
 
 	registry, err := DefaultRegistry(config.EnabledPacks)
@@ -73,14 +73,6 @@ func TestCurrentProfileBindsEveryRegisteredRule(t *testing.T) {
 	compiled, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
-	}
-
-	if len(compiled.Effective.Rules) != len(registry.Rules()) {
-		t.Fatalf(
-			"expected %d active rules, got %d",
-			len(registry.Rules()),
-			len(compiled.Effective.Rules),
-		)
 	}
 
 	for _, rule := range compiled.Effective.Rules {

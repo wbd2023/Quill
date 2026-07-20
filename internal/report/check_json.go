@@ -3,7 +3,7 @@ package report
 import (
 	"io"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* ------------------------------------------ JSON DTOs ----------------------------------------- */

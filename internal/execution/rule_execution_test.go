@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 func TestRunRuleUsesInjectedDriver(t *testing.T) {
@@ -26,7 +26,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		nil,
 		nil,
 	)
-	drivers := ExecutorSet{
+	drivers := DriverSet{
 		RepositoryScan: func(
 			_ context.Context,
 			_ RunContext,
@@ -64,7 +64,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 		nil,
 		nil,
 	)
-	drivers := ExecutorSet{}
+	drivers := DriverSet{}
 
 	_, err := RunRule(context.Background(), rule, runCtx, nil, drivers)
 	if err == nil {

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"time"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/process"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/process"
 )
 
 // ToolByID runs a tool identified by toolID and returns its result.

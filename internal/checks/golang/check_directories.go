@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/checks/golang/analysis"
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */

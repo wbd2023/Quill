@@ -1,8 +1,8 @@
 package bash
 
 import (
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 func walkConfig(repository policy.RepositoryConfig) (config filewalk.WalkConfig) {

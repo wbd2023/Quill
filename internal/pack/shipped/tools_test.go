@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 /* ------------------------------------------- Tooling ------------------------------------------ */
@@ -70,22 +70,18 @@ func TestPinnedGoVersionMatchesModuleFiles(t *testing.T) {
 	goDirectivePattern := regexp.MustCompile(`(?m)^go ([0-9]+\.[0-9]+(?:\.[0-9]+)?)$`)
 	goTool := pinnedVersion(t, tool.Go)
 
-	rootModule := readRepoFile(t, "go.mod")
-	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
+	module := readRepoFile(t, "go.mod")
+	matches := goDirectivePattern.FindStringSubmatch(module)
+	if len(matches) != 2 {
+		t.Fatalf("could not find go directive in module contents:\n%s", module)
+	}
 
-	for _, contents := range []string{rootModule, styleModule} {
-		matches := goDirectivePattern.FindStringSubmatch(contents)
-		if len(matches) != 2 {
-			t.Fatalf("could not find go directive in module contents:\n%s", contents)
-		}
-
-		if matches[1] != goTool {
-			t.Fatalf(
-				"go directive %q does not match pinned version %q",
-				matches[1],
-				goTool,
-			)
-		}
+	if matches[1] != goTool {
+		t.Fatalf(
+			"go directive %q does not match pinned version %q",
+			matches[1],
+			goTool,
+		)
 	}
 }
 
@@ -95,15 +91,15 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 	)
 	goimportsTool := pinnedVersion(t, tool.Goimports)
 
-	styleModule := readRepoFile(t, filepath.Join("tools", "go.mod"))
-	matches := requireLinePattern.FindStringSubmatch(styleModule)
+	module := readRepoFile(t, "go.mod")
+	matches := requireLinePattern.FindStringSubmatch(module)
 	if len(matches) != 2 {
-		t.Fatalf("could not find golang.org/x/tools requirement in tools/go.mod")
+		t.Fatalf("could not find golang.org/x/tools requirement in go.mod")
 	}
 
 	if matches[1] != goimportsTool {
 		t.Fatalf(
-			"tools/go.mod pins golang.org/x/tools at %q, want %q",
+			"go.mod pins golang.org/x/tools at %q, want %q",
 			matches[1],
 			goimportsTool,
 		)

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/checks/golang/analysis"
-	"ciphera/tools/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
 )
 
 func resolvedDomainValueTypeName(

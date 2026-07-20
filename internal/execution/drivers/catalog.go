@@ -1,10 +1,10 @@
 package drivers
 
 import (
-	"ciphera/tools/internal/execution/drivers/command"
-	profiledrivers "ciphera/tools/internal/execution/drivers/profile"
-	scandrivers "ciphera/tools/internal/execution/drivers/scan"
-	targetdrivers "ciphera/tools/internal/execution/drivers/target"
+	"github.com/wbd2023/Quill/internal/execution/drivers/command"
+	profiledrivers "github.com/wbd2023/Quill/internal/execution/drivers/profile"
+	scandrivers "github.com/wbd2023/Quill/internal/execution/drivers/scan"
+	targetdrivers "github.com/wbd2023/Quill/internal/execution/drivers/target"
 )
 
 /* -------------------------------------- Profile Bindings -------------------------------------- */

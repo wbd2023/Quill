@@ -3,8 +3,8 @@ package policy_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestTargetConfigsLookup(t *testing.T) {

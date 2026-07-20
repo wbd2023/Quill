@@ -1,14 +1,14 @@
 package bindings
 
 import (
-	"ciphera/tools/internal/execution/drivers"
-	"ciphera/tools/internal/pack/shipped/bash"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/project"
-	"ciphera/tools/internal/pack/shipped/security"
-	"ciphera/tools/internal/pack/shipped/text"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/Quill/internal/execution/drivers"
+	"github.com/wbd2023/Quill/internal/pack/shipped/bash"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/project"
+	"github.com/wbd2023/Quill/internal/pack/shipped/security"
+	"github.com/wbd2023/Quill/internal/pack/shipped/text"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
 )
 
 // Build wires every shipped pack's scanners, commands, checks, and interpreters into a single
@@ -46,15 +46,15 @@ func registerFileInterpreters(bindings *drivers.Bindings) {
 /* --------------------------------------- Profile Checks --------------------------------------- */
 
 func registerProfileChecks(bindings *drivers.Bindings) {
-	bindings.AddProjectCheck(
+	bindings.AddProfileCheck(
 		project.CheckEnforcementLevels,
 		drivers.CheckProfileEnforcementLevels(),
 	)
-	bindings.AddProjectCheck(
+	bindings.AddProfileCheck(
 		project.CheckExcludedDirectories,
 		drivers.CheckProfileExcludedDirectories(),
 	)
-	bindings.AddProjectCheck(
+	bindings.AddProfileCheck(
 		project.CheckCommands,
 		drivers.CheckProfileCommands(project.PackID),
 	)

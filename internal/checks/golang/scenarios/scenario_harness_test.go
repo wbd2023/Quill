@@ -3,13 +3,13 @@ package scenarios
 import (
 	"testing"
 
-	"ciphera/tools/internal/checks/golang"
-	"ciphera/tools/internal/checks/gopolicy"
-	gopack "ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/golang"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	gopack "github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func runGoStyleResult(
@@ -18,7 +18,7 @@ func runGoStyleResult(
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
-	return runGoStyleResultWithPolicy(t, targetDirectory, profiles.Current(t))
+	return runGoStyleResultWithPolicy(t, targetDirectory, scenarioConfig(t))
 }
 
 func runGoStyleResultWithPolicy(
@@ -53,6 +53,118 @@ func goConfigForTest(t *testing.T, config policy.Config) (goConfig gopolicy.Conf
 
 	return goConfig
 }
+
+/* -------------------------------------- Scenario Profile -------------------------------------- */
+
+func scenarioConfig(t *testing.T) (config policy.Config) {
+	t.Helper()
+
+	config = profiles.Current(t)
+	config.PathRoles = policy.PathRoles{
+		"go_source": {"cmd/", "internal/", "test/"},
+		"application_port": {
+			"internal/client/application/port/",
+			"internal/relay/application/port/",
+		},
+		"concrete_infra": {"internal/client/adapters/", "internal/relay/adapters/"},
+		"domain":         {"internal/core/domain/"},
+		"domain_errors":  {"internal/core/domain/errors.go"},
+		"test_mocks":     {"internal/testkit/mocks/"},
+	}
+
+	goConfig := gopolicy.Config{
+		LocalImportPrefixes: []string{"ciphera"},
+		Parameters: gopolicy.ParameterConfig{
+			SecretNames: []string{
+				"passphrase",
+				"privateKey",
+				"token",
+				"seed",
+				"secret",
+				"password",
+				"secretKey",
+			},
+		},
+		Constructors: gopolicy.ConstructorConfig{
+			ParameterOrder: []gopolicy.ParameterGroup{
+				{Name: "repository", TypeNameSuffixes: []string{"Repository"}},
+				{Name: "service", TypeNameSuffixes: []string{"Service"}},
+				{Name: "adapter", TypeNameSuffixes: []string{"Client", "Factory"}},
+				{
+					Name:           "config",
+					ParameterNames: []string{"serverURL", "relayURL", "identityID", "timeout"},
+				},
+				{Name: "secret", MatchesSecretNames: true},
+			},
+		},
+		DomainValues: gopolicy.DomainValueConfig{
+			RequiredConstructors: gopolicy.DomainValueConstructors{
+				"Username":       {"ParseUsername"},
+				"ConversationID": {"ParseConversationID", "ConversationIDFromUsername"},
+				"IdentityID":     {"ParseIdentityID"},
+			},
+		},
+		Architecture: gopolicy.ArchitectureConfig{
+			Layers: []gopolicy.ArchitectureLayer{
+				{
+					Name:          "core",
+					PackageRoots:  []string{"internal/core"},
+					AllowedLayers: []string{"core"},
+				},
+				{
+					Name:          "client_port",
+					PackageRoots:  []string{"internal/client/application/port"},
+					AllowedLayers: []string{"core", "client_port"},
+				},
+				{
+					Name:          "client_service",
+					PackageRoots:  []string{"internal/client/application/service"},
+					AllowedLayers: []string{"core", "client_port", "client_service"},
+				},
+				{
+					Name:         "client_inbound",
+					PackageRoots: []string{"internal/client/adapters/inbound"},
+					AllowedLayers: []string{
+						"core",
+						"client_port",
+						"client_service",
+						"client_inbound",
+						"client_bootstrap",
+						"shared",
+					},
+				},
+				{
+					Name:          "client_outbound",
+					PackageRoots:  []string{"internal/client/adapters/outbound"},
+					AllowedLayers: []string{"core", "client_port", "client_outbound", "shared"},
+				},
+				{
+					Name:         "client_bootstrap",
+					PackageRoots: []string{"internal/client/bootstrap"},
+					AllowedLayers: []string{
+						"core",
+						"client_port",
+						"client_service",
+						"client_inbound",
+						"client_outbound",
+						"client_bootstrap",
+						"shared",
+					},
+				},
+				{
+					Name:          "shared",
+					PackageRoots:  []string{"internal/relaywire"},
+					AllowedLayers: []string{"core", "shared"},
+				},
+			},
+		},
+	}
+	config.PackConfigs[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
+
+	return config
+}
+
+/* --------------------------------------- Config Updates --------------------------------------- */
 
 func updateGoConfigForTest(
 	t *testing.T,

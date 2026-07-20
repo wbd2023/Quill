@@ -1,6 +1,6 @@
 package coverage
 
-import "ciphera/tools/internal/styleguide"
+import "github.com/wbd2023/Quill/internal/styleguide"
 
 func buildSectionCoverage(
 	headings []styleguide.Heading,

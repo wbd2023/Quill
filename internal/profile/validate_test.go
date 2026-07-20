@@ -3,8 +3,8 @@ package profile_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile"
 )
 
 func TestValidateChecksProfile(t *testing.T) {

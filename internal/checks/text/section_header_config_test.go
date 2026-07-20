@@ -3,8 +3,8 @@ package text
 import (
 	"testing"
 
-	"ciphera/tools/internal/checks/textpolicy"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/checks/textpolicy"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {

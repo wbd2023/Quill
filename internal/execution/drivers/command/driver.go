@@ -3,16 +3,16 @@ package command
 import (
 	"context"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 // CheckDriver returns the file-command driver for check execution. The driver looks up a
 // FileInterpreter for each rule's tool; tools without an interpreter are rejected as
 // unsupported rather than silently dumping raw output.
-func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Executor) {
+func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
@@ -25,7 +25,7 @@ func CheckDriver(interpreters driverkit.FileInterpreters) (driver execution.Exec
 
 // FixDriver returns the file-command driver for fix execution. Fixes never interpret output:
 // they either succeed (exit 0, empty result) or fail (non-zero exit, error).
-func FixDriver() (driver execution.Executor) {
+func FixDriver() (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,

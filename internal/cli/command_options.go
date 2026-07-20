@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/report"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 type checkOptions struct {

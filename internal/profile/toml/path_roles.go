@@ -1,6 +1,6 @@
 package toml
 
-import "ciphera/tools/internal/policy"
+import "github.com/wbd2023/Quill/internal/policy"
 
 func decodePathRoles(schema map[string][]string) (paths policy.PathRoles) {
 	return cloneStringLists(policy.PathRoles(schema))

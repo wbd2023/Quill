@@ -1,11 +1,11 @@
 package golang
 
 import (
-	"ciphera/tools/internal/checks/golang/analysis"
-	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/checks/golang/structure"
-	"ciphera/tools/internal/checks/golang/syntax"
-	"ciphera/tools/internal/checks/golang/test"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/check"
+	"github.com/wbd2023/Quill/internal/checks/golang/structure"
+	"github.com/wbd2023/Quill/internal/checks/golang/syntax"
+	"github.com/wbd2023/Quill/internal/checks/golang/test"
 )
 
 /* ---------------------------------------- Rule Dispatch --------------------------------------- */

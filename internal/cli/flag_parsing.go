@@ -7,8 +7,8 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/report"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/report"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func newFlagSet(name string) (flagSet *flag.FlagSet) {

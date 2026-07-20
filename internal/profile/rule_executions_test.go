@@ -3,9 +3,9 @@ package profile
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/internal/profiletest"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* --------------------------------------- Rule Executions -------------------------------------- */

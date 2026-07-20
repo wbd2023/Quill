@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"ciphera/tools/internal/ecosystem/golang"
-	"ciphera/tools/internal/ecosystem/node"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/ecosystem/golang"
+	"github.com/wbd2023/Quill/internal/ecosystem/node"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 func testContext(

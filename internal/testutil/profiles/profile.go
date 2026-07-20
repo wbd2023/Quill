@@ -3,9 +3,9 @@ package profiles
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 // Current loads the active profile from the repository root.
@@ -33,7 +33,7 @@ func Write(test *testing.T, root string, config policy.Config) {
 
 	styleGuide := testutil.ReadFile(test, testutil.RepositoryRoot(test), "STYLE.md")
 	testutil.WriteFile(test, root, config.StyleGuide.Path, styleGuide)
-	testutil.WriteFile(test, root, "style.toml", Format(test, config))
+	testutil.WriteFile(test, root, "quill.toml", Format(test, config))
 }
 
 // Format serialises a profile config to its TOML representation.

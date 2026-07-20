@@ -1,6 +1,6 @@
 package report
 
-import "ciphera/tools/internal/style"
+import "github.com/wbd2023/Quill/internal/style"
 
 // CheckGroup is check group.
 type CheckGroup struct {

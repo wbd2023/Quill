@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected generic section header failure")
@@ -54,7 +54,7 @@ func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		currentSectionHeaders(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("expected structural header to pass, diagnostics: %#v", result.Diagnostics)
@@ -77,7 +77,7 @@ func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 		repoRoot,
 		profiles.RepositoryConfig(t),
 		headers,
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if len(result.Diagnostics) == 0 {
 		t.Fatal("expected profile-owned generic section header failure")

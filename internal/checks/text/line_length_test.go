@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/markers"
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/markers"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {

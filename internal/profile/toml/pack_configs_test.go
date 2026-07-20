@@ -3,7 +3,7 @@ package toml_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/profile/toml"
+	"github.com/wbd2023/Quill/internal/profile/toml"
 )
 
 func TestDecodeReadsPackConfigs(t *testing.T) {

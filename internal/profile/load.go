@@ -6,12 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile/toml"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile/toml"
 )
 
-// DefaultFilename is the style profile filename loaded from repository roots.
-const DefaultFilename = "style.toml"
+// DefaultFilename is the Quill Profile filename loaded from repository roots.
+const DefaultFilename = "quill.toml"
 
 // Load reads the default profile file from a repository root and validates it.
 func Load(root string) (config policy.Config, err error) {

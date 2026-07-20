@@ -7,8 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	corepolicy "ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	corepolicy "github.com/wbd2023/Quill/internal/policy"
 )
 
 /* ------------------------------------------ Decoding ------------------------------------------ */

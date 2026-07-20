@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 /* ----------------------------------------- Resolution ----------------------------------------- */

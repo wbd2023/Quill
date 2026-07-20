@@ -10,9 +10,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/toolchain"
 
 	"github.com/ulikunitz/xz"
+)
+
+/* ------------------------------------------ Constants ----------------------------------------- */
+
+const (
+	maxArchiveEntries = 4096
+	maxArchiveSize    = 128 << 20
 )
 
 /* ----------------------------------------- Extraction ----------------------------------------- */
@@ -22,6 +29,16 @@ func extractBinary(
 	dir string,
 	install toolchain.GitHubInstall,
 	version string,
+) (extracted string, err error) {
+	return extractBinaryUpTo(archive, dir, install, version, maxArchiveSize)
+}
+
+func extractBinaryUpTo(
+	archive string,
+	dir string,
+	install toolchain.GitHubInstall,
+	version string,
+	maxSize int64,
 ) (extracted string, err error) {
 	file, err := os.Open(archive)
 	if err != nil {
@@ -43,6 +60,8 @@ func extractBinary(
 	target := filepath.Join(dir, filepath.FromSlash(expected))
 	found := false
 
+	var entryCount int
+	var uncompressedSize int64
 	tarReader := tar.NewReader(reader)
 	for {
 		header, err := tarReader.Next()
@@ -57,11 +76,23 @@ func extractBinary(
 		if err != nil {
 			return "", err
 		}
+		entryCount++
+		if entryCount > maxArchiveEntries {
+			return "", fmt.Errorf("archive exceeds maximum entry count")
+		}
 
 		name, err := validateArchiveEntry(header, expected)
 		if err != nil {
 			return "", err
 		}
+
+		if header.Size < 0 || header.Size > maxSize-uncompressedSize {
+			return "", fmt.Errorf(
+				"archive uncompressed size exceeds maximum of %d bytes",
+				maxSize,
+			)
+		}
+		uncompressedSize += header.Size
 
 		switch header.Typeflag {
 
@@ -74,7 +105,7 @@ func extractBinary(
 			}
 
 			found = true
-			if err = writeExecutable(target, tarReader); err != nil {
+			if err = writeExecutable(dir, target, tarReader); err != nil {
 				return "", err
 			}
 

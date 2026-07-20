@@ -1,6 +1,6 @@
 package tool
 
-import "ciphera/tools/internal/toolchain"
+import "github.com/wbd2023/Quill/internal/toolchain"
 
 func buildBuiltin(
 	id string,

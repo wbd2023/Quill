@@ -5,18 +5,18 @@ import (
 	"io"
 	"path/filepath"
 
-	"ciphera/tools/internal/ecosystem/golang"
-	"ciphera/tools/internal/ecosystem/node"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/pack/shipped/bindings"
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/ecosystem/golang"
+	"github.com/wbd2023/Quill/internal/ecosystem/node"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/pack/shipped/bindings"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 /* ----------------------------------------- Engine Core ---------------------------------------- */
@@ -95,38 +95,50 @@ func WithPackProvider(packProvider PackProvider) (option Option) {
 
 /* ---------------------------------------- Pack Provider --------------------------------------- */
 
-// PackProvider constructs the pack registry and matching drivers after the profile's enabled
-// packs have been loaded.
+// PackProvider supplies Pack definitions separately from their execution Drivers.
 type PackProvider interface {
-	Load(
+	Definitions(
 		operationContext context.Context,
 		enabledPacks []string,
-	) (environment PackEnvironment, loadError error)
+	) (definitions PackDefinitions, loadError error)
+	Runtime(
+		operationContext context.Context,
+		enabledPacks []string,
+	) (runtime PackRuntime, loadError error)
 }
 
-// PackEnvironment contains pack metadata and the drivers capable of executing the corresponding
-// definitions.
-type PackEnvironment struct {
-	Registry     pack.Registry
-	CheckDrivers execution.ExecutorSet
-	FixDrivers   execution.ExecutorSet
+// PackDefinitions contains Pack metadata used to compile a Profile.
+type PackDefinitions struct {
+	Registry pack.Registry
 }
 
-// defaultPackProvider wraps shipped packs, shipped bindings, and standard drivers.
+// PackRuntime contains the Drivers used for check and fix operations.
+type PackRuntime struct {
+	CheckDrivers execution.DriverSet
+	FixDrivers   execution.DriverSet
+}
+
+// defaultPackProvider supplies shipped Pack definitions and Drivers.
 type defaultPackProvider struct{}
 
-func (defaultPackProvider) Load(
+func (defaultPackProvider) Definitions(
 	_ context.Context,
 	enabledPacks []string,
-) (environment PackEnvironment, loadError error) {
+) (definitions PackDefinitions, loadError error) {
 	registry, err := shipped.DefaultRegistry(enabledPacks)
 	if err != nil {
-		return PackEnvironment{}, err
+		return PackDefinitions{}, err
 	}
 
+	return PackDefinitions{Registry: registry}, nil
+}
+
+func (defaultPackProvider) Runtime(
+	_ context.Context,
+	_ []string,
+) (runtime PackRuntime, loadError error) {
 	built := bindings.Build()
-	return PackEnvironment{
-		Registry:     registry,
+	return PackRuntime{
 		CheckDrivers: drivers.CheckDrivers(built),
 		FixDrivers:   drivers.FixDrivers(built),
 	}, nil
@@ -148,57 +160,48 @@ func (engine *Engine) loadCompiledProfile(
 		return compiledProfile{}, err
 	}
 
-	environment, err := engine.packProvider.Load(operationContext, config.EnabledPacks)
+	definitions, err := engine.packProvider.Definitions(operationContext, config.EnabledPacks)
 	if err != nil {
 		return compiledProfile{}, err
 	}
 
-	config, err = pack.ResolvePacks(config, environment.Registry.Packs())
+	config, err = pack.ResolvePacks(config, definitions.Registry.Packs())
 	if err != nil {
 		return compiledProfile{}, err
 	}
 
-	effective, err := profile.Compile(config, environment.Registry.Definitions())
+	effective, err := profile.Compile(config, definitions.Registry.Definitions())
 	if err != nil {
 		return compiledProfile{}, err
 	}
 
 	return compiledProfile{
 		profile:  effective,
-		registry: environment.Registry,
+		registry: definitions.Registry,
 	}, nil
 }
 
 func (engine *Engine) prepareRunnerContext(
 	operationContext context.Context,
 	scope style.Scope,
-) (context execution.RunContext, packs PackEnvironment, prepareError error) {
-	config, err := profile.Load(engine.repositoryRoot)
+) (context execution.RunContext, runtime PackRuntime, prepareError error) {
+	compiled, err := engine.loadCompiledProfile(operationContext)
 	if err != nil {
-		return execution.RunContext{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackRuntime{}, err
 	}
 
+	config := compiled.profile.Profile
 	if scope == "" {
 		scope = config.Repository.DefaultScope
 	}
 
 	if !config.Repository.HasScope(scope) {
-		return execution.RunContext{}, PackEnvironment{}, errUnknownScope(scope)
+		return execution.RunContext{}, PackRuntime{}, errUnknownScope(scope)
 	}
 
-	packs, err = engine.packProvider.Load(operationContext, config.EnabledPacks)
+	runtime, err = engine.packProvider.Runtime(operationContext, config.EnabledPacks)
 	if err != nil {
-		return execution.RunContext{}, PackEnvironment{}, err
-	}
-
-	config, err = pack.ResolvePacks(config, packs.Registry.Packs())
-	if err != nil {
-		return execution.RunContext{}, PackEnvironment{}, err
-	}
-
-	compiled, err := profile.Compile(config, packs.Registry.Definitions())
-	if err != nil {
-		return execution.RunContext{}, PackEnvironment{}, err
+		return execution.RunContext{}, PackRuntime{}, err
 	}
 
 	layout := workspace.NewLayout(engine.repositoryRoot)
@@ -210,10 +213,10 @@ func (engine *Engine) prepareRunnerContext(
 	return execution.NewRunContext(
 		engine.repositoryRoot,
 		scope,
-		compiled.Profile,
-		compiled.Effective,
-		packs.Registry.ToolCapabilities(),
+		compiled.profile.Profile,
+		compiled.profile.Effective,
+		compiled.registry.ToolCapabilities(),
 		toolEnvironment,
 		goEnvironment,
-	), packs, nil
+	), runtime, nil
 }
