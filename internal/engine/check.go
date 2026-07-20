@@ -3,43 +3,10 @@ package engine
 import (
 	"context"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
-
-/* --------------------------------------- Tool Inspection -------------------------------------- */
-
-// ToolchainInspection contains structured tool inspection outcomes.
-type ToolchainInspection struct {
-	Statuses []toolchain.Status
-	AllValid bool
-}
-
-func (engine *Engine) inspectTools(
-	ctx context.Context,
-	tools map[string]toolchain.Tool,
-	toolIDs []string,
-	environment map[string]string,
-) (inspection ToolchainInspection) {
-	selected := selectTools(tools, toolIDs)
-	statuses := toolchain.InspectTools(ctx, engine.commandRunner, selected, environment)
-	return ToolchainInspection{
-		Statuses: statuses,
-		AllValid: toolchain.NewStatusMap(statuses).AreAllValid(toolIDs),
-	}
-}
-
-func selectTools(
-	tools map[string]toolchain.Tool,
-	toolIDs []string,
-) (selected map[string]toolchain.Tool) {
-	selected = make(map[string]toolchain.Tool, len(toolIDs))
-	for _, toolID := range toolIDs {
-		selected[toolID] = tools[toolID]
-	}
-	return selected
-}
 
 /* ---------------------------------------- Rule Checking --------------------------------------- */
 

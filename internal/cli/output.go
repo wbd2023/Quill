@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/report"
+	"github.com/wbd2023/Quill/internal/report"
 )
 
 func (tool Tool) writeUsageError(usage string, err error) {

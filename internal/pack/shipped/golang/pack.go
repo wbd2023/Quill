@@ -1,9 +1,9 @@
 package golang
 
 import (
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.

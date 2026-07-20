@@ -37,7 +37,7 @@ func isHelpRequest(argument string) (help bool) {
 func rootUsageText() (usage string) {
 	lines := []string{
 		"usage:",
-		"  style <command> [flags]",
+		"  quill <command> [flags]",
 		"",
 		"commands:",
 	}
@@ -48,7 +48,7 @@ func rootUsageText() (usage string) {
 	lines = append(
 		lines,
 		"",
-		"run `style help <command>` or `style <command> -h` to see command-specific flags",
+		"run `quill help <command>` or `quill <command> -h` to see command-specific flags",
 		"",
 	)
 	return strings.Join(lines, "\n")

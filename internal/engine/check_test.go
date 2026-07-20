@@ -3,11 +3,11 @@ package engine
 import (
 	"testing"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {

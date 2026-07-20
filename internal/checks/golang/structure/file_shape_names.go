@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"path/filepath"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 var vagueGoFileNames = map[string]bool{

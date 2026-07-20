@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
@@ -116,13 +116,13 @@ func TestFindRepoRootRejectsMissingRepository(t *testing.T) {
 	}
 }
 
-func TestFindRepoRootRejectsLegacyRootWithoutStyleProfile(t *testing.T) {
+func TestFindRepoRootRejectsLegacyRootWithoutQuillProfile(t *testing.T) {
 	legacyRoot := t.TempDir()
 	testutil.WriteFile(t, legacyRoot, "STYLE.md", "# Style\n")
 
 	testutil.WriteFile(t, legacyRoot, "tools/go.mod", "module example.com/tools\n")
 
 	if _, err := findRepoRoot(legacyRoot); err == nil {
-		t.Fatal("expected legacy repo root without style.toml to be rejected")
+		t.Fatal("expected legacy repo root without quill.toml to be rejected")
 	}
 }

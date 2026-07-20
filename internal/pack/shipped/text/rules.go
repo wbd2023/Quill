@@ -1,8 +1,8 @@
 package text
 
 import (
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // rules constants.

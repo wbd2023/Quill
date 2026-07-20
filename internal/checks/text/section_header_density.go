@@ -3,10 +3,10 @@ package text
 import (
 	"fmt"
 
-	"ciphera/tools/internal/checks/textpolicy"
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/textpolicy"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // CheckSectionHeaderDensity check section header density.

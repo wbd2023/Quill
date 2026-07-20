@@ -1,6 +1,6 @@
 package policy
 
-import "ciphera/tools/internal/style"
+import "github.com/wbd2023/Quill/internal/style"
 
 // FileSets defines the configured file sets.
 type FileSets []FileSetConfig

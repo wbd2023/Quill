@@ -1,11 +1,11 @@
 package markdown
 
 import (
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.

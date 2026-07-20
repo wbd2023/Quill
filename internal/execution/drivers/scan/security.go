@@ -3,10 +3,10 @@ package scan
 import (
 	"context"
 
-	"ciphera/tools/internal/checks/security"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/security"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // CheckSecrets check secrets.

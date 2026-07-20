@@ -1,12 +1,14 @@
 package testutil
 
 import (
+	"errors"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
-// RepositoryRoot repository root.
+// RepositoryRoot returns the Go module root containing the test helpers.
 func RepositoryRoot(test *testing.T) (root string) {
 	test.Helper()
 
@@ -15,12 +17,18 @@ func RepositoryRoot(test *testing.T) (root string) {
 		test.Fatal("runtime.Caller failed")
 	}
 
-	return filepath.Clean(filepath.Join(filepath.Dir(callerFile), "..", "..", ".."))
-}
+	for root = filepath.Dir(callerFile); ; root = filepath.Dir(root) {
+		_, err := os.Stat(filepath.Join(root, "go.mod"))
+		switch {
+		case err == nil:
+			return root
+		case !errors.Is(err, os.ErrNotExist):
+			test.Fatalf("stat module root marker: %v", err)
+		}
 
-// ToolsRoot tools root.
-func ToolsRoot(test *testing.T) (root string) {
-	test.Helper()
-
-	return filepath.Join(RepositoryRoot(test), "tools")
+		parent := filepath.Dir(root)
+		if parent == root {
+			test.Fatal("Go module root not found")
+		}
+	}
 }

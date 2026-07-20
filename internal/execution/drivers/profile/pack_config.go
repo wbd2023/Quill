@@ -3,8 +3,8 @@ package profile
 import (
 	"fmt"
 
-	"ciphera/tools/internal/checks/projectpolicy"
-	"ciphera/tools/internal/execution"
+	"github.com/wbd2023/Quill/internal/checks/projectpolicy"
+	"github.com/wbd2023/Quill/internal/execution"
 )
 
 func decodeProjectConfig(

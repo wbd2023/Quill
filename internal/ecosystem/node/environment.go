@@ -3,7 +3,7 @@ package node
 import (
 	"path/filepath"
 
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 // InstallDirectory returns the directory where npm install operates.

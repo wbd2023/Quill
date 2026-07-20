@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 
 	codec "github.com/BurntSushi/toml"
 )

@@ -3,9 +3,9 @@ package text
 import (
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 	result, err := CheckMaintenanceMarkers(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		style.Scope("app"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

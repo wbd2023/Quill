@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 func goTargets(

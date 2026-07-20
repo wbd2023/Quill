@@ -3,7 +3,7 @@ package structure
 import (
 	"testing"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 func TestCheckScannerEntrypointOrderRejectsHelperBeforeCheck(t *testing.T) {
@@ -17,7 +17,7 @@ func CheckThing() {}
 	violations := CheckScannerEntrypointOrder(
 		fileSet,
 		file,
-		"/repo/tools/internal/checks/text/example.go",
+		"/repo/internal/checks/text/example.go",
 	)
 	if len(violations) != 1 || violations[0].Rule != analysis.DiagnosticScannerEntrypointOrder {
 		t.Fatalf("expected scanner entrypoint violation, got %#v", violations)
@@ -35,7 +35,7 @@ func helper() {}
 	violations := CheckScannerEntrypointOrder(
 		fileSet,
 		file,
-		"/repo/tools/internal/checks/text/example.go",
+		"/repo/internal/checks/text/example.go",
 	)
 	if len(violations) != 0 {
 		t.Fatalf("expected scanner order to pass, got %#v", violations)

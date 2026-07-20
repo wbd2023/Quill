@@ -3,9 +3,9 @@ package drivers
 import (
 	"testing"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
@@ -34,7 +34,7 @@ func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
 	}
 }
 
-func driverForDetail(detail style.Template, set execution.ExecutorSet) (driver execution.Executor) {
+func driverForDetail(detail style.Template, set execution.DriverSet) (driver execution.Driver) {
 	switch detail.(type) {
 
 	case style.ToolchainExecution:

@@ -1,5 +1,5 @@
 usage:
-  style check [flags]
+  quill check [flags]
 
 run STYLE.md checks
 

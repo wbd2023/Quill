@@ -1,6 +1,6 @@
 package execution
 
-import "ciphera/tools/internal/style"
+import "github.com/wbd2023/Quill/internal/style"
 
 // CheckStatus classifies the outcome of running one rule. Findings are data carried by result: a
 // non-empty result means the rule found violations; a non-nil error means the rule could not run

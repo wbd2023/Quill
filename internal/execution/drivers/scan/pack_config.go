@@ -3,10 +3,10 @@ package scan
 import (
 	"fmt"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/checks/textpolicy"
-	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/execution"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/checks/textpolicy"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/execution"
 )
 
 func decodeGoPackConfig(

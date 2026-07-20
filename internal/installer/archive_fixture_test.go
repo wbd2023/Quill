@@ -9,12 +9,16 @@ import (
 	"github.com/ulikunitz/xz"
 )
 
+/* --------------------------------------- Archive Entries -------------------------------------- */
+
 type archiveEntry struct {
 	Name     string
 	Body     string
 	Typeflag byte
 	Linkname string
 }
+
+/* --------------------------------------- Fixture Writers -------------------------------------- */
 
 func writeTestArchive(
 	t *testing.T,
@@ -74,5 +78,38 @@ func writeTestArchive(
 		t.Fatalf("close archive: %v", err)
 	}
 
+	return path
+}
+
+func writeTestArchiveHeader(t *testing.T, name string, size int64) (path string) {
+	t.Helper()
+
+	path = filepath.Join(t.TempDir(), "oversized.tar.xz")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("create archive: %v", err)
+	}
+
+	xzWriter, err := xz.NewWriter(file)
+	if err != nil {
+		t.Fatalf("create xz writer: %v", err)
+	}
+	tarWriter := tar.NewWriter(xzWriter)
+	if err = tarWriter.WriteHeader(&tar.Header{
+		Name:     name,
+		Mode:     0o755,
+		Size:     size,
+		Typeflag: tar.TypeReg,
+	}); err != nil {
+		t.Fatalf("write tar header: %v", err)
+	}
+
+	// leave the declared body absent so the extractor must reject from the header
+	if err = xzWriter.Close(); err != nil {
+		t.Fatalf("close xz writer: %v", err)
+	}
+	if err = file.Close(); err != nil {
+		t.Fatalf("close archive: %v", err)
+	}
 	return path
 }

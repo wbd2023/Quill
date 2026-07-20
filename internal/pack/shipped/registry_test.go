@@ -3,11 +3,11 @@ package shipped
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/markdown"
-	"ciphera/tools/internal/pack/shipped/project"
-	"ciphera/tools/internal/pack/shipped/text"
-	"ciphera/tools/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/markdown"
+	"github.com/wbd2023/Quill/internal/pack/shipped/project"
+	"github.com/wbd2023/Quill/internal/pack/shipped/text"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
 )
 
 func TestDefaultRegistryLoadsEnabledPacks(t *testing.T) {

@@ -3,7 +3,7 @@ package toml_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/policy"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"

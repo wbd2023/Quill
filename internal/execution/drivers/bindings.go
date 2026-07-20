@@ -1,6 +1,6 @@
 package drivers
 
-import "ciphera/tools/internal/execution/drivers/internal/driverkit"
+import "github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
 
 // RepositoryScanner is repository scanner.
 type RepositoryScanner = driverkit.RepositoryScanner
@@ -11,7 +11,7 @@ type TargetCommand = driverkit.TargetCommand
 // TargetCheck is target check.
 type TargetCheck = driverkit.TargetCheck
 
-// ProfileCheck is project check.
+// ProfileCheck is a Profile check.
 type ProfileCheck = driverkit.ProfileCheck
 
 // FileInterpreter converts a tool's raw command output into style diagnostics.
@@ -22,7 +22,7 @@ type Bindings struct {
 	repositoryScanners driverkit.RepositoryScanners
 	targetCommands     driverkit.TargetCommands
 	targetChecks       driverkit.TargetChecks
-	projectChecks      driverkit.ProfileChecks
+	profileChecks      driverkit.ProfileChecks
 	fileInterpreters   driverkit.FileInterpreters
 }
 
@@ -32,7 +32,7 @@ func NewBindings() (bindings Bindings) {
 		repositoryScanners: driverkit.NewRepositoryScanners(),
 		targetCommands:     driverkit.NewTargetCommands(),
 		targetChecks:       driverkit.NewTargetChecks(),
-		projectChecks:      driverkit.NewProjectChecks(),
+		profileChecks:      driverkit.NewProfileChecks(),
 		fileInterpreters:   driverkit.NewFileInterpreters(),
 	}
 }
@@ -49,8 +49,8 @@ func (bindings *Bindings) AddTargetCheck(language string, check TargetCheck) {
 	bindings.targetChecks.Add(language, check)
 }
 
-func (bindings *Bindings) AddProjectCheck(id string, check ProfileCheck) {
-	bindings.projectChecks.Add(id, check)
+func (bindings *Bindings) AddProfileCheck(id string, check ProfileCheck) {
+	bindings.profileChecks.Add(id, check)
 }
 
 func (bindings *Bindings) AddFileInterpreter(id string, interpreter FileInterpreter) {

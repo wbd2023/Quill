@@ -3,8 +3,8 @@ package profile
 import (
 	"fmt"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func validateRules(

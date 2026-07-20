@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
-func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Executor) {
+func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
@@ -36,7 +36,7 @@ func targetCommandDriver(commands driverkit.TargetCommands) (driver execution.Ex
 	}
 }
 
-func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Executor) {
+func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
@@ -58,4 +58,19 @@ func targetCheckDriver(checks driverkit.TargetChecks) (driver execution.Executor
 
 		return check(ctx, context, job)
 	}
+}
+
+// CheckCommandDriver returns the target-command driver for check execution.
+func CheckCommandDriver(commands driverkit.TargetCommands) (driver execution.Driver) {
+	return targetCommandDriver(commands)
+}
+
+// CheckCheckDriver returns the target-check driver for check execution.
+func CheckCheckDriver(checks driverkit.TargetChecks) (driver execution.Driver) {
+	return targetCheckDriver(checks)
+}
+
+// FixCommandDriver returns the target-command driver for fix execution.
+func FixCommandDriver(commands driverkit.TargetCommands) (driver execution.Driver) {
+	return targetCommandDriver(commands)
 }

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"ciphera/tools/internal/coverage"
+	"github.com/wbd2023/Quill/internal/coverage"
 )
 
 /* --------------------------------------- Coverage Output -------------------------------------- */

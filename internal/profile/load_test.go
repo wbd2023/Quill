@@ -3,9 +3,9 @@ package profile_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestLoadReadsCurrentProfile(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestCheckStatusRequiredViolationsFail(t *testing.T) {

@@ -13,7 +13,7 @@ func commandUsage(name string, summary string, flagSet *flag.FlagSet) (usage str
 
 	lines := []string{
 		"usage:",
-		fmt.Sprintf("  style %s [flags]", name),
+		fmt.Sprintf("  quill %s [flags]", name),
 	}
 	if summary != "" {
 		lines = append(lines, "", summary)

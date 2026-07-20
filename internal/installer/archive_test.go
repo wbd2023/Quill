@@ -4,9 +4,10 @@ import (
 	"archive/tar"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 // testInstall mirrors the shellcheck GitHubInstall from
@@ -100,5 +101,53 @@ func TestExtractBinaryRejectsLinks(t *testing.T) {
 
 	if _, err := extractBinary(archive, t.TempDir(), testInstall(), "0.10.0"); err == nil {
 		t.Fatal("expected link entry to fail")
+	}
+}
+
+func TestExtractBinaryRejectsOversizedEntry(t *testing.T) {
+	t.Parallel()
+
+	const oversizedEntry = int64(maxArchiveSize) + 1
+
+	archive := writeTestArchiveHeader(
+		t,
+		"shellcheck-v0.10.0/shellcheck",
+		oversizedEntry,
+	)
+	dir := t.TempDir()
+	_, err := extractBinary(archive, dir, testInstall(), "0.10.0")
+	if err == nil || !strings.Contains(err.Error(), "uncompressed size") {
+		t.Fatalf("extract oversized entry error = %v, want uncompressed size error", err)
+	}
+
+	target := filepath.Join(dir, "shellcheck-v0.10.0", "shellcheck")
+	if _, statErr := os.Stat(target); !os.IsNotExist(statErr) {
+		t.Fatalf("target exists after oversized archive: %v", statErr)
+	}
+}
+
+func TestExtractBinaryRejectsCumulativeUncompressedSize(t *testing.T) {
+	t.Parallel()
+
+	archive := writeTestArchive(
+		t,
+		archiveEntry{
+			Name: "shellcheck-v0.10.0/LICENSE.txt",
+			Body: "12345",
+		},
+		archiveEntry{
+			Name: "shellcheck-v0.10.0/shellcheck",
+			Body: "6789",
+		},
+	)
+	dir := t.TempDir()
+	_, err := extractBinaryUpTo(archive, dir, testInstall(), "0.10.0", 8)
+	if err == nil || !strings.Contains(err.Error(), "uncompressed size") {
+		t.Fatalf("extract cumulative size error = %v, want uncompressed size error", err)
+	}
+
+	target := filepath.Join(dir, "shellcheck-v0.10.0", "shellcheck")
+	if _, statErr := os.Stat(target); !os.IsNotExist(statErr) {
+		t.Fatalf("target exists after oversized archive: %v", statErr)
 	}
 }

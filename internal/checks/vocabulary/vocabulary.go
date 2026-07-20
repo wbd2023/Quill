@@ -1,10 +1,10 @@
 package vocabulary
 
 import (
-	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 const goTypeSuffixMatchLength = 2

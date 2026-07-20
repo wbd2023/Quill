@@ -3,10 +3,10 @@ package target
 import (
 	"testing"
 
-	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/golang/check"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestShippedPackGoChecksHaveDispatch(t *testing.T) {

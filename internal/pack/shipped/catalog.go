@@ -1,15 +1,15 @@
 package shipped
 
 import (
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped/bash"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/markdown"
-	"ciphera/tools/internal/pack/shipped/project"
-	"ciphera/tools/internal/pack/shipped/security"
-	"ciphera/tools/internal/pack/shipped/text"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped/bash"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/markdown"
+	"github.com/wbd2023/Quill/internal/pack/shipped/project"
+	"github.com/wbd2023/Quill/internal/pack/shipped/security"
+	"github.com/wbd2023/Quill/internal/pack/shipped/text"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
 )
 
 // DefaultCatalog returns the Shipped Pack catalogue.

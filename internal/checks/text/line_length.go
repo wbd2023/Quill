@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/markers"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/markers"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // line_length constants.

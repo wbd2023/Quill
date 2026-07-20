@@ -1,8 +1,8 @@
 package golang
 
 import (
-	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/checks/golang/syntax"
+	"github.com/wbd2023/Quill/internal/checks/golang/check"
+	"github.com/wbd2023/Quill/internal/checks/golang/syntax"
 )
 
 func (state *analysisState) addCrossFileViolations(scanRoots []string) {

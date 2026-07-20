@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"ciphera/tools/internal/checks/textpolicy"
-	corepolicy "ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/checks/textpolicy"
+	corepolicy "github.com/wbd2023/Quill/internal/policy"
 )
 
 func TestDecodeConfigReadsTextPackConfig(t *testing.T) {

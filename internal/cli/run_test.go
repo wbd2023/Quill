@@ -22,7 +22,7 @@ func TestRunRejectsMissingCommand(t *testing.T) {
 		t.Fatalf("expected no stdout for missing command, got %q", stdout.String())
 	}
 
-	if !strings.Contains(stderr.String(), "style <command> [flags]") {
+	if !strings.Contains(stderr.String(), "quill <command> [flags]") {
 		t.Fatalf("expected root usage on stderr, got %q", stderr.String())
 	}
 }
@@ -91,17 +91,34 @@ func TestRunTreatsFlagHelpAsSuccess(t *testing.T) {
 	}
 }
 
+func TestRunPrintsVersion(t *testing.T) {
+	tool, stdout, stderr := newTestCLI()
+
+	exitCode := tool.Run([]string{"version"})
+	if exitCode != 0 {
+		t.Fatalf("expected success exit code for version, got %d", exitCode)
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("expected no stderr for version, got %q", stderr.String())
+	}
+	if stdout.String() != "test-version\n" {
+		t.Fatalf("unexpected version output: %q", stdout.String())
+	}
+}
+
 /* -------------------------------------------- Usage ------------------------------------------- */
 
 func TestUsageTextListsCommands(t *testing.T) {
 	usage := rootUsageText()
 	requiredSnippets := []string{
-		"style <command> [flags]",
+		"quill <command> [flags]",
 		"check",
 		"fix",
 		"doctor",
 		"coverage",
 		"install",
+		"lock",
+		"version",
 	}
 
 	for _, snippet := range requiredSnippets {
@@ -116,7 +133,7 @@ func TestUsageTextListsCommands(t *testing.T) {
 func newTestCLI() (tool Tool, stdout *bytes.Buffer, stderr *bytes.Buffer) {
 	stdout = &bytes.Buffer{}
 	stderr = &bytes.Buffer{}
-	tool = New(stdout, stderr)
+	tool = New(stdout, stderr, "test-version")
 	return tool, stdout, stderr
 }
 

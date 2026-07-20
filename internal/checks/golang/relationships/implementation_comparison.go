@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 /* ----------------------------------- Implementation Matching ---------------------------------- */

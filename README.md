@@ -1,284 +1,212 @@
-# Tooling
+# Quill
 
-This directory holds the style tool, a general-purpose style-checking engine. It turns a project's
-human-authored style guide (`STYLE.md`) and machine-readable profile (`style.toml`) into executable
-checks: an effective rule graph, pinned tool installation, and coverage reporting. The engine has no
-built-in knowledge of any particular project. Every project-specific decision (active scopes, file
-sets, Targets, rule bindings, tool pins) lives in that project's `style.toml`, and every requirement
-lives in that project's `STYLE.md`.
+Quill turns a repository's human-authored `STYLE.md` and machine-readable `quill.toml` Profile into
+executable style checks. It resolves Pack defaults, validates Rule bindings, installs pinned tools,
+runs checks and safe fixes, writes `quill.lock`, and reports requirement coverage.
 
-This repository (Ciphera, the end-to-end encrypted chat client and relay) is the engine's current
-host and exemplar. `STYLE.md` and `style.toml` at the repository root are Ciphera's inputs; the
-engine under `tools/` consumes them.
+Quill is a CLI application. Its Go packages are internal implementation details; the stable
+integration surface is the `quill` command and the repository-owned files it consumes.
 
 ## Status
 
-The engine is currently embedded at `tools/` within the ciphera repository and is being split into
-its own repository so it can be reused across projects. Its Go module path is currently
-`ciphera/tools`; that path will be renamed as part of the split. Until then, treat the module path
-as an import-path detail, not a product coupling. The engine code is general.
+Quill is pre-1.0. The CLI and file formats are being prepared for their first standalone release.
+Until a release is tagged, build from a reviewed commit rather than relying on an unpinned branch.
 
-`STYLE.md` remains the human source of truth. `style.toml` is the executable repository profile: it
-enables Packs, binds checker rules to requirement IDs, declares file sets, and supplies project-
-specific paths. The Go control plane in `tools/` compiles those two inputs into an effective rule
-graph, installs pinned tools from active Packs, and reports coverage from the same graph.
+## Requirements
 
-## Daily Use
+- Go 1.24.5, matching the self-check Profile's exact toolchain pin
+- Node.js 20 when installing or running Node-based tools
+- A POSIX environment for the repository Make targets
 
-Fresh checkout:
+## Install
 
-- `make style-install`
+Build the current checkout:
 
-Primary gate:
-
-- `make lint`
-
-Required-only fast gate:
-
-- `make lint-required`
-
-Safe auto-fixes:
-
-- `make lint-fix`
-
-Maintenance:
-
-- `make style-doctor`
-- `make style-coverage`
-
-Structured output:
-
-- `bin/style check --format json`
-- `bin/style coverage --format json`
-- `bin/style doctor --format json`
-- `bin/style help check`
-
-`make style-install` goes through `style install`, so install logic lives in the same Go control
-plane as checking, fixing, doctor, and coverage. On a fresh checkout, run it once before the first
-`make lint-required` or `make lint`. Installed tools and caches live under the repo-local
-`.cache/style/` tree instead of mutating global GOPATH or home-directory tool paths.
-
-`make style` builds `bin/style` directly, and the `make lint*` and `make style-*` targets build it
-on demand first, so the style tool is integrated into the repo like the other executables instead of
-being launched via ad hoc `go run` plumbing.
-
-## Target Contract
-
-- `make lint`
-  - Runs the full strict STYLE.md gate.
-- `make lint-required`
-  - Runs the required-only STYLE.md gate.
-- `make lint-fix`
-  - Runs safe STYLE.md auto-fixes where available.
-- `make lint-app`
-  - Runs the full STYLE.md gate for app scope only.
-- `make lint-tools`
-  - Runs the full STYLE.md gate for `tools` only.
-- `make style-install`
-  - Installs or refreshes pinned style tools.
-- `make style-doctor`
-  - Checks whether pinned style tools are installed and healthy.
-- `make style-coverage`
-  - Shows STYLE.md automation coverage.
-
-Testing:
-
-- `make test`
-  - Runs all tests, including the tooling module.
-- `make test-app`
-  - Runs application Go tests only.
-- `make test-tools`
-  - Runs tooling-module tests only.
-
-When `--repo-root` is omitted, the CLI auto-detects the repository root by walking upward until it
-finds the configured profile markers, currently `STYLE.md` and `style.toml`.
-
-## Model
-
-- `STYLE.md` is the canonical style guide.
-- `style.toml` is the machine-readable project profile.
-- `style.toml` owns active scopes, file sets, Targets, rule bindings, and tool pins.
-- Requirement IDs live in hidden `<!-- style: id=... -->` metadata comments instead of the prose
-  bullets themselves.
-- Hidden `<!-- style: ... -->` metadata comments also declare review-only requirements and other
-  machine-only guide metadata.
-- Packs define checker capabilities; `style.toml` decides which Packs and rules are active.
-- Rules map to requirement IDs through `style.toml`, not through implementation code.
-- Rule bindings also own project path-class requirements; Packs do not import project policy.
-- Go style diagnostics use checker-owned diagnostic codes instead of hardcoded STYLE.md IDs.
-- Coverage is derived from requirements, not maintained as a hand-written section-status table.
-- `profile_version = 1` is the first unreleased current schema. There is no legacy schema support.
-- Scoped file sets collect from explicit include scopes that overlap the active scope. The profile
-  default scope is only the CLI default, not a hidden "widest" scope.
-
-## Boundaries
-
-The dependency direction is:
-
-`style -> policy -> profile/toml`
-
-`style -> policy -> profile/internal/validation -> profile`
-
-`style -> policy -> pack -> profile/internal/effective -> profile -> cli`
-
-`toolchain -> runtime -> installer -> cli`
-
-`toolchain -> report`
-
-`pack/shipped/<pack> -> pack/shipped -> profile/internal/effective -> profile -> cli`
-
-`pack/shipped/bindings -> runner/drivers -> cli`
-
-`styleguide -> coverage -> cli/report`
-
-`runner -> runner/drivers -> cli`
-
-Production packages must keep these boundaries:
-
-- `style` imports no internal package.
-- `policy` imports only `style`.
-- `profile/toml` is the persisted `style.toml` codec. It imports profile policy types, not loaders,
-  validators, Packs, runners, drivers, checks, or reports.
-- `profile/internal/validation` imports profile policy types and style vocabulary, not loaders,
-  Packs, runners, drivers, checks, or reports.
-- `profile/internal/effective` imports profile policy types, style vocabulary, and neutral Pack
-  definitions, not loaders, Shipped Packs, runners, drivers, checks, or reports.
-- `profile` is the public facade over profile loading, TOML, validation, Pack default resolution,
-  and Effective Profile compilation. It may import neutral Pack registries, but not Shipped Packs,
-  runners, drivers, checks, or reports.
-- `toolchain` owns Tool capability, health, status, command lookup, and version detection. It
-  imports no project policy, runtime, checks, profile, or reporting package.
-- `runtime` owns command execution, command environment layout, and no installation orchestration or
-  Tool health policy.
-- `installer` imports runtime and style tool types, not project policy, checks, profiles, reports,
-  or runners.
-- `pack` defines neutral Pack definitions, catalogues, and registries.
-- `pack/shipped` assembles the Shipped Pack catalogue and may import Shipped Pack modules.
-- `pack/shipped/<pack>` modules own declaration-time Pack concepts and may import Check packages,
-  Pack-owned policy codecs, and canonical shipped Tool IDs from `pack/shipped/tool`, but not
-  runners, drivers, reports, profiles, or installers.
-- `pack/shipped/tool` owns reusable shipped tool capabilities, canonical Tool IDs, install kinds,
-  and version kinds.
-- `pack/shipped/bindings` owns Shipped Pack Runtime Bindings and may import only the top-level
-  `runner/drivers` facade, not driver-family subpackages.
-- `runner` imports no `profile`, `pack/shipped`, `runtime`, or `report`.
-- `runner/drivers` binds generic Execution Kinds to concrete Drivers from explicit
-  `drivers.Bindings` without importing Shipped Packs, profiles, reports, or installation packages.
-  Its command, project, scan, and target subpackages stay behind the top-level facade.
-- Concrete Check packages import no `profile`; Pack Policy packages such as
-  `internal/checks/gopolicy`, `internal/checks/textpolicy`, `internal/checks/projectpolicy`, and
-  `internal/checks/vocabularypolicy` own typed Pack Policy and avoid Check implementations, runners,
-  profiles, and Shipped Packs.
-- Go Checks import no `pack/shipped`, and Go Check policy stays separate from Check implementations.
-- `report` owns final text and JSON formatting; Checks and drivers return data.
-
-## File Shape
-
-The style platform uses balanced granularity:
-
-- Split files when a file owns multiple domain responsibilities.
-- Merge tiny glue files when they only contain one helper, alias, or constant and add navigation
-  cost.
-- Prefer role-named files over broad names such as `types.go`, `helpers.go`, `model.go`, and
-  `checks.go`, unless the file is genuinely package-wide.
-- Generated and machine-maintained files such as `go.sum` and `package-lock.json` are excluded from
-  aesthetic file-shape judgement.
-
-## Directory Layout
-
-The tool is a private Go module owned by this repository. The tree is grouped by ownership: profile
-model, Pack declaration, Check implementation, execution, output, and test guardrails.
-
-```text
-tools/
-|-- cmd/
-|   `-- style/                         CLI entrypoint for bin/style.
-|
-`-- internal/
-    |-- style/                         Shared rule, scope, diagnostic, and execution vocabulary.
-    |-- policy/                        Neutral typed profile policy and repository policy.
-    |-- profile/                       Profile facade: load, parse, format, validate, compile.
-    |   |-- toml/                      Persisted style.toml schema and policy conversion.
-    |   `-- internal/
-    |       |-- validation/             Consistency checks for typed profile policy.
-    |       |-- effective/              Effective Profile compilation.
-    |       `-- profiletest/            Profile-specific test helpers.
-    |
-    |-- pack/                          Neutral Pack definitions, catalogues, and registries.
-    |   `-- shipped/                   Built-in Pack catalogue.
-    |       |-- golang/                 Go Pack declaration.
-    |       |-- text/                   Text Pack declaration.
-    |       |-- bash/                   Bash Pack declaration.
-    |       |-- markdown/               Markdown Pack declaration.
-    |       |-- project/                Project Pack declaration.
-    |       |-- security/               Security Pack declaration.
-    |       |-- vocabulary/             Vocabulary Pack declaration.
-    |       |-- tool/                  Canonical shipped Tool IDs and capabilities.
-    |       `-- bindings/              Shipped Pack Runtime Binding assembly.
-    |
-    |-- checks/                        Check implementations and Pack-specific policy codecs.
-    |   |-- golang/                    Go checker facade and Go check family.
-    |   |   |-- analysis/              Shared Go analysis primitives.
-    |   |   |-- check/                 Go check IDs.
-    |   |   |-- syntax/                AST and syntax checks.
-    |   |   |-- structure/             File shape, order, and spacing checks.
-    |   |   |-- relationships/         Interface, implementation, and mock checks.
-    |   |   |-- architecture/          Go import and layering checks.
-    |   |   |-- test/                  Go test hygiene checks.
-    |   |   `-- scenarios/             End-to-end Go style scenarios.
-    |   |-- text/                     Executable text scanners.
-    |   |-- bash/                     Executable Bash scanners.
-    |   |-- security/                 Executable security scanners.
-    |   |-- vocabulary/               Executable project-term vocabulary scanner.
-    |   |-- gopolicy/                 Go Pack Policy codec and validation.
-    |   |-- textpolicy/               Text Pack Policy codec and validation.
-    |   |-- projectpolicy/            Project Pack Policy codec and validation.
-    |   `-- vocabularypolicy/         Vocabulary Pack Policy codec and validation.
-    |
-    |-- runner/                       Generic rule and fix execution.
-    |   `-- drivers/                  Driver facade and execution-family implementations.
-    |       |-- command/               File-command execution.
-    |       |-- project/               Project-level check execution.
-    |       |-- scan/                  Repository scanner execution.
-    |       |-- target/                Target command and target check execution.
-    |       `-- internal/
-    |           |-- runtimebinding/    Runtime Binding contracts and duplicate guards.
-    |           `-- commandrun/        Command output handling shared by command drivers.
-    |
-    |-- toolchain/                    Tool capability, health, command lookup, and versions.
-    |-- runtime/                      Command execution and repository-local tool layout.
-    |-- installer/                    Pinned Tool installation, downloads, and archives.
-    |
-    |-- styleguide/                   STYLE.md parsing and hidden metadata extraction.
-    |-- markers/                      Hidden STYLE.md marker parsing.
-    |-- coverage/                     STYLE.md/profile/rule coverage graph.
-    |-- report/                       Text and JSON output rendering.
-    |   `-- testdata/                 Golden output fixtures.
-    |
-    |-- cli/                          Command parsing, repo-root detection, and user UX.
-    |-- filewalk/                     Repository file collection and generated-file filtering.
-    |-- testutil/                     Shared test-only repository helpers.
-    |   `-- profiles/                 Repository-shaped profile test setup.
-    `-- architecture/                 Test-only architecture boundary guardrails.
+```sh
+make build
+./bin/quill version
 ```
 
-### Naming Notes
+Install the current release:
 
-- `internal/policy` is neutral profile policy. It should not know about concrete Packs.
-- `checks/<domain>` packages run checks. For example, `checks/text` runs text scanners.
-- `checks/<domain>policy` packages decode and validate Pack-specific policy. For example,
-  `checks/textpolicy` owns Text Pack Policy, not executable scanners.
-- `internal/architecture` is intentionally test-only. It enforces package import boundaries and
-  requirement ownership from one place.
-- Requirement ID types (`style.RequirementID`, `style.IDScheme`, `style.SectionSlug`) live in
-  `internal/style` so profile and styleguide code can use the ID grammar without importing the full
-  STYLE.md parser.
-- `internal/profile/internal/profiletest` is profile-specific test support. Shared test helpers that
-  are not profile-specific live in `internal/testutil`.
-- Report surfaces use `<surface>.go`, `<surface>_text.go`, `<surface>_json.go`, and
-  `<surface>_view.go` where those roles exist.
-- Multi-role shipped Packs use `execution_ids.go`, `rules.go`, and `file_sets.go`. Small Packs stay
-  flat until splitting improves locality.
+```sh
+go install github.com/wbd2023/Quill/cmd/quill@v0.1.0
+```
 
-There is no longer a shell registry, shell-script control plane, nested `tools/style/` module, or
-single overloaded package mixing style-platform vocabulary with STYLE.md parsing.
+Do not use `@latest` in CI. Pin a reviewed module release.
+
+## Versioning and releases
+
+`quill version` reads the main module version from `runtime/debug.BuildInfo`. Go 1.24 stamps that
+version from the repository tag or commit and appends `+dirty` when the checkout has uncommitted
+changes. Builds without usable module or VCS version information report `devel`.
+
+The Git tag is the only version source. Quill has no separate version file and does not inject a
+second version with linker flags. This keeps local tagged builds, `go install ...@vX.Y.Z`, and Go
+1.24 `tool` dependencies on the same version contract.
+
+For each release:
+
+1. Choose and review the semantic version.
+2. From a clean release commit, run `make lint`, `make test`, and `go vet ./...`.
+3. Create the matching semantic-version tag locally.
+4. Run `GOFLAGS=-buildvcs=true make build` and confirm that `./bin/quill version` prints the tag.
+5. Push the tag. Tag CI repeats the VCS-enabled build and version assertion.
+6. Verify the pinned `go install` command, then publish release notes.
+
+Releases publish source only. Quill does not publish archive binaries until their supported platform
+matrix, checksum generation, and installation contract are defined.
+
+## Repository contract
+
+A checked repository owns the policy that Quill executes:
+
+- `STYLE.md` is the human source of truth. Requirements carry stable IDs in hidden
+  `<!-- style: id=... -->` metadata.
+- `quill.toml` is the executable Profile. It selects Packs, binds Rules to requirements and scopes,
+  declares Targets and file sets, and pins tool versions.
+- `quill.lock` records verified per-platform hashes for archive-installed tools.
+
+Quill has no built-in knowledge of a consuming repository's package layout, scope names, naming
+vocabulary, or policy values. Those decisions belong in that repository's Profile.
+
+When `--repo-root` is omitted, Quill walks upward from the current directory until it finds both
+`STYLE.md` and `quill.toml`.
+
+## CLI
+
+```text
+quill <command> [flags]
+```
+
+Commands:
+
+- `quill check` runs selected Rules.
+- `quill fix` runs safe fixes for selected Rules.
+- `quill doctor` inspects pinned tools and reports missing or wrong versions.
+- `quill coverage` maps STYLE.md requirements to automated, review-only, and deferred coverage.
+- `quill install` installs or refreshes pinned tools in the repository-local cache.
+- `quill lock` resolves archive-tool hashes and atomically rewrites `quill.lock`.
+- `quill version` prints the version recorded by the Go toolchain.
+
+Use `quill help <command>` for command-specific flags.
+
+Common examples:
+
+```sh
+quill check --mode required
+quill check --mode all --strict-recommendations --verbose
+quill check --scope all --format json
+quill fix --scope all
+quill doctor --format json
+quill coverage --format json
+quill lock
+```
+
+Exit codes:
+
+- `0`: command completed successfully and no selected failure requires a non-zero result.
+- `1`: a selected Rule failed, a Rule errored, or command execution failed.
+- `2`: command-line usage was invalid.
+
+JSON output is intended for automation. Text output is intended for people.
+
+## Profile model
+
+A Profile contains seven main areas:
+
+1. Repository roots, scopes, exclusions, and generated-file markers.
+2. The STYLE.md path and path-role classifications.
+3. Named file sets for repository scans.
+4. Language Targets and their working directories.
+5. Pinned tool versions and execution limits.
+6. Enabled Packs and Pack Policy values.
+7. Rule bindings, enforcement levels, scopes, and requirement IDs.
+
+Packs provide reusable checker capabilities and defaults. The Profile decides which capabilities
+are active. Drivers execute resolved jobs; Checks implement repository-specific observations
+without owning Profile policy.
+
+The repository's own `quill.toml` and `STYLE.md` are a complete self-checking example.
+
+## Architecture
+
+Quill is a modular monolith with one CLI entrypoint and private implementation packages. See
+[docs/architecture.md](docs/architecture.md) for package ownership and runtime flow. The package
+composition and public interface decisions are recorded in
+[ADR 0001](docs/adr/0001-separate-shipped-declarations-from-check-execution.md) and
+[ADR 0002](docs/adr/0002-cli-and-files-are-the-public-interface.md).
+
+## Development
+
+Install the pinned development tools once:
+
+```sh
+make style-install
+```
+
+Run the required gate:
+
+```sh
+make lint-required
+```
+
+Run the complete strict gate and tests:
+
+```sh
+make lint
+make test
+```
+
+Build and smoke-test the command:
+
+```sh
+go build -o /tmp/quill ./cmd/quill
+/tmp/quill help
+/tmp/quill help check
+/tmp/quill help lock
+```
+
+The repository keeps build products and installed tools under ignored repository-local
+directories. Development commands do not mutate the global GOPATH tool directory.
+
+## Package map
+
+Quill is a modular monolith with one command and private packages under `internal/`.
+
+- `cmd/quill` contains only process entrypoint wiring.
+- `internal/cli` owns argument parsing, output streams, and exit codes.
+- `internal/engine` is the operation facade for check, fix, doctor, coverage, install, and lock.
+- `internal/profile` loads, validates, and compiles Profiles.
+- `internal/profile/toml` owns the persisted Profile codec.
+- `internal/pack` defines Pack contracts and resolution.
+- `internal/pack/shipped` assembles built-in Pack declarations.
+- `internal/checks` contains concrete repository Checks and Pack Policy codecs.
+- `internal/execution` runs resolved jobs through Drivers.
+- `internal/installer`, `internal/toolchain`, and `internal/process` own external-tool boundaries.
+- `internal/styleguide` parses STYLE.md requirement metadata.
+- `internal/coverage` derives requirement coverage from the compiled Profile.
+- `internal/report` renders text and JSON views.
+
+Architecture tests under `internal/architecture` enforce the intended import direction.
+
+## Security
+
+Quill executes repository policy and downloaded tools on the host. It is not a sandbox. Review
+`quill.toml`, `quill.lock`, and changes to shipped tool capabilities before running Quill on an
+untrusted checkout.
+
+Archive downloads are HTTPS-only and are verified against lockfile hashes. Installer tests defend
+archive traversal, links, oversized downloads, and checksum mismatches. See
+[SECURITY.md](SECURITY.md) for the trust model and vulnerability reporting process.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Contributions require recorded acceptance of the
+[Contributor Licence Agreement](CLA.md) and must preserve CLI contracts, Profile validation,
+package boundaries, and installer security properties.
+
+## Licence
+
+Quill is licensed under the [Apache License, Version 2.0](LICENSE). Its SPDX licence identifier is
+`Apache-2.0`. See [NOTICE](NOTICE) for creator attribution.

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
 )
 
 func TestValidateConfigRejectsEmptyPreferredName(t *testing.T) {

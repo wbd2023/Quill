@@ -3,7 +3,7 @@ package node
 import (
 	"testing"
 
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 func TestInstallDirectoryDerivesFromLayout(t *testing.T) {

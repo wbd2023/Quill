@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 	result, err := CheckMagicValues(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		style.Scope("tools"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -66,7 +66,7 @@ func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
 	result, err := CheckMagicValues(
 		repoRoot,
 		profiles.RepositoryConfig(t),
-		style.Scope("tools"),
+		style.Scope("all"),
 	)
 	if err != nil {
 		t.Fatalf("expected trivial literals to pass, diagnostics: %#v", result.Diagnostics)

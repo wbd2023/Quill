@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/styleguide"
+	"github.com/wbd2023/Quill/internal/styleguide"
 
 	"github.com/google/go-cmp/cmp"
 )

@@ -3,14 +3,15 @@ package execution
 import (
 	"path/filepath"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
-// FileCommandArguments extracts the command arguments from a file-command job, resolving config
-// file paths against the repository root.
+// FileCommandArguments extracts the command arguments from a file-command job, resolves its config
+// file path against the repository root, and appends the selected files.
 func FileCommandArguments(
 	repoRoot string,
 	job style.Job,
+	files []string,
 ) (arguments []string) {
 	execution, found := job.(style.FileCommandExecution)
 	if !found {
@@ -25,6 +26,8 @@ func FileCommandArguments(
 			filepath.Join(repoRoot, execution.ConfigFile),
 		)
 	}
+
+	arguments = append(arguments, files...)
 
 	return arguments
 }

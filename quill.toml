@@ -1,0 +1,565 @@
+schema_version = 1
+
+[repository]
+root_markers = ["STYLE.md", "quill.toml"]
+default_scope = "all"
+excluded_directories = [
+  ".cache",
+  ".git",
+  ".toolchain",
+  "bin",
+  "testdata",
+  "third_party",
+  "vendor",
+]
+generated_marker = "DO NOT EDIT."
+
+[repository.scope_roots]
+all = ["."]
+
+[style_guide]
+path = "STYLE.md"
+
+[path_roles]
+go_source = ["cmd/", "internal/"]
+
+[file_sets.markdown.include]
+extensions = [".md"]
+files = { all = [
+  "README.md",
+  "STYLE.md",
+  "CONTRIBUTING.md",
+  "SECURITY.md",
+  "TODO.md",
+  "CLA.md",
+  "CONTEXT.md",
+] }
+paths = { all = ["cmd/", "docs/", "internal/"] }
+
+[file_sets.line_length.exclude]
+files = ["go.sum"]
+
+[file_sets.spelling.exclude]
+extensions = [".go"]
+files = [
+  "CLA.md",
+  "COPYING",
+  "COPYING.*",
+  "LICENSE",
+  "LICENSE.*",
+  "NOTICE",
+  "NOTICE.*",
+]
+
+[targets.go]
+language = "go"
+scope = "all"
+working_directory = "."
+format_paths = ["cmd", "internal"]
+check_paths = ["cmd", "internal"]
+
+[tools.go]
+version = "1.24.5"
+
+[tools.goimports]
+version = "v0.42.0"
+
+[tools.misspell]
+version = "v0.3.4"
+
+[tools."golangci-lint"]
+version = "v2.6.2"
+
+[tools.markdownlint]
+version = "0.45.0"
+
+[tools.shfmt]
+version = "v3.12.0"
+
+[tools.shellcheck]
+version = "0.10.0"
+
+[packs]
+enabled = [
+  "project",
+  "text",
+  "markdown",
+  "bash",
+  "go",
+  "security",
+  "vocabulary",
+]
+
+[packs.project.commands]
+runner = "make"
+path = "Makefile"
+
+[[packs.project.commands.required_variables]]
+name = "LINT_REQUIRED_ARGS"
+value = "--mode required"
+
+[[packs.project.commands.required_variables]]
+name = "LINT_FULL_ARGS"
+value = "--mode all --strict-recommendations --verbose"
+
+[[packs.project.commands.required_targets]]
+name = "lint"
+recipe_line = "@$(QUILL_CMD) check $(LINT_FULL_ARGS)"
+
+[[packs.project.commands.required_targets]]
+name = "lint-required"
+recipe_line = "@$(QUILL_CMD) check $(LINT_REQUIRED_ARGS)"
+
+[[packs.project.commands.required_targets]]
+name = "lint-fix"
+recipe_line = "@$(QUILL_CMD) fix --scope all"
+
+[[packs.project.commands.required_targets]]
+name = "style-install"
+recipe_line = "@$(QUILL_CMD) install"
+
+[[packs.project.commands.required_targets]]
+name = "style-doctor"
+recipe_line = "@$(QUILL_CMD) doctor"
+
+[[packs.project.commands.required_targets]]
+name = "style-coverage"
+recipe_line = "@$(QUILL_CMD) coverage"
+
+[packs.text.section_headers]
+large_min_lines = 100
+short_max_lines = 79
+max_header_count = 6
+generic_names = ["Check", "Checks", "Misc", "Other"]
+structural_names = [
+  "Accessors",
+  "Compile",
+  "Constants",
+  "Errors",
+  "Helpers",
+  "Loading",
+  "Lookups",
+  "Registry",
+  "Rendering",
+  "Sync",
+  "Tools",
+  "Types",
+  "Validation",
+]
+
+[packs.go]
+local_import_prefixes = ["github.com/wbd2023/Quill"]
+
+[packs.go.parameters]
+secret_names = [
+  "passphrase",
+  "privateKey",
+  "token",
+  "seed",
+  "secret",
+  "password",
+  "secretKey",
+]
+
+[[packs.go.constructors.parameter_order]]
+name = "repository"
+type_name_suffixes = ["Repository"]
+
+[[packs.go.constructors.parameter_order]]
+name = "service"
+type_name_suffixes = ["Service"]
+
+[[packs.go.constructors.parameter_order]]
+name = "adapter"
+type_name_suffixes = ["Client", "Factory"]
+
+[[packs.go.constructors.parameter_order]]
+name = "config"
+parameter_names = ["config", "options", "repositoryRoot"]
+
+[[packs.go.constructors.parameter_order]]
+name = "secret"
+matches_secret_names = true
+
+[[packs.go.architecture.layers]]
+name = "quill"
+package_roots = ["cmd", "internal"]
+may_import = ["quill"]
+
+[packs.vocabulary.go.type_suffixes]
+Repository = ["Store"]
+
+[packs.vocabulary.go.identifier_suffixes]
+Repository = ["Repo"]
+Service = ["Svc"]
+Config = ["Cfg"]
+Manager = ["Mgr"]
+
+[packs.vocabulary.bash.variable_names]
+COLOUR_RESET = ["NC"]
+
+
+[[rules]]
+id = "bash/magic-values"
+enforcement = "recommendation"
+scope = "all"
+requirement_ids = ["1.6.bash-magic-values-recommendation"]
+
+[[rules]]
+id = "bash/safety"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "4.1.lowercase-shell-functions",
+  "4.1.uppercase-shell-constants",
+  "4.1.main-at-bottom",
+  "4.2.detect-tools-with-command-v",
+  "4.2.use-mktemp",
+  "4.2.trap-temp-cleanup",
+  "4.2.avoid-state-losing-read-loops",
+  "4.2.local-shellcheck-suppressions",
+]
+
+[[rules]]
+id = "bash/shellcheck"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "4.2.command-substitution",
+  "4.2.prefer-double-brackets",
+  "4.2.quote-expansions",
+  "4.2.use-read-r",
+  "4.2.avoid-eval",
+]
+
+[[rules]]
+id = "bash/shfmt"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["4.1.tabs-not-spaces", "4.1.no-trailing-whitespace"]
+
+[[rules]]
+id = "bash/structure"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "4.1.shebang",
+  "4.1.strict-mode",
+  "4.1.tabs-not-spaces",
+  "4.1.no-trailing-whitespace",
+  "4.1.unix-line-endings",
+]
+
+[[rules]]
+id = "bash/test-hygiene"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["6.2.cleanup-temp-resources"]
+
+[[rules]]
+id = "go/comments"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.8.inline-comments-lowercase",
+  "3.8.inline-comments-no-period",
+]
+
+[[rules]]
+id = "go/data"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.10.named-struct-literals",
+  "3.10.use-len-for-slice-emptiness",
+  "3.10.no-pointers-to-interfaces",
+  "3.10.pass-interface-values-directly",
+]
+
+[[rules]]
+id = "go/errors"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.1.adapters-wrap-with-cause",
+  "3.1.error-context-lowercase",
+  "3.1.error-context-no-punctuation",
+  "3.1.error-context-no-secrets",
+]
+
+[[rules]]
+id = "go/guard-clause-spacing"
+enforcement = "recommendation"
+scope = "all"
+requirement_ids = ["1.8.blank-line-between-guards"]
+
+[[rules]]
+id = "go/lint"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "1.3.configured-spelling-wins",
+  "1.6.no-unexplained-numbers",
+  "3.2.cancel-func-called",
+  "3.2.close-closers",
+  "3.2.rebind-loop-variables",
+  "3.4.no-naked-returns",
+  "3.8.doc-comments-start-name",
+  "3.8.doc-comments-full-sentences",
+  "3.6.use-gofmt",
+  "3.6.use-goimports",
+  "3.6.import-group-order",
+  "3.6.no-blank-imports",
+]
+
+[[rules]]
+id = "go/logging"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "2.2.structured-logs",
+  "2.2.stable-log-keys",
+  "2.2.no-secrets-in-logs",
+]
+
+[[rules]]
+id = "go/naming"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["3.3.limit-single-letter-names"]
+
+[[rules]]
+id = "go/order"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.5.crudl-order",
+  "3.5.mocks-match-interface-order",
+  "3.5.implementations-match-interface-order",
+  "3.9.file-order",
+  "3.9.scanner-entrypoint-first",
+]
+
+[[rules]]
+id = "go/parameters"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.4.no-type-elision",
+  "3.4.explicit-parameter-types",
+  "3.7.ctx-first",
+  "3.7.secrets-last",
+  "3.5.constructor-category-order",
+]
+
+[[rules]]
+id = "go/process"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["2.5.no-shell-interpolation"]
+
+[[rules]]
+id = "go/resources"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.2.no-context-on-structs",
+  "3.2.explicit-network-timeouts",
+  "3.2.justify-ignored-close-errors",
+]
+
+[[rules]]
+id = "go/returns"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.4.named-return-values",
+  "3.4.named-returns-in-all-signatures",
+  "3.4.no-placeholder-return-names",
+  "3.4.no-naked-returns",
+  "3.4.explicit-return-values",
+  "3.4.naked-return-void-only",
+]
+
+[[rules]]
+id = "go/security"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "2.3.no-secrets-in-repo",
+  "2.4.crypto-rand",
+  "2.4.no-deprecated-crypto",
+]
+
+[[rules]]
+id = "go/switch-case-spacing"
+enforcement = "recommendation"
+scope = "all"
+requirement_ids = ["1.8.blank-lines-between-switch-cases"]
+
+[[rules]]
+id = "go/tests"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "6.1.helpers-call-helper",
+  "6.1.helpers-after-tests",
+  "6.1.use-tempdir",
+  "6.1.use-setenv",
+  "6.1.avoid-arbitrary-sleeps",
+]
+
+[[rules]]
+id = "markdown/style"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["5.2.use-markdown", "5.2.keep-go-docs-readable"]
+
+[[rules]]
+id = "profile/enforcement-levels"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "0.5.required-fails-ci",
+  "0.5.recommendations-report-only",
+  "0.5.experimental-opt-in",
+]
+
+[[rules]]
+id = "profile/excluded-directories"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "0.2.exclude-vendor",
+  "0.2.exclude-third-party",
+  "0.2.exclude-testdata",
+  "0.2.exclude-generated",
+  "1.2.generated-exception",
+  "1.2.vendor-exception",
+]
+
+[[rules]]
+id = "profile/quality-commands"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "0.5.make-lint",
+  "0.5.make-lint-required",
+  "0.5.make-lint-fix",
+  "0.5.make-style-install",
+  "0.5.make-style-doctor",
+  "0.5.make-style-coverage",
+]
+
+[[rules]]
+id = "security/secrets"
+enforcement = "required"
+scope = "all"
+requirement_ids = ["0.2.no-committed-secrets"]
+
+[[rules]]
+id = "text/ascii"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "1.4.ascii-default",
+  "1.4.source-files-ascii",
+  "1.4.docs-and-strings-ascii",
+  "1.4.non-ascii-marker",
+]
+
+[[rules]]
+id = "text/exception-markers"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "0.3.exception-basic",
+  "0.3.exception-with-reason",
+  "0.3.exception-ascii",
+]
+
+[[rules]]
+id = "text/line-length"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "1.2.max-line-length",
+  "1.2.tabs-count-four",
+  "1.2.machine-maintained-exception",
+  "1.2.shell-long-line-marker",
+]
+
+[[rules]]
+id = "text/maintenance-markers"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "5.3.markers-short-and-actionable",
+  "5.3.markers-identify-next-step",
+]
+
+[[rules]]
+id = "text/section-header-density"
+enforcement = "recommendation"
+scope = "all"
+requirement_ids = [
+  "1.5.short-files-avoid-headers",
+  "1.5.header-overuse-split-file",
+]
+
+[[rules]]
+id = "text/section-header-names"
+enforcement = "recommendation"
+scope = "all"
+requirement_ids = ["1.5.prefer-specific-section-names"]
+
+[[rules]]
+id = "text/section-headers"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "1.5.use-section-headers",
+  "1.5.headers-over-100-lines",
+  "1.5.header-tabs-count-four",
+  "1.5.header-width",
+  "1.5.header-centred",
+  "1.5.left-fill-precedence",
+]
+
+[[rules]]
+id = "text/spelling"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "1.3.australian-english",
+  "1.3.configured-spelling-wins",
+  "4.1.follow-language-guidance",
+]
+
+[[rules]]
+id = "toolchain/check-versions"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "0.4.pin-go",
+  "0.4.pin-golangci-lint",
+  "0.4.pin-goimports",
+  "0.4.pin-shfmt",
+  "0.4.pin-shellcheck",
+  "0.4.pin-markdownlint",
+  "0.4.pin-spelling-checker",
+  "0.4.use-pinned-toolchain",
+]
+
+[[rules]]
+id = "vocabulary/project-terms"
+enforcement = "required"
+scope = "all"
+requirement_ids = [
+  "3.3.use-repository-name",
+  "3.3.no-store-persistence-types",
+  "3.3.store-verbs-allowed",
+  "3.3.prefer-repository-variable-names",
+  "3.3.prefer-full-identifier-suffixes",
+  "4.1.prefer-descriptive-shell-names",
+]

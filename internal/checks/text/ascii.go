@@ -3,10 +3,10 @@ package text
 import (
 	"unicode/utf8"
 
-	"ciphera/tools/internal/filewalk"
-	"ciphera/tools/internal/markers"
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/Quill/internal/markers"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 const nonASCIIMarker = "allow-non-ascii"

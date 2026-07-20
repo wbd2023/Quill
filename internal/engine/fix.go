@@ -3,9 +3,9 @@ package engine
 import (
 	"context"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 /* ----------------------------------------- Rule Fixing ---------------------------------------- */
@@ -93,24 +93,4 @@ func selectRulesForFix(available []style.Rule, context execution.RunContext) (ru
 	}
 
 	return rules
-}
-
-/* --------------------------------------- Full Inspection -------------------------------------- */
-
-// Inspect loads the repository and inspects every configured tool.
-func (engine *Engine) Inspect(
-	operationContext context.Context,
-) (inspection ToolchainInspection, operationError error) {
-	context, _, err := engine.prepareRunnerContext(operationContext, "")
-	if err != nil {
-		return ToolchainInspection{}, err
-	}
-
-	toolIDs := make([]string, 0, len(context.Tools))
-	for toolID := range context.Tools {
-		toolIDs = append(toolIDs, toolID)
-	}
-
-	return engine.inspectTools(operationContext, context.Tools, toolIDs, context.ToolEnvironment),
-		nil
 }

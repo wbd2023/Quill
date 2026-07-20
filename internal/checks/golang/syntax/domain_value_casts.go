@@ -5,8 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 
-	"ciphera/tools/internal/checks/golang/analysis"
-	"ciphera/tools/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
 )
 
 // CheckDirectDomainValueCasts enforces parser/constructor usage for key domain values.

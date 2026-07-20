@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"ciphera/tools/internal/checks/golang/architecture"
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/commandrun"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/golang/architecture"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/commandrun"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func scanGoArchitecture(

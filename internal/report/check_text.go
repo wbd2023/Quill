@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 /* ----------------------------------------- Text Output ---------------------------------------- */

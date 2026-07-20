@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"path/filepath"
 	"strings"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 // CheckScannerEntrypointOrder check scanner entrypoint order.
@@ -66,12 +67,13 @@ func isFirstPartyScannerFile(path string) (found bool) {
 	if strings.HasSuffix(path, "_test.go") {
 		return false
 	}
+	path = "/" + strings.TrimLeft(filepath.ToSlash(path), "/")
 
 	for _, directory := range []string{
-		"/tools/internal/checks/bash/",
-		"/tools/internal/checks/vocabulary/",
-		"/tools/internal/checks/security/",
-		"/tools/internal/checks/text/",
+		"/internal/checks/bash/",
+		"/internal/checks/vocabulary/",
+		"/internal/checks/security/",
+		"/internal/checks/text/",
 	} {
 		if strings.Contains(path, directory) {
 			return true

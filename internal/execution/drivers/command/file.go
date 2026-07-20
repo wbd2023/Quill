@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/process"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // runFileCommand runs a file-command tool over its file set. For check execution, the driver
@@ -43,7 +43,7 @@ func runFileCommand(
 		return style.ExecutionResult{}, errUnknownTool(fileCommand.ToolID)
 	}
 
-	arguments := execution.FileCommandArguments(context.RepoRoot, job)
+	arguments := execution.FileCommandArguments(context.RepoRoot, job, files)
 	commandResult, runErr := process.RunCommand(ctx, process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        arguments,

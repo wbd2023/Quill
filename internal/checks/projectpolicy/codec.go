@@ -3,7 +3,7 @@ package projectpolicy
 import (
 	"fmt"
 
-	corepolicy "ciphera/tools/internal/policy"
+	corepolicy "github.com/wbd2023/Quill/internal/policy"
 )
 
 // DecodeConfig decodes the Project Pack Policy subtree.

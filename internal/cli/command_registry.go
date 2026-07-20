@@ -45,6 +45,12 @@ var commands = []Command{
 		usage:   lockUsageText,
 		prepare: prepareAction(parseLockOptionsWithResolver, runLock),
 	},
+	{
+		name:    "version",
+		summary: "print the Quill version",
+		usage:   versionUsageText,
+		prepare: prepareAction(parseVersionOptions, runVersion),
+	},
 }
 
 func findCommand(name string) (matched Command, found bool) {

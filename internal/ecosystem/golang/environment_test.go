@@ -3,7 +3,7 @@ package golang
 import (
 	"testing"
 
-	"ciphera/tools/internal/workspace"
+	"github.com/wbd2023/Quill/internal/workspace"
 )
 
 func TestBuildCacheDirectoryDerivesFromLayout(t *testing.T) {

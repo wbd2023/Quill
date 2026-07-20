@@ -3,10 +3,10 @@ package profile_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/testutil"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/testutil"
 )
 
 func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
@@ -22,8 +22,6 @@ func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 		t.Fatalf("DefaultRegistry: %v", err)
 	}
 
-	definitions := registry.Definitions()
-
 	config, err = pack.ResolvePacks(config, registry.Packs())
 	if err != nil {
 		t.Fatalf("ResolvePacks: %v", err)
@@ -34,15 +32,15 @@ func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	if len(compiled.Effective.Rules) != len(definitions.Rules) {
+	if len(compiled.Effective.Rules) != len(config.Rules) {
 		t.Fatalf(
 			"expected %d effective rules, got %d",
-			len(definitions.Rules),
+			len(config.Rules),
 			len(compiled.Effective.Rules),
 		)
 	}
 
-	if _, found := compiled.Profile.FileSets.Lookup("bash"); !found {
-		t.Fatal("expected compiled profile to include Pack default file sets")
+	if _, found := compiled.Profile.FileSets.Lookup("line_length"); !found {
+		t.Fatal("expected compiled profile to include Text Pack default file sets")
 	}
 }

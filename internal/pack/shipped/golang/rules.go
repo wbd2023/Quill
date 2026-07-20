@@ -1,9 +1,9 @@
 package golang
 
 import (
-	"ciphera/tools/internal/checks/golang/check"
-	"ciphera/tools/internal/pack/shipped/tool"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/checks/golang/check"
+	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // rules constants.

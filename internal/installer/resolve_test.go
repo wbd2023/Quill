@@ -8,8 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	"ciphera/tools/internal/lockfile"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 func testGitHubInstall(platforms ...string) (install toolchain.GitHubInstall) {

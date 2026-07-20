@@ -1,8 +1,8 @@
 package security
 
 import (
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // PackID is the canonical identifier for this Pack.

@@ -1,8 +1,8 @@
 package coverage
 
 import (
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/styleguide"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/styleguide"
 )
 
 // Build assembles a coverage report mapping STYLE.md requirements to automated rules.

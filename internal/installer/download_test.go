@@ -1,9 +1,11 @@
 package installer
 
 import (
-	"crypto/sha256"
-	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -11,26 +13,57 @@ import (
 func TestDownloadFileWritesContentToDisk(t *testing.T) {
 	t.Parallel()
 
-	// downloadFile needs an HTTP server; test the checksum logic instead.
-	body := "archive-body"
-	checksum := fmt.Sprintf("%x", sha256.Sum256([]byte(body)))
+	const body = "archive-body"
 
-	// Write the body to a temp file, then verify the checksum.
-	file, err := os.CreateTemp(t.TempDir(), "test-*")
+	server := httptest.NewServer(http.HandlerFunc(func(
+		writer http.ResponseWriter,
+		_ *http.Request,
+	) {
+		_, _ = io.WriteString(writer, body)
+	}))
+	defer server.Close()
+
+	destination := filepath.Join(t.TempDir(), "downloads", "archive")
+	if err := downloadFile(t.Context(), server.URL, destination); err != nil {
+		t.Fatalf("download file: %v", err)
+	}
+
+	downloaded, err := os.ReadFile(destination)
 	if err != nil {
-		t.Fatalf("create temp file: %v", err)
+		t.Fatalf("read download: %v", err)
+	}
+	if string(downloaded) != body {
+		t.Fatalf("downloaded content = %q, want %q", downloaded, body)
+	}
+}
+
+func TestDownloadFileRejectsOversizedResponse(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(
+		writer http.ResponseWriter,
+		_ *http.Request,
+	) {
+		_, _ = io.WriteString(writer, "123456789")
+	}))
+	defer server.Close()
+
+	directory := t.TempDir()
+	destination := filepath.Join(directory, "archive")
+	err := downloadFileUpTo(t.Context(), server.URL, destination, 8)
+	if err == nil {
+		t.Fatal("expected oversized download to fail")
+	}
+	if _, statErr := os.Stat(destination); !os.IsNotExist(statErr) {
+		t.Fatalf("destination exists after failure: %v", statErr)
 	}
 
-	if _, err = file.WriteString(body); err != nil {
-		t.Fatalf("write: %v", err)
+	entries, readErr := os.ReadDir(directory)
+	if readErr != nil {
+		t.Fatalf("read download directory: %v", readErr)
 	}
-
-	if err = file.Close(); err != nil {
-		t.Fatalf("close: %v", err)
-	}
-
-	if err = verifyChecksum(file.Name(), checksum); err != nil {
-		t.Fatalf("verify checksum: %v", err)
+	if len(entries) != 0 {
+		t.Fatalf("temporary downloads remain after failure: %v", entries)
 	}
 }
 

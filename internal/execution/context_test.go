@@ -3,10 +3,10 @@ package execution
 import (
 	"testing"
 
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func testContext(

@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/profile"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestFormatReturnsCanonicalTOML(t *testing.T) {

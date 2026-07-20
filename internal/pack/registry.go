@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/toolchain"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/toolchain"
 )
 
 /* ------------------------------------------ Registry ------------------------------------------ */

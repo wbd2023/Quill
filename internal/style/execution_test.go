@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 func TestDescribeReturnsCorrectRequirements(t *testing.T) {

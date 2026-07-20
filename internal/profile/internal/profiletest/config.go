@@ -1,8 +1,8 @@
 package profiletest
 
 import (
-	"ciphera/tools/internal/policy"
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 // Config returns a valid minimal profile config fixture.

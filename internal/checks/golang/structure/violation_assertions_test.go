@@ -3,7 +3,7 @@ package structure
 import (
 	"strings"
 
-	"ciphera/tools/internal/checks/golang/analysis"
+	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
 )
 
 func hasViolation(violations []analysis.Violation, rule string) (found bool) {

@@ -1,7 +1,7 @@
 package report
 
 import (
-	"ciphera/tools/internal/coverage"
+	"github.com/wbd2023/Quill/internal/coverage"
 )
 
 // CoverageTotals is coverage totals.

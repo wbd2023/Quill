@@ -5,16 +5,17 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 /* ------------------------------------------ File Sets ----------------------------------------- */
 
 func TestCollectFileSetFilesUsesProfileDefinedScopeFilters(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, scopedFileSetConfig(t))
 
 	readme := testutil.WriteFile(t, repoRoot, "README.md", "# App\n")
 	testutil.WriteFile(t, repoRoot, "internal/guide.md", "# Internal\n")
@@ -38,9 +39,7 @@ func TestCollectFileSetFilesUsesProfileDefinedScopeFilters(t *testing.T) {
 
 func TestCollectFileSetFilesDoesNotUseDefaultScopeAsWidestScope(t *testing.T) {
 	repoRoot := t.TempDir()
-	config := profiles.Current(t)
-	config.Repository.DefaultScope = style.Scope("app")
-	profiles.Write(t, repoRoot, config)
+	profiles.Write(t, repoRoot, scopedFileSetConfig(t))
 
 	toolsReadme := testutil.WriteFile(t, repoRoot, "tools/README.md", "# Tools\n")
 
@@ -58,7 +57,7 @@ func TestCollectFileSetFilesDoesNotUseDefaultScopeAsWidestScope(t *testing.T) {
 
 func TestCollectFileSetFilesReturnsEmptySetWhenScopedIncludesDoNotOverlap(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, scopedFileSetConfig(t))
 
 	testutil.WriteFile(t, repoRoot, "README.md", "# App\n")
 
@@ -109,4 +108,33 @@ func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 	if slices.Contains(files, checksum) {
 		t.Fatalf("expected go.sum to be excluded from line_length file set: %v", files)
 	}
+}
+
+func scopedFileSetConfig(t *testing.T) (config policy.Config) {
+	t.Helper()
+
+	config = profiles.Current(t)
+	config.Repository.ScopeRoots = map[style.Scope][]string{
+		"app":   {"cmd", "internal", "test"},
+		"tools": {"tools"},
+		"all":   {"."},
+	}
+	config.Repository.DefaultScope = style.Scope("app")
+
+	for index := range config.FileSets {
+		if config.FileSets[index].Name != "markdown" {
+			continue
+		}
+
+		config.FileSets[index].Include.Files = map[style.Scope][]string{
+			"app": {"README.md"},
+		}
+		config.FileSets[index].Include.Paths = map[style.Scope][]string{
+			"app":   {"internal/"},
+			"tools": {"tools/"},
+		}
+		break
+	}
+
+	return config
 }

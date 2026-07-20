@@ -3,7 +3,7 @@ package profile
 import (
 	"fmt"
 
-	"ciphera/tools/internal/style"
+	"github.com/wbd2023/Quill/internal/style"
 )
 
 type ruleExecutionValidator struct {

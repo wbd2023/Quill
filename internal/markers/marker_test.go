@@ -3,7 +3,7 @@ package markers_test
 import (
 	"testing"
 
-	"ciphera/tools/internal/markers"
+	"github.com/wbd2023/Quill/internal/markers"
 )
 
 const longLineRule = "allow-long-line"

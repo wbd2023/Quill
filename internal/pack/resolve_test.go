@@ -4,15 +4,15 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/checks/textpolicy"
-	"ciphera/tools/internal/checks/vocabularypolicy"
-	"ciphera/tools/internal/pack"
-	"ciphera/tools/internal/pack/shipped"
-	"ciphera/tools/internal/pack/shipped/bash"
-	"ciphera/tools/internal/pack/shipped/markdown"
-	"ciphera/tools/internal/pack/shipped/text"
-	"ciphera/tools/internal/pack/shipped/vocabulary"
-	"ciphera/tools/internal/policy"
+	"github.com/wbd2023/Quill/internal/checks/textpolicy"
+	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/Quill/internal/pack"
+	"github.com/wbd2023/Quill/internal/pack/shipped"
+	"github.com/wbd2023/Quill/internal/pack/shipped/bash"
+	"github.com/wbd2023/Quill/internal/pack/shipped/markdown"
+	"github.com/wbd2023/Quill/internal/pack/shipped/text"
+	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/Quill/internal/policy"
 )
 
 /* ----------------------------------------- Validation ----------------------------------------- */

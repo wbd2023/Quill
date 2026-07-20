@@ -6,20 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"ciphera/tools/internal/execution"
-	"ciphera/tools/internal/execution/drivers/internal/driverkit"
-	"ciphera/tools/internal/pack/shipped/golang"
-	"ciphera/tools/internal/pack/shipped/text"
-	"ciphera/tools/internal/pack/shipped/vocabulary"
-	"ciphera/tools/internal/style"
-	"ciphera/tools/internal/testutil"
-	"ciphera/tools/internal/testutil/profiles"
+	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/Quill/internal/pack/shipped/text"
+	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/Quill/internal/testutil/profiles"
 )
 
 /* ------------------------------------- Repository Scanners ------------------------------------ */
 
 func TestRunRepositoryScanRuleAcceptsKnownScanner(t *testing.T) {
-	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("tools"))
+	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
 
 	if _, err := testRepositoryScanDriver()(
 		context.Background(),
@@ -134,10 +134,10 @@ func repositoryScanSpec(scanner string) (job style.Job) {
 	}
 }
 
-func testRepositoryScanDriver() (driver execution.Executor) {
+func testRepositoryScanDriver() (driver execution.Driver) {
 	scanners := driverkit.NewRepositoryScanners()
 	scanners.Add(text.ScannerASCII, CheckASCII())
 	scanners.Add(golang.ScannerArchitecture, CheckGoArchitecture(golang.PackID))
 	scanners.Add(vocabulary.ScannerVocabulary, CheckVocabulary(vocabulary.PackID))
-	return repositoryScanDriver(scanners)
+	return CheckDriver(scanners)
 }

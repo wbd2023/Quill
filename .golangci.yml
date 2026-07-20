@@ -1,0 +1,69 @@
+# .golangci.yml -- STYLE.md Tier 1 checks.
+#
+# Linters enabled here enforce rules that existing tools handle well.
+# Run with: golangci-lint run ./...
+
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Defaults.
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+    # 1.2  Australian English (UK locale catches American spellings).
+    - misspell
+
+    # 2.2  No naked returns.
+    - nakedret
+
+    # 2.3  Doc comments must end with a period.
+    - godot
+
+    # 2.3  Doc comments must start with the identifier name.
+    - godoclint
+
+    # 2.10 No magic numeric values.
+    - mnd
+
+formatters:
+  enable:
+    # 2.6  Import grouping: std -> third-party -> local.
+    - goimports
+
+linters-settings:
+  misspell:
+    locale: UK
+
+  nakedret:
+    max-func-lines: 0
+
+  godot:
+    scope: toplevel
+    period: true
+    capital: true
+
+formatters-settings:
+  goimports:
+    local-prefixes:
+      - github.com/wbd2023/Quill
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - nakedret
+    - path: "mock_.*\\.go"
+      linters:
+        - godot
+        - godoclint

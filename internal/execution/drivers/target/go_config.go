@@ -2,9 +2,10 @@ package target
 
 import (
 	"fmt"
+	"strings"
 
-	"ciphera/tools/internal/checks/gopolicy"
-	"ciphera/tools/internal/execution"
+	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/Quill/internal/execution"
 )
 
 func decodeGoConfig(
@@ -21,4 +22,8 @@ func decodeGoConfig(
 
 func errMissingPackConfig(packID string) (err error) {
 	return fmt.Errorf("packs.%s must be configured", packID)
+}
+
+func joinGoLocalImportPrefixes(prefixes []string) (prefix string) {
+	return strings.Join(prefixes, ",")
 }
