@@ -24,8 +24,7 @@ Describe any migration required for consuming repositories, or write `None`.
 ## Contribution provenance
 
 - [ ] I disclosed all third-party material, including its source, copyright owner, and licence.
-- [ ] I disclosed any other material whose authorship, ownership, or licensing status may be
-      uncertain.
+- [ ] I disclosed any material whose authorship, ownership, or licensing status may be uncertain.
 - [ ] I disclosed any employer, university, client, funding, or confidentiality obligation that
       may affect my authority to contribute.
 
@@ -33,11 +32,8 @@ Provide details below, or write `None`.
 
 ## Contributor licence agreement
 
-Every external contribution requires acceptance of
-[`CLA.md`](https://github.com/wbd2023/Quill/blob/main/CLA.md). Checking a box in this template does
-not accept the CLA.
+The automated CLA Assistant status check must pass before this pull request can be merged.
 
-- [ ] I posted the required Version 1.1 acceptance statement on this pull request.
-- [ ] I previously accepted Version 1.1 from this GitHub account and linked that record below.
-
-CLA acceptance comment or earlier acceptance record:
+No comment or checkbox in this template constitutes acceptance of the CLA. If another person or
+legal entity owns or may own the Contribution, or if you are under 18, contact the maintainer
+instead of using the standard individual signing process.

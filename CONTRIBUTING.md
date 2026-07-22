@@ -27,44 +27,30 @@ The installer writes tools and caches beneath the ignored `.cache/quill/` direct
 Every external contribution requires acceptance of the
 [Quill Individual Contributor Licence Agreement](CLA.md) before it can be merged.
 
+Quill uses [CLA Assistant][cla-assistant] to authenticate contributors, record acceptance, and
+report CLA status on pull requests. The automated CLA status check must pass before merging.
+
+For your first contribution:
+
+1. Open the pull request using the GitHub account that submitted the Contribution.
+2. Follow the signing link posted by CLA Assistant.
+3. Review the signing copy of the CLA and its exact Gist revision.
+4. Complete the private contributor fields and declarations.
+5. Accept the Agreement through CLA Assistant.
+
+Your full legal name and declaration responses are not posted to the Quill repository or pull
+request by Quill. CLA Assistant and GitHub process the information described in
+[CONTRIBUTOR_PRIVACY.md](CONTRIBUTOR_PRIVACY.md).
+
 The CLA is individual-only. If an employer, company, university, client, or other legal entity owns
-or may own the contribution, contact the maintainer before submitting it. Written authorisation or
+or may own the Contribution, contact the maintainer before submitting it. Written authorisation or
 a separate entity contributor agreement may be required.
 
-If you are under 18, contact the maintainer before contributing. Do not use the standard acceptance
-statement.
+If you are under 18, contact the maintainer before contributing. Do not use the standard
+individual acceptance process.
 
-For your first contribution under CLA Version 1.1, post the following statement as a comment on the
-pull request from the same GitHub account that submitted it:
-
-```text
-I, FULL LEGAL NAME, have read and accept the Quill Individual Contributor Licence Agreement,
-Version 1.1, at commit CLA_COMMIT_SHA, including the moral-rights consent in Section 7.
-
-I confirm that I am at least 18 years old, that I have authority to grant its rights, and that this
-acceptance applies to pull request #PULL_REQUEST_NUMBER and my later Accepted Contributions under
-Version 1.1.
-
-Signed electronically by @GITHUB_USERNAME on YYYY-MM-DD.
-```
-
-Replace every capitalised placeholder. `CLA_COMMIT_SHA` must be the full Git commit SHA of a
-repository revision containing the Version 1.1 `CLA.md`. The acceptance comment is public.
-
-A maintainer must verify the statement, apply the `cla:accepted` pull-request label, and reply
-using this form before merging:
-
-```text
-CLA acceptance recorded for FULL LEGAL NAME (@GITHUB_USERNAME), Version 1.1 at
-CLA_COMMIT_SHA, on YYYY-MM-DD.
-```
-
-The acceptance comment, maintainer reply, pull request, and referenced repository commit form the
-acceptance record.
-
-A Version 1.1 acceptance remains valid for later contributions from the same GitHub account. A
-revised CLA requires fresh acceptance. A pull-request checkbox or Developer Certificate of Origin
-sign-off does not replace the acceptance statement.
+A materially revised CLA requires fresh acceptance. A pull-request checkbox or Developer
+Certificate of Origin sign-off does not replace the CLA process.
 
 General discussion, ideas, feature requests, and bug reports are not Contributions unless specific
 material is expressly submitted for inclusion in Quill.
@@ -74,12 +60,12 @@ material is expressly submitted for inclusion in Quill.
 Disclose in the pull request:
 
 - all third-party material, including its source, copyright owner, and licence;
-- any other material whose authorship, ownership, or licensing status may be uncertain, including
-  its source and applicable terms where known; and
+- any material whose authorship, ownership, or licensing status may be uncertain, including its
+  source and applicable terms where known; and
 - any employer, university, client, funding, confidentiality, or other obligation that may affect
   your authority to contribute.
 
-You remain responsible for reviewing the complete contribution and confirming that you can grant
+You remain responsible for reviewing the complete Contribution and confirming that you can grant
 the rights stated in the CLA. Do not submit confidential information, trade secrets, personal
 information, or material copied from another project unless its licence and inclusion have been
 expressly disclosed and are compatible with Quill.
@@ -95,8 +81,8 @@ make build
 ```
 
 For focused work, run the smallest affected package test first, then the complete commands above.
-Tests must be deterministic and must not depend on a parent checkout, a global tool installation, or
-network access unless they are explicitly isolated integration tests.
+Tests must be deterministic and must not depend on a parent checkout, a global tool installation,
+or network access unless they are explicitly isolated integration tests.
 
 ## Design rules
 
@@ -145,6 +131,8 @@ Pull requests should state:
 - affected CLI, Profile, or security contracts;
 - verification commands and observed results;
 - any migration required for consuming repositories;
-- all third-party material and any other material with uncertain authorship, ownership, or
-  licensing status; and
-- the CLA acceptance comment or a link to the contributor's earlier Version 1.1 acceptance.
+- all third-party material and any material with uncertain authorship, ownership, or licensing
+  status; and
+- whether a separate contribution arrangement may be required.
+
+[cla-assistant]: https://cla-assistant.io/
