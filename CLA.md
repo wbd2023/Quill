@@ -1,6 +1,6 @@
 # Quill Individual Contributor Licence Agreement
 
-Version 1.1
+Version 1.2
 
 Effective date: 20 July 2026
 
@@ -19,7 +19,17 @@ Agreement, Version 1.0. Changes have been made. Harmony materials are published 
 
 ## 1. Definitions
 
-**You** and **Your** mean the individual accepting this Agreement.
+**You** and **Your** mean the individual identified in the Acceptance Record who accepts this
+Agreement.
+
+**Acceptance Service** means the authenticated electronic contributor agreement service or other
+authenticated electronic process designated in [CONTRIBUTING.md][contributing] at the time of
+acceptance.
+
+**Acceptance Record** means the electronic record created through the Acceptance Service that
+identifies Your authenticated GitHub account, the applicable version or revision of this Agreement,
+the time of acceptance, Your affirmative acceptance, and any declarations or information required
+by the acceptance process.
 
 **Copyright Rights** means copyright and analogous rights protecting works of authorship,
 including database and neighbouring rights where applicable, but excluding patents, trademarks,
@@ -55,15 +65,19 @@ Section 13.
 
 ## 2. Acceptance and scope
 
-You accept this Agreement through the recorded GitHub acceptance process described in
-[CONTRIBUTING.md](CONTRIBUTING.md). The Project Owner consents to electronic acceptance by that
-process.
+You accept this Agreement through the Acceptance Service. The Project Owner consents to electronic
+acceptance through that service or process.
 
-The effective date for You is the timestamp of Your recorded acceptance. This Agreement applies to:
+The version displayed to You by the Acceptance Service and identified in the Acceptance Record is
+the version You accept. The copy in the Project repository and the signing copy should be
+identical. If they differ, the signing copy displayed to You governs that Acceptance Record.
+
+The effective date for You is the time recorded in the Acceptance Record. This Agreement applies
+to:
 
 1. the Contribution associated with Your first acceptance; and
-2. each Contribution that You later Submit through the same GitHub identity while this version of
-   the Agreement remains accepted by You.
+2. each Contribution that You later Submit through the same authenticated GitHub account while
+   this version of the Agreement remains accepted by You.
 
 A revised version does not apply to You unless You separately accept it. Contributions already
 covered by an earlier version remain governed by that version.
@@ -117,7 +131,7 @@ revenue share, fee, or other payment is owed to You for exercising them.
 For patent claims that You own, control, or have the right to license now or later, You grant the
 Project Owner, any Permitted Successor, and their direct and indirect licensees a perpetual,
 worldwide, non-exclusive, transferable under Section 13, royalty-free, fully paid-up, and
-irrevocable (except as stated below) patent licence, with the right to sublicense through multiple
+irrevocable, except as stated below, patent licence, with the right to sublicense through multiple
 tiers, to make, have made, use, offer for sale, sell, import, export, and otherwise transfer:
 
 - the Accepted Contribution; and
@@ -173,8 +187,8 @@ an Accepted Contribution:
   otherwise modifying all or part of it;
 - combining it with other material;
 - separating, deleting, replacing, or supplementing any part of it;
-- using it in a context, format, medium, product, service, or purpose different from that originally
-  contemplated;
+- using it in a context, format, medium, product, service, or purpose different from that
+  originally contemplated;
 - changing its name, presentation, organisation, or function;
 - publishing or distributing it without identifying You in every copy, display, interface,
   version, distribution, or communication;
@@ -294,7 +308,24 @@ Project and Contribution.
 A Contribution and related submission are not confidential unless the Project Owner expressly
 agrees otherwise in writing before submission.
 
-## 16. General terms
+## 16. Acceptance records and privacy
+
+The Acceptance Service may process Your GitHub identity, GitHub-associated email address, full
+legal name, declarations, acceptance time, and the applicable Agreement version or revision.
+
+The Project Owner may inspect and export Acceptance Records and retain private copies for as long
+as reasonably necessary to administer the Project, establish its intellectual-property history,
+exercise rights under this Agreement, respond to legal claims, or transfer the Project.
+
+The Project Owner will not intentionally publish Your full legal name or private contact details
+merely because You accepted this Agreement. Public GitHub activity and information You separately
+choose to publish remain public under GitHub's terms.
+
+Further information is provided in
+[CONTRIBUTOR_PRIVACY.md][contributor-privacy] and the privacy statement of the Acceptance
+Service.
+
+## 17. General terms
 
 This Agreement is governed by the laws of New South Wales, Australia, excluding conflict-of-law
 rules. You and the Project Owner submit to the non-exclusive jurisdiction of the courts of New
@@ -311,5 +342,7 @@ and the remaining provisions continue.
 Headings are for convenience only. The words `including`, `includes`, and similar expressions do
 not limit what follows them.
 
+[contributing]: https://github.com/wbd2023/Quill/blob/main/CONTRIBUTING.md
+[contributor-privacy]: https://github.com/wbd2023/Quill/blob/main/CONTRIBUTOR_PRIVACY.md
 [cc-by]: https://creativecommons.org/licenses/by/3.0/
 [harmony]: https://harmonyagreements.org/
