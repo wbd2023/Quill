@@ -22,18 +22,19 @@ func CheckLineLengths(
 	files []string,
 ) (result style.ExecutionResult, err error) {
 	for _, path := range files {
+		allowances := loadMarkdownAllowances(path)
 		err = filewalk.ScanLines(path, func(line filewalk.Line) error {
 			if strings.HasSuffix(path, ".sh") &&
 				markers.HasMarker(line.Text, longLineMarker) {
 				return nil
 			}
 
-			expandedLine := strings.ReplaceAll(
-				line.Text,
-				"\t",
-				strings.Repeat(" ", lineLengthTabWidth),
-			)
+			expandedLine := expandTabs(line.Text)
 			if len(expandedLine) <= lineLengthLimit {
+				return nil
+			}
+
+			if allowances.allows(line.Number, line.Text) {
 				return nil
 			}
 

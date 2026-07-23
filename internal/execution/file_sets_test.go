@@ -110,6 +110,47 @@ func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 	}
 }
 
+func TestCollectFileSetFilesSelectsPrivacyDocumentAndExcludesUnlistedRootMarkdown(t *testing.T) {
+	repoRoot := t.TempDir()
+	profiles.Write(t, repoRoot, profiles.Current(t))
+
+	privacy := testutil.WriteFile(t, repoRoot, "CONTRIBUTOR_PRIVACY.md", "# Contributor Privacy\n")
+	unlisted := testutil.WriteFile(t, repoRoot, "UNLISTED.md", "# Unlisted\n")
+
+	context := testContext(t, repoRoot, style.Scope("all"))
+
+	files, err := CollectFileSetFiles(context, "markdown")
+	if err != nil {
+		t.Fatalf("collect markdown file set: %v", err)
+	}
+
+	if !slices.Contains(files, privacy) {
+		t.Fatalf("expected CONTRIBUTOR_PRIVACY.md in markdown file set: %v", files)
+	}
+
+	if slices.Contains(files, unlisted) {
+		t.Fatalf("did not expect unlisted root markdown in markdown file set: %v", files)
+	}
+}
+
+func TestCollectLineLengthFileSetCoversPrivacyDocument(t *testing.T) {
+	repoRoot := t.TempDir()
+	profiles.Write(t, repoRoot, profiles.Current(t))
+
+	privacy := testutil.WriteFile(t, repoRoot, "CONTRIBUTOR_PRIVACY.md", "# Contributor Privacy\n")
+
+	context := testContext(t, repoRoot, style.Scope("all"))
+
+	files, err := CollectFileSetFiles(context, "line_length")
+	if err != nil {
+		t.Fatalf("collect line_length file set: %v", err)
+	}
+
+	if !slices.Contains(files, privacy) {
+		t.Fatalf("expected CONTRIBUTOR_PRIVACY.md in line_length file set: %v", files)
+	}
+}
+
 func scopedFileSetConfig(t *testing.T) (config policy.Config) {
 	t.Helper()
 

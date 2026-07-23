@@ -1,9 +1,7 @@
 {
+  // Quill is the sole Markdown line-length authority; MD013 is disabled.
+  // See STYLE.md 1.2 for the reference-definition destination exception.
   "default": true,
   "MD010": { "code_blocks": false },
-  "MD013": {
-    "line_length": 100,
-    "code_blocks": false,
-    "tables": false
-  }
+  "MD013": false
 }

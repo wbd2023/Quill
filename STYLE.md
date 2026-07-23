@@ -304,6 +304,13 @@ mode=review_only
 reason=Wrapping quality is an editorial judgement.
 -->
 * Prefer wrapping thoughtfully over horizontal scrolling.
+<!-- style:
+id=1.2.markdown-reference-links
+mode=review_only
+reason=Choosing reference links and line placement is an editorial judgement.
+-->
+* In Markdown, prefer reference links for long inline destinations, putting the destination on a
+  following source line when doing so keeps every line within 100 columns.
 <!-- style: id=1.2.tabs-count-four -->
 * Tabs count as 4 columns for line-length checks.
 
@@ -338,12 +345,21 @@ reason=Shell-output clarity is contextual.
   clarity.
 <!-- style: id=1.2.shell-long-line-marker -->
 * Any shell-line exception MUST include an inline `# style: allow-long-line` marker.
+<!-- style: id=1.2.markdown-reference-destination-exception -->
+* A Markdown source line may exceed 100 columns only when that line holds a valid link reference
+  definition whose destination is one exact lowercase `http://` or `https://` URL whose own text
+  is strictly longer than 100 columns, and whose non-destination remainder (label, delimiters,
+  spacing, title, and other content) is at most 100 columns. Inline links, bare URLs, autolinks,
+  code and HTML URLs, invalid definitions, non-HTTP(S) destinations, and excess label or title
+  text MUST still fail.
 
 Automation guidance:
 
 * Enforce line length through the profile-owned `line_length` file set.
 * Bash line-length checks SHOULD treat tabs as 4 columns.
 * Shell-line exceptions SHOULD require an explicit inline marker.
+* Quill is the sole Markdown line-length authority; markdownlint `MD013` is disabled to avoid a
+  competing check, so only the reference-definition destination exception above applies.
 
 ### 1.3 Language
 
