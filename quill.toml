@@ -33,6 +33,7 @@ files = { all = [
   "TODO.md",
   "CLA.md",
   "CONTEXT.md",
+  "CONTRIBUTOR_PRIVACY.md",
 ] }
 paths = { all = ["cmd/", "docs/", "internal/"] }
 
@@ -487,6 +488,7 @@ requirement_ids = [
   "1.2.tabs-count-four",
   "1.2.machine-maintained-exception",
   "1.2.shell-long-line-marker",
+  "1.2.markdown-reference-destination-exception",
 ]
 
 [[rules]]

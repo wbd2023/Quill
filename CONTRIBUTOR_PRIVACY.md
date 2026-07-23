@@ -62,4 +62,5 @@ without including personal information in the issue.
 
 [cla-assistant]: https://cla-assistant.io/
 [cla-privacy]: https://gist.github.com/CLAassistant/3a73e4cd729c9d0a6e30
-[github-privacy]: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+[github-privacy]:
+https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
