@@ -50,6 +50,7 @@ files = [
   "LICENSE.*",
   "NOTICE",
   "NOTICE.*",
+  "release.yml",
 ]
 
 [targets.go]
@@ -149,7 +150,7 @@ structural_names = [
 ]
 
 [packs.go]
-local_import_prefixes = ["github.com/wbd2023/Quill"]
+local_import_prefixes = ["github.com/wbd2023/quill"]
 
 [packs.go.parameters]
 secret_names = [
