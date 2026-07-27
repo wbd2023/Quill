@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/markers"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/markers"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 /* ---------------------------------------- Source files ---------------------------------------- */

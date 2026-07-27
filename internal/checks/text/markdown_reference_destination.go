@@ -12,6 +12,12 @@ import (
 	gmtext "github.com/yuin/goldmark/text"
 )
 
+const (
+	logicalSourceCapacityMultiplier = 32
+	escapedLabelSequenceWidth       = 2
+	definitionColonOffset           = 2
+)
+
 /* ------------------------------------- Markdown allowance ------------------------------------- */
 
 // markdownAllowances maps a 1-based source line number to the verbatim destination
@@ -52,7 +58,7 @@ func (a markdownAllowances) allows(lineNumber int, line string) (allowed bool) {
 		return false
 	}
 
-	if strings.Index(line[index+len(needle):], needle) >= 0 {
+	if strings.Contains(line[index+len(needle):], needle) {
 		// Ambiguous layout: cannot pin the destination bytes. Fail closed.
 		return false
 	}
@@ -62,11 +68,7 @@ func (a markdownAllowances) allows(lineNumber int, line string) (allowed bool) {
 	}
 
 	residual := line[:index] + line[index+len(needle):]
-	if len(expandTabs(residual)) > lineLengthLimit {
-		return false
-	}
-
-	return true
+	return len(expandTabs(residual)) <= lineLengthLimit
 }
 
 /* --------------------------------------- Allowance build -------------------------------------- */
@@ -145,7 +147,7 @@ func destinationSourceOffset(
 	// spaces that have no source counterpart. Stripped inter-segment indentation
 	// (e.g. list-item content offsets) is absent from the segments and therefore
 	// absent here too.
-	logical := make([]byte, 0, segments.Len()*32)
+	logical := make([]byte, 0, segments.Len()*logicalSourceCapacityMultiplier)
 	srcOf := make([]int, 0, cap(logical))
 	for index := range segments.Len() {
 		segment := segments.At(index)
@@ -171,7 +173,7 @@ func destinationSourceOffset(
 	for cursor < len(logical) {
 		switch {
 		case logical[cursor] == '\\' && cursor+1 < len(logical):
-			cursor += 2
+			cursor += escapedLabelSequenceWidth
 		case logical[cursor] == ']':
 			closeAt = cursor
 		default:
@@ -193,7 +195,7 @@ func destinationSourceOffset(
 	// Consume the whitespace the spec permits between the colon and the
 	// destination: spaces, tabs, and the line break that lets the destination
 	// begin on a continuation line.
-	cursor = skipDefinitionSpaces(logical, closeAt+2)
+	cursor = skipDefinitionSpaces(logical, closeAt+definitionColonOffset)
 	if cursor >= len(logical) {
 		return 0, false
 	}
