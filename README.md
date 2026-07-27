@@ -30,10 +30,21 @@ make build
 Install the current release:
 
 ```sh
-go install github.com/wbd2023/Quill/cmd/quill@v0.1.0
+go install github.com/wbd2023/quill/cmd/quill@v0.1.0
 ```
 
 Do not use `@latest` in CI. Pin a reviewed module release.
+
+## Integrate
+
+Quill is a CLI-first, language-neutral product. Pin a reviewed `quill`
+release, invoke it for a local repository, and consume its documented command
+output and exit status. This works from any language or automation environment
+that can execute a supported Quill artefact.
+
+For a Go repository, `go tool quill` is an executable integration mechanism,
+not an importable Go API. See [docs/product.md](docs/product.md) for the
+supported interfaces and planned machine protocol.
 
 ## Versioning and releases
 
@@ -41,21 +52,31 @@ Do not use `@latest` in CI. Pin a reviewed module release.
 version from the repository tag or commit and appends `+dirty` when the checkout has uncommitted
 changes. Builds without usable module or VCS version information report `devel`.
 
-The Git tag is the only version source. Quill has no separate version file and does not inject a
-second version with linker flags. This keeps local tagged builds, `go install ...@vX.Y.Z`, and Go
-1.24 `tool` dependencies on the same version contract.
+The Git tag is the only version source. Quill has no separate version file and
+does not inject a second version with linker flags. This keeps local tagged
+builds, release archives, and Go 1.24 `tool` dependencies on the same version
+contract.
 
 For each release:
 
 1. Choose and review the semantic version.
 2. From a clean release commit, run `make lint`, `make test`, and `go vet ./...`.
 3. Create the matching semantic-version tag locally.
-4. Run `GOFLAGS=-buildvcs=true make build` and confirm that `./bin/quill version` prints the tag.
-5. Push the tag. Tag CI repeats the VCS-enabled build and version assertion.
-6. Verify the pinned `go install` command, then publish release notes.
+4. Run `GOFLAGS=-buildvcs=true make build` and confirm that `./bin/quill version`
+   prints the tag.
+5. Push the tag. Release CI builds, verifies, checksums, and publishes the
+   supported binary archives.
+6. Download the intended archive, verify its SHA-256 entry in the published
+   checksum file, and confirm `quill version` prints the tag.
 
-Releases publish source only. Quill does not publish archive binaries until their supported platform
-matrix, checksum generation, and installation contract are defined.
+Release CI publishes these archives:
+
+- Linux amd64 and arm64 (`.tar.gz`);
+- macOS amd64 and arm64 (`.tar.gz`); and
+- Windows amd64 (`.zip`).
+
+Each archive contains only `quill` or `quill.exe`. The release also contains
+`quill_<version>_checksums.txt`, with one SHA-256 digest per archive.
 
 ## Repository contract
 
@@ -94,13 +115,14 @@ Use `quill help <command>` for command-specific flags.
 Common examples:
 
 ```sh
-quill check --mode required
-quill check --mode all --strict-recommendations --verbose
-quill check --scope all --format json
-quill fix --scope all
-quill doctor --format json
-quill coverage --format json
-quill lock
+quill check --repo-root . --mode required
+quill check --repo-root . --mode all --strict-recommendations --verbose
+quill check --repo-root . --scope all --format json
+quill fix --repo-root . --scope all --format json
+quill doctor --repo-root . --format json
+quill coverage --repo-root . --format json
+quill install --repo-root . --format json
+quill lock --repo-root . --format json
 ```
 
 Exit codes:
@@ -110,6 +132,8 @@ Exit codes:
 - `2`: command-line usage was invalid.
 
 JSON output is intended for automation. Text output is intended for people.
+See [docs/cli-protocol.md](docs/cli-protocol.md) for stream, envelope, error,
+cancellation, and compatibility rules.
 
 ## Profile model
 
@@ -131,11 +155,14 @@ The repository's own `quill.toml` and `STYLE.md` are a complete self-checking ex
 
 ## Architecture
 
-Quill is a modular monolith with one CLI entrypoint and private implementation packages. See
-[docs/architecture.md](docs/architecture.md) for package ownership and runtime flow. The package
-composition and public interface decisions are recorded in
-[ADR 0001](docs/adr/0001-separate-shipped-declarations-from-check-execution.md) and
-[ADR 0002](docs/adr/0002-cli-and-files-are-the-public-interface.md).
+Quill is a modular monolith with one CLI entrypoint and private implementation
+packages. Its public product boundary is the CLI and repository formats. See
+[docs/README.md](docs/README.md) for the documentation map,
+[docs/mvp.md](docs/mvp.md) for the ideal first-release target,
+[docs/architecture.md](docs/architecture.md) for package ownership and runtime
+flow, [docs/product.md](docs/product.md) for supported interfaces, and
+[ADR 0004](docs/adr/0004-cli-first-language-neutral-product.md) for the
+accepted boundary decision.
 
 ## Development
 
@@ -172,21 +199,26 @@ directories. Development commands do not mutate the global GOPATH tool directory
 
 ## Package map
 
-Quill is a modular monolith with one command and private packages under `internal/`.
+Quill has one command and private implementation packages under `internal/`.
+ADR 0004 is complete: no production Go package exists at the repository root.
 
 - `cmd/quill` contains only process entrypoint wiring.
-- `internal/cli` owns argument parsing, output streams, and exit codes.
-- `internal/engine` is the operation facade for check, fix, doctor, coverage, install, and lock.
+- `internal/cli` owns argument parsing, output streams, exit codes, and the
+  language-neutral command protocol.
+- `internal/engine` is the private application facade for check, fix,
+  inspection, coverage, installation, and lock operations.
 - `internal/profile` loads, validates, and compiles Profiles.
 - `internal/profile/toml` owns the persisted Profile codec.
 - `internal/pack` defines Pack contracts and resolution.
-- `internal/pack/shipped` assembles built-in Pack declarations.
+- `internal/pack/shipped` assembles shipped Pack declarations and Pack-local
+  runtime bindings.
 - `internal/checks` contains concrete repository Checks and Pack Policy codecs.
 - `internal/execution` runs resolved jobs through Drivers.
-- `internal/installer`, `internal/toolchain`, and `internal/process` own external-tool boundaries.
+- `internal/installer`, `internal/toolchain`, and `internal/process` own
+  external-tool boundaries.
 - `internal/styleguide` parses STYLE.md requirement metadata.
 - `internal/coverage` derives requirement coverage from the compiled Profile.
-- `internal/report` renders text and JSON views.
+- `internal/report` renders command results as CLI text and JSON.
 
 Architecture tests under `internal/architecture` enforce the intended import direction.
 

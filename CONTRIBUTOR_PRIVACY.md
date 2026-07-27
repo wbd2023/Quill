@@ -57,8 +57,7 @@ Project.
 
 Use a private contact method listed on the Project Owner's GitHub profile. If no private method is
 listed, open an issue at <https://github.com/wbd2023/Quill/issues> asking for a private
-contact channel,
-without including personal information in the issue.
+contact channel, without including personal information in the issue.
 
 [cla-assistant]: https://cla-assistant.io/
 [cla-privacy]: https://gist.github.com/CLAassistant/3a73e4cd729c9d0a6e30

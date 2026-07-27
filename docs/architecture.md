@@ -1,8 +1,11 @@
 # Quill architecture
 
-Quill is a modular monolith. One command composes private packages with explicit ownership and
-one-way dependencies. The CLI and repository file formats are the supported integration boundary;
-packages under `internal/` may change without a downstream Go API migration.
+Quill is a modular monolith with explicit ownership and one-way dependencies.
+Its supported product boundaries are the `quill` command and repository file
+formats. All production implementation packages belong under `internal/`.
+
+ADR 0004 is complete: the former root `quill` facade has been removed. No
+production Go package exists at the repository root.
 
 ## Runtime flow
 
@@ -15,7 +18,7 @@ cmd/quill
        -> shipped Pack definitions and bindings
        -> toolchain inspection and installation
        -> execution Drivers and Checks
-       -> report rendering
+  -> internal/report
 ```
 
 A `check` operation follows this order:
@@ -37,8 +40,8 @@ configuration; it does not cache Profiles, plans, tool status, or operation resu
 - `internal/style` owns shared domain vocabulary: Rules, Jobs, diagnostics, plans, and statuses.
 - `internal/policy` owns the decoded consumer Profile model.
 - `internal/profile` owns Profile loading, validation, Pack-policy resolution, and compilation.
-- `internal/pack` owns Pack definitions; `internal/pack/shipped` composes Quill's built-in Packs and
-  their runtime bindings.
+- `internal/pack` owns Pack definitions; `internal/pack/shipped` composes shipped Pack declarations
+  and delegates Pack-local runtime registration to explicit child binding packages.
 - `internal/execution` owns RunContext construction, Rule execution, Driver selection, and file-set
   collection.
 - `internal/execution/drivers` adapts resolved Jobs to commands and Checks.
@@ -47,11 +50,11 @@ configuration; it does not cache Profiles, plans, tool status, or operation resu
 - `internal/toolchain`, `internal/installer`, and `internal/process` own external-tool discovery,
   verified installation, and bounded process execution.
 - `internal/styleguide`, `internal/coverage`, and `internal/report` own STYLE.md parsing,
-  requirement coverage, and presentation respectively.
+  requirement coverage, and CLI presentation respectively.
 - `internal/workspace`, `internal/filewalk`, and `internal/lockfile` own filesystem layout, bounded
   traversal, and resolved archive state.
 - `internal/cli` owns argument parsing, stdout/stderr discipline, and exit-code mapping.
-- `internal/engine` is the application facade and composition coordinator.
+- `internal/engine` is the private application facade and composition coordinator.
 
 Architecture tests under `internal/architecture` enforce important import and ownership boundaries.
 Update those tests when a deliberate ownership move changes a boundary.
@@ -71,9 +74,10 @@ language. Repository discovery requires both `STYLE.md` and `quill.toml`; automa
 
 ## Change rules
 
-- Add behaviour to the package that owns the concept; do not bypass the engine with a second CLI
-  orchestration path.
+- Add behaviour to the package that owns the concept; `internal/cli` calls the
+  private application facade rather than maintaining a second operation path.
 - Keep composition explicit. Do not use `init` registration or mutable global registries.
 - Validate repository and network input at its boundary, then trust the validated operation model.
 - Keep presentation out of Checks and execution policy out of report writers.
-- Add a public Go package only when a concrete external consumer needs a stable in-process API.
+- Keep command protocol DTOs explicit, presentation-free, and independent of
+  internal implementation types.
