@@ -5,7 +5,8 @@ scope. The [MVP roadmap](docs/roadmap.md) owns committed release work.
 
 ## Open
 
-No tactical tasks are currently recorded.
+- [ ] Audit authored prose for Australian English and replace inconsistent US
+  spellings without changing technical identifiers.
 
 ## Rules
 
