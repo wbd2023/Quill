@@ -3,7 +3,7 @@ package node
 import (
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 // InstallDirectory returns the directory where npm install operates.

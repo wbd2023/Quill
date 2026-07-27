@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 // Validate checks config for supported schema version and internal consistency.
-func Validate(config policy.Config) (err error) {
+func Validate(config policy.Profile) (err error) {
 	if config.SchemaVersion != policy.SchemaVersion {
 		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
 	}

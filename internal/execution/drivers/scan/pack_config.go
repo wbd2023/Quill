@@ -3,10 +3,10 @@ package scan
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	"github.com/wbd2023/Quill/internal/checks/textpolicy"
-	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
-	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/checks/textpolicy"
+	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/quill/internal/execution"
 )
 
 func decodeGoPackConfig(

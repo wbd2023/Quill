@@ -1,16 +1,16 @@
 package execution
 
 import (
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // RunContext carries loaded profile and toolchain state through a check or install run.
 type RunContext struct {
 	RepoRoot        string
 	Scope           style.Scope
-	Profile         policy.Config
+	Profile         policy.Profile
 	Effective       style.Plan
 	Tools           map[string]toolchain.Tool
 	ToolEnvironment map[string]string
@@ -22,7 +22,7 @@ type RunContext struct {
 func NewRunContext(
 	repoRoot string,
 	scope style.Scope,
-	config policy.Config,
+	config policy.Profile,
 	effective style.Plan,
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,

@@ -1,4 +1,4 @@
-module github.com/wbd2023/Quill
+module github.com/wbd2023/quill
 
 go 1.24.5
 

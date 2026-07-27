@@ -3,7 +3,7 @@ package engine
 import (
 	"slices"
 
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 func sortedTools(tools map[string]toolchain.Tool) (sorted []toolchain.Tool) {

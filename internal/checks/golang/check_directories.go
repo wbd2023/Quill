@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	"github.com/wbd2023/Quill/internal/filewalk"
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/filewalk"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ------------------------------------------- Errors ------------------------------------------- */

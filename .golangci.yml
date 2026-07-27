@@ -53,7 +53,7 @@ linters-settings:
 formatters-settings:
   goimports:
     local-prefixes:
-      - github.com/wbd2023/Quill
+      - github.com/wbd2023/quill
 
 issues:
   max-issues-per-linter: 0

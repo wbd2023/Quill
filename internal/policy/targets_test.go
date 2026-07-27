@@ -3,8 +3,8 @@ package policy_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestTargetConfigsLookup(t *testing.T) {

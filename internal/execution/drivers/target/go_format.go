@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/commandrun"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/commandrun"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // RunGoFormat run go format.

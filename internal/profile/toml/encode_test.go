@@ -3,16 +3,16 @@ package toml_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/profile/toml"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile/toml"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 func TestEncodeRoundTripsLocalProfile(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Config{
+	config := policy.Profile{
 		SchemaVersion: policy.SchemaVersion,
 		Repository: policy.RepositoryConfig{
 			RootMarkers: []string{"PROJECT.marker"},

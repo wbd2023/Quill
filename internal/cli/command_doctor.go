@@ -4,27 +4,23 @@ import (
 	"context"
 	"flag"
 
-	"github.com/wbd2023/Quill/internal/engine"
-	"github.com/wbd2023/Quill/internal/report"
+	"github.com/wbd2023/quill/internal/report"
 )
 
-func runDoctor(tool Tool, options doctorOptions) (exitCode int) {
-	doctor, err := engine.New(options.repoRoot)
+func runDoctor(ctx context.Context, tool Tool, options doctorOptions) (exitCode int) {
+	engineInstance, err := tool.buildEngine(options.repoRoot)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "doctor", options.format, err)
 	}
 
-	inspection, err := doctor.Inspect(context.Background())
+	inspection, err := engineInstance.Inspect(ctx)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "doctor", options.format, err)
 	}
 
 	result := report.ToolchainResult{Statuses: inspection.Statuses}
-	if _, err = renderToolchainStatus(tool.stdout, options.format, result); err != nil {
-		tool.writeError(err)
-		return 1
+	if _, err = renderToolchainStatus(tool.stdout, "doctor", options.format, result); err != nil {
+		return tool.reportCommandError(ctx, "doctor", options.format, err)
 	}
 
 	if inspection.AllValid {

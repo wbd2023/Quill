@@ -3,10 +3,10 @@ package target
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/check"
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/golang/check"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestShippedPackGoChecksHaveDispatch(t *testing.T) {

@@ -5,34 +5,42 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/engine"
-	"github.com/wbd2023/Quill/internal/report"
+	"github.com/wbd2023/quill/internal/engine"
+	"github.com/wbd2023/quill/internal/report"
 )
 
-func runInstall(tool Tool, options installOptions) (exitCode int) {
-	installer, err := engine.New(
-		options.repoRoot,
-		engine.WithProgressWriter(tool.stdout),
-	)
-	if err != nil {
-		tool.writeError(err)
-		return 1
+func runInstall(ctx context.Context, tool Tool, options installOptions) (exitCode int) {
+	progressWriter := tool.stdout
+	if options.format == report.FormatJSON {
+		// Machine mode reserves stdout for the single envelope; route install progress to stderr.
+		progressWriter = tool.stderr
 	}
 
-	result, err := installer.Install(context.Background())
+	engineInstance, err := tool.buildEngine(
+		options.repoRoot, engine.WithProgressWriter(progressWriter),
+	)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "install", options.format, err)
+	}
+
+	result, err := engineInstance.Install(ctx)
+	if err != nil {
+		return tool.reportCommandError(ctx, "install", options.format, err)
 	}
 
 	toolchainResult := report.ToolchainResult{Statuses: result.Toolchain.Statuses}
-	if _, err = renderToolchainStatus(tool.stdout, report.FormatText, toolchainResult); err != nil {
-		tool.writeError(err)
-		return 1
+	if _, err = renderToolchainStatus(
+		tool.stdout, "install", options.format, toolchainResult,
+	); err != nil {
+		return tool.reportCommandError(ctx, "install", options.format, err)
 	}
 
 	if !result.Toolchain.AllValid {
 		return 1
+	}
+
+	if options.format == report.FormatJSON {
+		return 0
 	}
 
 	if _, err := fmt.Fprintln(tool.stdout, "Style tools installed."); err != nil {
@@ -52,8 +60,14 @@ func parseInstallOptionsWithResolver(
 	arguments []string,
 ) (options installOptions, err error) {
 	const summary = "install pinned style tools"
-	flagSet := newInstallFlagSet(&options)
+	var format string
+	flagSet := newInstallFlagSet(&options, &format)
 	if err = parseArguments(flagSet, summary, arguments); err != nil {
+		return options, err
+	}
+
+	options.format, err = parseFormat(format)
+	if err != nil {
 		return options, err
 	}
 
@@ -61,7 +75,7 @@ func parseInstallOptionsWithResolver(
 	return options, err
 }
 
-func newInstallFlagSet(options *installOptions) (flagSet *flag.FlagSet) {
+func newInstallFlagSet(options *installOptions, format *string) (flagSet *flag.FlagSet) {
 	flagSet = newFlagSet("install")
 	flagSet.StringVar(
 		&options.repoRoot,
@@ -69,11 +83,13 @@ func newInstallFlagSet(options *installOptions) (flagSet *flag.FlagSet) {
 		"",
 		"repository root (auto-detected when omitted)",
 	)
+	flagSet.StringVar(format, "format", string(report.FormatText), "format: text|json")
 	return flagSet
 }
 
 func installUsageText() (usage string) {
 	const summary = "install pinned style tools"
 	var options installOptions
-	return commandUsage("install", summary, newInstallFlagSet(&options))
+	var format string
+	return commandUsage("install", summary, newInstallFlagSet(&options, &format))
 }

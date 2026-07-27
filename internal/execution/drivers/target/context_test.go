@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/ecosystem/golang"
-	"github.com/wbd2023/Quill/internal/ecosystem/node"
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/pack"
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/ecosystem/golang"
+	"github.com/wbd2023/quill/internal/ecosystem/node"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 func testContext(

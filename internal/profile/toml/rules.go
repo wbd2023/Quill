@@ -1,8 +1,8 @@
 package toml
 
 import (
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 type schemaRuleBinding struct {

@@ -1,10 +1,11 @@
 package architecture
 
 type importBoundaryCase struct {
-	name      string
-	directory string
-	recursive bool
-	forbidden []string
+	name           string
+	directory      string
+	recursive      bool
+	excludeSubdirs []string
+	forbidden      []string
 }
 
 func importBoundaryCases() (testCases []importBoundaryCase) {

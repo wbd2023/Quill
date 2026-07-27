@@ -3,9 +3,9 @@ package engine
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 /* ---------------------------------------- Rule Checking --------------------------------------- */
@@ -49,9 +49,16 @@ func (engine *Engine) Check(
 	operationContext context.Context,
 	options CheckOptions,
 ) (result CheckResult, operationError error) {
+	if err := operationContext.Err(); err != nil {
+		return result, err
+	}
+
 	context, environment, err := engine.prepareRunnerContext(operationContext, options.Scope)
 	if err != nil {
 		return CheckResult{}, err
+	}
+	if err := operationContext.Err(); err != nil {
+		return result, err
 	}
 
 	result.Scope = context.Scope
@@ -61,6 +68,9 @@ func (engine *Engine) Check(
 	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
 		context.ToolEnvironment)
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
+	if err := operationContext.Err(); err != nil {
+		return result, err
+	}
 
 	result.Rules = make([]RuleCheckResult, 0, len(selected))
 	for _, rule := range selected {
@@ -79,6 +89,10 @@ func (engine *Engine) Check(
 			Execution:      executionResult,
 			ExecutionError: executionError,
 		})
+		if err := operationContext.Err(); err != nil {
+			return result, err
+		}
+
 	}
 
 	return result, nil

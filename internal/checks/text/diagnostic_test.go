@@ -3,7 +3,7 @@ package text
 import (
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func hasDiagnostic(

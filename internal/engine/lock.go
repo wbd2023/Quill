@@ -3,17 +3,20 @@ package engine
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/installer"
-	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/installer"
+	"github.com/wbd2023/quill/internal/lockfile"
 )
 
-// LockResult contains resolved lock file archives.
+// LockResult describes a completed lock operation.
 type LockResult struct {
-	Archives []lockfile.Archive
+	// Path is the absolute path of the written quill.lock.
+	Path string
+	// ArchiveCount is the number of archive-tool entries written.
+	ArchiveCount int
 }
 
-// Lock loads the repository profile, resolves every tool's platform archive, and returns
-// the entries that make up quill.lock.
+// Lock loads the repository profile, resolves every tool's platform archive,
+// writes quill.lock atomically, and returns the written path and archive count.
 func (engine *Engine) Lock(
 	operationContext context.Context,
 ) (result LockResult, operationError error) {
@@ -28,5 +31,15 @@ func (engine *Engine) Lock(
 		return LockResult{}, err
 	}
 
-	return LockResult{Archives: archives}, nil
+	archiveByID := make(map[string]lockfile.Archive, len(archives))
+	for _, archive := range archives {
+		archiveByID[archive.Tool] = archive
+	}
+
+	path, err := lockfile.Write(engine.repositoryRoot, lockfile.Lockfile{Archives: archiveByID})
+	if err != nil {
+		return LockResult{}, err
+	}
+
+	return LockResult{Path: path, ArchiveCount: len(archives)}, nil
 }

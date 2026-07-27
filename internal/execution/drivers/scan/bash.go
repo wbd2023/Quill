@@ -3,10 +3,10 @@ package scan
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/checks/bash"
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/bash"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // CheckBashMagicValues check bash magic values.

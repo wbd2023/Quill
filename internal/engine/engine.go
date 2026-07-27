@@ -5,18 +5,18 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/ecosystem/golang"
-	"github.com/wbd2023/Quill/internal/ecosystem/node"
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers"
-	"github.com/wbd2023/Quill/internal/pack"
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/pack/shipped/bindings"
-	"github.com/wbd2023/Quill/internal/process"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/ecosystem/golang"
+	"github.com/wbd2023/quill/internal/ecosystem/node"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers"
+	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/pack/shipped/bindings"
+	"github.com/wbd2023/quill/internal/process"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 /* ----------------------------------------- Engine Core ---------------------------------------- */
@@ -155,8 +155,15 @@ type compiledProfile struct {
 func (engine *Engine) loadCompiledProfile(
 	operationContext context.Context,
 ) (compiled compiledProfile, loadError error) {
+	if err := operationContext.Err(); err != nil {
+		return compiledProfile{}, err
+	}
+
 	config, err := profile.Load(engine.repositoryRoot)
 	if err != nil {
+		return compiledProfile{}, err
+	}
+	if err := operationContext.Err(); err != nil {
 		return compiledProfile{}, err
 	}
 
@@ -164,14 +171,23 @@ func (engine *Engine) loadCompiledProfile(
 	if err != nil {
 		return compiledProfile{}, err
 	}
+	if err := operationContext.Err(); err != nil {
+		return compiledProfile{}, err
+	}
 
 	config, err = pack.ResolvePacks(config, definitions.Registry.Packs())
 	if err != nil {
 		return compiledProfile{}, err
 	}
+	if err := operationContext.Err(); err != nil {
+		return compiledProfile{}, err
+	}
 
 	effective, err := profile.Compile(config, definitions.Registry.Definitions())
 	if err != nil {
+		return compiledProfile{}, err
+	}
+	if err := operationContext.Err(); err != nil {
 		return compiledProfile{}, err
 	}
 

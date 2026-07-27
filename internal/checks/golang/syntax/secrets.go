@@ -5,8 +5,8 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
 )
 
 const minSensitiveLiteralLength = 16

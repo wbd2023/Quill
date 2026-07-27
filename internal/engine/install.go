@@ -3,9 +3,9 @@ package engine
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/installer"
-	"github.com/wbd2023/Quill/internal/lockfile"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/installer"
+	"github.com/wbd2023/quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 // InstallResult contains post-install tool inspection.

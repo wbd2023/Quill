@@ -5,11 +5,11 @@ import (
 	"go/token"
 	"io"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/Quill/internal/checks/golang/check"
-	"github.com/wbd2023/Quill/internal/checks/golang/relationships"
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/quill/internal/checks/golang/check"
+	"github.com/wbd2023/quill/internal/checks/golang/relationships"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 type analysisState struct {

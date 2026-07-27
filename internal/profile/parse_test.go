@@ -3,7 +3,7 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/profile"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 func TestParseValidatesProfile(t *testing.T) {

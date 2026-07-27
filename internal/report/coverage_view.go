@@ -1,7 +1,7 @@
 package report
 
 import (
-	"github.com/wbd2023/Quill/internal/coverage"
+	"github.com/wbd2023/quill/internal/coverage"
 )
 
 // CoverageTotals is coverage totals.

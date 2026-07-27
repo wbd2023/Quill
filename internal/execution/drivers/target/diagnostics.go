@@ -3,7 +3,7 @@ package target
 import (
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // appendDiagnostics converts non-empty tool output into a diagnostic and appends it. Used by

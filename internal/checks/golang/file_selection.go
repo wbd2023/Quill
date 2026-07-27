@@ -1,8 +1,8 @@
 package golang
 
 import (
-	"github.com/wbd2023/Quill/internal/filewalk"
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/filewalk"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 func goFilesInDirectories(

@@ -1,6 +1,6 @@
 package toml
 
-import "github.com/wbd2023/Quill/internal/policy"
+import "github.com/wbd2023/quill/internal/policy"
 
 type schemaStyleGuideConfig struct {
 	Path string `toml:"path"`

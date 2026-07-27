@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
-	"github.com/wbd2023/Quill/internal/filewalk"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/quill/internal/filewalk"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func checkBashVocabulary(

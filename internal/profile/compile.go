@@ -1,19 +1,19 @@
 package profile
 
 import (
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // EffectiveProfile is the resolved Profile and executable rule/tool configuration.
 type EffectiveProfile struct {
-	Profile   policy.Config
+	Profile   policy.Profile
 	Effective style.Plan
 }
 
 // Compile validates config and builds an executable plan from definitions.
 func Compile(
-	config policy.Config,
+	config policy.Profile,
 	definitions style.Definitions,
 ) (compiled EffectiveProfile, err error) {
 	if err := Validate(config); err != nil {

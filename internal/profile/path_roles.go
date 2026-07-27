@@ -3,7 +3,7 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 func validatePathRoles(paths policy.PathRoles) (err error) {

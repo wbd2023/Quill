@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 /* -------------------------------------- Command Execution ------------------------------------- */

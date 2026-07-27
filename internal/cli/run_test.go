@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,7 +14,7 @@ import (
 func TestRunRejectsMissingCommand(t *testing.T) {
 	tool, stdout, stderr := newTestCLI()
 
-	exitCode := tool.Run(nil)
+	exitCode := tool.Run(context.Background(), nil)
 	if exitCode != usageExitCode {
 		t.Fatalf("expected usage exit code, got %d", exitCode)
 	}
@@ -30,7 +31,7 @@ func TestRunRejectsMissingCommand(t *testing.T) {
 func TestRunRejectsUnknownCommand(t *testing.T) {
 	tool, _, stderr := newTestCLI()
 
-	exitCode := tool.Run([]string{"unknown"})
+	exitCode := tool.Run(context.Background(), []string{"unknown"})
 	if exitCode != usageExitCode {
 		t.Fatalf("expected usage exit code, got %d", exitCode)
 	}
@@ -43,7 +44,7 @@ func TestRunRejectsUnknownCommand(t *testing.T) {
 func TestRunTreatsRootHelpAsSuccess(t *testing.T) {
 	tool, stdout, stderr := newTestCLI()
 
-	exitCode := tool.Run([]string{"help"})
+	exitCode := tool.Run(context.Background(), []string{"help"})
 	if exitCode != 0 {
 		t.Fatalf("expected success exit code for help, got %d", exitCode)
 	}
@@ -60,7 +61,7 @@ func TestRunTreatsRootHelpAsSuccess(t *testing.T) {
 func TestRunTreatsCommandHelpAsSuccess(t *testing.T) {
 	tool, stdout, stderr := newTestCLI()
 
-	exitCode := tool.Run([]string{"help", "check"})
+	exitCode := tool.Run(context.Background(), []string{"help", "check"})
 	if exitCode != 0 {
 		t.Fatalf("expected success exit code for command help, got %d", exitCode)
 	}
@@ -77,7 +78,7 @@ func TestRunTreatsCommandHelpAsSuccess(t *testing.T) {
 func TestRunTreatsFlagHelpAsSuccess(t *testing.T) {
 	tool, stdout, stderr := newTestCLI()
 
-	exitCode := tool.Run([]string{"check", "-h"})
+	exitCode := tool.Run(context.Background(), []string{"check", "-h"})
 	if exitCode != 0 {
 		t.Fatalf("expected success exit code for flag help, got %d", exitCode)
 	}
@@ -94,7 +95,7 @@ func TestRunTreatsFlagHelpAsSuccess(t *testing.T) {
 func TestRunPrintsVersion(t *testing.T) {
 	tool, stdout, stderr := newTestCLI()
 
-	exitCode := tool.Run([]string{"version"})
+	exitCode := tool.Run(context.Background(), []string{"version"})
 	if exitCode != 0 {
 		t.Fatalf("expected success exit code for version, got %d", exitCode)
 	}

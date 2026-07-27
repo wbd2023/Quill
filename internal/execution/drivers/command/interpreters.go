@@ -3,9 +3,9 @@ package command
 import (
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
-	"github.com/wbd2023/Quill/internal/process"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/quill/internal/process"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // Exit codes that linters use to signal findings rather than failure.

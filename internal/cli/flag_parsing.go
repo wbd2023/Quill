@@ -7,9 +7,11 @@ import (
 	"io"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/report"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/report"
+	"github.com/wbd2023/quill/internal/style"
 )
+
+/* -------------------------------------- Flag Construction ------------------------------------- */
 
 func newFlagSet(name string) (flagSet *flag.FlagSet) {
 	flagSet = flag.NewFlagSet(name, flag.ContinueOnError)
@@ -31,6 +33,8 @@ func parseArguments(flagSet *flag.FlagSet, summary string, arguments []string) (
 
 	return ensureNoPositionalArguments(flagSet.Args())
 }
+
+/* ---------------------------------------- Value Parsing --------------------------------------- */
 
 func parseScope(value string) (scope style.Scope, err error) {
 	if strings.TrimSpace(value) == "" {
@@ -58,6 +62,8 @@ func parseFormat(value string) (format report.OutputFormat, err error) {
 	}
 }
 
+/* ------------------------------------- Argument Validation ------------------------------------ */
+
 func ensureNoPositionalArguments(arguments []string) (err error) {
 	if len(arguments) == 0 {
 		return nil
@@ -67,4 +73,63 @@ func ensureNoPositionalArguments(arguments []string) (err error) {
 		"unexpected positional arguments: %s",
 		strings.Join(arguments, ", "),
 	)
+}
+
+/* --------------------------------------- Machine Output --------------------------------------- */
+
+// machineModeRequested reports whether the command's flag parser reaches `--format json` before
+// it stops or fails. It parses raw arguments so a preparation failure can still render a machine
+// error envelope using the format that the command itself established.
+func machineModeRequested(
+	arguments []string,
+	flagSet *flag.FlagSet,
+	format *string,
+) (requested bool) {
+	_ = flagSet.Parse(arguments)
+	return report.OutputFormat(*format) == report.FormatJSON
+}
+
+func checkMachineMode(arguments []string) (requested bool) {
+	var options checkOptions
+	var scope string
+	var mode string
+	var format string
+	return machineModeRequested(
+		arguments, newCheckFlagSet(&options, &scope, &mode, &format), &format,
+	)
+}
+
+func fixMachineMode(arguments []string) (requested bool) {
+	var options fixOptions
+	var scope string
+	var format string
+	return machineModeRequested(arguments, newFixFlagSet(&options, &scope, &format), &format)
+}
+
+func doctorMachineMode(arguments []string) (requested bool) {
+	var options doctorOptions
+	var format string
+	return machineModeRequested(arguments, newDoctorFlagSet(&options, &format), &format)
+}
+
+func coverageMachineMode(arguments []string) (requested bool) {
+	var options coverageOptions
+	var format string
+	return machineModeRequested(arguments, newCoverageFlagSet(&options, &format), &format)
+}
+
+func installMachineMode(arguments []string) (requested bool) {
+	var options installOptions
+	var format string
+	return machineModeRequested(arguments, newInstallFlagSet(&options, &format), &format)
+}
+
+func lockMachineMode(arguments []string) (requested bool) {
+	var options lockOptions
+	var format string
+	return machineModeRequested(arguments, newLockFlagSet(&options, &format), &format)
+}
+
+func versionMachineMode(arguments []string) (requested bool) {
+	return machineModeRequested(arguments, newFlagSet("version"), new(string))
 }

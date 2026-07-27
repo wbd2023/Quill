@@ -3,13 +3,13 @@ package scenarios
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/checks/golang"
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	gopack "github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil"
-	"github.com/wbd2023/Quill/internal/testutil/profiles"
+	"github.com/wbd2023/quill/internal/checks/golang"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	gopack "github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 func runGoStyleResult(
@@ -24,7 +24,7 @@ func runGoStyleResult(
 func runGoStyleResultWithPolicy(
 	t *testing.T,
 	targetDirectory string,
-	config policy.Config,
+	config policy.Profile,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
@@ -38,7 +38,7 @@ func runGoStyleResultWithPolicy(
 	return result, err
 }
 
-func goConfigForTest(t *testing.T, config policy.Config) (goConfig gopolicy.Config) {
+func goConfigForTest(t *testing.T, config policy.Profile) (goConfig gopolicy.Config) {
 	t.Helper()
 
 	pack, found := config.PackConfigs.Lookup(gopack.PackID)
@@ -56,7 +56,7 @@ func goConfigForTest(t *testing.T, config policy.Config) (goConfig gopolicy.Conf
 
 /* -------------------------------------- Scenario Profile -------------------------------------- */
 
-func scenarioConfig(t *testing.T) (config policy.Config) {
+func scenarioConfig(t *testing.T) (config policy.Profile) {
 	t.Helper()
 
 	config = profiles.Current(t)
@@ -168,7 +168,7 @@ func scenarioConfig(t *testing.T) (config policy.Config) {
 
 func updateGoConfigForTest(
 	t *testing.T,
-	config *policy.Config,
+	config *policy.Profile,
 	update func(*gopolicy.Config),
 ) {
 	t.Helper()

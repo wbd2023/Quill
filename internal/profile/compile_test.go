@@ -3,10 +3,10 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/pack"
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {

@@ -3,7 +3,7 @@ package markers_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/markers"
+	"github.com/wbd2023/quill/internal/markers"
 )
 
 const longLineRule = "allow-long-line"

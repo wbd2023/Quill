@@ -3,7 +3,7 @@ package policy_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 func TestPathRolesLookupPatterns(t *testing.T) {

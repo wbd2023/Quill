@@ -3,9 +3,9 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 )
 
 func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {

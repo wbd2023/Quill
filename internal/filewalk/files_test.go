@@ -5,10 +5,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil"
-	"github.com/wbd2023/Quill/internal/testutil/profiles"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 /* --------------------------------------- File Collection -------------------------------------- */
@@ -121,6 +121,24 @@ func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
 
 	if !slices.Contains(files, configFile) {
 		t.Fatalf("expected config file %q in %v", configFile, files)
+	}
+}
+
+func TestCollectAllFilesSkipsBinaryFiles(t *testing.T) {
+	repoRoot := t.TempDir()
+	binaryFile := testutil.WriteFile(t, repoRoot, "quill", "\x00binary\n")
+
+	repository := profiles.RepositoryConfig(t)
+	files, err := CollectAllFiles(
+		repository.ResolveScopeRoots(repoRoot, style.Scope("all")),
+		walkConfig(repository),
+	)
+	if err != nil {
+		t.Fatalf("collect all files: %v", err)
+	}
+
+	if slices.Contains(files, binaryFile) {
+		t.Fatalf("unexpected binary file %q in %v", binaryFile, files)
 	}
 }
 

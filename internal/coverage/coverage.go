@@ -1,8 +1,8 @@
 package coverage
 
 import (
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/styleguide"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/styleguide"
 )
 
 // Build assembles a coverage report mapping STYLE.md requirements to automated rules.

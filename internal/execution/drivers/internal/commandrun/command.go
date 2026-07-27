@@ -6,8 +6,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/process"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/process"
 )
 
 // ToolByID runs a tool identified by toolID and returns its result.

@@ -3,9 +3,9 @@ package drivers
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {

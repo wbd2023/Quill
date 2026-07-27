@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ---------------------------------------- Check Output ---------------------------------------- */
@@ -40,7 +40,7 @@ func TestWriteCheckText(t *testing.T) {
 		},
 	}
 
-	summary, err := WriteCheck(&buffer, FormatText, NewCheckView(result), true)
+	summary, err := WriteCheck(&buffer, "check", FormatText, NewCheckView(result), true)
 	if err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestWriteCheckJSON(t *testing.T) {
 			},
 		},
 	})
-	summary, err := WriteCheck(&buffer, FormatJSON, view, false)
+	summary, err := WriteCheck(&buffer, "check", FormatJSON, view, false)
 	if err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
@@ -81,7 +81,10 @@ func TestWriteCheckJSON(t *testing.T) {
 	}
 
 	var envelope struct {
-		Check struct {
+		SchemaVersion int    `json:"schema_version"`
+		Command       string `json:"command"`
+		Status        string `json:"status"`
+		Result        struct {
 			Summary CheckSummary `json:"summary"`
 			Result  struct {
 				Entries []struct {
@@ -89,19 +92,28 @@ func TestWriteCheckJSON(t *testing.T) {
 					Name   string `json:"name"`
 				} `json:"entries"`
 			} `json:"result"`
-		} `json:"check"`
+		} `json:"result"`
 	}
 	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
 		t.Fatalf("decode check json: %v", err)
 	}
 
-	if envelope.Check.Summary.Passed != 1 {
-		t.Fatalf("unexpected JSON summary: %+v", envelope.Check.Summary)
+	if envelope.SchemaVersion != SchemaVersion {
+		t.Fatalf("unexpected schema version: %d", envelope.SchemaVersion)
 	}
 
-	if len(envelope.Check.Result.Entries) != 1 ||
-		envelope.Check.Result.Entries[0].RuleID != "toolchain" {
-		t.Fatalf("unexpected JSON entries: %+v", envelope.Check.Result.Entries)
+	if envelope.Command != "check" || envelope.Status != StatusOK {
+		t.Fatalf("unexpected envelope header: command=%q status=%q",
+			envelope.Command, envelope.Status)
+	}
+
+	if envelope.Result.Summary.Passed != 1 {
+		t.Fatalf("unexpected JSON summary: %+v", envelope.Result.Summary)
+	}
+
+	if len(envelope.Result.Result.Entries) != 1 ||
+		envelope.Result.Result.Entries[0].RuleID != "toolchain" {
+		t.Fatalf("unexpected JSON entries: %+v", envelope.Result.Result.Entries)
 	}
 
 	for _, forbidden := range []string{"spec", "fix_spec", "install_kind", "module_path"} {

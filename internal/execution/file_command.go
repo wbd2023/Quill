@@ -3,7 +3,7 @@ package execution
 import (
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // FileCommandArguments extracts the command arguments from a file-command job, resolves its config

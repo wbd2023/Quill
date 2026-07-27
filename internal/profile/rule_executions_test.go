@@ -3,9 +3,9 @@ package profile
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* --------------------------------------- Rule Executions -------------------------------------- */

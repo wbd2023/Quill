@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/checks/golang"
-	"github.com/wbd2023/Quill/internal/checks/golang/check"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/golang"
+	"github.com/wbd2023/quill/internal/checks/golang/check"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* --------------------------------------- Rule Selection --------------------------------------- */

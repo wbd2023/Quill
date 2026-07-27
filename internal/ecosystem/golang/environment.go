@@ -3,7 +3,7 @@ package golang
 import (
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 // BuildCacheDirectory returns the Go build cache directory.

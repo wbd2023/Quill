@@ -6,15 +6,15 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestFormatReturnsCanonicalTOML(t *testing.T) {
 	t.Parallel()
 
-	contents, err := profile.Format(policy.Config{
+	contents, err := profile.Format(policy.Profile{
 		SchemaVersion: policy.SchemaVersion,
 		Repository: policy.RepositoryConfig{
 			RootMarkers: []string{"PROJECT.marker"},
@@ -74,6 +74,6 @@ func TestFormatReturnsCanonicalTOML(t *testing.T) {
 func TestFormatValidatesProfile(t *testing.T) {
 	t.Parallel()
 
-	_, err := profile.Format(policy.Config{SchemaVersion: 2})
+	_, err := profile.Format(policy.Profile{SchemaVersion: 2})
 	requireErrorContains(t, err, "version 2")
 }

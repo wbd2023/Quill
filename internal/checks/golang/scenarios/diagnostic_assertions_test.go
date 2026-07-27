@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 type diagnosticMatch struct {

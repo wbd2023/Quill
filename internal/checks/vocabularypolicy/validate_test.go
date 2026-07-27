@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
 )
 
 func TestValidateConfigRejectsEmptyPreferredName(t *testing.T) {

@@ -1,9 +1,9 @@
 package golang
 
 import (
-	"github.com/wbd2023/Quill/internal/checks/golang/check"
-	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/golang/check"
+	"github.com/wbd2023/quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // rules constants.

@@ -1,13 +1,13 @@
 package profiletest
 
 import (
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // Config returns a valid minimal profile config fixture.
-func Config() (config policy.Config) {
-	return policy.Config{
+func Config() (config policy.Profile) {
+	return policy.Profile{
 		SchemaVersion: policy.SchemaVersion,
 		Repository:    baselineRepository(),
 		StyleGuide: policy.StyleGuideConfig{

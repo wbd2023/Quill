@@ -3,13 +3,13 @@ package profiles
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/profile"
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 // Current loads the active profile from the repository root.
-func Current(test *testing.T) (config policy.Config) {
+func Current(test *testing.T) (config policy.Profile) {
 	test.Helper()
 
 	config, err := profile.Load(testutil.RepositoryRoot(test))
@@ -28,7 +28,7 @@ func RepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
 }
 
 // Write writes the profile and STYLE.md to the given root.
-func Write(test *testing.T, root string, config policy.Config) {
+func Write(test *testing.T, root string, config policy.Profile) {
 	test.Helper()
 
 	styleGuide := testutil.ReadFile(test, testutil.RepositoryRoot(test), "STYLE.md")
@@ -37,7 +37,7 @@ func Write(test *testing.T, root string, config policy.Config) {
 }
 
 // Format serialises a profile config to its TOML representation.
-func Format(test *testing.T, config policy.Config) (contents string) {
+func Format(test *testing.T, config policy.Profile) (contents string) {
 	test.Helper()
 
 	contents, err := profile.Format(config)

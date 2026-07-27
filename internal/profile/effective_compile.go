@@ -3,15 +3,15 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ----------------------------------------- Compilation ---------------------------------------- */
 
 // compilePlan resolves a validated style profile against available rule and tool definitions.
 func compilePlan(
-	config policy.Config,
+	config policy.Profile,
 	definitions style.Definitions,
 ) (effective style.Plan, err error) {
 	availableTools := indexToolIDs(definitions.ToolIDs)
@@ -38,7 +38,7 @@ func compilePlan(
 /* --------------------------------------- Rule Resolution -------------------------------------- */
 
 func resolveRules(
-	config policy.Config,
+	config policy.Profile,
 	availableRules map[string]style.RuleDefinition,
 ) (rules []style.Rule, err error) {
 	rules = make([]style.Rule, 0, len(config.Rules))
@@ -63,7 +63,7 @@ func resolveRules(
 }
 
 func resolveRule(
-	config policy.Config,
+	config policy.Profile,
 	binding policy.RuleBinding,
 	definition style.RuleDefinition,
 ) (rule style.Rule, err error) {
@@ -90,7 +90,7 @@ func resolveRule(
 }
 
 func resolveExecution(
-	config policy.Config,
+	config policy.Profile,
 	binding policy.RuleBinding,
 	template style.Template,
 ) (resolved style.Job, err error) {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/execution"
 )
 
 func decodeGoConfig(

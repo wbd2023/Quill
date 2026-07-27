@@ -1,6 +1,6 @@
 package policy
 
-import "github.com/wbd2023/Quill/internal/style"
+import "github.com/wbd2023/quill/internal/style"
 
 // FileSets defines the configured file sets.
 type FileSets []FileSetConfig

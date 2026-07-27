@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/lockfile"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 /* ----------------------------------------- Resolution ----------------------------------------- */

@@ -3,8 +3,8 @@ package engine
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/coverage"
-	"github.com/wbd2023/Quill/internal/styleguide"
+	"github.com/wbd2023/quill/internal/coverage"
+	"github.com/wbd2023/quill/internal/styleguide"
 )
 
 // Coverage loads STYLE.md and the compiled effective profile, then builds requirement coverage.
@@ -14,8 +14,15 @@ import (
 func (engine *Engine) Coverage(
 	operationContext context.Context,
 ) (coverageReport coverage.Report, operationError error) {
+	if err := operationContext.Err(); err != nil {
+		return coverage.Report{}, err
+	}
+
 	compiled, err := engine.loadCompiledProfile(operationContext)
 	if err != nil {
+		return coverage.Report{}, err
+	}
+	if err := operationContext.Err(); err != nil {
 		return coverage.Report{}, err
 	}
 
@@ -25,6 +32,14 @@ func (engine *Engine) Coverage(
 	if err != nil {
 		return coverage.Report{}, err
 	}
+	if err := operationContext.Err(); err != nil {
+		return coverage.Report{}, err
+	}
 
-	return coverage.Build(document, compiled.profile.Effective.Rules), nil
+	coverageReport = coverage.Build(document, compiled.profile.Effective.Rules)
+	if err := operationContext.Err(); err != nil {
+		return coverage.Report{}, err
+	}
+
+	return coverageReport, nil
 }

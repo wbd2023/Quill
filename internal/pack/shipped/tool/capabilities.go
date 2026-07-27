@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"slices"
 
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // BuildAll build all.

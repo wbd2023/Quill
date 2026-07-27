@@ -1,15 +1,15 @@
 package shipped
 
 import (
-	"github.com/wbd2023/Quill/internal/pack"
-	"github.com/wbd2023/Quill/internal/pack/shipped/bash"
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/pack/shipped/markdown"
-	"github.com/wbd2023/Quill/internal/pack/shipped/project"
-	"github.com/wbd2023/Quill/internal/pack/shipped/security"
-	"github.com/wbd2023/Quill/internal/pack/shipped/text"
-	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/pack/shipped/bash"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/pack/shipped/markdown"
+	"github.com/wbd2023/quill/internal/pack/shipped/project"
+	"github.com/wbd2023/quill/internal/pack/shipped/security"
+	"github.com/wbd2023/quill/internal/pack/shipped/text"
+	"github.com/wbd2023/quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
 )
 
 // DefaultCatalog returns the Shipped Pack catalogue.

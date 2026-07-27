@@ -3,7 +3,7 @@ package toml
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 const enabledPacksKey = "enabled"

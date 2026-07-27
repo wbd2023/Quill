@@ -1,11 +1,11 @@
 package drivers
 
 import (
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/command"
-	"github.com/wbd2023/Quill/internal/execution/drivers/profile"
-	"github.com/wbd2023/Quill/internal/execution/drivers/scan"
-	"github.com/wbd2023/Quill/internal/execution/drivers/target"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/command"
+	"github.com/wbd2023/quill/internal/execution/drivers/profile"
+	"github.com/wbd2023/quill/internal/execution/drivers/scan"
+	"github.com/wbd2023/quill/internal/execution/drivers/target"
 )
 
 // CheckDrivers returns the complete driver set for check execution.

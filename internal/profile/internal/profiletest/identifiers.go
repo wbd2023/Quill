@@ -1,6 +1,6 @@
 package profiletest
 
-import "github.com/wbd2023/Quill/internal/style"
+import "github.com/wbd2023/quill/internal/style"
 
 // identifiers constants.
 const (

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/Quill/internal/testutil"
-	"github.com/wbd2023/Quill/internal/testutil/profiles"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil/profiles"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 /* ------------------------------------------- Tooling ------------------------------------------ */

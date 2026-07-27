@@ -3,7 +3,7 @@ package toml
 import (
 	"sort"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func decodeScopeMap(source map[string][]string) (target map[style.Scope][]string) {

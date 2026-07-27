@@ -1,55 +1,65 @@
 package cli
 
-// Command is command.
+import "context"
+
+// Command is one supported CLI command and its preparation contract.
 type Command struct {
-	name    string
-	summary string
-	usage   func() string
-	prepare func(repositoryRootResolver, []string) (Action, error)
+	name        string
+	summary     string
+	usage       func() string
+	prepare     func(repositoryRootResolver, []string) (Action, error)
+	machineMode func([]string) bool
 }
 
 var commands = []Command{
 	{
-		name:    "check",
-		summary: "run STYLE.md checks",
-		usage:   checkUsageText,
-		prepare: prepareAction(parseCheckOptionsWithResolver, runCheck),
+		name:        "check",
+		summary:     "run STYLE.md checks",
+		usage:       checkUsageText,
+		prepare:     prepareAction(parseCheckOptionsWithResolver, runCheck),
+		machineMode: checkMachineMode,
 	},
 	{
-		name:    "fix",
-		summary: "run safe style auto-fixes",
-		usage:   fixUsageText,
-		prepare: prepareAction(parseFixOptionsWithResolver, runFix),
+		name:        "fix",
+		summary:     "run safe style auto-fixes",
+		usage:       fixUsageText,
+		prepare:     prepareAction(parseFixOptionsWithResolver, runFix),
+		machineMode: fixMachineMode,
 	},
 	{
-		name:    "doctor",
-		summary: "check pinned style tools",
-		usage:   doctorUsageText,
-		prepare: prepareAction(parseDoctorOptionsWithResolver, runDoctor),
+		name:        "doctor",
+		summary:     "check pinned style tools",
+		usage:       doctorUsageText,
+		prepare:     prepareAction(parseDoctorOptionsWithResolver, runDoctor),
+		machineMode: doctorMachineMode,
 	},
 	{
-		name:    "coverage",
-		summary: "show STYLE.md automation coverage",
-		usage:   coverageUsageText,
-		prepare: prepareAction(parseCoverageOptionsWithResolver, runCoverage),
+		name:        "coverage",
+		summary:     "show STYLE.md automation coverage",
+		usage:       coverageUsageText,
+		prepare:     prepareAction(parseCoverageOptionsWithResolver, runCoverage),
+		machineMode: coverageMachineMode,
 	},
 	{
-		name:    "install",
-		summary: "install pinned style tools",
-		usage:   installUsageText,
-		prepare: prepareAction(parseInstallOptionsWithResolver, runInstall),
+		name:        "install",
+		summary:     "install pinned style tools",
+		usage:       installUsageText,
+		prepare:     prepareAction(parseInstallOptionsWithResolver, runInstall),
+		machineMode: installMachineMode,
 	},
 	{
-		name:    "lock",
-		summary: "resolve archive-tool hashes to quill.lock",
-		usage:   lockUsageText,
-		prepare: prepareAction(parseLockOptionsWithResolver, runLock),
+		name:        "lock",
+		summary:     "resolve archive-tool hashes to quill.lock",
+		usage:       lockUsageText,
+		prepare:     prepareAction(parseLockOptionsWithResolver, runLock),
+		machineMode: lockMachineMode,
 	},
 	{
-		name:    "version",
-		summary: "print the Quill version",
-		usage:   versionUsageText,
-		prepare: prepareAction(parseVersionOptions, runVersion),
+		name:        "version",
+		summary:     "print the Quill version",
+		usage:       versionUsageText,
+		prepare:     prepareAction(parseVersionOptions, runVersion),
+		machineMode: versionMachineMode,
 	},
 }
 
@@ -65,7 +75,7 @@ func findCommand(name string) (matched Command, found bool) {
 
 func prepareAction[options any](
 	parse func(repositoryRootResolver, []string) (options, error),
-	run func(Tool, options) int,
+	run func(context.Context, Tool, options) int,
 ) (prepare func(repositoryRootResolver, []string) (Action, error)) {
 	return func(resolve repositoryRootResolver, arguments []string) (bound Action, err error) {
 		options, err := parse(resolve, arguments)
@@ -73,8 +83,8 @@ func prepareAction[options any](
 			return nil, err
 		}
 
-		return func(tool Tool) int {
-			return run(tool, options)
+		return func(ctx context.Context, tool Tool) int {
+			return run(ctx, tool, options)
 		}, nil
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/quill/internal/checks/golang/analysis"
 )
 
 /* ----------------------------------- Implementation Matching ---------------------------------- */

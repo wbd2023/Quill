@@ -1,6 +1,6 @@
 package toml
 
-import "github.com/wbd2023/Quill/internal/policy"
+import "github.com/wbd2023/quill/internal/policy"
 
 type schemaConfig struct {
 	SchemaVersion int `toml:"schema_version"`
@@ -18,13 +18,13 @@ type schemaConfig struct {
 	Rules []schemaRuleBinding `toml:"rules"`
 }
 
-func decodeConfig(schema schemaConfig) (config policy.Config, err error) {
+func decodeConfig(schema schemaConfig) (config policy.Profile, err error) {
 	enabledPacks, err := decodeEnabledPacks(schema.Packs)
 	if err != nil {
-		return policy.Config{}, err
+		return policy.Profile{}, err
 	}
 
-	return policy.Config{
+	return policy.Profile{
 		SchemaVersion: schema.SchemaVersion,
 
 		Repository: decodeRepository(schema.Repository),
@@ -42,7 +42,7 @@ func decodeConfig(schema schemaConfig) (config policy.Config, err error) {
 	}, nil
 }
 
-func encodeConfig(config policy.Config) (schema schemaConfig) {
+func encodeConfig(config policy.Profile) (schema schemaConfig) {
 	return schemaConfig{
 		SchemaVersion: config.SchemaVersion,
 

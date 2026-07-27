@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 
 	codec "github.com/BurntSushi/toml"
 )
 
 // Encode encodes config as style profile TOML.
-func Encode(config policy.Config) (contents string, err error) {
+func Encode(config policy.Profile) (contents string, err error) {
 	var buffer bytes.Buffer
 	encoder := codec.NewEncoder(&buffer)
 	encoder.Indent = ""

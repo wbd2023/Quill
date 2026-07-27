@@ -3,8 +3,8 @@ package policy
 // SchemaVersion is the current style profile schema version.
 const SchemaVersion = 1
 
-// Config is a typed style profile.
-type Config struct {
+// Profile is a typed style profile.
+type Profile struct {
 	SchemaVersion int
 
 	Repository RepositoryConfig

@@ -3,7 +3,7 @@ package report
 import (
 	"io"
 
-	"github.com/wbd2023/Quill/internal/coverage"
+	"github.com/wbd2023/quill/internal/coverage"
 )
 
 /* ------------------------------------------ JSON DTOs ----------------------------------------- */
@@ -42,10 +42,8 @@ type sectionJSON struct {
 
 /* ------------------------------------------ Rendering ----------------------------------------- */
 
-func writeCoverageJSON(writer io.Writer, view CoverageView) (err error) {
-	return writeJSON(writer, struct {
-		Coverage coverageJSON `json:"coverage"`
-	}{Coverage: newCoverageJSON(view)})
+func writeCoverageJSON(writer io.Writer, command string, view CoverageView) (err error) {
+	return writeResultEnvelope(writer, command, newCoverageJSON(view))
 }
 
 func newCoverageJSON(view CoverageView) (payload coverageJSON) {

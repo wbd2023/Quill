@@ -1,6 +1,6 @@
 package tool
 
-import "github.com/wbd2023/Quill/internal/toolchain"
+import "github.com/wbd2023/quill/internal/toolchain"
 
 func buildBuiltin(
 	id string,

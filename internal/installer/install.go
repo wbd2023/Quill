@@ -7,11 +7,11 @@ import (
 	"io"
 	"os"
 
-	"github.com/wbd2023/Quill/internal/ecosystem/golang"
-	"github.com/wbd2023/Quill/internal/ecosystem/node"
-	"github.com/wbd2023/Quill/internal/lockfile"
-	"github.com/wbd2023/Quill/internal/toolchain"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/ecosystem/golang"
+	"github.com/wbd2023/quill/internal/ecosystem/node"
+	"github.com/wbd2023/quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 const standardPermissions os.FileMode = 0o755

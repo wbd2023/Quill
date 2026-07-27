@@ -1,6 +1,6 @@
 package coverage
 
-import "github.com/wbd2023/Quill/internal/styleguide"
+import "github.com/wbd2023/quill/internal/styleguide"
 
 func buildSectionCoverage(
 	headings []styleguide.Heading,

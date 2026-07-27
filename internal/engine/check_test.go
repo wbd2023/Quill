@@ -1,13 +1,16 @@
 package engine
 
 import (
+	"context"
+	"errors"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
@@ -31,7 +34,7 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 
 	context := execution.RunContext{
 		Scope: style.Scope("tools"),
-		Profile: policy.Config{
+		Profile: policy.Profile{
 			Repository: policy.RepositoryConfig{
 				ScopeRoots: map[style.Scope][]string{
 					"all":   {"."},
@@ -44,5 +47,20 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 	selected := selectRulesForFix(rules, context)
 	if len(selected) != 1 || selected[0].ID != "go/lint" {
 		t.Fatalf("selectRulesForFix = %v", selected)
+	}
+}
+
+func TestCheckRejectsCancelledContext(t *testing.T) {
+	engine, err := New(testutil.RepositoryRoot(t))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	operationContext, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err = engine.Check(operationContext, CheckOptions{})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Check error = %v, want context.Canceled", err)
 	}
 }

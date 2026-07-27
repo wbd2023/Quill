@@ -3,7 +3,7 @@ package node
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 func TestInstallDirectoryDerivesFromLayout(t *testing.T) {

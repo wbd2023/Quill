@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 func goTargets(
@@ -30,7 +30,7 @@ func goTargets(
 }
 
 func goTarget(
-	config policy.Config,
+	config policy.Profile,
 	name string,
 	goLanguage string,
 ) (target policy.TargetConfig, err error) {

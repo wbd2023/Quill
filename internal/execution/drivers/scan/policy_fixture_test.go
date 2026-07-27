@@ -4,18 +4,18 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
-	"github.com/wbd2023/Quill/internal/checks/vocabularypolicy"
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil/profiles"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 /* --------------------------------------- Policy Fixture --------------------------------------- */
 
-func buildScanDriverPolicyFixture(t *testing.T) (config policy.Config) {
+func buildScanDriverPolicyFixture(t *testing.T) (config policy.Profile) {
 	t.Helper()
 
 	config = profiles.Current(t)

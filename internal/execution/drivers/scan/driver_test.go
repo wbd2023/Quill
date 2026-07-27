@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/pack/shipped/text"
-	"github.com/wbd2023/Quill/internal/pack/shipped/vocabulary"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/testutil"
-	"github.com/wbd2023/Quill/internal/testutil/profiles"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/pack/shipped/text"
+	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 /* ------------------------------------- Repository Scanners ------------------------------------ */

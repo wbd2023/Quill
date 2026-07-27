@@ -3,11 +3,11 @@ package shipped
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/pack/shipped/golang"
-	"github.com/wbd2023/Quill/internal/pack/shipped/markdown"
-	"github.com/wbd2023/Quill/internal/pack/shipped/project"
-	"github.com/wbd2023/Quill/internal/pack/shipped/text"
-	"github.com/wbd2023/Quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/pack/shipped/golang"
+	"github.com/wbd2023/quill/internal/pack/shipped/markdown"
+	"github.com/wbd2023/quill/internal/pack/shipped/project"
+	"github.com/wbd2023/quill/internal/pack/shipped/text"
+	"github.com/wbd2023/quill/internal/pack/shipped/tool"
 )
 
 func TestDefaultRegistryLoadsEnabledPacks(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 /* -------------------------------------- Import Boundaries ------------------------------------- */
@@ -24,7 +24,7 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 			t.Parallel()
 
 			directory := filepath.Join(toolsRoot, testCase.directory)
-			files := productionGoFiles(t, directory, testCase.recursive)
+			files := productionGoFiles(t, directory, testCase.recursive, testCase.excludeSubdirs)
 			for _, file := range files {
 				for _, imported := range fileImports(t, file) {
 					if !forbiddenImport(imported, modulePath, testCase.forbidden) {
@@ -67,6 +67,7 @@ func productionGoFiles(
 	t *testing.T,
 	directory string,
 	recursive bool,
+	excludeSubdirs []string,
 ) (files []string) {
 	t.Helper()
 
@@ -79,6 +80,13 @@ func productionGoFiles(
 				}
 
 				if entry.IsDir() {
+					if path == directory {
+						return nil
+					}
+
+					if isExcludedSubdir(path, directory, excludeSubdirs) {
+						return filepath.SkipDir
+					}
 					return nil
 				}
 
@@ -111,6 +119,29 @@ func productionGoFiles(
 	}
 
 	return files
+}
+
+// isExcludedSubdir reports whether path is a direct child of root whose basename appears in
+// excludeSubdirs. It is used to keep a recursive boundary check strict while admitting a named
+// child package that is allowed to cross the parent's import line.
+func isExcludedSubdir(path string, root string, excludeSubdirs []string) (excluded bool) {
+	if len(excludeSubdirs) == 0 {
+		return false
+	}
+
+	parent := filepath.Dir(path)
+	if filepath.Clean(parent) != filepath.Clean(root) {
+		return false
+	}
+
+	name := filepath.Base(path)
+	for _, excluded := range excludeSubdirs {
+		if name == excluded {
+			return true
+		}
+	}
+
+	return false
 }
 
 func isProductionGoFile(path string) (production bool) {

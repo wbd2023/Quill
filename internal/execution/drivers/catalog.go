@@ -1,10 +1,10 @@
 package drivers
 
 import (
-	"github.com/wbd2023/Quill/internal/execution/drivers/command"
-	profiledrivers "github.com/wbd2023/Quill/internal/execution/drivers/profile"
-	scandrivers "github.com/wbd2023/Quill/internal/execution/drivers/scan"
-	targetdrivers "github.com/wbd2023/Quill/internal/execution/drivers/target"
+	"github.com/wbd2023/quill/internal/execution/drivers/command"
+	profiledrivers "github.com/wbd2023/quill/internal/execution/drivers/profile"
+	scandrivers "github.com/wbd2023/quill/internal/execution/drivers/scan"
+	targetdrivers "github.com/wbd2023/quill/internal/execution/drivers/target"
 )
 
 /* -------------------------------------- Profile Bindings -------------------------------------- */

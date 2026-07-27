@@ -3,7 +3,7 @@ package toml_test
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -17,7 +17,7 @@ func requireEqual[T any](t *testing.T, name string, expected T, actual T) {
 	}
 }
 
-func requireConfigEqual(t *testing.T, expected policy.Config, actual policy.Config) {
+func requireConfigEqual(t *testing.T, expected policy.Profile, actual policy.Profile) {
 	t.Helper()
 
 	if diff := cmp.Diff(expected, actual, cmpopts.EquateEmpty()); diff != "" {

@@ -1,6 +1,10 @@
 package report
 
-import "io"
+import (
+	"io"
+
+	"github.com/wbd2023/quill/internal/toolchain"
+)
 
 type toolchainJSON struct {
 	Result   toolchainResultJSON `json:"result"`
@@ -21,23 +25,28 @@ type toolStatusJSON struct {
 	Issue         string `json:"issue,omitempty"`
 }
 
-func writeToolchainJSON(writer io.Writer, view ToolchainView) (allValid bool, err error) {
-	err = writeJSON(writer, struct {
-		Toolchain toolchainJSON `json:"toolchain"`
-	}{Toolchain: newToolchainJSON(view)})
+func writeToolchainJSON(
+	writer io.Writer,
+	command string,
+	view ToolchainView,
+) (allValid bool, err error) {
+	err = writeResultEnvelope(writer, command, newToolchainJSON(view))
 	return view.AllValid, err
 }
 
 func newToolchainJSON(view ToolchainView) (payload toolchainJSON) {
-	payload = toolchainJSON{
-		Result: toolchainResultJSON{
-			Statuses: make([]toolStatusJSON, 0, len(view.Result.Statuses)),
-		},
+	return toolchainJSON{
+		Result:   toolchainResultJSON{Statuses: toolStatusListJSON(view.Result.Statuses)},
 		AllValid: view.AllValid,
 	}
+}
 
-	for _, status := range view.Result.Statuses {
-		payload.Result.Statuses = append(payload.Result.Statuses, toolStatusJSON{
+// toolStatusListJSON builds the status payload shared by toolchain-driven commands (doctor,
+// install, and fix).
+func toolStatusListJSON(statuses []toolchain.Status) (payload []toolStatusJSON) {
+	payload = make([]toolStatusJSON, 0, len(statuses))
+	for _, status := range statuses {
+		payload = append(payload, toolStatusJSON{
 			ID:            status.Tool.ID,
 			Name:          status.Tool.Name,
 			Path:          status.Path,

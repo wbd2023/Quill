@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestCompileInfersTargetsFromRuleScope(t *testing.T) {

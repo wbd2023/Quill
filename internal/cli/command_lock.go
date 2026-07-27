@@ -4,50 +4,36 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"os"
-	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/engine"
-	"github.com/wbd2023/Quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/engine"
+	"github.com/wbd2023/quill/internal/report"
 )
 
-/* ------------------------------------------- Command ------------------------------------------ */
+func runLock(ctx context.Context, tool Tool, options lockOptions) (exitCode int) {
+	progressWriter := tool.stdout
+	if options.format == report.FormatJSON {
+		// Machine mode reserves stdout for the single envelope; route lock progress to stderr.
+		progressWriter = tool.stderr
+	}
 
-func runLock(tool Tool, options lockOptions) (exitCode int) {
-	engineInstance, err := engine.New(
-		options.repoRoot,
-		engine.WithProgressWriter(tool.stdout),
+	engineInstance, err := tool.buildEngine(
+		options.repoRoot, engine.WithProgressWriter(progressWriter),
 	)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "lock", options.format, err)
 	}
 
-	result, err := engineInstance.Lock(context.Background())
+	result, err := engineInstance.Lock(ctx)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "lock", options.format, err)
 	}
 
-	archiveByID := make(map[string]lockfile.Archive, len(result.Archives))
-	for _, archive := range result.Archives {
-		archiveByID[archive.Tool] = archive
-	}
-
-	contents, err := lockfile.Encode(lockfile.Lockfile{Archives: archiveByID})
-	if err != nil {
-		tool.writeError(err)
-		return 1
-	}
-
-	path := filepath.Join(options.repoRoot, lockfile.DefaultFilename)
-	if err = writeLockfile(path, contents); err != nil {
-		tool.writeError(err)
-		return 1
+	if options.format == report.FormatJSON {
+		return writeLockEnvelope(tool, "lock", result)
 	}
 
 	if _, err = fmt.Fprintf(
-		tool.stdout, "Wrote %s (%d tools)\n", path, len(result.Archives),
+		tool.stdout, "Wrote %s (%d tools)\n", result.Path, result.ArchiveCount,
 	); err != nil {
 		tool.writeError(err)
 		return 1
@@ -56,56 +42,31 @@ func runLock(tool Tool, options lockOptions) (exitCode int) {
 	return 0
 }
 
-const (
-	standardDirectoryPermissions os.FileMode = 0o755
-	standardLockfilePermissions  os.FileMode = 0o644
-)
-
-// writeLockfile writes contents to path atomically via a temp-file rename in the same directory.
-func writeLockfile(path string, contents string) (err error) {
-	dir := filepath.Dir(path)
-	if err = os.MkdirAll(dir, standardDirectoryPermissions); err != nil {
-		return err
+func writeLockEnvelope(tool Tool, command string, result engine.LockResult) (exitCode int) {
+	if err := report.WriteLock(tool.stdout, command, report.LockResult{
+		Path:         result.Path,
+		ArchiveCount: result.ArchiveCount,
+	}); err != nil {
+		tool.writeError(err)
+		return 1
 	}
 
-	temp, err := os.CreateTemp(dir, ".lock-*")
-	if err != nil {
-		return err
-	}
-	tempPath := temp.Name()
-
-	defer func() {
-		if err != nil {
-			_ = os.Remove(tempPath)
-		}
-	}()
-
-	if _, err = temp.WriteString(contents); err != nil {
-		_ = temp.Close() // preserve the original write error
-		return err
-	}
-
-	if err = temp.Chmod(standardLockfilePermissions); err != nil {
-		_ = temp.Close() // preserve the original permission error
-		return err
-	}
-
-	if err = temp.Close(); err != nil {
-		return err
-	}
-
-	return os.Rename(tempPath, path)
+	return 0
 }
-
-/* ------------------------------------------- Parsing ------------------------------------------ */
 
 func parseLockOptionsWithResolver(
 	resolve repositoryRootResolver,
 	arguments []string,
 ) (options lockOptions, err error) {
 	const summary = "resolve and write archive-tool hashes to quill.lock"
-	flagSet := newLockFlagSet(&options)
+	var format string
+	flagSet := newLockFlagSet(&options, &format)
 	if err = parseArguments(flagSet, summary, arguments); err != nil {
+		return options, err
+	}
+
+	options.format, err = parseFormat(format)
+	if err != nil {
 		return options, err
 	}
 
@@ -113,7 +74,7 @@ func parseLockOptionsWithResolver(
 	return options, err
 }
 
-func newLockFlagSet(options *lockOptions) (flagSet *flag.FlagSet) {
+func newLockFlagSet(options *lockOptions, format *string) (flagSet *flag.FlagSet) {
 	flagSet = newFlagSet("lock")
 	flagSet.StringVar(
 		&options.repoRoot,
@@ -121,11 +82,13 @@ func newLockFlagSet(options *lockOptions) (flagSet *flag.FlagSet) {
 		"",
 		"repository root (auto-detected when omitted)",
 	)
+	flagSet.StringVar(format, "format", string(report.FormatText), "format: text|json")
 	return flagSet
 }
 
 func lockUsageText() (usage string) {
 	const summary = "resolve and write archive-tool hashes to quill.lock"
 	var options lockOptions
-	return commandUsage("lock", summary, newLockFlagSet(&options))
+	var format string
+	return commandUsage("lock", summary, newLockFlagSet(&options, &format))
 }

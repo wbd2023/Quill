@@ -1,8 +1,8 @@
 package bash
 
 import (
-	"github.com/wbd2023/Quill/internal/pack"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.

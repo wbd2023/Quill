@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 /* -------------------------------------- Toolchain Output -------------------------------------- */
@@ -14,7 +14,7 @@ import (
 func TestWriteToolchainText(t *testing.T) {
 	var buffer bytes.Buffer
 
-	allValid, err := WriteToolchain(&buffer, FormatText, NewToolchainView(ToolchainResult{
+	allValid, err := WriteToolchain(&buffer, "doctor", FormatText, NewToolchainView(ToolchainResult{
 		Statuses: []toolchain.Status{
 			{
 				Tool:    toolchain.Tool{Name: "Go"},
@@ -59,7 +59,7 @@ func TestWriteToolchainJSON(t *testing.T) {
 			},
 		},
 	})
-	allValid, err := WriteToolchain(&buffer, FormatJSON, view)
+	allValid, err := WriteToolchain(&buffer, "doctor", FormatJSON, view)
 	if err != nil {
 		t.Fatalf("WriteToolchain: %v", err)
 	}
@@ -69,7 +69,10 @@ func TestWriteToolchainJSON(t *testing.T) {
 	}
 
 	var envelope struct {
-		Toolchain struct {
+		SchemaVersion int    `json:"schema_version"`
+		Command       string `json:"command"`
+		Status        string `json:"status"`
+		Result        struct {
 			AllValid bool `json:"all_valid"`
 			Result   struct {
 				Statuses []struct {
@@ -77,13 +80,18 @@ func TestWriteToolchainJSON(t *testing.T) {
 					Valid bool   `json:"valid"`
 				} `json:"statuses"`
 			} `json:"result"`
-		} `json:"toolchain"`
+		} `json:"result"`
 	}
 	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
 		t.Fatalf("decode toolchain json: %v", err)
 	}
 
-	if envelope.Toolchain.AllValid {
+	if envelope.SchemaVersion != SchemaVersion || envelope.Command != "doctor" ||
+		envelope.Status != StatusOK {
+		t.Fatalf("unexpected envelope header: %+v", envelope)
+	}
+
+	if envelope.Result.AllValid {
 		t.Fatal("expected all_valid=false in JSON output")
 	}
 

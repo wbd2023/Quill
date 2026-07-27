@@ -3,8 +3,8 @@ package installer
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/pack/shipped"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/pack/shipped"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 func TestInstallerRecognisesShippedPackInstallSpecs(t *testing.T) {

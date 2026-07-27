@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/architecture"
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/commandrun"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/golang/architecture"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/commandrun"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func scanGoArchitecture(

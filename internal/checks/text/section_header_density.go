@@ -3,10 +3,10 @@ package text
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/checks/textpolicy"
-	"github.com/wbd2023/Quill/internal/filewalk"
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/textpolicy"
+	"github.com/wbd2023/quill/internal/filewalk"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // CheckSectionHeaderDensity check section header density.

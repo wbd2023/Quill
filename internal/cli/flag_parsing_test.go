@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/testutil"
+	"github.com/wbd2023/quill/internal/testutil"
 )
 
 /* ------------------------------------------- Parsing ------------------------------------------ */
@@ -86,6 +86,44 @@ func TestParseCheckOptionsAcceptsJSONFormat(t *testing.T) {
 
 	if options.format != "json" {
 		t.Fatalf("expected json format, got %q", options.format)
+	}
+}
+
+func TestCheckMachineModeUsesFlagParsingOrder(t *testing.T) {
+	testCases := []struct {
+		name      string
+		arguments []string
+		requested bool
+	}{
+		{
+			name:      "json overrides text",
+			arguments: []string{"--format", "text", "--format", "json"},
+			requested: true,
+		},
+		{
+			name:      "text overrides json",
+			arguments: []string{"--format", "json", "--format", "text"},
+			requested: false,
+		},
+		{
+			name:      "space form consumes dash-prefixed value",
+			arguments: []string{"--format", "--format=json"},
+			requested: false,
+		},
+		{
+			name:      "positional argument stops parsing",
+			arguments: []string{"--format", "json", "extra", "--format", "text"},
+			requested: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if got := checkMachineMode(testCase.arguments); got != testCase.requested {
+				t.Fatalf("checkMachineMode(%v) = %t, want %t",
+					testCase.arguments, got, testCase.requested)
+			}
+		})
 	}
 }
 

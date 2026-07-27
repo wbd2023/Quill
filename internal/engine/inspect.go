@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // ToolchainInspection contains structured tool inspection outcomes.

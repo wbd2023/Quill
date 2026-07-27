@@ -5,28 +5,26 @@ import (
 	"flag"
 	"io"
 
-	"github.com/wbd2023/Quill/internal/engine"
-	"github.com/wbd2023/Quill/internal/report"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/engine"
+	"github.com/wbd2023/quill/internal/report"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ---------------------------------------- Check Command --------------------------------------- */
 
-func runCheck(tool Tool, options checkOptions) (exitCode int) {
-	checker, err := engine.New(options.repoRoot)
+func runCheck(ctx context.Context, tool Tool, options checkOptions) (exitCode int) {
+	engineInstance, err := tool.buildEngine(options.repoRoot)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "check", options.format, err)
 	}
 
-	result, err := checker.Check(context.Background(), engine.CheckOptions{
+	result, err := engineInstance.Check(ctx, engine.CheckOptions{
 		Scope:                 options.scope,
 		Mode:                  options.mode,
 		StrictRecommendations: options.strictRecommendations,
 	})
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "check", options.format, err)
 	}
 
 	checkResult := report.CheckResult{
@@ -43,10 +41,9 @@ func runCheck(tool Tool, options checkOptions) (exitCode int) {
 		)
 	}
 
-	summary, err := writeCheckResult(tool.stdout, checkResult, options)
+	summary, err := writeCheckResult(tool.stdout, "check", checkResult, options)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "check", options.format, err)
 	}
 
 	if summary.Failed > 0 || summary.Errored > 0 {
@@ -137,9 +134,10 @@ func checkUsageText() (usage string) {
 
 func writeCheckResult(
 	writer io.Writer,
+	command string,
 	result report.CheckResult,
 	options checkOptions,
 ) (summary report.CheckSummary, err error) {
 	view := report.NewCheckView(result)
-	return report.WriteCheck(writer, options.format, view, options.verbose)
+	return report.WriteCheck(writer, command, options.format, view, options.verbose)
 }

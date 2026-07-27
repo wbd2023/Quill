@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wbd2023/Quill/internal/process"
-	"github.com/wbd2023/Quill/internal/toolchain"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/process"
+	"github.com/wbd2023/quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 // standardPermissions is the filesystem mode for created directories.

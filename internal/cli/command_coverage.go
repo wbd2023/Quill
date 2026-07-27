@@ -5,29 +5,25 @@ import (
 	"flag"
 	"io"
 
-	"github.com/wbd2023/Quill/internal/coverage"
-	"github.com/wbd2023/Quill/internal/engine"
-	"github.com/wbd2023/Quill/internal/report"
+	"github.com/wbd2023/quill/internal/coverage"
+	"github.com/wbd2023/quill/internal/report"
 )
 
 /* -------------------------------------- Coverage Command -------------------------------------- */
 
-func runCoverage(tool Tool, options coverageOptions) (exitCode int) {
-	engine, err := engine.New(options.repoRoot)
+func runCoverage(ctx context.Context, tool Tool, options coverageOptions) (exitCode int) {
+	engineInstance, err := tool.buildEngine(options.repoRoot)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "coverage", options.format, err)
 	}
 
-	coverageReport, err := engine.Coverage(context.Background())
+	coverageReport, err := engineInstance.Coverage(ctx)
 	if err != nil {
-		tool.writeError(err)
-		return 1
+		return tool.reportCommandError(ctx, "coverage", options.format, err)
 	}
 
-	if err = writeCoverageResult(tool.stdout, coverageReport, options); err != nil {
-		tool.writeError(err)
-		return 1
+	if err = writeCoverageResult(tool.stdout, "coverage", coverageReport, options); err != nil {
+		return tool.reportCommandError(ctx, "coverage", options.format, err)
 	}
 
 	return 0
@@ -86,9 +82,10 @@ func coverageUsageText() (usage string) {
 
 func writeCoverageResult(
 	writer io.Writer,
+	command string,
 	coverageReport coverage.Report,
 	options coverageOptions,
 ) (err error) {
 	view := report.NewCoverageView(coverageReport)
-	return report.WriteCoverage(writer, options.format, view, options.verbose)
+	return report.WriteCoverage(writer, command, options.format, view, options.verbose)
 }

@@ -1,6 +1,9 @@
 package cli
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 const versionSummary = "print the Quill version"
 
@@ -18,7 +21,7 @@ func versionUsageText() (usage string) {
 	return commandUsage("version", versionSummary, newFlagSet("version"))
 }
 
-func runVersion(tool Tool, _ versionOptions) (exitCode int) {
+func runVersion(_ context.Context, tool Tool, _ versionOptions) (exitCode int) {
 	_, _ = fmt.Fprintln(tool.stdout, tool.version)
 	return 0
 }

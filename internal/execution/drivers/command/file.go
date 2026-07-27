@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
-	"github.com/wbd2023/Quill/internal/process"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
+	"github.com/wbd2023/quill/internal/process"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 // runFileCommand runs a file-command tool over its file set. For check execution, the driver

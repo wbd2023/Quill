@@ -3,9 +3,9 @@ package scan
 import (
 	"context"
 
-	"github.com/wbd2023/Quill/internal/checks/text"
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/checks/text"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func scanSectionHeaders(

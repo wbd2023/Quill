@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ----------------------------------------- Text Output ---------------------------------------- */
@@ -99,7 +99,7 @@ func writeRuleDetails(writer io.Writer, entry CheckEntry, verbose bool) (err err
 		}
 	}
 
-	if entry.Result.HasCommand() {
+	if hasCommandMetadata(entry.Result) {
 		if _, err = fmt.Fprintf(
 			writer,
 			"    command: exit_code=%d timed_out=%t truncated=%t\n",

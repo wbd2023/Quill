@@ -8,8 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/lockfile"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/lockfile"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 func testGitHubInstall(platforms ...string) (install toolchain.GitHubInstall) {

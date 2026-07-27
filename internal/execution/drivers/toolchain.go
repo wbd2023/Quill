@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/execution"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/execution"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // ToolchainDriver checks that pinned tools are installed and healthy.

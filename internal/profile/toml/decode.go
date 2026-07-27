@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 
 	codec "github.com/BurntSushi/toml"
 )
 
 // Decode decodes style profile TOML source.
-func Decode(source string) (config policy.Config, err error) {
+func Decode(source string) (config policy.Profile, err error) {
 	var schema schemaConfig
 	metadata, err := codec.Decode(source, &schema)
 	if err != nil {
-		return policy.Config{}, err
+		return policy.Profile{}, err
 	}
 
 	for _, key := range metadata.Undecoded() {
@@ -22,7 +22,7 @@ func Decode(source string) (config policy.Config, err error) {
 			continue
 		}
 
-		return policy.Config{}, fmt.Errorf("unknown quill.toml key %q", key.String())
+		return policy.Profile{}, fmt.Errorf("unknown quill.toml key %q", key.String())
 	}
 
 	return decodeConfig(schema)

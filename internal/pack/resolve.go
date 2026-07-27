@@ -3,27 +3,27 @@ package pack
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/policy"
 )
 
 /* --------------------------------------- Pack Resolution -------------------------------------- */
 
 // ResolvePacks applies pack-owned defaults and validates pack-owned profile config.
 func ResolvePacks(
-	config policy.Config,
+	config policy.Profile,
 	packs []Definition,
-) (resolved policy.Config, err error) {
+) (resolved policy.Profile, err error) {
 	resolved = config
 	resolved.FileSets = resolveFileSets(config.FileSets, packs)
 
 	if err = validatePackConfigs(resolved, packs); err != nil {
-		return policy.Config{}, err
+		return policy.Profile{}, err
 	}
 
 	return resolved, nil
 }
 
-func validatePackConfigs(config policy.Config, packs []Definition) (err error) {
+func validatePackConfigs(config policy.Profile, packs []Definition) (err error) {
 	active := indexPacks(packs)
 	for packID := range config.PackConfigs {
 		definition, found := active[packID]

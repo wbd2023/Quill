@@ -3,8 +3,8 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/Quill/internal/checks/projectpolicy"
-	"github.com/wbd2023/Quill/internal/execution"
+	"github.com/wbd2023/quill/internal/checks/projectpolicy"
+	"github.com/wbd2023/quill/internal/execution"
 )
 
 func decodeProjectConfig(

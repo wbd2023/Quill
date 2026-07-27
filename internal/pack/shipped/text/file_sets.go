@@ -1,6 +1,6 @@
 package text
 
-import "github.com/wbd2023/Quill/internal/policy"
+import "github.com/wbd2023/quill/internal/policy"
 
 func fileSets() (fileSets policy.FileSets) {
 	fileSets = append(fileSets, policy.FileSetConfig{

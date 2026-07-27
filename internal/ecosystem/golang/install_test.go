@@ -3,8 +3,8 @@ package golang
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/toolchain"
-	"github.com/wbd2023/Quill/internal/workspace"
+	"github.com/wbd2023/quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 func TestCommandBuildsGoInstallRequest(t *testing.T) {

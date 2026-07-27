@@ -1,7 +1,9 @@
 package main
 
 import (
+	"os"
 	"runtime/debug"
+	"syscall"
 	"testing"
 )
 
@@ -41,6 +43,27 @@ func TestVersionFromBuildInfo(t *testing.T) {
 			got := versionFromBuildInfo(testCase.buildInfo, testCase.ok)
 			if got != testCase.want {
 				t.Fatalf("versionFromBuildInfo() = %q, want %q", got, testCase.want)
+			}
+		})
+	}
+}
+
+func TestExitCodeForSignal(t *testing.T) {
+	testCases := []struct {
+		name   string
+		signal os.Signal
+		want   int
+	}{
+		{name: "interrupt", signal: os.Interrupt, want: 130},
+		{name: "termination", signal: syscall.SIGTERM, want: 143},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := exitCodeForSignal(testCase.signal); got != testCase.want {
+				t.Fatalf("exitCodeForSignal(%v) = %d, want %d", testCase.signal, got, testCase.want)
 			}
 		})
 	}

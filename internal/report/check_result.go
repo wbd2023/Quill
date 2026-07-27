@@ -1,6 +1,6 @@
 package report
 
-import "github.com/wbd2023/Quill/internal/style"
+import "github.com/wbd2023/quill/internal/style"
 
 // CheckEntry is check entry.
 type CheckEntry struct {
@@ -54,4 +54,11 @@ func (result CheckResult) Summary() (summary CheckSummary) {
 	}
 
 	return summary
+}
+
+// hasCommandMetadata reports whether the execution result carries command output or metadata.
+// It preserves the historical facade semantics where captured command output counts as a command,
+// even when the exit code is zero and neither timeout nor truncation occurred.
+func hasCommandMetadata(result style.ExecutionResult) (hasMetadata bool) {
+	return result.Output != "" || result.HasCommand()
 }

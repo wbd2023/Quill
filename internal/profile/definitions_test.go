@@ -3,7 +3,7 @@ package profile
 import (
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/profile/internal/profiletest"
+	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 )
 
 func TestCompileRejectsDuplicateRuleDefinitions(t *testing.T) {

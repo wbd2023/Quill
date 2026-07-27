@@ -5,9 +5,11 @@ import (
 	"io"
 )
 
-// WriteCheck write check.
+// WriteCheck writes a check result in the requested format. In JSON mode it writes the full
+// machine envelope tagged with command.
 func WriteCheck(
 	writer io.Writer,
+	command string,
 	format OutputFormat,
 	view CheckView,
 	verbose bool,
@@ -16,7 +18,7 @@ func WriteCheck(
 	case FormatText:
 		return writeCheckText(writer, view, verbose)
 	case FormatJSON:
-		return writeCheckJSON(writer, view)
+		return writeCheckJSON(writer, command, view)
 	default:
 		return summary, fmt.Errorf("unsupported output format %q", format)
 	}

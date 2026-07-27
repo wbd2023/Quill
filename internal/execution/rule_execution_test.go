@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/policy"
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 func TestRunRuleUsesInjectedDriver(t *testing.T) {
@@ -20,7 +20,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
-		policy.Config{},
+		policy.Profile{},
 		style.Plan{},
 		nil,
 		nil,
@@ -58,7 +58,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
-		policy.Config{},
+		policy.Profile{},
 		style.Plan{},
 		nil,
 		nil,

@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/wbd2023/Quill/internal/report"
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/report"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 type checkOptions struct {
@@ -17,6 +17,7 @@ type checkOptions struct {
 type fixOptions struct {
 	repoRoot string
 	scope    style.Scope
+	format   report.OutputFormat
 }
 
 type doctorOptions struct {
@@ -32,10 +33,12 @@ type coverageOptions struct {
 
 type installOptions struct {
 	repoRoot string
+	format   report.OutputFormat
 }
 
 type lockOptions struct {
 	repoRoot string
+	format   report.OutputFormat
 }
 
 type flagHelpError struct {

@@ -3,7 +3,7 @@ package report
 import (
 	"io"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ------------------------------------------ JSON DTOs ----------------------------------------- */
@@ -51,25 +51,27 @@ type commandResultJSON struct {
 
 /* ------------------------------------------ Rendering ----------------------------------------- */
 
-func writeCheckJSON(writer io.Writer, view CheckView) (summary CheckSummary, err error) {
-	summary = view.Summary
-	err = writeJSON(writer, struct {
-		Check checkJSON `json:"check"`
-	}{Check: newCheckJSON(view)})
-	return summary, err
+func writeCheckJSON(
+	writer io.Writer,
+	command string,
+	view CheckView,
+) (summary CheckSummary, err error) {
+	err = writeResultEnvelope(writer, command, newCheckJSON(view))
+	return view.Summary, err
 }
 
 func newCheckJSON(view CheckView) (payload checkJSON) {
-	payload = checkJSON{
-		Result: checkResultJSON{
-			Entries: checkEntryListJSON(view.Result.Entries),
-		},
+	return checkJSON{
+		Result:  checkResultJSON{Entries: checkEntryListJSON(view.Result.Entries)},
 		Summary: view.Summary,
-		Groups:  make([]checkGroupJSON, 0, len(view.Groups)),
+		Groups:  checkGroupListJSON(view.Groups),
 	}
+}
 
-	for _, group := range view.Groups {
-		payload.Groups = append(payload.Groups, checkGroupJSON{
+func checkGroupListJSON(groups []CheckGroup) (payload []checkGroupJSON) {
+	payload = make([]checkGroupJSON, 0, len(groups))
+	for _, group := range groups {
+		payload = append(payload, checkGroupJSON{
 			Group:   group.Group,
 			Entries: checkEntryListJSON(group.Entries),
 		})
@@ -113,7 +115,7 @@ func diagnosticListJSON(diagnostics []style.Diagnostic) (payload []diagnosticJSO
 }
 
 func commandResultJSONFor(result style.ExecutionResult) (payload *commandResultJSON) {
-	if !result.HasCommand() {
+	if !hasCommandMetadata(result) {
 		return nil
 	}
 

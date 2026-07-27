@@ -1,6 +1,6 @@
 package drivers
 
-import "github.com/wbd2023/Quill/internal/execution/drivers/internal/driverkit"
+import "github.com/wbd2023/quill/internal/execution/drivers/internal/driverkit"
 
 // RepositoryScanner is repository scanner.
 type RepositoryScanner = driverkit.RepositoryScanner
@@ -55,6 +55,34 @@ func (bindings *Bindings) AddProfileCheck(id string, check ProfileCheck) {
 
 func (bindings *Bindings) AddFileInterpreter(id string, interpreter FileInterpreter) {
 	bindings.fileInterpreters.Add(id, interpreter)
+}
+
+func (bindings Bindings) LookupRepositoryScanner(id string) (
+	scanner RepositoryScanner,
+	found bool,
+) {
+	return bindings.repositoryScanners.Lookup(id)
+}
+
+func (bindings Bindings) LookupTargetCommand(action string) (
+	command TargetCommand,
+	found bool,
+) {
+	return bindings.targetCommands.Lookup(action)
+}
+
+func (bindings Bindings) LookupTargetCheck(language string) (
+	check TargetCheck,
+	found bool,
+) {
+	return bindings.targetChecks.Lookup(language)
+}
+
+func (bindings Bindings) LookupProfileCheck(id string) (
+	check ProfileCheck,
+	found bool,
+) {
+	return bindings.profileChecks.Lookup(id)
 }
 
 func (bindings Bindings) LookupFileInterpreter(id string) (

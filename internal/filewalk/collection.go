@@ -59,15 +59,15 @@ func CollectFilesInRoots(
 	})
 }
 
-// CollectAllFiles collects all regular files under roots.
+// CollectAllFiles collects all non-binary regular files under roots.
 func CollectAllFiles(roots []string, config WalkConfig) (paths []string, err error) {
 	return collectFilesInRoots(roots, config, func(path string) bool {
 		info, statErr := os.Stat(path)
-		if statErr != nil {
+		if statErr != nil || !info.Mode().IsRegular() {
 			return false
 		}
 
-		return info.Mode().IsRegular()
+		return !IsBinaryFile(path)
 	})
 }
 

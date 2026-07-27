@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wbd2023/Quill/internal/style"
+	"github.com/wbd2023/quill/internal/style"
 )
 
 func TestDescribeReturnsCorrectRequirements(t *testing.T) {

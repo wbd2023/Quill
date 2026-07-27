@@ -1,6 +1,6 @@
 package toml
 
-import "github.com/wbd2023/Quill/internal/policy"
+import "github.com/wbd2023/quill/internal/policy"
 
 func decodePathRoles(schema map[string][]string) (paths policy.PathRoles) {
 	return cloneStringLists(policy.PathRoles(schema))

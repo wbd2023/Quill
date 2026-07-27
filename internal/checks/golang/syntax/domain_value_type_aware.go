@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"go/ast"
 
-	"github.com/wbd2023/Quill/internal/checks/golang/analysis"
+	"github.com/wbd2023/quill/internal/checks/golang/analysis"
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/wbd2023/Quill/internal/checks/gopolicy"
+	"github.com/wbd2023/quill/internal/checks/gopolicy"
 )
 
 /* --------------------------------------- Type-Aware Scan -------------------------------------- */

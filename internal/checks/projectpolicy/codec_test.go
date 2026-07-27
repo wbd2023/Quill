@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/wbd2023/Quill/internal/checks/projectpolicy"
-	corepolicy "github.com/wbd2023/Quill/internal/policy"
+	"github.com/wbd2023/quill/internal/checks/projectpolicy"
+	corepolicy "github.com/wbd2023/quill/internal/policy"
 )
 
 /* ------------------------------------------ Decoding ------------------------------------------ */

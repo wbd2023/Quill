@@ -3,7 +3,7 @@ package textpolicy
 import (
 	"fmt"
 
-	corepolicy "github.com/wbd2023/Quill/internal/policy"
+	corepolicy "github.com/wbd2023/quill/internal/policy"
 )
 
 // DecodeConfig decodes the Text Pack Policy subtree.

@@ -3,7 +3,7 @@ package execution
 import (
 	"errors"
 
-	"github.com/wbd2023/Quill/internal/filewalk"
+	"github.com/wbd2023/quill/internal/filewalk"
 )
 
 // CollectFileSetFiles collect file set files.

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/wbd2023/Quill/internal/style"
-	"github.com/wbd2023/Quill/internal/toolchain"
+	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 /* ------------------------------------------ Registry ------------------------------------------ */
