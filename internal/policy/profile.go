@@ -18,7 +18,13 @@ type Profile struct {
 
 	EnabledPacks []string
 	PackConfigs  PackConfigs
+	PackSources  []PackSource
 	Rules        []RuleBinding
+}
+
+// PackSource is one declared local external Pack directory.
+type PackSource struct {
+	Path string
 }
 
 // StyleGuideConfig describes how the style guide is located.

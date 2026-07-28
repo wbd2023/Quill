@@ -11,7 +11,7 @@ import (
 
 func TestQuillPassesGoStyleChecks(t *testing.T) {
 	repositoryRoot := testutil.RepositoryRoot(t)
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 
 	result, err := golang.CheckDirectories(
 		repositoryRoot,

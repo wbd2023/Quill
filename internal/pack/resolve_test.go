@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
-	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
 	"github.com/wbd2023/quill/internal/pack"
 	"github.com/wbd2023/quill/internal/pack/shipped"
 	"github.com/wbd2023/quill/internal/pack/shipped/bash"
 	"github.com/wbd2023/quill/internal/pack/shipped/markdown"
 	"github.com/wbd2023/quill/internal/pack/shipped/text"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
+	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
 	"github.com/wbd2023/quill/internal/policy"
 )
 

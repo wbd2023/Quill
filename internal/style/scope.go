@@ -24,10 +24,12 @@ const (
 	CheckStatusWarn CheckStatus = "warn"
 	// CheckStatusFail means the rule found required-level violations.
 	CheckStatusFail CheckStatus = "fail"
-	// CheckStatusSkip means the rule was skipped due to a missing tool or blocked dependency.
+	// CheckStatusBlocked means the rule could not execute because a required Tool is invalid.
+	CheckStatusBlocked CheckStatus = "blocked"
+	// CheckStatusSkip means the rule was deliberately not selected for this check.
 	CheckStatusSkip CheckStatus = "skip"
-	// CheckStatusError means the rule could not run (operational failure: parse error, missing
-	// config, IO failure). Distinct from Fail, which means the rule ran and found violations.
+	// CheckStatusError means the rule could not run because of an operational failure. Distinct
+	// from Fail, which means the rule ran and found violations.
 	CheckStatusError CheckStatus = "error"
 )
 

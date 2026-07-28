@@ -37,6 +37,7 @@ func runCheck(ctx context.Context, tool Tool, options checkOptions) (exitCode in
 				ruleResult.Rule,
 				ruleResult.Status,
 				ruleResult.Execution,
+				ruleResult.ExecutionError,
 			),
 		)
 	}
@@ -46,7 +47,7 @@ func runCheck(ctx context.Context, tool Tool, options checkOptions) (exitCode in
 		return tool.reportCommandError(ctx, "check", options.format, err)
 	}
 
-	if summary.Failed > 0 || summary.Errored > 0 {
+	if summary.Failed > 0 || summary.Blocked > 0 || summary.Errored > 0 {
 		return 1
 	}
 

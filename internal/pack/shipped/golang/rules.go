@@ -1,18 +1,8 @@
 package golang
 
 import (
-	"github.com/wbd2023/quill/internal/checks/golang/check"
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
 	"github.com/wbd2023/quill/internal/style"
-)
-
-// rules constants.
-const (
-	TargetActionGoFormat = "go_format"
-	TargetActionGolangci = "golangci"
-
-	Language            = "go"
-	ScannerArchitecture = "architecture"
 )
 
 const ruleGroupLanguage style.RuleGroup = "language"
@@ -38,20 +28,20 @@ func toolRules() (rules []style.RuleDefinition) {
 
 func structuredRules() (rules []style.RuleDefinition) {
 	return []style.RuleDefinition{
-		styleRule("go/comments", "Go comments", check.Comments),
-		styleRule("go/errors", "Go error handling", check.Errors),
-		styleRule("go/resources", "Go resource handling", check.Resources),
-		styleRule("go/returns", "Go return style", check.Returns),
-		styleRule("go/parameters", "Go parameter style", check.Parameters),
-		styleRule("go/domain-values", "Go domain values", check.DomainValues),
-		styleRule("go/naming", "Go naming", check.Naming),
-		styleRule("go/order", "Go declaration and method order", check.Order),
-		styleRule("go/logging", "Go logging", check.Logging),
-		styleRule("go/security", "Go security", check.Security),
-		styleRule("go/process", "Go process execution", check.Process),
-		styleRule("go/data", "Go data usage", check.Data),
-		styleRule("go/tests", "Go test hygiene", check.Tests),
-		styleRule("go/file-shape", "Go file shape", check.FileShape),
+		styleRule("go/comments", "Go comments", TargetCheckComments),
+		styleRule("go/errors", "Go error handling", TargetCheckErrors),
+		styleRule("go/resources", "Go resource handling", TargetCheckResources),
+		styleRule("go/returns", "Go return style", TargetCheckReturns),
+		styleRule("go/parameters", "Go parameter style", TargetCheckParameters),
+		styleRule("go/domain-values", "Go domain values", TargetCheckDomainValues),
+		styleRule("go/naming", "Go naming", TargetCheckNaming),
+		styleRule("go/order", "Go declaration and method order", TargetCheckOrder),
+		styleRule("go/logging", "Go logging", TargetCheckLogging),
+		styleRule("go/security", "Go security", TargetCheckSecurity),
+		styleRule("go/process", "Go process execution", TargetCheckProcess),
+		styleRule("go/data", "Go data usage", TargetCheckData),
+		styleRule("go/tests", "Go test hygiene", TargetCheckTests),
+		styleRule("go/file-shape", "Go file shape", TargetCheckFileShape),
 	}
 }
 
@@ -60,12 +50,12 @@ func spacingRules() (rules []style.RuleDefinition) {
 		styleRule(
 			"go/guard-clause-spacing",
 			"Guard-clause spacing (Go)",
-			check.GuardClauseSpacing,
+			TargetCheckGuardClauseSpacing,
 		),
 		styleRule(
 			"go/switch-case-spacing",
 			"Switch-case spacing (Go)",
-			check.SwitchCaseSpacing,
+			TargetCheckSwitchCaseSpacing,
 		),
 	}
 }

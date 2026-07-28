@@ -26,21 +26,23 @@ Driver dependencies.
 
 Quill separates these responsibilities:
 
-- `internal/pack/shipped` owns built-in Pack identity and profile-visible Rule declarations.
-- `internal/pack/shipped/bindings` maps shipped execution identities to concrete scanners, commands,
-  Checks, and file interpreters.
-- `internal/checks` owns concrete repository observations and typed Pack Policy codecs.
+- `internal/pack/shipped/<pack>` owns built-in Pack identity and profile-visible Rule declarations.
+- `internal/pack/shipped/<pack>/policy` owns that Pack's typed persisted Policy codec.
+- `internal/pack/shipped/<pack>/bindings` maps that Pack's local execution identities to concrete
+  scanners, commands, Checks, and file interpreters.
+- `internal/pack/shipped/bindings` assembles those Pack-local bindings into one explicit runtime
+  value.
+- `internal/checks` owns concrete repository observations.
 - `internal/execution/drivers` owns generic adapters for resolved execution families and receives a
   complete `drivers.Bindings` value during composition.
-- `internal/pack/shipped/tool` owns the built-in Tool catalogue and capability definitions.
 - `internal/toolchain` owns generic capability health, inspection, and version detection.
 - `internal/installer` owns verified installation of external tools.
 - `internal/engine` composes Pack definitions and runtime bindings without moving shipped identities
   into generic execution packages.
 
 `pack/shipped/bindings.Build` is the explicit composition point for shipped runtime behaviour.
-`drivers.NewBindings` constructs the generic binding collection. Drivers do not import shipped Pack
-packages or concrete Check packages to discover behaviour implicitly.
+Pack-local binding children contain concrete adapters. `drivers.NewBindings` constructs the generic
+binding collection; Drivers do not import shipped Packs, Pack Policy, or concrete Checks.
 
 ## Consequences
 

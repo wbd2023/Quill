@@ -75,7 +75,7 @@ func TestCollectFileSetFilesReturnsEmptySetWhenScopedIncludesDoNotOverlap(t *tes
 
 func TestCollectFileSetFilesRejectsUnknownSet(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, profiles.Self(t))
 
 	context := testContext(t, repoRoot, style.Scope("all"))
 
@@ -86,7 +86,7 @@ func TestCollectFileSetFilesRejectsUnknownSet(t *testing.T) {
 
 func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, profiles.Self(t))
 	makefile := testutil.WriteFile(t, repoRoot, "Makefile", "all:\n\t@true\n")
 	config := testutil.WriteFile(t, repoRoot, "style.local.toml", "enabled = true\n")
 	checksum := testutil.WriteFile(t, repoRoot, "go.sum", strings.Repeat("x", 120)+"\n")
@@ -112,7 +112,7 @@ func TestCollectLineLengthFileSetCoversTextFiles(t *testing.T) {
 
 func TestCollectFileSetFilesSelectsPrivacyDocumentAndExcludesUnlistedRootMarkdown(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, profiles.Self(t))
 
 	privacy := testutil.WriteFile(t, repoRoot, "CONTRIBUTOR_PRIVACY.md", "# Contributor Privacy\n")
 	unlisted := testutil.WriteFile(t, repoRoot, "UNLISTED.md", "# Unlisted\n")
@@ -135,7 +135,7 @@ func TestCollectFileSetFilesSelectsPrivacyDocumentAndExcludesUnlistedRootMarkdow
 
 func TestCollectLineLengthFileSetCoversPrivacyDocument(t *testing.T) {
 	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Current(t))
+	profiles.Write(t, repoRoot, profiles.Self(t))
 
 	privacy := testutil.WriteFile(t, repoRoot, "CONTRIBUTOR_PRIVACY.md", "# Contributor Privacy\n")
 
@@ -154,7 +154,7 @@ func TestCollectLineLengthFileSetCoversPrivacyDocument(t *testing.T) {
 func scopedFileSetConfig(t *testing.T) (config policy.Profile) {
 	t.Helper()
 
-	config = profiles.Current(t)
+	config = profiles.Self(t)
 	config.Repository.ScopeRoots = map[style.Scope][]string{
 		"app":   {"cmd", "internal", "test"},
 		"tools": {"tools"},

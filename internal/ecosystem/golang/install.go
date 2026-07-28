@@ -80,7 +80,8 @@ func command(
 	return process.CommandRequest{
 		Name:        "go",
 		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
-		Environment: environment,
+		Environment: process.EnvironmentInherit,
+		Variables:   environment,
 		Directory:   layout.StateDirectory,
 	}, nil
 }

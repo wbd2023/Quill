@@ -127,3 +127,17 @@ func (validator ruleExecutionValidator) validateRepositoryScanExecution(
 
 	return nil
 }
+
+func (validator ruleExecutionValidator) validateExternalCheckExecution(
+	execution style.ExternalCheckTemplate,
+) (err error) {
+	if isBlank(execution.CheckID) {
+		return fmt.Errorf(
+			"rule definition %q %s must define a check id",
+			validator.ruleID,
+			validator.label,
+		)
+	}
+
+	return nil
+}

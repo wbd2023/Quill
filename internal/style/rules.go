@@ -17,21 +17,25 @@ type Plan struct {
 }
 
 // RuleDefinition represents a pack-declared rule before profile binding. It carries check and fix
-// execution templates but not enforcement or scope.
+// execution templates but not enforcement or scope. PackID records the Pack that declared the rule
+// so compiled rules, jobs, and results carry Pack provenance.
 type RuleDefinition struct {
-	ID    string
-	Name  string
-	Group RuleGroup
+	ID     string
+	PackID string
+	Name   string
+	Group  RuleGroup
 
 	Check Template
 	Fix   Template
 }
 
 // Rule represents a profile-bound, enforceable style requirement with bound execution jobs.
+// PackID carries the declaring Pack through to compiled jobs and results.
 type Rule struct {
-	ID    string
-	Name  string
-	Group RuleGroup
+	ID     string
+	PackID string
+	Name   string
+	Group  RuleGroup
 
 	Enforcement    Enforcement
 	Scope          Scope

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -45,9 +45,9 @@ func CheckSectionHeaderNames(
 			}
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
-				Code: "text/section-header-names/generic",
-				File: filewalk.RelativePath(repoRoot, path),
-				Line: header.Line,
+				Code:  "text/section-header-names/generic",
+				File:  filewalk.DisplayPath(repoRoot, path),
+				Range: style.Range{Start: style.Position{Line: header.Line}},
 				Message: fmt.Sprintf(
 					"generic section header name %q; prefer a specific heading",
 					title,

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
 )
 
 func resolvedDomainValueTypeName(

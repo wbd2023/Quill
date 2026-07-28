@@ -35,7 +35,7 @@ func TestLoadRejectsMissingConfiguredRootMarker(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 	config.Repository.RootMarkers = []string{"PROJECT.marker"}
 	profiles.Write(t, root, config)
 

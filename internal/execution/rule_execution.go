@@ -30,6 +30,7 @@ type DriverSet struct {
 	TargetCommand  Driver
 	TargetCheck    Driver
 	RepositoryScan Driver
+	ExternalCheck  Driver
 }
 
 // IsBlocked reports whether the error indicates a rule was blocked by toolchain health.
@@ -45,7 +46,11 @@ func RunRule(
 	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
-	return runExecution(ctx, rule.ID, rule.Check, rule.CheckToolIDs(), run, toolStatuses, drivers)
+	return runExecution(
+		ctx, rule.ID, rule.PackID,
+		rule.Check, rule.CheckToolIDs(),
+		run, toolStatuses, drivers,
+	)
 }
 
 // RunFix executes a rule's fix against the repository.
@@ -56,12 +61,17 @@ func RunFix(
 	toolStatuses toolchain.StatusMap,
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
-	return runExecution(ctx, rule.ID, rule.Fix, rule.FixToolIDs(), run, toolStatuses, drivers)
+	return runExecution(
+		ctx, rule.ID, rule.PackID,
+		rule.Fix, rule.FixToolIDs(),
+		run, toolStatuses, drivers,
+	)
 }
 
 func runExecution(
 	ctx context.Context,
 	ruleID string,
+	packID string,
 	job style.Job,
 	toolIDs []string,
 	run RunContext,
@@ -72,8 +82,10 @@ func runExecution(
 		return style.ExecutionResult{}, nil
 	}
 
-	if len(toolIDs) > 0 && !toolStatuses.AreAllValid(toolIDs) {
+	if _, isToolchain := job.(style.ToolchainExecution); !isToolchain &&
+		len(toolIDs) > 0 && !toolStatuses.AreAllValid(toolIDs) {
 		return style.ExecutionResult{
+			PackID: packID,
 			Diagnostics: []style.Diagnostic{
 				{
 					Code:    "toolchain/blocked",
@@ -119,6 +131,9 @@ func driverFor(job style.Job, drivers DriverSet) (driver Driver, err error) {
 
 	case style.RepositoryScanExecution:
 		return drivers.RepositoryScan, nil
+
+	case style.ExternalCheckJob:
+		return drivers.ExternalCheck, nil
 
 	default:
 		return nil, fmt.Errorf("unknown execution job type %T", job)

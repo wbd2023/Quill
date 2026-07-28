@@ -45,9 +45,8 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 		})
 	}
 
-	// Each Pack's bindings child package is the only place permitted to import the Driver facade.
-	// It may import only the facade, its own Pack declarations, and the shared tool catalogue; it
-	// must not reach into other Packs, Driver family implementations, or any orchestration.
+	// Each Pack's bindings child is the composition seam. It may import generic
+	// Drivers, its Pack Policy, its concrete Checks, process primitives, and tools.
 	for _, directory := range shippedPackDeclarationPackages() {
 		testCases = append(testCases, shippedPackBindingsBoundaryCase(directory))
 	}
@@ -84,34 +83,20 @@ func shippedPackModuleBoundaryCases() (testCases []importBoundaryCase) {
 	return testCases
 }
 
-// shippedPackBindingsBoundaryCase builds the import boundary for one Pack's bindings child package.
-// The child may import the drivers facade, its own Pack, and the shared tool catalogue; everything
-// else (other Packs, Driver family implementations, presentation, persistence) is forbidden.
-//
-// Note: "internal/execution" is intentionally omitted from the forbidden list because the allowed
-// facade lives at "internal/execution/drivers" and the boundary checker matches by path prefix.
-// Forbidding the bare "internal/execution" prefix would also block the facade itself. The driver
-// family sub-packages are enumerated individually so they remain forbidden while the facade stays
-// reachable.
+// shippedPackBindingsBoundaryCase builds the import boundary for one Pack's composition child.
+// The child wires only its own declarations, policy, concrete checks, generic Drivers, process
+// primitives, and shared tools. It must not reach into other Packs or application orchestration.
 func shippedPackBindingsBoundaryCase(packDirectory string) (testCase importBoundaryCase) {
 	forbidden := []string{
 		"internal/architecture",
 		"internal/cli",
 		"internal/coverage",
-		"internal/execution/drivers/command",
-		"internal/execution/drivers/internal",
-		"internal/execution/drivers/profile",
-		"internal/execution/drivers/scan",
-		"internal/execution/drivers/target",
 		"internal/filewalk",
 		"internal/installer",
-		"internal/policy",
 		"internal/profile",
 		"internal/report",
-		"internal/process",
 		"internal/workspace",
 		"internal/styleguide",
-		"internal/checks",
 	}
 
 	for _, other := range shippedPackDeclarationPackages() {
@@ -122,8 +107,7 @@ func shippedPackBindingsBoundaryCase(packDirectory string) (testCase importBound
 	}
 
 	return importBoundaryCase{
-		name: packDirectory +
-			"/bindings imports only driver facade, own Pack, and tool catalogue",
+		name:      packDirectory + "/bindings imports only its Pack runtime dependencies",
 		directory: packDirectory + "/bindings",
 		forbidden: forbidden,
 	}

@@ -12,21 +12,31 @@ import (
 	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
 )
 
-// DefaultCatalog returns the Shipped Pack catalogue.
+// DefaultCatalog returns the Shipped Pack catalogue. The catalogue owns every canonical Tool
+// capability exactly once; each Pack references its Tools by global ID.
 func DefaultCatalog() (catalog pack.Catalog) {
 	return pack.NewCatalog(
-		project.Pack(tool.BuildAll()),
-		text.Pack(tool.Select(tool.Misspell)),
-		markdown.Pack(tool.Select(tool.Markdownlint)),
-		bash.Pack(tool.Select(
+		tool.BuildAll(),
+		project.Pack(
+			tool.Go,
+			tool.Goimports,
+			tool.Misspell,
+			tool.GolangciLint,
+			tool.Shfmt,
+			tool.Shellcheck,
+			tool.Markdownlint,
+		),
+		text.Pack(tool.Misspell),
+		markdown.Pack(tool.Markdownlint),
+		bash.Pack(
 			tool.Shellcheck,
 			tool.Shfmt,
-		)),
-		golang.Pack(tool.Select(
+		),
+		golang.Pack(
 			tool.Go,
 			tool.Goimports,
 			tool.GolangciLint,
-		)),
+		),
 		security.Pack(),
 		vocabulary.Pack(),
 	)
@@ -35,4 +45,13 @@ func DefaultCatalog() (catalog pack.Catalog) {
 // DefaultRegistry builds a registry from the Shipped Pack catalogue.
 func DefaultRegistry(enabled []string) (registry pack.Registry, err error) {
 	return DefaultCatalog().Registry(enabled)
+}
+
+// ComposeCatalog returns the Shipped catalogue augmented with external Pack definitions. External
+// Packs declare no canonical Tools - their rules reference self-describing ExternalCheckTemplate
+// jobs - so they compose alongside the built-in Packs into one validated catalogue without
+// creating a second selection, binding, or execution pipeline.
+func ComposeCatalog(external []pack.Definition) (catalog pack.Catalog) {
+	base := DefaultCatalog()
+	return pack.NewCatalog(base.Tools(), append(base.Packs(), external...)...)
 }

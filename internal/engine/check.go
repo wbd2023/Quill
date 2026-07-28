@@ -53,7 +53,7 @@ func (engine *Engine) Check(
 		return result, err
 	}
 
-	context, environment, err := engine.prepareRunnerContext(operationContext, options.Scope)
+	runContext, driverSets, err := engine.prepareRun(operationContext, options.Scope)
 	if err != nil {
 		return CheckResult{}, err
 	}
@@ -61,12 +61,12 @@ func (engine *Engine) Check(
 		return result, err
 	}
 
-	result.Scope = context.Scope
+	result.Scope = runContext.Scope
 
-	selected := selectRulesForCheck(context.Effective.Rules, context, options.Mode)
+	selected := selectRulesForCheck(runContext.Effective.Rules, runContext, options.Mode)
 	toolIDs := execution.ToolIDsForRules(selected)
-	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
-		context.ToolEnvironment)
+	result.Toolchain = engine.inspectTools(operationContext, runContext.Tools, toolIDs,
+		runContext.ToolEnvironment)
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 	if err := operationContext.Err(); err != nil {
 		return result, err
@@ -77,9 +77,9 @@ func (engine *Engine) Check(
 		executionResult, executionError := execution.RunRule(
 			operationContext,
 			rule,
-			context,
+			runContext,
 			toolStatuses,
-			environment.CheckDrivers,
+			driverSets.check,
 		)
 		result.Rules = append(result.Rules, RuleCheckResult{
 			Rule: rule,
@@ -100,11 +100,11 @@ func (engine *Engine) Check(
 
 func selectRulesForCheck(
 	available []style.Rule,
-	context execution.RunContext,
+	runContext execution.RunContext,
 	mode style.CheckMode,
 ) (rules []style.Rule) {
 	for _, rule := range available {
-		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
+		if !runContext.Profile.Repository.HasScopeOverlap(runContext.Scope, rule.Scope) {
 			continue
 		}
 

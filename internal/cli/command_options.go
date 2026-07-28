@@ -41,6 +41,23 @@ type lockOptions struct {
 	format   report.OutputFormat
 }
 
+type initOptions struct {
+	repoRoot string
+	preset   string
+}
+
+type listOptions struct {
+	repoRoot string
+	selector string
+	format   report.OutputFormat
+}
+
+type explainOptions struct {
+	repoRoot string
+	subject  string
+	format   report.OutputFormat
+}
+
 type flagHelpError struct {
 	message string
 }

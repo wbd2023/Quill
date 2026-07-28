@@ -60,8 +60,8 @@ func CheckSecrets(
 
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    pattern.code,
-					File:    filewalk.RelativePath(repoRoot, path),
-					Line:    line.Number,
+					File:    filewalk.DisplayPath(repoRoot, path),
+					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "contains " + pattern.message,
 				})
 				break

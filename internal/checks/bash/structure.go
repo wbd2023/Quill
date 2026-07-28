@@ -42,8 +42,8 @@ func CheckStructure(
 			if line.Number == 1 && text != shellShebangLine {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.RelativePath(repoRoot, path),
-					Line:    1,
+					File:    filewalk.DisplayPath(repoRoot, path),
+					Range:   style.Range{Start: style.Position{Line: 1}},
 					Message: fmt.Sprintf("missing %s", shellShebangLine),
 				})
 			}
@@ -55,8 +55,8 @@ func CheckStructure(
 			if strings.Contains(text, "\r") {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.RelativePath(repoRoot, path),
-					Line:    line.Number,
+					File:    filewalk.DisplayPath(repoRoot, path),
+					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "contains CRLF line endings",
 				})
 			}
@@ -64,8 +64,8 @@ func CheckStructure(
 			if hasTrailingHorizontalWhitespace(text) {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.RelativePath(repoRoot, path),
-					Line:    line.Number,
+					File:    filewalk.DisplayPath(repoRoot, path),
+					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "has trailing whitespace",
 				})
 			}
@@ -73,8 +73,8 @@ func CheckStructure(
 			if hasSpaceIndentation(text) {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.RelativePath(repoRoot, path),
-					Line:    line.Number,
+					File:    filewalk.DisplayPath(repoRoot, path),
+					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "uses space indentation",
 				})
 			}
@@ -88,7 +88,7 @@ func CheckStructure(
 		if !hasStrictMode {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "bash/structure/invalid",
-				File:    filewalk.RelativePath(repoRoot, path),
+				File:    filewalk.DisplayPath(repoRoot, path),
 				Message: fmt.Sprintf("missing %s", strictModeLine),
 			})
 		}

@@ -46,7 +46,11 @@ func (m StatusMap) ExplainIssues(ids []string) (message string) {
 	var lines []string
 	for _, id := range ordered {
 		status, ok := m[id]
-		if !ok || status.Valid {
+		if !ok {
+			lines = append(lines, fmt.Sprintf("%s: no inspection status", id))
+			continue
+		}
+		if status.Valid {
 			continue
 		}
 

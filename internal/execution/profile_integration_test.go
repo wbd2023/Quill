@@ -11,7 +11,7 @@ import (
 
 func TestNewRunContextLoadsCurrentProfileFixture(t *testing.T) {
 	fixtureRoot := t.TempDir()
-	profiles.Write(t, fixtureRoot, profiles.Current(t))
+	profiles.Write(t, fixtureRoot, profiles.Self(t))
 
 	testutil.WriteFile(
 		t,

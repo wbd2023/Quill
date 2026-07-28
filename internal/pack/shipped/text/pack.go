@@ -1,20 +1,20 @@
 package text
 
 import (
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
 	"github.com/wbd2023/quill/internal/pack"
-	"github.com/wbd2023/quill/internal/toolchain"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 )
 
 // PackID is the canonical identifier for this Pack.
 const PackID = "text"
 
-// Pack returns the Text Shipped Pack definition.
-func Pack(tools []toolchain.Capability) (definition pack.Definition) {
+// Pack returns the Text Shipped Pack definition. toolIDs reference the canonical Tool capabilities
+// owned by the catalogue by global ID.
+func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
 		ID:       PackID,
 		Name:     "Text",
-		Tools:    append([]toolchain.Capability{}, tools...),
+		ToolIDs:  append([]string{}, toolIDs...),
 		FileSets: fileSets(),
 		Config: pack.Config{
 			Required: true,

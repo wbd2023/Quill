@@ -1,29 +1,24 @@
 package drivers
 
-import (
-	"github.com/wbd2023/quill/internal/execution"
-	"github.com/wbd2023/quill/internal/execution/drivers/command"
-	"github.com/wbd2023/quill/internal/execution/drivers/profile"
-	"github.com/wbd2023/quill/internal/execution/drivers/scan"
-	"github.com/wbd2023/quill/internal/execution/drivers/target"
-)
+import "github.com/wbd2023/quill/internal/execution"
 
 // CheckDrivers returns the complete driver set for check execution.
 func CheckDrivers(bindings Bindings) (set execution.DriverSet) {
 	return execution.DriverSet{
 		Toolchain:      ToolchainDriver,
-		Profile:        profile.CheckDriver(bindings.profileChecks),
-		FileCommand:    command.CheckDriver(bindings.fileInterpreters),
-		TargetCommand:  target.CheckCommandDriver(bindings.targetCommands),
-		TargetCheck:    target.CheckCheckDriver(bindings.targetChecks),
-		RepositoryScan: scan.CheckDriver(bindings.repositoryScanners),
+		Profile:        profileCheckDriver(bindings.profileChecks),
+		FileCommand:    fileCommandCheckDriver(bindings.fileInterpreters),
+		TargetCommand:  targetCommandDriver(bindings.targetCommands),
+		TargetCheck:    targetCheckDriver(bindings.targetChecks),
+		RepositoryScan: repositoryScanDriver(bindings.repositoryScanners),
+		ExternalCheck:  externalCheckDriver(),
 	}
 }
 
 // FixDrivers returns the driver set for fix execution (command and target only).
 func FixDrivers(bindings Bindings) (set execution.DriverSet) {
 	return execution.DriverSet{
-		FileCommand:   command.FixDriver(),
-		TargetCommand: target.FixCommandDriver(bindings.targetCommands),
+		FileCommand:   fileCommandFixDriver(),
+		TargetCommand: targetCommandDriver(bindings.targetCommands),
 	}
 }

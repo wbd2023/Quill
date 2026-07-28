@@ -29,7 +29,7 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 
 	result, err := CheckMagicValues(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {
@@ -65,7 +65,7 @@ func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
 
 	result, err := CheckMagicValues(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {

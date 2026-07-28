@@ -10,11 +10,13 @@ import (
 	"github.com/wbd2023/quill/internal/execution"
 	"github.com/wbd2023/quill/internal/execution/drivers"
 	"github.com/wbd2023/quill/internal/pack"
+	"github.com/wbd2023/quill/internal/pack/external"
 	"github.com/wbd2023/quill/internal/pack/shipped"
 	"github.com/wbd2023/quill/internal/pack/shipped/bindings"
 	"github.com/wbd2023/quill/internal/process"
 	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
+	"github.com/wbd2023/quill/internal/styleguide"
 	"github.com/wbd2023/quill/internal/toolchain"
 	"github.com/wbd2023/quill/internal/workspace"
 )
@@ -25,11 +27,11 @@ import (
 // installation, coverage, and lock generation for a single repository.
 //
 // Engine holds only immutable configuration. It does not cache a loaded profile, compiled plan,
-// or toolchain state between operations. Each method loads a fresh snapshot.
+// style guide, or toolchain state between operations. Each method loads a fresh snapshot through
+// one preparation pipeline.
 type Engine struct {
 	repositoryRoot string
 	commandRunner  toolchain.CommandRunner
-	packProvider   PackProvider
 	progressWriter io.Writer
 }
 
@@ -39,18 +41,15 @@ type Option func(configuration *engineConfiguration) (optionError error)
 type engineConfiguration struct {
 	repositoryRoot string
 	commandRunner  toolchain.CommandRunner
-	packProvider   PackProvider
 	progressWriter io.Writer
 }
 
 // New constructs an Engine for the repository at repositoryRoot. The default command runner
-// executes local commands, and the default pack provider uses the shipped packs and shipped
-// driver bindings.
+// executes local commands.
 func New(repositoryRoot string, options ...Option) (engine *Engine, optionError error) {
 	configuration := engineConfiguration{
 		repositoryRoot: repositoryRoot,
 		commandRunner:  process.Runner{},
-		packProvider:   defaultPackProvider{},
 		progressWriter: io.Discard,
 	}
 
@@ -60,10 +59,14 @@ func New(repositoryRoot string, options ...Option) (engine *Engine, optionError 
 		}
 	}
 
+	canonicalRoot, err := workspace.CanonicalRoot(configuration.repositoryRoot)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Engine{
-		repositoryRoot: configuration.repositoryRoot,
+		repositoryRoot: canonicalRoot,
 		commandRunner:  configuration.commandRunner,
-		packProvider:   configuration.packProvider,
 		progressWriter: configuration.progressWriter,
 	}, nil
 }
@@ -85,139 +88,123 @@ func WithProgressWriter(writer io.Writer) (option Option) {
 	}
 }
 
-// WithPackProvider replaces the provider for pack definitions and execution drivers.
-func WithPackProvider(packProvider PackProvider) (option Option) {
-	return func(configuration *engineConfiguration) (optionError error) {
-		configuration.packProvider = packProvider
-		return nil
-	}
-}
-
-/* ---------------------------------------- Pack Provider --------------------------------------- */
-
-// PackProvider supplies Pack definitions separately from their execution Drivers.
-type PackProvider interface {
-	Definitions(
-		operationContext context.Context,
-		enabledPacks []string,
-	) (definitions PackDefinitions, loadError error)
-	Runtime(
-		operationContext context.Context,
-		enabledPacks []string,
-	) (runtime PackRuntime, loadError error)
-}
-
-// PackDefinitions contains Pack metadata used to compile a Profile.
-type PackDefinitions struct {
-	Registry pack.Registry
-}
-
-// PackRuntime contains the Drivers used for check and fix operations.
-type PackRuntime struct {
-	CheckDrivers execution.DriverSet
-	FixDrivers   execution.DriverSet
-}
-
-// defaultPackProvider supplies shipped Pack definitions and Drivers.
-type defaultPackProvider struct{}
-
-func (defaultPackProvider) Definitions(
-	_ context.Context,
-	enabledPacks []string,
-) (definitions PackDefinitions, loadError error) {
-	registry, err := shipped.DefaultRegistry(enabledPacks)
-	if err != nil {
-		return PackDefinitions{}, err
-	}
-
-	return PackDefinitions{Registry: registry}, nil
-}
-
-func (defaultPackProvider) Runtime(
-	_ context.Context,
-	_ []string,
-) (runtime PackRuntime, loadError error) {
-	built := bindings.Build()
-	return PackRuntime{
-		CheckDrivers: drivers.CheckDrivers(built),
-		FixDrivers:   drivers.FixDrivers(built),
-	}, nil
-}
-
 /* ----------------------------------------- Preparation ---------------------------------------- */
 
-// compiledProfile holds the resolved profile config and compiled execution plan.
-type compiledProfile struct {
-	profile  profile.EffectiveProfile
-	registry pack.Registry
+// preparedOperation holds the freshly loaded and validated state shared by every repository
+// operation. Engine loads it once per operation and never retains it.
+type preparedOperation struct {
+	profile       profile.EffectiveProfile
+	registry      pack.Registry
+	document      styleguide.Document
+	externalPacks []pack.Definition
 }
 
-func (engine *Engine) loadCompiledProfile(
+// resolvedDrivers holds the shipped check and fix driver sets resolved for one runner operation.
+type resolvedDrivers struct {
+	check execution.DriverSet
+	fix   execution.DriverSet
+}
+
+// prepare loads a fresh repository snapshot for one operation: the Profile, the STYLE.md
+// document, the shipped Pack registry, and the compiled effective profile. Requirement IDs bound
+// by the Profile are validated against the parsed document before the profile is compiled, so an
+// unknown but syntactically valid requirement id fails before any rule or tool operation.
+func (engine *Engine) prepare(
 	operationContext context.Context,
-) (compiled compiledProfile, loadError error) {
+) (prepared preparedOperation, prepareError error) {
 	if err := operationContext.Err(); err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 
 	config, err := profile.Load(engine.repositoryRoot)
 	if err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 	if err := operationContext.Err(); err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 
-	definitions, err := engine.packProvider.Definitions(operationContext, config.EnabledPacks)
+	document, err := styleguide.Load(engine.repositoryRoot, styleguide.Config{
+		Filename: config.StyleGuide.Path,
+	})
 	if err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 	if err := operationContext.Err(); err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 
-	config, err = pack.ResolvePacks(config, definitions.Registry.Packs())
+	if err = validateRequirementBindings(config, document); err != nil {
+		return preparedOperation{}, err
+	}
+	if err := operationContext.Err(); err != nil {
+		return preparedOperation{}, err
+	}
+
+	externalPacks, err := external.LoadSources(engine.repositoryRoot, config.PackSources)
 	if err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 	if err := operationContext.Err(); err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 
-	effective, err := profile.Compile(config, definitions.Registry.Definitions())
+	registry, err := shipped.ComposeCatalog(externalPacks).Registry(config.EnabledPacks)
 	if err != nil {
-		return compiledProfile{}, err
-	}
-	if err := operationContext.Err(); err != nil {
-		return compiledProfile{}, err
+		return preparedOperation{}, err
 	}
 
-	return compiledProfile{
-		profile:  effective,
-		registry: definitions.Registry,
+	config, err = pack.ResolvePacks(config, registry.Packs())
+	if err != nil {
+		return preparedOperation{}, err
+	}
+	if err := operationContext.Err(); err != nil {
+		return preparedOperation{}, err
+	}
+
+	effective, err := profile.Compile(config, registry.Definitions())
+	if err != nil {
+		return preparedOperation{}, err
+	}
+
+	return preparedOperation{
+		profile:       effective,
+		registry:      registry,
+		document:      document,
+		externalPacks: externalPacks,
 	}, nil
 }
 
-func (engine *Engine) prepareRunnerContext(
+// prepareRun loads the fresh operation snapshot and resolves the executable runner context and
+// shipped drivers for a check, fix, inspect, install, or lock operation. Metadata-only operations
+// such as Coverage call prepare directly and never construct a runner context, drivers, or
+// inspected tools.
+func (engine *Engine) prepareRun(
 	operationContext context.Context,
 	scope style.Scope,
-) (context execution.RunContext, runtime PackRuntime, prepareError error) {
-	compiled, err := engine.loadCompiledProfile(operationContext)
+) (runContext execution.RunContext, driverSets resolvedDrivers, prepareError error) {
+	prepared, err := engine.prepare(operationContext)
 	if err != nil {
-		return execution.RunContext{}, PackRuntime{}, err
+		return execution.RunContext{}, resolvedDrivers{}, err
 	}
 
-	config := compiled.profile.Profile
+	config := prepared.profile.Profile
 	if scope == "" {
 		scope = config.Repository.DefaultScope
 	}
 
 	if !config.Repository.HasScope(scope) {
-		return execution.RunContext{}, PackRuntime{}, errUnknownScope(scope)
+		return execution.RunContext{}, resolvedDrivers{}, errUnknownScope(scope)
 	}
 
-	runtime, err = engine.packProvider.Runtime(operationContext, config.EnabledPacks)
-	if err != nil {
-		return execution.RunContext{}, PackRuntime{}, err
+	built := bindings.Build()
+	if err = profile.ValidateRuntimeBindings(prepared.profile, built); err != nil {
+		return execution.RunContext{}, resolvedDrivers{}, err
+	}
+
+	driverSets = resolvedDrivers{
+		check: drivers.CheckDrivers(built),
+		fix:   drivers.FixDrivers(built),
 	}
 
 	layout := workspace.NewLayout(engine.repositoryRoot)
@@ -226,13 +213,15 @@ func (engine *Engine) prepareRunnerContext(
 	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
-	return execution.NewRunContext(
+	runContext = execution.NewRunContext(
 		engine.repositoryRoot,
 		scope,
-		compiled.profile.Profile,
-		compiled.profile.Effective,
-		compiled.registry.ToolCapabilities(),
+		prepared.profile.Profile,
+		prepared.profile.Effective,
+		prepared.registry.ToolCapabilities(),
 		toolEnvironment,
 		goEnvironment,
-	), runtime, nil
+	)
+
+	return runContext, driverSets, nil
 }

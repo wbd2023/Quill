@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/wbd2023/quill/internal/checks/golang"
-	"github.com/wbd2023/quill/internal/checks/gopolicy"
 	gopack "github.com/wbd2023/quill/internal/pack/shipped/golang"
+	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
@@ -59,7 +59,7 @@ func goConfigForTest(t *testing.T, config policy.Profile) (goConfig gopolicy.Con
 func scenarioConfig(t *testing.T) (config policy.Profile) {
 	t.Helper()
 
-	config = profiles.Current(t)
+	config = profiles.Self(t)
 	config.PathRoles = policy.PathRoles{
 		"go_source": {"cmd/", "internal/", "test/"},
 		"application_port": {

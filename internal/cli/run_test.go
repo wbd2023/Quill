@@ -120,6 +120,9 @@ func TestUsageTextListsCommands(t *testing.T) {
 		"install",
 		"lock",
 		"version",
+		"init",
+		"list",
+		"explain",
 	}
 
 	for _, snippet := range requiredSnippets {

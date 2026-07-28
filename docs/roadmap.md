@@ -16,8 +16,10 @@ Completed:
   `internal/engine`.
 - Defined versioned JSON envelopes, stdout purity, structured failures, and
   signal cancellation for machine commands.
-- Added tagged release automation for Linux amd64 and arm64, macOS amd64 and
-  arm64, and Windows amd64 archives with checksums.
+- Added tagged release automation that builds, executes, and smoke-tests every
+  declared platform archive on its native runner (Linux amd64 and arm64, macOS
+  amd64 and arm64, Windows amd64), then verifies archive contents and checksum
+  coverage before publishing.
 
 Remaining:
 

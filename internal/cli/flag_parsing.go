@@ -20,18 +20,35 @@ func newFlagSet(name string) (flagSet *flag.FlagSet) {
 	return flagSet
 }
 
-func parseArguments(flagSet *flag.FlagSet, summary string, arguments []string) (err error) {
+// parseFlags parses arguments into flagSet and returns the remaining positional arguments. It
+// converts the flag package's help signal into the CLI's flagHelpError so command help is rendered
+// uniformly. Commands that accept positional selectors or subjects call this directly; commands
+// that reject positional arguments call parseArguments instead.
+func parseFlags(
+	flagSet *flag.FlagSet,
+	summary string,
+	arguments []string,
+) (positional []string, err error) {
 	if err = flagSet.Parse(arguments); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
-			return flagHelpError{
+			return nil, flagHelpError{
 				message: commandUsage(flagSet.Name(), summary, flagSet),
 			}
 		}
 
+		return nil, err
+	}
+
+	return flagSet.Args(), nil
+}
+
+func parseArguments(flagSet *flag.FlagSet, summary string, arguments []string) (err error) {
+	positional, err := parseFlags(flagSet, summary, arguments)
+	if err != nil {
 		return err
 	}
 
-	return ensureNoPositionalArguments(flagSet.Args())
+	return ensureNoPositionalArguments(positional)
 }
 
 /* ---------------------------------------- Value Parsing --------------------------------------- */
@@ -60,6 +77,18 @@ func parseFormat(value string) (format report.OutputFormat, err error) {
 	default:
 		return "", fmt.Errorf("invalid format %q: must be text or json", value)
 	}
+}
+
+func parsePreset(value string) (preset string, err error) {
+	if strings.TrimSpace(value) == "" {
+		return defaultPreset, nil
+	}
+
+	if value == defaultPreset {
+		return value, nil
+	}
+
+	return "", fmt.Errorf("unsupported preset %q: only %q is supported", value, defaultPreset)
 }
 
 /* ------------------------------------- Argument Validation ------------------------------------ */

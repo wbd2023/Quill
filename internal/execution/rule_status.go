@@ -13,7 +13,7 @@ func CheckStatus(
 ) (status style.CheckStatus) {
 	switch {
 	case IsBlocked(err):
-		return style.CheckStatusSkip
+		return style.CheckStatusBlocked
 
 	case err != nil:
 		return style.CheckStatusError

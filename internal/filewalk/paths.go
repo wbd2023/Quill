@@ -1,16 +1,39 @@
 package filewalk
 
-import "path/filepath"
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+)
 
-// RelativePath returns path relative to repoRoot, using forward slashes. If the path cannot be
-// made relative, it is returned cleaned with system separators.
-func RelativePath(repoRoot string, path string) (relative string) {
-	relative, err := filepath.Rel(repoRoot, path)
+// RelativePath returns path relative to repoRoot using forward slashes. It returns an error
+// rather than an absolute or parent-escaping fallback: a path that cannot be contained under
+// repoRoot is a containment failure that must surface. Repository-owned records resolve the
+// error; DisplayPath provides a safe display fallback for diagnostics.
+func RelativePath(repoRoot string, path string) (relative string, err error) {
+	rel, err := filepath.Rel(repoRoot, path)
 	if err != nil {
-		return filepath.Clean(path)
+		return "", fmt.Errorf("path %q is not relative to repository root", path)
 	}
 
-	return filepath.ToSlash(relative)
+	cleaned := filepath.ToSlash(rel)
+	if cleaned == ".." || strings.HasPrefix(cleaned, "../") {
+		return "", fmt.Errorf("path %q escapes the repository root", path)
+	}
+
+	return cleaned, nil
+}
+
+// DisplayPath returns path relative to repoRoot using forward slashes for diagnostic display.
+// When the path cannot be relativised it falls back to the base name, so it never emits an
+// absolute or escaping value. Callers that must reject escapes should use RelativePath.
+func DisplayPath(repoRoot string, path string) (relative string) {
+	relative, err := RelativePath(repoRoot, path)
+	if err != nil {
+		return filepath.ToSlash(filepath.Base(path))
+	}
+
+	return relative
 }
 
 func dedupePaths(values []string) (deduped []string) {

@@ -19,7 +19,7 @@ func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
 
 	result, err := CheckTestHygiene(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {
@@ -52,7 +52,7 @@ func TestCheckTestHygieneAcceptsTrapCleanup(t *testing.T) {
 
 	result, err := CheckTestHygiene(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {

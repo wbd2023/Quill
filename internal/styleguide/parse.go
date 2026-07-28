@@ -3,10 +3,11 @@ package styleguide
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/text"
+
+	"github.com/wbd2023/quill/internal/workspace"
 )
 
 // Load parses the configured STYLE.md file under root.
@@ -15,7 +16,16 @@ func Load(root string, config Config) (document Document, err error) {
 		return Document{}, fmt.Errorf("styleguide filename must not be empty")
 	}
 
-	path := filepath.Join(root, config.Filename)
+	canonical, err := workspace.CanonicalRoot(root)
+	if err != nil {
+		return Document{}, err
+	}
+
+	path, err := workspace.ResolveRepoRelative(canonical, config.Filename)
+	if err != nil {
+		return Document{}, fmt.Errorf("style_guide.path: %w", err)
+	}
+
 	source, err := os.ReadFile(path)
 	if err != nil {
 		return Document{}, err

@@ -32,7 +32,7 @@ func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
 			"worker\n",
 	)
 
-	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
+	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -87,7 +87,7 @@ func TestCheckSafetyPassesCleanScript(t *testing.T) {
 			"main \"$@\"\n",
 	)
 
-	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
+	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("expected bash safety check to pass, diagnostics: %#v", result.Diagnostics)
 	}

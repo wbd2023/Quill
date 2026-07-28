@@ -43,12 +43,12 @@ func TestCheckStatusStrictRecommendationsFail(t *testing.T) {
 	}
 }
 
-func TestCheckStatusBlockedRulesSkip(t *testing.T) {
+func TestCheckStatusBlockedRulesBlock(t *testing.T) {
 	rule := style.Rule{Enforcement: style.EnforcementRequired}
 
 	status := CheckStatus(rule, style.ExecutionResult{}, errRuleBlocked, false)
-	if status != style.CheckStatusSkip {
-		t.Fatalf("expected blocked rule to skip, got %q", status)
+	if status != style.CheckStatusBlocked {
+		t.Fatalf("expected blocked rule to block, got %q", status)
 	}
 }
 

@@ -37,6 +37,10 @@ func validateRepositoryMarkers(markers []string) (err error) {
 			return fmt.Errorf("repository.root_markers contains an empty marker")
 		}
 
+		if err = validateRepoPath(marker); err != nil {
+			return fmt.Errorf("repository.root_markers: %w", err)
+		}
+
 		if seen[marker] {
 			return fmt.Errorf("repository.root_markers contains duplicate marker %q", marker)
 		}
@@ -87,6 +91,10 @@ func validateScopeRoots(scope string, roots []string) (err error) {
 	for _, root := range roots {
 		if isBlank(root) {
 			return fmt.Errorf("repository.scope_roots.%s contains an empty root", scope)
+		}
+
+		if err = validateRepoPath(root); err != nil {
+			return fmt.Errorf("repository.scope_roots.%s: %w", scope, err)
 		}
 
 		if seen[root] {

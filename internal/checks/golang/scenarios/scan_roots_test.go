@@ -11,7 +11,7 @@ import (
 
 func TestGoStyleRejectsMissingScanRoot(t *testing.T) {
 	missingRoot := filepath.Join(t.TempDir(), "missing")
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 
 	if _, err := golang.CheckDirectories(
 		testutil.RepositoryRoot(t),

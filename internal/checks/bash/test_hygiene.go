@@ -48,7 +48,7 @@ func CheckTestHygiene(
 		if foundMktemp && !foundTrap {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "bash/test-hygiene/missing-cleanup",
-				File:    filewalk.RelativePath(repoRoot, path),
+				File:    filewalk.DisplayPath(repoRoot, path),
 				Message: "Bash tests using mktemp must install trap-based cleanup",
 			})
 		}
@@ -62,7 +62,7 @@ func CheckTestHygiene(
 }
 
 func isBashTestFile(repoRoot string, path string) (found bool) {
-	relativePath := filewalk.RelativePath(repoRoot, path)
+	relativePath := filewalk.DisplayPath(repoRoot, path)
 	base := filepath.Base(relativePath)
 
 	if strings.HasSuffix(base, "_test.sh") || strings.HasSuffix(base, ".bats") {

@@ -21,7 +21,7 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 
 	result, _ := CheckSectionHeaderNames(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
 	)
@@ -52,7 +52,7 @@ func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 
 	result, err := CheckSectionHeaderNames(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
 	)
@@ -75,7 +75,7 @@ func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
 
 	result, _ := CheckSectionHeaderNames(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		headers,
 		style.Scope("all"),
 	)

@@ -135,6 +135,10 @@ func validateFileSetPaths(
 				)
 			}
 
+			if err = validateRepoPath(value); err != nil {
+				return fmt.Errorf("file set %q %s.%s: %w", fileSetName, field, scope, err)
+			}
+
 			if seen[value] {
 				return fmt.Errorf(
 					"file set %q %s.%s contains duplicate path %q",

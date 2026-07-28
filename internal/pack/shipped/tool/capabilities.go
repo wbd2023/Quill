@@ -1,13 +1,12 @@
 package tool
 
 import (
-	"cmp"
-	"slices"
-
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
-// BuildAll build all.
+// BuildAll returns the canonical Shipped Tool capabilities. Each Tool is defined exactly once here;
+// Packs reference these Tools by global ID (see ids.go) and the catalogue resolves the references,
+// so a Tool capability is never duplicated across Packs.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{
 		buildBuiltin(Go, "Go", "go",
@@ -48,23 +47,4 @@ func BuildAll() (capabilities []toolchain.Capability) {
 			"markdownlint-cli",
 		),
 	}
-}
-
-// Select returns only the capabilities whose IDs match the given tool IDs.
-func Select(toolIDs ...string) (capabilities []toolchain.Capability) {
-	wanted := make(map[string]bool, len(toolIDs))
-	for _, toolID := range toolIDs {
-		wanted[toolID] = true
-	}
-
-	for _, capability := range BuildAll() {
-		if wanted[capability.ID] {
-			capabilities = append(capabilities, capability)
-		}
-	}
-
-	slices.SortFunc(capabilities, func(a toolchain.Capability, b toolchain.Capability) int {
-		return cmp.Compare(a.ID, b.ID)
-	})
-	return capabilities
 }

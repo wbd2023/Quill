@@ -15,7 +15,7 @@ import (
 func loadDocument(t *testing.T) (document styleguide.Document) {
 	t.Helper()
 
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 	document, err := styleguide.Load(testutil.RepositoryRoot(t), styleguide.Config{
 		Filename: config.StyleGuide.Path,
 	})
@@ -29,7 +29,7 @@ func loadDocument(t *testing.T) (document styleguide.Document) {
 func loadPlan(t *testing.T) (plan style.Plan) {
 	t.Helper()
 
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
 		t.Fatalf("DefaultRegistry: %v", err)

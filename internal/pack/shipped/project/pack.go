@@ -1,11 +1,10 @@
 package project
 
 import (
-	"github.com/wbd2023/quill/internal/checks/projectpolicy"
 	"github.com/wbd2023/quill/internal/pack"
+	projectpolicy "github.com/wbd2023/quill/internal/pack/shipped/project/policy"
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
 	"github.com/wbd2023/quill/internal/style"
-	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.
@@ -20,12 +19,13 @@ const (
 
 const ruleGroupProject style.RuleGroup = "project"
 
-// Pack returns the Project Shipped Pack definition.
-func Pack(tools []toolchain.Capability) (definition pack.Definition) {
+// Pack returns the Project Shipped Pack definition. toolIDs reference the canonical Tool
+// capabilities owned by the catalogue by global ID.
+func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
-		ID:    PackID,
-		Name:  "Project",
-		Tools: append([]toolchain.Capability{}, tools...),
+		ID:      PackID,
+		Name:    "Project",
+		ToolIDs: append([]string{}, toolIDs...),
 		Config: pack.Config{
 			Required: true,
 			Validate: projectpolicy.ValidatePackConfig,

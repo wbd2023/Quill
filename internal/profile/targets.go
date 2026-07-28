@@ -32,6 +32,12 @@ func validateTargets(
 			return fmt.Errorf("target %q has a blank working_directory", target.Name)
 		}
 
+		if target.WorkingDirectory != "" {
+			if err = validateRepoPath(target.WorkingDirectory); err != nil {
+				return fmt.Errorf("target %q working_directory: %w", target.Name, err)
+			}
+		}
+
 		if err = validateTargetPaths(
 			target.Name,
 			"format_paths",
@@ -69,6 +75,10 @@ func validateTargetPaths(
 	for _, path := range paths {
 		if isBlank(path) {
 			return fmt.Errorf("target %q %s contains an empty path", name, field)
+		}
+
+		if err = validateRepoPath(path); err != nil {
+			return fmt.Errorf("target %q %s: %w", name, field, err)
 		}
 
 		if seen[path] {

@@ -58,7 +58,7 @@ func TestRegisteredRulesReferenceKnownTools(t *testing.T) {
 }
 
 func TestCurrentProfileRulesReferenceRequirements(t *testing.T) {
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 
 	registry, err := DefaultRegistry(config.EnabledPacks)
 	if err != nil {

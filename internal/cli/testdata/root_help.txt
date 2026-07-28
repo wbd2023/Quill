@@ -9,5 +9,8 @@ commands:
   install   install pinned style tools
   lock      resolve archive-tool hashes to quill.lock
   version   print the Quill version
+  init      create a minimal STYLE.md and quill.toml
+  list      list packs, rules, tools, or scopes
+  explain   explain an active rule
 
 run `quill help <command>` or `quill <command> -h` to see command-specific flags

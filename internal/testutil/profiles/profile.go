@@ -8,8 +8,8 @@ import (
 	"github.com/wbd2023/quill/internal/testutil"
 )
 
-// Current loads the active profile from the repository root.
-func Current(test *testing.T) (config policy.Profile) {
+// Self loads this repository's Profile for explicit self-hosting tests.
+func Self(test *testing.T) (config policy.Profile) {
 	test.Helper()
 
 	config, err := profile.Load(testutil.RepositoryRoot(test))
@@ -20,11 +20,11 @@ func Current(test *testing.T) (config policy.Profile) {
 	return config
 }
 
-// RepositoryConfig repository config.
-func RepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
+// SelfRepositoryConfig returns this repository's collector policy.
+func SelfRepositoryConfig(test *testing.T) (repository policy.RepositoryConfig) {
 	test.Helper()
 
-	return Current(test).Repository
+	return Self(test).Repository
 }
 
 // Write writes the profile and STYLE.md to the given root.

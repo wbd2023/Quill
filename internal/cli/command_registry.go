@@ -11,6 +11,8 @@ type Command struct {
 	machineMode func([]string) bool
 }
 
+/* -------------------------------------- Command Registry -------------------------------------- */
+
 var commands = []Command{
 	{
 		name:        "check",
@@ -61,7 +63,30 @@ var commands = []Command{
 		prepare:     prepareAction(parseVersionOptions, runVersion),
 		machineMode: versionMachineMode,
 	},
+	{
+		name:        "init",
+		summary:     "create a minimal STYLE.md and quill.toml",
+		usage:       initUsageText,
+		prepare:     prepareAction(parseInitOptionsWithResolver, runInit),
+		machineMode: initMachineMode,
+	},
+	{
+		name:        "list",
+		summary:     "list packs, rules, tools, or scopes",
+		usage:       listUsageText,
+		prepare:     prepareAction(parseListOptionsWithResolver, runList),
+		machineMode: listMachineMode,
+	},
+	{
+		name:        "explain",
+		summary:     "explain an active rule",
+		usage:       explainUsageText,
+		prepare:     prepareAction(parseExplainOptionsWithResolver, runExplain),
+		machineMode: explainMachineMode,
+	},
 }
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
 
 func findCommand(name string) (matched Command, found bool) {
 	for _, command := range commands {

@@ -30,9 +30,9 @@ func TestCommandBuildsGoInstallRequest(t *testing.T) {
 		t.Fatalf("Directory = %q, want %q", cmd.Directory, layout.StateDirectory)
 	}
 
-	if cmd.Environment["GOBIN"] != layout.BinaryDirectory() {
+	if cmd.Variables["GOBIN"] != layout.BinaryDirectory() {
 		t.Fatalf("GOBIN = %q, want %q",
-			cmd.Environment["GOBIN"], layout.BinaryDirectory())
+			cmd.Variables["GOBIN"], layout.BinaryDirectory())
 	}
 
 	if cmd.Arguments[1] != "golang.org/x/tools/cmd/goimports@v0.30.0" {

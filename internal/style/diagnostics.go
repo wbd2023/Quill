@@ -1,17 +1,24 @@
 package style
 
-// Diagnostic is a single style-check finding for one file and line.
+// Diagnostic is a single style-check finding located at a Range within a repository-relative File.
+// The zero Range represents an unknown location; see VerifyRange for the protocol-boundary check
+// applied to diagnostics entering Quill from external sources. HelpURL carries an optional
+// documentation link supplied by the producer; it is empty when none is provided.
 type Diagnostic struct {
 	Code    string
 	Message string
 
-	File   string
-	Line   int
-	Column int
+	File    string
+	Range   Range
+	HelpURL string
 }
 
-// ExecutionResult represents the outcome of running one check or fix against a rule.
+// ExecutionResult represents the outcome of running one check or fix against a rule. PackID
+// records the Pack whose rule produced the result so report aggregation can attribute findings by
+// Pack provenance.
 type ExecutionResult struct {
+	PackID string
+
 	Diagnostics []Diagnostic
 
 	ExitCode int

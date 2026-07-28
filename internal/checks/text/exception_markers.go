@@ -34,8 +34,8 @@ func CheckExceptionMarkers(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "text/exception-markers/invalid",
-				File:    filewalk.RelativePath(repoRoot, path),
-				Line:    line.Number,
+				File:    filewalk.DisplayPath(repoRoot, path),
+				Range:   style.Range{Start: style.Position{Line: line.Number}},
 				Message: "invalid exception marker",
 			})
 			return nil

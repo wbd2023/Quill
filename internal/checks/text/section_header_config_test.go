@@ -3,14 +3,14 @@ package text
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {
 	t.Helper()
 
-	pack, found := profiles.Current(t).PackConfigs.Lookup("text")
+	pack, found := profiles.Self(t).PackConfigs.Lookup("text")
 	if !found {
 		t.Fatal("expected text pack config")
 	}

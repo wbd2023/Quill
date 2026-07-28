@@ -2,7 +2,6 @@ package golang
 
 import (
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/quill/internal/checks/golang/check"
 	"github.com/wbd2023/quill/internal/checks/golang/structure"
 	"github.com/wbd2023/quill/internal/checks/golang/syntax"
 	"github.com/wbd2023/quill/internal/checks/golang/test"
@@ -11,7 +10,7 @@ import (
 /* ---------------------------------------- Rule Dispatch --------------------------------------- */
 
 func (scan fileScan) addLoggingViolations() {
-	if !scan.enabled(check.Logging) {
+	if !scan.enabled(CheckLogging) {
 		return
 	}
 
@@ -25,7 +24,7 @@ func (scan fileScan) addLoggingViolations() {
 }
 
 func (scan fileScan) addSecurityViolations() {
-	if !scan.enabled(check.Security) {
+	if !scan.enabled(CheckSecurity) {
 		return
 	}
 
@@ -47,7 +46,7 @@ func (scan fileScan) addSecurityViolations() {
 }
 
 func (scan fileScan) addProcessViolations() {
-	if !scan.enabled(check.Process) {
+	if !scan.enabled(CheckProcess) {
 		return
 	}
 
@@ -58,7 +57,7 @@ func (scan fileScan) addProcessViolations() {
 }
 
 func (scan fileScan) addResourceViolations() {
-	if !scan.enabled(check.Resources) {
+	if !scan.enabled(CheckResources) {
 		return
 	}
 
@@ -72,7 +71,7 @@ func (scan fileScan) addResourceViolations() {
 }
 
 func (scan fileScan) addDataViolations() {
-	if !scan.enabled(check.Data) {
+	if !scan.enabled(CheckData) {
 		return
 	}
 
@@ -86,7 +85,7 @@ func (scan fileScan) addDataViolations() {
 }
 
 func (scan fileScan) addReturnViolations() {
-	if !scan.enabled(check.Returns) {
+	if !scan.enabled(CheckReturns) {
 		return
 	}
 
@@ -95,7 +94,7 @@ func (scan fileScan) addReturnViolations() {
 }
 
 func (scan fileScan) addParameterViolations() {
-	if !scan.enabled(check.Parameters) {
+	if !scan.enabled(CheckParameters) {
 		return
 	}
 
@@ -114,7 +113,7 @@ func (scan fileScan) addParameterViolations() {
 }
 
 func (scan fileScan) addErrorViolations() {
-	if !scan.enabled(check.Errors) {
+	if !scan.enabled(CheckErrors) {
 		return
 	}
 
@@ -136,7 +135,7 @@ func (scan fileScan) addErrorViolations() {
 }
 
 func (scan fileScan) addCommentViolations() {
-	if !scan.enabled(check.Comments) {
+	if !scan.enabled(CheckComments) {
 		return
 	}
 
@@ -149,7 +148,7 @@ func (scan fileScan) addCommentViolations() {
 }
 
 func (scan fileScan) addDomainValueViolations() {
-	if !scan.enabled(check.DomainValues) {
+	if !scan.enabled(CheckDomainValues) {
 		return
 	}
 
@@ -163,7 +162,7 @@ func (scan fileScan) addDomainValueViolations() {
 }
 
 func (scan fileScan) addOrderViolations() {
-	if !scan.enabled(check.Order) {
+	if !scan.enabled(CheckOrder) {
 		return
 	}
 
@@ -189,7 +188,7 @@ func (scan fileScan) addOrderViolations() {
 }
 
 func (scan fileScan) addNamingViolations() {
-	if !scan.enabled(check.Naming) || scan.isTestFile {
+	if !scan.enabled(CheckNaming) || scan.isTestFile {
 		return
 	}
 
@@ -197,7 +196,7 @@ func (scan fileScan) addNamingViolations() {
 }
 
 func (scan fileScan) addTestViolations() {
-	if !scan.enabled(check.Tests) || !scan.isTestFile {
+	if !scan.enabled(CheckTests) || !scan.isTestFile {
 		return
 	}
 
@@ -209,7 +208,7 @@ func (scan fileScan) addTestViolations() {
 }
 
 func (scan fileScan) addFileShapeViolations() {
-	if !scan.enabled(check.FileShape) {
+	if !scan.enabled(CheckFileShape) {
 		return
 	}
 
@@ -222,14 +221,14 @@ func (scan fileScan) addFileShapeViolations() {
 }
 
 func (scan fileScan) addSpacingViolations() {
-	if scan.enabled(check.GuardClauseSpacing) {
+	if scan.enabled(CheckGuardClauseSpacing) {
 		scan.addViolations(structure.CheckGuardClauseSpacing(
 			scan.state.fileSet,
 			scan.file,
 		))
 	}
 
-	if scan.enabled(check.SwitchCaseSpacing) {
+	if scan.enabled(CheckSwitchCaseSpacing) {
 		scan.addViolations(structure.CheckSwitchCaseSpacing(
 			scan.state.fileSet,
 			scan.file,
@@ -240,8 +239,8 @@ func (scan fileScan) addSpacingViolations() {
 
 /* -------------------------------------- Dispatch Helpers -------------------------------------- */
 
-func (scan fileScan) enabled(checkName string) (enabled bool) {
-	return scan.state.enabled(checkName)
+func (scan fileScan) enabled(selector Check) (enabled bool) {
+	return scan.state.enabled(selector)
 }
 
 func (scan fileScan) addViolations(violations []analysis.Violation) {

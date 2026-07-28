@@ -5,7 +5,6 @@ import (
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
-	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.
@@ -13,12 +12,13 @@ const PackID = "markdown"
 
 const ruleGroupExternal style.RuleGroup = "external_tools"
 
-// Pack returns the Markdown Shipped Pack definition.
-func Pack(tools []toolchain.Capability) (definition pack.Definition) {
+// Pack returns the Markdown Shipped Pack definition. toolIDs reference the canonical Tool
+// capabilities owned by the catalogue by global ID.
+func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
 		ID:       PackID,
 		Name:     "Markdown",
-		Tools:    append([]toolchain.Capability{}, tools...),
+		ToolIDs:  append([]string{}, toolIDs...),
 		FileSets: fileSets(),
 		Rules: []style.RuleDefinition{
 			fileCommandRuleWithConfig(

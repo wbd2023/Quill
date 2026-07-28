@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/quill/internal/checks/gopolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -24,13 +24,13 @@ func CheckDirectories(
 	repository policy.RepositoryConfig,
 	paths policy.PathRoles,
 	goConfig gopolicy.Config,
-	checkNames ...string,
+	checks ...Check,
 ) (result style.ExecutionResult, err error) {
 	if err = validateScanRoots(directories); err != nil {
 		return style.ExecutionResult{}, err
 	}
 
-	violations := analyseDirectories(repoRoot, directories, repository, paths, goConfig, checkNames)
+	violations := analyseDirectories(repoRoot, directories, repository, paths, goConfig, checks)
 	if len(violations) == 0 {
 		return style.ExecutionResult{}, nil
 	}
@@ -61,9 +61,9 @@ func analyseDirectories(
 	repository policy.RepositoryConfig,
 	paths policy.PathRoles,
 	goConfig gopolicy.Config,
-	checkNames []string,
+	checks []Check,
 ) (violations []analysis.Violation) {
-	state := newAnalysisState(repoRoot, repository, paths, goConfig, checkNames)
+	state := newAnalysisState(repoRoot, repository, paths, goConfig, checks)
 
 	files, err := goFilesInDirectories(directories, repository)
 	if err != nil {
@@ -99,14 +99,18 @@ func diagnosticFromViolation(
 ) (diagnostic style.Diagnostic) {
 	path := violation.Position.Filename
 	if repoRoot != "" && filepath.IsAbs(path) {
-		path = filewalk.RelativePath(repoRoot, path)
+		path = filewalk.DisplayPath(repoRoot, path)
 	}
 
 	return style.Diagnostic{
-		Code:    violation.Rule,
-		File:    filepath.ToSlash(path),
-		Line:    violation.Position.Line,
-		Column:  violation.Position.Column,
+		Code: violation.Rule,
+		File: filepath.ToSlash(path),
+		Range: style.Range{
+			Start: style.Position{
+				Line:   violation.Position.Line,
+				Column: violation.Position.Column,
+			},
+		},
 		Message: violation.Message,
 	}
 }

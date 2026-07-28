@@ -17,7 +17,7 @@ func TestCheckSecretsFindsHighConfidenceSecretMarkers(t *testing.T) {
 		"access_key=AKI"+"AABCDEFGHIJKLMNOP\n",
 	)
 
-	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
+	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -40,7 +40,7 @@ func TestCheckSecretsPassesOrdinaryFiles(t *testing.T) {
 	repoRoot := t.TempDir()
 	testutil.WriteFile(t, repoRoot, "internal/example/doc.txt", "ordinary content\n")
 
-	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(t), style.Scope("all"))
+	result, err := CheckSecrets(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("expected committed-secret check to pass, diagnostics: %#v", result.Diagnostics)
 	}

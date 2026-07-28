@@ -79,6 +79,7 @@ func resolveRule(
 
 	return style.Rule{
 		ID:             definition.ID,
+		PackID:         definition.PackID,
 		Name:           definition.Name,
 		Group:          definition.Group,
 		Enforcement:    binding.Enforcement,

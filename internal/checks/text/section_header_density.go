@@ -3,8 +3,8 @@ package text
 import (
 	"fmt"
 
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -35,7 +35,7 @@ func CheckSectionHeaderDensity(
 			return style.ExecutionResult{}, err
 		}
 
-		relativePath := filewalk.RelativePath(repoRoot, path)
+		relativePath := filewalk.DisplayPath(repoRoot, path)
 		if lineCount <= sectionHeaders.ShortMaxLines && len(headers) > 0 {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code: "text/section-header-density/short-file",

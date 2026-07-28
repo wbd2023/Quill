@@ -15,13 +15,13 @@ func validateSectionHeader(
 	body string,
 	bodyPattern *regexp.Regexp,
 ) (diagnostics []style.Diagnostic) {
-	relativePath := filewalk.RelativePath(repoRoot, path)
+	relativePath := filewalk.DisplayPath(repoRoot, path)
 	lineWidth := visualWidth(line.Text)
 	if lineWidth != sectionHeaderLength {
 		diagnostics = append(diagnostics, style.Diagnostic{
-			Code: "text/section-headers/format",
-			File: relativePath,
-			Line: line.Number,
+			Code:  "text/section-headers/format",
+			File:  relativePath,
+			Range: style.Range{Start: style.Position{Line: line.Number}},
 			Message: fmt.Sprintf(
 				"section header must be %d columns (got %d)",
 				sectionHeaderLength,
@@ -34,7 +34,7 @@ func validateSectionHeader(
 		return append(diagnostics, style.Diagnostic{
 			Code:    "text/section-headers/format",
 			File:    relativePath,
-			Line:    line.Number,
+			Range:   style.Range{Start: style.Position{Line: line.Number}},
 			Message: "malformed section header body",
 		})
 	}
@@ -46,7 +46,7 @@ func validateSectionHeader(
 		diagnostics = append(diagnostics, style.Diagnostic{
 			Code:    "text/section-headers/format",
 			File:    relativePath,
-			Line:    line.Number,
+			Range:   style.Range{Start: style.Position{Line: line.Number}},
 			Message: "section header text is not centred with left-side precedence",
 		})
 	}

@@ -1,15 +1,24 @@
 // Package bindings owns the Text Shipped Pack's runtime driver registrations.
 //
 // It is the only place that may connect Text execution identities (the misspell file interpreter
-// and the text repository scanners) to concrete generic drivers. The parent text package stays
-// independent of the driver facade.
+// and the text repository scanners) to concrete check behaviour. The parent text package stays
+// independent of the driver facade and check implementations.
 package bindings
 
 import (
+	"context"
+	"fmt"
+
+	checks "github.com/wbd2023/quill/internal/checks/text"
+	"github.com/wbd2023/quill/internal/execution"
 	"github.com/wbd2023/quill/internal/execution/drivers"
 	"github.com/wbd2023/quill/internal/pack/shipped/text"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
+	"github.com/wbd2023/quill/internal/style"
 )
+
+/* ---------------------------------------- Registration ---------------------------------------- */
 
 // Register wires every Text execution identity into the aggregate driver Bindings.
 // It is called only by the central shipped aggregate builder.
@@ -26,26 +35,142 @@ func registerFileInterpreters(bindings *drivers.Bindings) {
 }
 
 func registerRepositoryScanners(bindings *drivers.Bindings) {
-	bindings.AddRepositoryScanner(text.ScannerASCII, drivers.CheckASCII())
+	bindings.AddRepositoryScanner(text.PackID, text.ScannerASCII, scanASCII)
+	bindings.AddRepositoryScanner(text.PackID, text.ScannerExceptionMarkers, scanExceptionMarkers)
+	bindings.AddRepositoryScanner(text.PackID, text.ScannerLineLength, scanLineLengths)
 	bindings.AddRepositoryScanner(
-		text.ScannerExceptionMarkers,
-		drivers.CheckExceptionMarkers(),
-	)
-	bindings.AddRepositoryScanner(text.ScannerLineLength, drivers.CheckLineLengths())
-	bindings.AddRepositoryScanner(
+		text.PackID,
 		text.ScannerMaintenanceMarkers,
-		drivers.CheckMaintenanceMarkers(),
+		scanMaintenanceMarkers,
 	)
 	bindings.AddRepositoryScanner(
+		text.PackID,
 		text.ScannerSectionHeaderNames,
-		drivers.CheckSectionHeaderNames(text.PackID),
+		scanSectionHeaderNames,
 	)
 	bindings.AddRepositoryScanner(
+		text.PackID,
 		text.ScannerSectionHeaderDensity,
-		drivers.CheckSectionHeaderDensity(text.PackID),
+		scanSectionHeaderDensity,
 	)
-	bindings.AddRepositoryScanner(
-		text.ScannerSectionHeaders,
-		drivers.CheckSectionHeaders(text.PackID),
+	bindings.AddRepositoryScanner(text.PackID, text.ScannerSectionHeaders, scanSectionHeaders)
+}
+
+/* ------------------------------------- Repository Scanners ------------------------------------ */
+
+func scanASCII(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	return checks.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
+}
+
+func scanExceptionMarkers(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	return checks.CheckExceptionMarkers(
+		context.RepoRoot,
+		context.Profile.Repository,
+		context.Scope,
 	)
+}
+
+func scanLineLengths(
+	_ context.Context,
+	context execution.RunContext,
+	scanExec style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	files, err := execution.CollectFileSetFiles(context, scanExec.FileSet)
+	if err != nil {
+		return style.ExecutionResult{}, err
+	}
+
+	return checks.CheckLineLengths(context.RepoRoot, files)
+}
+
+func scanMaintenanceMarkers(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	return checks.CheckMaintenanceMarkers(
+		context.RepoRoot,
+		context.Profile.Repository,
+		context.Scope,
+	)
+}
+
+func scanSectionHeaderNames(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, text.PackID)
+	if err != nil {
+		return style.ExecutionResult{}, err
+	}
+
+	return checks.CheckSectionHeaderNames(
+		context.RepoRoot,
+		context.Profile.Repository,
+		config.SectionHeaders,
+		context.Scope,
+	)
+}
+
+func scanSectionHeaderDensity(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, text.PackID)
+	if err != nil {
+		return style.ExecutionResult{}, err
+	}
+
+	return checks.CheckSectionHeaderDensity(
+		context.RepoRoot,
+		context.Profile.Repository,
+		config.SectionHeaders,
+		context.Scope,
+	)
+}
+
+func scanSectionHeaders(
+	_ context.Context,
+	context execution.RunContext,
+	_ style.RepositoryScanExecution,
+) (result style.ExecutionResult, err error) {
+	config, err := decodeTextPackConfig(context, text.PackID)
+	if err != nil {
+		return style.ExecutionResult{}, err
+	}
+
+	return checks.CheckSectionHeaders(
+		context.RepoRoot,
+		context.Profile.Repository,
+		config.SectionHeaders,
+		context.Scope,
+	)
+}
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
+
+func decodeTextPackConfig(
+	context execution.RunContext,
+	packID string,
+) (config textpolicy.Config, err error) {
+	pack, found := context.Profile.PackConfigs.Lookup(packID)
+	if !found {
+		return textpolicy.Config{}, errMissingPackConfig(packID)
+	}
+
+	return textpolicy.DecodeConfig(pack)
+}
+
+func errMissingPackConfig(packID string) (err error) {
+	return fmt.Errorf("packs.%s must be configured", packID)
 }

@@ -18,7 +18,7 @@ type InstallResult struct {
 func (engine *Engine) Install(
 	operationContext context.Context,
 ) (result InstallResult, operationError error) {
-	context, _, err := engine.prepareRunnerContext(operationContext, "")
+	runContext, _, err := engine.prepareRun(operationContext, "")
 	if err != nil {
 		return InstallResult{}, err
 	}
@@ -33,7 +33,7 @@ func (engine *Engine) Install(
 		operationContext,
 		layout,
 		engine.progressWriter,
-		sortedTools(context.Tools),
+		sortedTools(runContext.Tools),
 		loaded,
 	); err != nil {
 		return InstallResult{}, err
@@ -41,9 +41,9 @@ func (engine *Engine) Install(
 
 	result.Toolchain = engine.inspectTools(
 		operationContext,
-		context.Tools,
-		toolIDs(context.Tools),
-		context.ToolEnvironment,
+		runContext.Tools,
+		toolIDs(runContext.Tools),
+		runContext.ToolEnvironment,
 	)
 	return result, nil
 }

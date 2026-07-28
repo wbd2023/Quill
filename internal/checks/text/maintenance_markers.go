@@ -44,8 +44,8 @@ func CheckMaintenanceMarkers(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "text/maintenance-markers/missing-action",
-				File:    filewalk.RelativePath(repoRoot, path),
-				Line:    line.Number,
+				File:    filewalk.DisplayPath(repoRoot, path),
+				Range:   style.Range{Start: style.Position{Line: line.Number}},
 				Message: "TODO/FIXME markers must include actionable text after the colon",
 			})
 			return nil

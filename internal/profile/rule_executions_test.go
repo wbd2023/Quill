@@ -78,6 +78,56 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 	requireErrorContainsInternal(t, err, "references unknown tool")
 }
 
+func TestCompileCarriesPackIDProvenance(t *testing.T) {
+	t.Parallel()
+
+	definition := style.RuleDefinition{
+		ID:     "test/provenance",
+		PackID: "test",
+		Name:   "Provenance rule",
+		Group:  "test",
+		Check: style.ProfileExecution{
+			PackID: "test",
+			Check:  "commands",
+		},
+	}
+
+	config := profiletest.Config()
+	config.Rules = []policy.RuleBinding{
+		{
+			RuleID:         definition.ID,
+			Enforcement:    style.EnforcementRequired,
+			Scope:          config.Repository.DefaultScope,
+			RequirementIDs: []string{profiletest.Requirement},
+		},
+	}
+
+	plan, err := compilePlan(config, style.Definitions{
+		ToolIDs: []string{profiletest.Tool},
+		Rules:   []style.RuleDefinition{definition},
+	})
+	if err != nil {
+		t.Fatalf("compilePlan: %v", err)
+	}
+	if len(plan.Rules) != 1 {
+		t.Fatalf("rules = %d, want 1", len(plan.Rules))
+	}
+
+	rule := plan.Rules[0]
+	if rule.PackID != "test" {
+		t.Fatalf("rule PackID = %q, want test", rule.PackID)
+	}
+
+	job, ok := rule.Check.(style.ProfileExecution)
+	if !ok {
+		t.Fatalf("expected ProfileExecution, got %T", rule.Check)
+	}
+
+	if job.PackID != "test" {
+		t.Fatalf("job PackID = %q, want test", job.PackID)
+	}
+}
+
 /* ------------------------------------------- Support ------------------------------------------ */
 
 func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err error) {

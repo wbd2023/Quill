@@ -19,7 +19,7 @@ func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
 
 	result, err := CheckExceptionMarkers(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {
@@ -45,7 +45,7 @@ func TestCheckExceptionMarkersAcceptsValidMarkers(t *testing.T) {
 
 	result, err := CheckExceptionMarkers(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {

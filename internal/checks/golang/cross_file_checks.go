@@ -1,12 +1,9 @@
 package golang
 
-import (
-	"github.com/wbd2023/quill/internal/checks/golang/check"
-	"github.com/wbd2023/quill/internal/checks/golang/syntax"
-)
+import "github.com/wbd2023/quill/internal/checks/golang/syntax"
 
 func (state *analysisState) addCrossFileViolations(scanRoots []string) {
-	if state.enabled(check.DomainValues) {
+	if state.enabled(CheckDomainValues) {
 		typeAwareViolations, typeAwareRan := syntax.CollectTypeAwareDomainValueCastViolations(
 			scanRoots,
 			state.scannedGoFiles,

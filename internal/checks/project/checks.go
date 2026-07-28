@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wbd2023/quill/internal/checks/projectpolicy"
 	"github.com/wbd2023/quill/internal/execution"
 	"github.com/wbd2023/quill/internal/filewalk"
+	projectpolicy "github.com/wbd2023/quill/internal/pack/shipped/project/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )

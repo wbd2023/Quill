@@ -7,16 +7,17 @@ import (
 	"testing"
 )
 
-func TestRunnerDriverFamiliesStayBehindFacade(t *testing.T) {
+func TestDriversHaveNoLegacyFamilyImports(t *testing.T) {
 	t.Parallel()
 
 	toolsRoot := importBoundaryRoot(t)
 	modulePath := moduleImportPath(t, toolsRoot)
-	families := []string{
+	legacyFamilies := []string{
 		modulePath + "/internal/execution/drivers/command",
 		modulePath + "/internal/execution/drivers/profile",
 		modulePath + "/internal/execution/drivers/scan",
 		modulePath + "/internal/execution/drivers/target",
+		modulePath + "/internal/execution/drivers/internal",
 	}
 
 	err := filepath.WalkDir(
@@ -40,15 +41,11 @@ func TestRunnerDriverFamiliesStayBehindFacade(t *testing.T) {
 			}
 
 			for _, imported := range fileImports(t, path) {
-				if !isDriverFamilyImport(imported, families) {
+				if !isDriverFamilyImport(imported, legacyFamilies) {
 					continue
 				}
 
-				t.Fatalf(
-					"%s imports driver family package %q; import execution/drivers facade instead",
-					path,
-					imported,
-				)
+				t.Fatalf("%s imports removed Driver package %q", path, imported)
 			}
 
 			return nil

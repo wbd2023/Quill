@@ -30,9 +30,9 @@ func TestCommandBuildsNpmInstallRequest(t *testing.T) {
 		t.Fatalf("Directory = %q, want %q", cmd.Directory, InstallDirectory(layout))
 	}
 
-	if cmd.Environment["npm_config_cache"] != CacheDirectory(layout) {
+	if cmd.Variables["npm_config_cache"] != CacheDirectory(layout) {
 		t.Fatalf("npm_config_cache = %q, want %q",
-			cmd.Environment["npm_config_cache"], CacheDirectory(layout))
+			cmd.Variables["npm_config_cache"], CacheDirectory(layout))
 	}
 
 	found := false

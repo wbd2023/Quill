@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/wbd2023/quill/internal/checks/textpolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -57,7 +57,7 @@ func CheckSectionHeaders(
 		if lineCount >= sectionHeaders.LargeMinLines && len(headers) == 0 {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code: "text/section-headers/missing",
-				File: filewalk.RelativePath(repoRoot, path),
+				File: filewalk.DisplayPath(repoRoot, path),
 				Message: fmt.Sprintf(
 					"missing section headers in %d+ line file",
 					sectionHeaders.LargeMinLines,

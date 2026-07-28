@@ -19,7 +19,7 @@ func TestCheckStructureFindsMissingStrictMode(t *testing.T) {
 
 	result, err := CheckStructure(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/wbd2023/quill/internal/checks/golang"
-	"github.com/wbd2023/quill/internal/checks/golang/check"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -29,7 +28,7 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, check.Logging)
+	result, err := runSelectedGoStyleCheck(t, tempDir, golang.CheckLogging)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -40,7 +39,7 @@ func Bad(raw string) (id domain.IdentityID, err error) {
 	expectDiagnosticMessage(t, result, "structured log key \"Path\" must be lower-case ASCII")
 	rejectDiagnosticMessage(t, result, "direct cast to domain.IdentityID")
 
-	result, err = runSelectedGoStyleCheck(t, tempDir, check.DomainValues)
+	result, err = runSelectedGoStyleCheck(t, tempDir, golang.CheckDomainValues)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -70,7 +69,7 @@ func Validate(a int, b int) (err error) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, check.GuardClauseSpacing)
+	result, err := runSelectedGoStyleCheck(t, tempDir, golang.CheckGuardClauseSpacing)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -105,7 +104,7 @@ func Render(value string) (rendered string) {
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
-	result, err := runSelectedGoStyleCheck(t, tempDir, check.SwitchCaseSpacing)
+	result, err := runSelectedGoStyleCheck(t, tempDir, golang.CheckSwitchCaseSpacing)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -121,7 +120,7 @@ func Render(value string) (rendered string) {
 func runSelectedGoStyleCheck(
 	t *testing.T,
 	targetDirectory string,
-	checkName string,
+	checkName golang.Check,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 

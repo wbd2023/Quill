@@ -111,7 +111,7 @@ func TestPinnedGoimportsVersionMatchesStyleModule(t *testing.T) {
 func pinnedVersion(t *testing.T, toolID string) (version string) {
 	t.Helper()
 
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 	pinnedTool, found := config.Tools.Lookup(toolID)
 	if !found {
 		t.Fatalf("missing %s tool in config", toolID)

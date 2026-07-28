@@ -67,11 +67,11 @@ func diagnosticMatches(diagnostic style.Diagnostic, expected diagnosticMatch) (m
 		return false
 	}
 
-	if expected.line != 0 && diagnostic.Line != expected.line {
+	if expected.line != 0 && diagnostic.Range.Start.Line != expected.line {
 		return false
 	}
 
-	if expected.column != 0 && diagnostic.Column != expected.column {
+	if expected.column != 0 && diagnostic.Range.Start.Column != expected.column {
 		return false
 	}
 

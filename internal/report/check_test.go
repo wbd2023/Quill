@@ -34,7 +34,14 @@ func TestWriteCheckText(t *testing.T) {
 				}),
 				Status: style.CheckStatusFail,
 				Result: style.ExecutionResult{
-					Diagnostics: []style.Diagnostic{{Message: "missing from PATH"}},
+					Diagnostics: []style.Diagnostic{
+						{
+							File:    "docs/example.md",
+							Range:   style.Range{Start: style.Position{Line: 5, Column: 3}},
+							Message: "line too long",
+						},
+						{Message: "missing from PATH"},
+					},
 				},
 			},
 		},
@@ -120,5 +127,148 @@ func TestWriteCheckJSON(t *testing.T) {
 		if strings.Contains(buffer.String(), forbidden) {
 			t.Fatalf("check JSON leaked internal field %q: %s", forbidden, buffer.String())
 		}
+	}
+}
+
+func TestWriteCheckJSONEncodesRange(t *testing.T) {
+	t.Parallel()
+
+	var buffer bytes.Buffer
+
+	view := NewCheckView(CheckResult{
+		Entries: []CheckEntry{
+			{
+				Rule: NewRuleSummary(style.Rule{
+					ID:    "text",
+					Name:  "line length",
+					Group: style.RuleGroup("external_tools"),
+				}),
+				Status: style.CheckStatusFail,
+				Result: style.ExecutionResult{
+					Diagnostics: []style.Diagnostic{
+						{
+							Code:    "text/line-length/too-long",
+							File:    "docs/example.md",
+							Range:   style.Range{Start: style.Position{Line: 5, Column: 3}},
+							Message: "line too long",
+						},
+						{Code: "text/line-length/too-long", Message: "missing from PATH"},
+					},
+				},
+			},
+		},
+	})
+
+	if _, err := WriteCheck(&buffer, "check", FormatJSON, view, false); err != nil {
+		t.Fatalf("WriteCheck: %v", err)
+	}
+
+	var envelope struct {
+		Result struct {
+			Groups []struct {
+				Entries []struct {
+					Diagnostics []map[string]json.RawMessage `json:"diagnostics"`
+				} `json:"entries"`
+			} `json:"groups"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
+		t.Fatalf("decode check json: %v", err)
+	}
+
+	if len(envelope.Result.Groups) != 1 || len(envelope.Result.Groups[0].Entries) != 1 {
+		t.Fatalf("unexpected entry shape: %+v", envelope)
+	}
+
+	diagnostics := envelope.Result.Groups[0].Entries[0].Diagnostics
+	if len(diagnostics) != 2 {
+		t.Fatalf("expected two diagnostics, got %d", len(diagnostics))
+	}
+
+	// A known location renders a structured range: start carries line and column; end is omitted
+	// when the extent is unknown.
+	known, hasRange := diagnostics[0]["range"]
+	if !hasRange {
+		t.Fatalf("expected range for known-location diagnostic: %s", diagnostics[0])
+	}
+
+	var rangePayload struct {
+		Start struct {
+			Line   int `json:"line"`
+			Column int `json:"column"`
+		} `json:"start"`
+		End *struct {
+			Line int `json:"line"`
+		} `json:"end"`
+	}
+	if err := json.Unmarshal(known, &rangePayload); err != nil {
+		t.Fatalf("decode range: %v", err)
+	}
+	if rangePayload.Start.Line != 5 || rangePayload.Start.Column != 3 {
+		t.Fatalf("unexpected range start: %+v", rangePayload.Start)
+	}
+	if rangePayload.End != nil {
+		t.Fatalf("expected unknown range end to be omitted, got %+v", rangePayload.End)
+	}
+
+	// An unknown location omits the range key entirely rather than emitting zero values.
+	if _, hasRange := diagnostics[1]["range"]; hasRange {
+		t.Fatalf("expected no range for unknown-location diagnostic: %s", diagnostics[1])
+	}
+}
+
+func TestWriteCheckJSONSerializesHelpURL(t *testing.T) {
+	t.Parallel()
+
+	var buffer bytes.Buffer
+
+	view := NewCheckView(CheckResult{
+		Entries: []CheckEntry{
+			{
+				Rule: NewRuleSummary(style.Rule{
+					ID:    "external",
+					Name:  "external check",
+					Group: style.RuleGroup("external"),
+				}),
+				Status: style.CheckStatusFail,
+				Result: style.ExecutionResult{
+					Diagnostics: []style.Diagnostic{{
+						Code:    "external/rule",
+						File:    "internal/service/users.go",
+						Range:   style.Range{Start: style.Position{Line: 42, Column: 5}},
+						Message: "Use the repository adapter.",
+						HelpURL: "https://example.invalid/rules/external-rule",
+					}},
+				},
+			},
+		},
+	})
+
+	if _, err := WriteCheck(&buffer, "check", FormatJSON, view, false); err != nil {
+		t.Fatalf("WriteCheck: %v", err)
+	}
+
+	var envelope struct {
+		Result struct {
+			Groups []struct {
+				Entries []struct {
+					Diagnostics []struct {
+						HelpURL string `json:"help_url"`
+					} `json:"diagnostics"`
+				} `json:"entries"`
+			} `json:"groups"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(buffer.Bytes(), &envelope); err != nil {
+		t.Fatalf("decode check json: %v", err)
+	}
+
+	diagnostics := envelope.Result.Groups[0].Entries[0].Diagnostics
+	if len(diagnostics) != 1 {
+		t.Fatalf("expected one diagnostic, got %d", len(diagnostics))
+	}
+	const want = "https://example.invalid/rules/external-rule"
+	if diagnostics[0].HelpURL != want {
+		t.Fatalf("expected help_url %q serialized, got %q", want, diagnostics[0].HelpURL)
 	}
 }

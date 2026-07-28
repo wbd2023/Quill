@@ -5,16 +5,13 @@ import (
 
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
-	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 	original := Definition{
-		ID:   "custom",
-		Name: "Custom",
-		Tools: []toolchain.Capability{
-			{ID: "tool", Command: "tool"},
-		},
+		ID:      "custom",
+		Name:    "Custom",
+		ToolIDs: []string{"tool"},
 		Rules: []style.RuleDefinition{
 			{
 				ID: "custom/rule",
@@ -34,14 +31,14 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 	}
 
 	clone := CloneDefinition(original)
-	clone.Tools[0].Command = "changed"
+	clone.ToolIDs[0] = "changed"
 	clone.FileSets[0].Include.Extensions[0] = ".txt"
 
 	execution := clone.Rules[0].Check.(style.FileCommandExecution)
 	execution.Arguments[0] = "-changed"
 
-	if got := original.Tools[0].Command; got != "tool" {
-		t.Fatalf("original tool command = %q, want tool", got)
+	if got := original.ToolIDs[0]; got != "tool" {
+		t.Fatalf("original tool id = %q, want tool", got)
 	}
 
 	if got := original.FileSets[0].Include.Extensions[0]; got != ".go" {

@@ -65,7 +65,11 @@ func fileSetCoversRelativePath(
 		return true
 	}
 
-	relativePath := filewalk.RelativePath(repoRoot, path)
+	relativePath, err := filewalk.RelativePath(repoRoot, path)
+	if err != nil {
+		return false
+	}
+
 	return slices.Contains(explicitFiles, relativePath) ||
 		hasPrefixedPath(pathPrefixes, relativePath)
 }

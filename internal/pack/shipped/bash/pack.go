@@ -2,18 +2,18 @@ package bash
 
 import (
 	"github.com/wbd2023/quill/internal/pack"
-	"github.com/wbd2023/quill/internal/toolchain"
 )
 
 // PackID is the canonical identifier for this Pack.
 const PackID = "bash"
 
-// Pack returns the Bash Shipped Pack definition.
-func Pack(tools []toolchain.Capability) (definition pack.Definition) {
+// Pack returns the Bash Shipped Pack definition. toolIDs reference the canonical Tool capabilities
+// owned by the catalogue by global ID.
+func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
 		ID:       PackID,
 		Name:     "Bash",
-		Tools:    append([]toolchain.Capability{}, tools...),
+		ToolIDs:  append([]string{}, toolIDs...),
 		FileSets: fileSets(),
 		Rules:    rules(),
 	}

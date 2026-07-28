@@ -40,13 +40,14 @@ configuration; it does not cache Profiles, plans, tool status, or operation resu
 - `internal/style` owns shared domain vocabulary: Rules, Jobs, diagnostics, plans, and statuses.
 - `internal/policy` owns the decoded consumer Profile model.
 - `internal/profile` owns Profile loading, validation, Pack-policy resolution, and compilation.
-- `internal/pack` owns Pack definitions; `internal/pack/shipped` composes shipped Pack declarations
-  and delegates Pack-local runtime registration to explicit child binding packages.
+- `internal/pack` owns Pack definitions. `internal/pack/shipped` owns shipped declarations; each
+  Pack's `policy` child owns its typed persisted Policy codec and its `bindings` child owns concrete
+  runtime wiring.
 - `internal/execution` owns RunContext construction, Rule execution, Driver selection, and file-set
-  collection.
-- `internal/execution/drivers` adapts resolved Jobs to commands and Checks.
-- `internal/checks` owns repository observations and Pack-specific policy codecs. Checks do not own
-  consumer paths, scopes, or enforcement levels.
+  collection. `internal/execution/drivers` owns only generic Job-family dispatch, registry values,
+  command execution, and output interpretation.
+- `internal/checks` owns repository observations. Checks accept validated Pack Policy values and do
+  not own consumer paths, scopes, or enforcement levels.
 - `internal/toolchain`, `internal/installer`, and `internal/process` own external-tool discovery,
   verified installation, and bounded process execution.
 - `internal/styleguide`, `internal/coverage`, and `internal/report` own STYLE.md parsing,

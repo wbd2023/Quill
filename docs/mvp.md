@@ -806,9 +806,18 @@ The ideal MVP officially supports:
 - macOS arm64; and
 - Windows amd64.
 
-WSL2 uses the Linux builds. The release gate must validate every supported
-platform's executable and every shipped Tool assumption before a platform is
-published. A platform is not supported merely because Quill cross-compiles.
+WSL2 uses the Linux builds.
+
+The release gate builds and executes every supported platform's archive on its
+native runner. It smoke-tests `quill help`, `quill version`, and one repository
+check there before publishing, so a platform is not supported merely because
+Quill cross-compiles for it.
+
+Executable support and Tool capability are distinct: the `quill` executable is
+validated on every supported platform, but a Pack check that requires an
+external Tool is only validated where that Tool's installer is supported. The
+cross-platform smoke repository check uses a Pack that needs no external Tool,
+so it does not claim a Tool works on a platform where the Tool cannot run.
 
 ### 12.3 Release artefacts
 

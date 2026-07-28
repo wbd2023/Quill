@@ -19,7 +19,7 @@ func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 
 	result, err := CheckMaintenanceMarkers(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {
@@ -51,7 +51,7 @@ func TestCheckMaintenanceMarkersAcceptsConcreteTodoText(t *testing.T) {
 
 	result, err := CheckMaintenanceMarkers(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
 	if err != nil {

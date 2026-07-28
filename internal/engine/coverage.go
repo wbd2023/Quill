@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/wbd2023/quill/internal/coverage"
-	"github.com/wbd2023/quill/internal/styleguide"
 )
 
-// Coverage loads STYLE.md and the compiled effective profile, then builds requirement coverage.
+// Coverage builds requirement coverage from the prepared STYLE.md document and the compiled
+// effective profile.
 //
-// Coverage intentionally does not construct a runner context or inspect tools. It uses a separate
-// internal pipeline that loads only the profile and style guide.
+// Coverage is metadata-only: it shares the document loaded during operation preparation and never
+// constructs a runner context, resolves drivers, or inspects tools.
 func (engine *Engine) Coverage(
 	operationContext context.Context,
 ) (coverageReport coverage.Report, operationError error) {
@@ -18,7 +18,7 @@ func (engine *Engine) Coverage(
 		return coverage.Report{}, err
 	}
 
-	compiled, err := engine.loadCompiledProfile(operationContext)
+	prepared, err := engine.prepare(operationContext)
 	if err != nil {
 		return coverage.Report{}, err
 	}
@@ -26,20 +26,5 @@ func (engine *Engine) Coverage(
 		return coverage.Report{}, err
 	}
 
-	document, err := styleguide.Load(engine.repositoryRoot, styleguide.Config{
-		Filename: compiled.profile.Profile.StyleGuide.Path,
-	})
-	if err != nil {
-		return coverage.Report{}, err
-	}
-	if err := operationContext.Err(); err != nil {
-		return coverage.Report{}, err
-	}
-
-	coverageReport = coverage.Build(document, compiled.profile.Effective.Rules)
-	if err := operationContext.Err(); err != nil {
-		return coverage.Report{}, err
-	}
-
-	return coverageReport, nil
+	return coverage.Build(prepared.document, prepared.profile.Effective.Rules), nil
 }

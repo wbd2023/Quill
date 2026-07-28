@@ -4,64 +4,40 @@ package architecture
 
 func checkBoundaryCases() (testCases []importBoundaryCase) {
 	return []importBoundaryCase{
-		{
-			name:      "go check IDs stay independent",
-			directory: "internal/checks/golang/check",
-			forbidden: []string{"internal/"},
-		},
-		{
-			name:      "go policy avoids Check implementations",
-			directory: "internal/checks/gopolicy",
-			forbidden: []string{
-				"internal/style",
-				"internal/pack/shipped",
-				"internal/profile",
-				"internal/execution",
-				"internal/checks/golang/analysis",
-				"internal/checks/golang/architecture",
-				"internal/checks/golang/check",
-				"internal/checks/golang/relationships",
-				"internal/checks/golang/structure",
-				"internal/checks/golang/syntax",
-				"internal/checks/golang/test",
-			},
-		},
+		packPolicyBoundaryCase("golang"),
 		packPolicyBoundaryCase("text"),
 		packPolicyBoundaryCase("project"),
 		packPolicyBoundaryCase("vocabulary"),
 		{
-			name:      "go syntax checks do not import Shipped Packs",
+			name:      "go syntax checks use only their own Pack policy",
 			directory: "internal/checks/golang/syntax",
-			forbidden: []string{"internal/pack/shipped"},
+			forbidden: goCheckForbiddenPackImports(),
 		},
 		{
-			name:      "go structure checks do not import Shipped Packs",
+			name:      "go structure checks use only their own Pack policy",
 			directory: "internal/checks/golang/structure",
-			forbidden: []string{"internal/pack/shipped"},
+			forbidden: goCheckForbiddenPackImports(),
 		},
 		{
-			name:      "go relationship checks do not import Shipped Packs",
+			name:      "go relationship checks use only their own Pack policy",
 			directory: "internal/checks/golang/relationships",
-			forbidden: []string{"internal/pack/shipped"},
+			forbidden: goCheckForbiddenPackImports(),
 		},
 		{
-			name:      "go test checks do not import Shipped Packs",
+			name:      "go test checks use only their own Pack policy",
 			directory: "internal/checks/golang/test",
-			forbidden: []string{"internal/pack/shipped"},
+			forbidden: goCheckForbiddenPackImports(),
 		},
 		{
-			name:      "go architecture check avoids source-file checks",
+			name:      "go architecture check uses only its own Pack policy",
 			directory: "internal/checks/golang/architecture",
-			forbidden: []string{
-				"internal/pack/shipped",
-				"internal/profile",
-				"internal/checks/golang/analysis",
-				"internal/checks/golang/check",
+			forbidden: append(
+				goCheckForbiddenPackImports(),
 				"internal/checks/golang/relationships",
 				"internal/checks/golang/structure",
 				"internal/checks/golang/syntax",
 				"internal/checks/golang/test",
-			},
+			),
 		},
 		{
 			name:      "bash checks use filewalk directly",
@@ -80,7 +56,13 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 				"internal/coverage",
 				"internal/installer",
 				"internal/profile",
-				"internal/pack/shipped",
+				"internal/pack/shipped/bash",
+				"internal/pack/shipped/golang/bindings",
+				"internal/pack/shipped/markdown",
+				"internal/pack/shipped/project",
+				"internal/pack/shipped/security",
+				"internal/pack/shipped/text",
+				"internal/pack/shipped/vocabulary",
 				"internal/report",
 				"internal/execution",
 				"internal/process",
@@ -115,21 +97,35 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 
 func packPolicyBoundaryCase(packID string) (testCase importBoundaryCase) {
 	return importBoundaryCase{
-		name:      packID + " Pack Policy avoids Check implementations and orchestration",
-		directory: "internal/checks/" + packID + "policy",
+		name:      packID + " Pack Policy avoids Checks and orchestration",
+		directory: "internal/pack/shipped/" + packID + "/policy",
 		forbidden: []string{
+			"internal/architecture",
 			"internal/cli",
 			"internal/coverage",
+			"internal/execution",
+			"internal/filewalk",
 			"internal/installer",
-			"internal/pack/shipped",
+			"internal/process",
 			"internal/profile",
 			"internal/report",
-			"internal/execution",
-			"internal/process",
-			"internal/workspace",
 			"internal/style",
 			"internal/styleguide",
-			"internal/checks/" + packID,
+			"internal/toolchain",
+			"internal/workspace",
+			"internal/checks",
 		},
+	}
+}
+
+func goCheckForbiddenPackImports() (forbidden []string) {
+	return []string{
+		"internal/pack/shipped/bash",
+		"internal/pack/shipped/golang/bindings",
+		"internal/pack/shipped/markdown",
+		"internal/pack/shipped/project",
+		"internal/pack/shipped/security",
+		"internal/pack/shipped/text",
+		"internal/pack/shipped/vocabulary",
 	}
 }

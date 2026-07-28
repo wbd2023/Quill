@@ -62,9 +62,24 @@ The ideal MVP release publishes checked binary archives for:
 - Windows amd64.
 
 Each release contains one archive per supported platform and a SHA-256 checksum
-file covering every archive. A platform is supported only after Quill and its
-declared Tool assumptions pass its release gate there. A caller outside the Go
-ecosystem does not need a Go toolchain to run a published archive.
+file covering every archive.
+
+Executable support and Pack or Tool capability are distinct commitments:
+
+- The `quill` executable is supported on every listed platform. The release
+  gate builds each archive on its native operating-system and architecture
+  runner and executes it there, smoke-testing `quill help`, `quill version`, and
+  one repository check before publishing. A platform is not supported merely
+  because Quill cross-compiles for it.
+- Pack and Tool capability is platform-qualified. A Pack check that requires an
+  external Tool is only validated where that Tool's installer is supported. The
+  cross-platform release smoke test deliberately uses a Pack check that needs no
+  external Tool, so it never claims a Tool is validated on a platform where the
+  Tool cannot run (for example, not every declared Tool is installable on
+  Windows).
+
+A caller outside the Go ecosystem does not need a Go toolchain to run a
+published archive.
 
 ## Non-goals
 

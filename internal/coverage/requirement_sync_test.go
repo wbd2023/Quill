@@ -20,7 +20,7 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 		requirements[requirement.ID] = true
 	}
 
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 
 	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
 	if err != nil {
@@ -98,7 +98,7 @@ func TestStyleGuideRequirementIDsAreUnique(t *testing.T) {
 func loadStyleRequirements(t *testing.T) (requirements []styleguide.Requirement) {
 	t.Helper()
 
-	config := profiles.Current(t)
+	config := profiles.Self(t)
 	document, err := styleguide.Load(testutil.RepositoryRoot(t), styleguide.Config{
 		Filename: config.StyleGuide.Path,
 	})

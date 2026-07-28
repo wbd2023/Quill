@@ -21,7 +21,7 @@ func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
 
 	result, _ := CheckSectionHeaderDensity(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
 	)
@@ -53,7 +53,7 @@ func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
 
 	result, err := CheckSectionHeaderDensity(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
 	)
@@ -77,7 +77,7 @@ func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
 
 	result, _ := CheckSectionHeaderDensity(
 		repoRoot,
-		profiles.RepositoryConfig(t),
+		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
 	)

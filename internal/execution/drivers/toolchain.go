@@ -25,7 +25,15 @@ func ToolchainDriver(
 	foundFailure := false
 	for _, toolID := range execution.ToolIDs {
 		status, found := toolStatuses[toolID]
-		if !found || status.Valid {
+		if !found {
+			foundFailure = true
+			diagnostics = append(diagnostics, style.Diagnostic{
+				Code:    "toolchain/invalid",
+				Message: fmt.Sprintf("%s: no inspection status", toolID),
+			})
+			continue
+		}
+		if status.Valid {
 			continue
 		}
 
@@ -37,8 +45,11 @@ func ToolchainDriver(
 	}
 
 	if !foundFailure {
-		return style.ExecutionResult{}, nil
+		return style.ExecutionResult{PackID: execution.PackID}, nil
 	}
 
-	return style.ExecutionResult{Diagnostics: diagnostics}, nil
+	return style.ExecutionResult{
+		PackID:      execution.PackID,
+		Diagnostics: diagnostics,
+	}, nil
 }

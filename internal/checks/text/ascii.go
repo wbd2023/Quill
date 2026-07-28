@@ -38,8 +38,8 @@ func CheckASCII(
 				if character > utf8.RuneSelf-1 {
 					result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 						Code:    "text/ascii/non-ascii",
-						File:    filewalk.RelativePath(repoRoot, path),
-						Line:    line.Number,
+						File:    filewalk.DisplayPath(repoRoot, path),
+						Range:   style.Range{Start: style.Position{Line: line.Number}},
 						Message: "contains non-ASCII character",
 					})
 					break

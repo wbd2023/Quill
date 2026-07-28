@@ -7,6 +7,7 @@ Project
 External Tools
   [markdown]  markdownlint  FAIL
     requirements: 5.2.concise-and-clear
+    docs/example.md:5:3 line too long
      missing from PATH
 
-Results: 1 passed, 0 warned, 1 failed, 0 skipped, 0 errored
+Results: 1 passed, 0 warned, 1 failed, 0 blocked, 0 skipped, 0 errored

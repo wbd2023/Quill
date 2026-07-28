@@ -68,8 +68,11 @@ func assertTemplateBound(
 		return nil
 
 	case style.ProfileExecution:
-		if _, found := built.LookupProfileCheck(execution.Check); !found {
-			missing = append(missing, describe(ruleID, side, "profile check", execution.Check))
+		if _, found := built.LookupProfileCheck(execution.PackID, execution.Check); !found {
+			missing = append(
+				missing,
+				describe(ruleID, side, "profile check", execution.PackID+"/"+execution.Check),
+			)
 		}
 
 	case style.FileCommandExecution:
@@ -78,21 +81,50 @@ func assertTemplateBound(
 		}
 
 	case style.RepositoryScanExecution:
-		if _, found := built.LookupRepositoryScanner(execution.Scanner); !found {
+		if _, found := built.LookupRepositoryScanner(execution.PackID, execution.Scanner); !found {
 			missing = append(
 				missing,
-				describe(ruleID, side, "repository scanner", execution.Scanner),
+				describe(
+					ruleID,
+					side,
+					"repository scanner",
+					execution.PackID+"/"+execution.Scanner,
+				),
 			)
 		}
 
 	case style.TargetCommandTemplate:
-		if _, found := built.LookupTargetCommand(execution.Action); !found {
-			missing = append(missing, describe(ruleID, side, "target command", execution.Action))
+		if _, found := built.LookupTargetCommand(
+			execution.PackID,
+			execution.Language,
+			execution.Action,
+		); !found {
+			missing = append(
+				missing,
+				describe(
+					ruleID,
+					side,
+					"target command",
+					execution.PackID+"/"+execution.Language+"/"+execution.Action,
+				),
+			)
 		}
 
 	case style.TargetCheckTemplate:
-		if _, found := built.LookupTargetCheck(execution.Language); !found {
-			missing = append(missing, describe(ruleID, side, "target check", execution.Language))
+		if _, found := built.LookupTargetCheck(
+			execution.PackID,
+			execution.Language,
+			execution.Check,
+		); !found {
+			missing = append(
+				missing,
+				describe(
+					ruleID,
+					side,
+					"target check",
+					execution.PackID+"/"+execution.Language+"/"+execution.Check,
+				),
+			)
 		}
 
 	default:

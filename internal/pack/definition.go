@@ -5,14 +5,15 @@ import (
 
 	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
-	"github.com/wbd2023/quill/internal/toolchain"
 )
 
-// Definition describes a modular checker collection.
+// Definition describes a modular checker collection. Tools reference the canonical Tool
+// capabilities owned by the catalogue by global ID rather than carrying copies; the catalogue
+// resolves each reference and rejects unknown or duplicate declarations.
 type Definition struct {
 	ID       string
 	Name     string
-	Tools    []toolchain.Capability
+	ToolIDs  []string
 	Rules    []style.RuleDefinition
 	FileSets policy.FileSets
 	Config   Config
@@ -37,7 +38,7 @@ func CloneDefinitions(definitions []Definition) (clones []Definition) {
 // CloneDefinition returns a deep copy of definition.
 func CloneDefinition(definition Definition) (clone Definition) {
 	clone = definition
-	clone.Tools = append([]toolchain.Capability{}, definition.Tools...)
+	clone.ToolIDs = slices.Clone(definition.ToolIDs)
 	clone.Rules = CloneRules(definition.Rules)
 	clone.FileSets = definition.FileSets.Clone()
 	return clone

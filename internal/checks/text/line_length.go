@@ -39,9 +39,9 @@ func CheckLineLengths(
 			}
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
-				Code: "text/line-length/too-long",
-				File: filewalk.RelativePath(repoRoot, path),
-				Line: line.Number,
+				Code:  "text/line-length/too-long",
+				File:  filewalk.DisplayPath(repoRoot, path),
+				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"%d columns, tab width %d",
 					len(expandedLine),

@@ -26,6 +26,10 @@ func Load(root string) (config policy.Profile, err error) {
 		return policy.Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
 	}
 
+	if err = validateRepositoryPaths(config, root); err != nil {
+		return policy.Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
+	}
+
 	for _, marker := range config.Repository.RootMarkers {
 		_, err = os.Stat(filepath.Join(root, marker))
 		switch {

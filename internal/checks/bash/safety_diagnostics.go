@@ -14,8 +14,8 @@ func bashSafetyDiagnostic(
 ) (diagnostic style.Diagnostic) {
 	return style.Diagnostic{
 		Code:    code,
-		File:    filewalk.RelativePath(repoRoot, path),
-		Line:    line,
+		File:    filewalk.DisplayPath(repoRoot, path),
+		Range:   style.Range{Start: style.Position{Line: line}},
 		Message: message,
 	}
 }

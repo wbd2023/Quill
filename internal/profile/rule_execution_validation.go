@@ -50,6 +50,9 @@ func (validator ruleExecutionValidator) validate(template style.Template) (err e
 	case style.RepositoryScanExecution:
 		return validator.validateRepositoryScanExecution(detail)
 
+	case style.ExternalCheckTemplate:
+		return validator.validateExternalCheckExecution(detail)
+
 	default:
 		return fmt.Errorf(
 			"rule definition %q %s uses unknown execution detail",

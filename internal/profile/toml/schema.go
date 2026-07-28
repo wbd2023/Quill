@@ -14,8 +14,9 @@ type schemaConfig struct {
 	Tools   map[string]schemaPinnedTool `toml:"tools"`
 	Targets map[string]schemaTarget     `toml:"targets"`
 
-	Packs map[string]any      `toml:"packs"`
-	Rules []schemaRuleBinding `toml:"rules"`
+	Packs       map[string]any      `toml:"packs"`
+	PackSources []schemaPackSource  `toml:"pack_sources"`
+	Rules       []schemaRuleBinding `toml:"rules"`
 }
 
 func decodeConfig(schema schemaConfig) (config policy.Profile, err error) {
@@ -38,6 +39,7 @@ func decodeConfig(schema schemaConfig) (config policy.Profile, err error) {
 
 		EnabledPacks: enabledPacks,
 		PackConfigs:  decodePackConfigs(schema.Packs),
+		PackSources:  decodePackSources(schema.PackSources),
 		Rules:        decodeRules(schema.Rules),
 	}, nil
 }
@@ -55,7 +57,8 @@ func encodeConfig(config policy.Profile) (schema schemaConfig) {
 		Tools:   encodeTools(config.Tools),
 		Targets: encodeTargets(config.Targets),
 
-		Packs: encodePacks(config.EnabledPacks, config.PackConfigs),
-		Rules: encodeRules(config.Rules),
+		Packs:       encodePacks(config.EnabledPacks, config.PackConfigs),
+		PackSources: encodePackSources(config.PackSources),
+		Rules:       encodeRules(config.Rules),
 	}
 }

@@ -2,11 +2,12 @@ package report
 
 import "github.com/wbd2023/quill/internal/style"
 
-// CheckEntry is check entry.
+// CheckEntry is one rendered Rule outcome.
 type CheckEntry struct {
-	Rule   RuleSummary
-	Status style.CheckStatus
-	Result style.ExecutionResult
+	Rule           RuleSummary
+	Status         style.CheckStatus
+	Result         style.ExecutionResult
+	ExecutionError error
 }
 
 // RuleSummary is rule summary.
@@ -24,11 +25,12 @@ type CheckResult struct {
 	Entries []CheckEntry
 }
 
-// CheckSummary is check summary.
+// CheckSummary is the aggregate outcome of a check.
 type CheckSummary struct {
 	Passed  int
 	Warned  int
 	Failed  int
+	Blocked int
 	Skipped int
 	Errored int
 }
@@ -45,6 +47,8 @@ func (result CheckResult) Summary() (summary CheckSummary) {
 		case style.CheckStatusFail:
 			summary.Failed++
 
+		case style.CheckStatusBlocked:
+			summary.Blocked++
 		case style.CheckStatusSkip:
 			summary.Skipped++
 

@@ -20,30 +20,47 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+
 jobs:
+  quality:
+    name: Required quality gate
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
   build:
-    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
-    runs-on: ubuntu-latest
+    name: Build and smoke-test (${{ matrix.goos }}/${{ matrix.goarch }})
+    needs: quality
     strategy:
       fail-fast: false
       matrix:
-        # Exact platform matrix from the distribution contract.
+        # Every declared platform is built and executed on its NATIVE runner.
+        # A platform is published only after its own executable runs there; no
+        # platform is supported merely because Quill cross-compiles for it.
+        # GOOS/GOARCH are set explicitly so a runner/arch mismatch would fail
+        # the native smoke step rather than silently cross-compiling.
         include:
           - goos: linux
             goarch: amd64
+            runner: ubuntu-24.04
             archive: tar.gz
           - goos: linux
             goarch: arm64
+            runner: ubuntu-24.04-arm
             archive: tar.gz
           - goos: darwin
             goarch: amd64
+            runner: macos-15-intel
             archive: tar.gz
           - goos: darwin
             goarch: arm64
+            runner: macos-14
             archive: tar.gz
           - goos: windows
             goarch: amd64
+            runner: windows-latest
             archive: zip
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -58,6 +75,7 @@ jobs:
 
       - name: Build binary
         id: build
+        shell: bash
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME}"
@@ -86,17 +104,95 @@ jobs:
           echo "archive=${archive}" >> "$GITHUB_OUTPUT"
           echo "bin_name=${bin_name}" >> "$GITHUB_OUTPUT"
 
-      - name: Create archive
+      - name: Smoke-test binary on target platform
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin="staging/${{ steps.build.outputs.bin_name }}"
+
+          # 1. help prints usage and exits cleanly.
+          echo "::group::quill help"
+          "${bin}" help
+          echo "::endgroup::"
+
+          # 2. version reports exactly the pushed tag.
+          reported="$("${bin}" version)"
+          echo "Reported version: ${reported}"
+          if [ "${reported}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Version mismatch: binary reports '${reported}'"
+            echo "::error::tag is '${GITHUB_REF_NAME}'"
+            exit 1
+          fi
+
+          # 3. One repository check. The fixture enables only the security
+          # pack's pure-Go committed-secret scan, which needs no external Tool,
+          # so this runs identically on every platform (including Windows, where
+          # not every declared Tool is installable). It is generated fresh under
+          # the workspace and never checked in.
+          smoke="smoke-repo"
+          rm -rf "${smoke}"
+          mkdir -p "${smoke}"
+
+          cat >"${smoke}/STYLE.md" <<'STYLE'
+          # Smoke style guide
+
+          ## 1 Security
+
+          ### 1.1 Secrets
+
+          <!-- style: id=1.1.no-committed-secrets -->
+          * Repositories MUST NOT commit secrets.
+          STYLE
+
+          cat >"${smoke}/quill.toml" <<'TOML'
+          schema_version = 1
+
+          [repository]
+          root_markers = ["STYLE.md", "quill.toml"]
+          default_scope = "all"
+          excluded_directories = [".git"]
+          generated_marker = "DO NOT EDIT."
+
+          [repository.scope_roots]
+          all = ["."]
+
+          [style_guide]
+          path = "STYLE.md"
+
+          [packs]
+          enabled = ["security"]
+
+          [[rules]]
+          id = "security/secrets"
+          enforcement = "required"
+          scope = "all"
+          requirement_ids = ["1.1.no-committed-secrets"]
+          TOML
+
+          echo "::group::quill check (no-external-tool repository check)"
+          "${bin}" check --repo-root "${smoke}"
+          echo "::endgroup::"
+
+          rm -rf "${smoke}"
+
+      - name: Create archive (tar.gz)
+        if: matrix.archive != 'zip'
+        shell: bash
         run: |
           set -euo pipefail
           archive="${{ steps.build.outputs.archive }}"
           bin_name="${{ steps.build.outputs.bin_name }}"
-          if [ "${{ matrix.archive }}" = "zip" ]; then
-            (cd staging && zip -q "../${archive}" "${bin_name}")
-          else
-            tar -czf "${archive}" -C staging "${bin_name}"
-          fi
+          tar -czf "${archive}" -C staging "${bin_name}"
           ls -lh "${archive}"
+
+      - name: Create archive (zip)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $archive = "${{ steps.build.outputs.archive }}"
+          $binary = "staging\${{ steps.build.outputs.bin_name }}"
+          Compress-Archive -Path $binary -DestinationPath "${archive}"
+          Get-Item -Path "${archive}" | Format-List Name, Length
 
       - name: Upload archive
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -28,9 +28,9 @@ func checkGoVocabulary(
 		typeSuffix := matchedSuffix(goTypePattern, line.Text, goTypeSuffixMatchLength)
 		if typeSuffix != "" {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
-				Code: "vocabulary/project-terms/go-type-suffix",
-				File: filewalk.RelativePath(repoRoot, path),
-				Line: line.Number,
+				Code:  "vocabulary/project-terms/go-type-suffix",
+				File:  filewalk.DisplayPath(repoRoot, path),
+				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"type name suffix %q must be %s",
 					typeSuffix,
@@ -50,9 +50,9 @@ func checkGoVocabulary(
 		idSuffix := matchedSuffix(goIdentifierPattern, line.Text, goIdentifierSuffixMatchLength)
 		if idSuffix != "" {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
-				Code: "vocabulary/project-terms/go-identifier-suffix",
-				File: filewalk.RelativePath(repoRoot, path),
-				Line: line.Number,
+				Code:  "vocabulary/project-terms/go-identifier-suffix",
+				File:  filewalk.DisplayPath(repoRoot, path),
+				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"identifier suffix %q must be %s",
 					idSuffix,

@@ -16,16 +16,16 @@ type ToolchainInspection struct {
 func (engine *Engine) Inspect(
 	operationContext context.Context,
 ) (inspection ToolchainInspection, operationError error) {
-	context, _, err := engine.prepareRunnerContext(operationContext, "")
+	runContext, _, err := engine.prepareRun(operationContext, "")
 	if err != nil {
 		return ToolchainInspection{}, err
 	}
 
 	return engine.inspectTools(
 		operationContext,
-		context.Tools,
-		toolIDs(context.Tools),
-		context.ToolEnvironment,
+		runContext.Tools,
+		toolIDs(runContext.Tools),
+		runContext.ToolEnvironment,
 	), nil
 }
 

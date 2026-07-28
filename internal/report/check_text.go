@@ -62,10 +62,11 @@ func writeCheckText(
 
 	_, err = fmt.Fprintf(
 		writer,
-		"Results: %d passed, %d warned, %d failed, %d skipped, %d errored\n",
+		"Results: %d passed, %d warned, %d failed, %d blocked, %d skipped, %d errored\n",
 		summary.Passed,
 		summary.Warned,
 		summary.Failed,
+		summary.Blocked,
 		summary.Skipped,
 		summary.Errored,
 	)
@@ -95,6 +96,16 @@ func writeRuleDetails(writer io.Writer, entry CheckEntry, verbose bool) (err err
 
 	for _, diagnostic := range entry.Result.Diagnostics {
 		if _, err = fmt.Fprintf(writer, "    %s\n", formatDiagnostic(diagnostic)); err != nil {
+			return err
+		}
+	}
+
+	if entry.ExecutionError != nil {
+		if _, err = fmt.Fprintf(
+			writer,
+			"    execution_error: %v\n",
+			entry.ExecutionError,
+		); err != nil {
 			return err
 		}
 	}

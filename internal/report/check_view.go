@@ -20,11 +20,13 @@ func NewCheckEntry(
 	rule style.Rule,
 	status style.CheckStatus,
 	result style.ExecutionResult,
+	executionError error,
 ) (entry CheckEntry) {
 	return CheckEntry{
-		Rule:   NewRuleSummary(rule),
-		Status: status,
-		Result: result,
+		Rule:           NewRuleSummary(rule),
+		Status:         status,
+		Result:         result,
+		ExecutionError: executionError,
 	}
 }
 

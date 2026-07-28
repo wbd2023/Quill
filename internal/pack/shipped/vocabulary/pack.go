@@ -1,8 +1,8 @@
 package vocabulary
 
 import (
-	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
 	"github.com/wbd2023/quill/internal/pack"
+	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 

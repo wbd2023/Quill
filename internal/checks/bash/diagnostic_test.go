@@ -20,7 +20,7 @@ func hasDiagnostic(
 		if file != "" && diagnostic.File != file {
 			continue
 		}
-		if line != 0 && diagnostic.Line != line {
+		if line != 0 && diagnostic.Range.Start.Line != line {
 			continue
 		}
 		if messageFragment != "" && !strings.Contains(diagnostic.Message, messageFragment) {

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/wbd2023/quill/internal/checks/vocabularypolicy"
 	"github.com/wbd2023/quill/internal/filewalk"
+	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -26,9 +26,9 @@ func checkBashVocabulary(
 		}
 
 		result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
-			Code: "vocabulary/project-terms/bash-assignment",
-			File: filewalk.RelativePath(repoRoot, path),
-			Line: line.Number,
+			Code:  "vocabulary/project-terms/bash-assignment",
+			File:  filewalk.DisplayPath(repoRoot, path),
+			Range: style.Range{Start: style.Position{Line: line.Number}},
 			Message: fmt.Sprintf(
 				"bash variable %q must be %s",
 				name,

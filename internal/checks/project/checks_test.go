@@ -3,14 +3,14 @@ package project
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/checks/projectpolicy"
 	projectpack "github.com/wbd2023/quill/internal/pack/shipped/project"
+	projectpolicy "github.com/wbd2023/quill/internal/pack/shipped/project/policy"
 	"github.com/wbd2023/quill/internal/testutil"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
 func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
-	if _, err := CheckExcludedDirectories(profiles.Current(t).Repository); err != nil {
+	if _, err := CheckExcludedDirectories(profiles.Self(t).Repository); err != nil {
 		t.Fatalf("CheckExcludedDirectories: %v", err)
 	}
 }
@@ -70,7 +70,7 @@ lint:
 func currentCommands(t *testing.T) (commands projectpolicy.CommandsConfig) {
 	t.Helper()
 
-	pack, found := profiles.Current(t).PackConfigs.Lookup(projectpack.PackID)
+	pack, found := profiles.Self(t).PackConfigs.Lookup(projectpack.PackID)
 	if !found {
 		t.Fatal("missing project pack config")
 	}

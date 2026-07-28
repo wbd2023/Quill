@@ -83,7 +83,8 @@ func command(
 			"--save-exact", "--ignore-scripts", "--no-audit", "--no-fund",
 			install.Source + "@" + tool.PinnedVersion,
 		},
-		Environment: Environment(layout, path),
+		Environment: process.EnvironmentInherit,
+		Variables:   Environment(layout, path),
 		Directory:   InstallDirectory(layout),
 	}, nil
 }

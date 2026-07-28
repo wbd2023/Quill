@@ -39,17 +39,20 @@ func (engine *Engine) Fix(
 	operationContext context.Context,
 	options FixOptions,
 ) (result FixResult, operationError error) {
-	context, environment, err := engine.prepareRunnerContext(operationContext, options.Scope)
+	runContext, driverSets, err := engine.prepareRun(operationContext, options.Scope)
 	if err != nil {
 		return FixResult{}, err
 	}
 
-	result.Scope = context.Scope
+	result.Scope = runContext.Scope
 
-	rules := selectRulesForFix(context.Effective.Rules, context)
+	rules := selectRulesForFix(runContext.Effective.Rules, runContext)
 	toolIDs := execution.ToolIDsForFixes(rules)
-	result.Toolchain = engine.inspectTools(operationContext, context.Tools, toolIDs,
-		context.ToolEnvironment)
+	result.Toolchain = engine.inspectTools(operationContext, runContext.Tools, toolIDs,
+		runContext.ToolEnvironment)
+	if err := operationContext.Err(); err != nil {
+		return result, err
+	}
 
 	if !result.Toolchain.AllValid {
 		return result, nil
@@ -58,19 +61,22 @@ func (engine *Engine) Fix(
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 	result.Rules = make([]RuleFixResult, 0, len(rules))
 	for _, rule := range rules {
-		execution, executionError := execution.RunFix(
+		executionResult, executionError := execution.RunFix(
 			operationContext,
 			rule,
-			context,
+			runContext,
 			toolStatuses,
-			environment.FixDrivers,
+			driverSets.fix,
 		)
 		result.Rules = append(result.Rules, RuleFixResult{
 			Rule:           rule,
-			Execution:      execution,
+			Execution:      executionResult,
 			ExecutionError: executionError,
 		})
 
+		if err := operationContext.Err(); err != nil {
+			return result, err
+		}
 		if executionError != nil {
 			return result, nil
 		}
@@ -79,9 +85,12 @@ func (engine *Engine) Fix(
 	return result, nil
 }
 
-func selectRulesForFix(available []style.Rule, context execution.RunContext) (rules []style.Rule) {
+func selectRulesForFix(
+	available []style.Rule,
+	runContext execution.RunContext,
+) (rules []style.Rule) {
 	for _, rule := range available {
-		if !context.Profile.Repository.HasScopeOverlap(context.Scope, rule.Scope) {
+		if !runContext.Profile.Repository.HasScopeOverlap(runContext.Scope, rule.Scope) {
 			continue
 		}
 

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
 )
 
 /* ----------------------------------- Domain Identifier Casts ---------------------------------- */

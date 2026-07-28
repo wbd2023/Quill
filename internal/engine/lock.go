@@ -20,12 +20,12 @@ type LockResult struct {
 func (engine *Engine) Lock(
 	operationContext context.Context,
 ) (result LockResult, operationError error) {
-	context, _, err := engine.prepareRunnerContext(operationContext, "")
+	runContext, _, err := engine.prepareRun(operationContext, "")
 	if err != nil {
 		return LockResult{}, err
 	}
 
-	tools := sortedTools(context.Tools)
+	tools := sortedTools(runContext.Tools)
 	archives, err := installer.Resolve(operationContext, engine.progressWriter, tools)
 	if err != nil {
 		return LockResult{}, err

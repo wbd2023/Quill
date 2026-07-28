@@ -6,9 +6,8 @@ import (
 	"io"
 
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
-	"github.com/wbd2023/quill/internal/checks/golang/check"
 	"github.com/wbd2023/quill/internal/checks/golang/relationships"
-	"github.com/wbd2023/quill/internal/checks/gopolicy"
+	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
 	"github.com/wbd2023/quill/internal/policy"
 )
 
@@ -17,7 +16,7 @@ type analysisState struct {
 	goParameters            gopolicy.ParameterConfig
 	goConstructors          gopolicy.ConstructorConfig
 	domainValueConstructors gopolicy.DomainValueConstructors
-	enabledChecks           map[string]bool
+	enabledChecks           map[Check]bool
 	pathClassifier          analysis.PathClassifier
 	fileSet                 *token.FileSet
 	scannedGoFiles          []string
@@ -31,7 +30,7 @@ func newAnalysisState(
 	repository policy.RepositoryConfig,
 	paths policy.PathRoles,
 	goConfig gopolicy.Config,
-	checkNames []string,
+	checks []Check,
 ) (state *analysisState) {
 	pathClassifier := analysis.NewPathClassifier(repoRoot, paths)
 
@@ -40,7 +39,7 @@ func newAnalysisState(
 		goParameters:            goConfig.Parameters,
 		goConstructors:          goConfig.Constructors,
 		domainValueConstructors: goConfig.DomainValues.RequiredConstructors,
-		enabledChecks:           enabledGoChecks(checkNames),
+		enabledChecks:           enabledGoChecks(checks),
 		pathClassifier:          pathClassifier,
 		fileSet:                 token.NewFileSet(),
 		scannedGoFiles:          make([]string, 0),
@@ -49,25 +48,25 @@ func newAnalysisState(
 	}
 }
 
-func enabledGoChecks(checkNames []string) (enabled map[string]bool) {
-	enabled = make(map[string]bool, len(checkNames))
-	for _, checkName := range checkNames {
-		enabled[checkName] = true
+func enabledGoChecks(checks []Check) (enabled map[Check]bool) {
+	enabled = make(map[Check]bool, len(checks))
+	for _, selector := range checks {
+		enabled[selector] = true
 	}
 
 	return enabled
 }
 
-func (state *analysisState) enabled(checkName string) (enabled bool) {
+func (state *analysisState) enabled(selector Check) (enabled bool) {
 	if len(state.enabledChecks) == 0 {
 		return true
 	}
 
-	return state.enabledChecks[checkName]
+	return state.enabledChecks[selector]
 }
 
 func (state *analysisState) collectOrder() (collect bool) {
-	return state.enabled(check.Order)
+	return state.enabled(CheckOrder)
 }
 
 func (state *analysisState) writeWarning(format string, arguments ...any) {

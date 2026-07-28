@@ -110,8 +110,8 @@ func bashMagicDiagnostic(
 ) (diagnostic style.Diagnostic) {
 	return style.Diagnostic{
 		Code:    "bash/magic-values/non-trivial",
-		File:    filewalk.RelativePath(repoRoot, path),
-		Line:    line,
+		File:    filewalk.DisplayPath(repoRoot, path),
+		Range:   style.Range{Start: style.Position{Line: line}},
 		Message: message,
 	}
 }
