@@ -29,8 +29,9 @@ Treat these inputs as trusted code or policy:
 
 - the Quill executable;
 - the consuming repository's `quill.toml` and `quill.lock`;
-- shipped Pack tool capabilities;
-- installed third-party tools;
+- local external-Pack `pack.toml` manifests, executables, and Pack Policy;
+- Shipped Pack tool capabilities;
+- installed third-party tools; and
 - repository Make targets and scripts invoked around Quill.
 
 Review changes to these inputs before running Quill on an untrusted checkout. Run CI jobs with the
@@ -61,13 +62,20 @@ timeouts, and output limits. Tool output is untrusted data. Quill distinguishes 
 from command-execution failures, but it cannot prevent a malicious executable from acting with the
 invoking user's permissions.
 
+External Pack manifests and subprocess output are untrusted data until Quill
+validates them. A Pack executable is trusted code selected by the repository:
+manifest validation, output bounds, timeouts, and path containment do not
+sandbox its behaviour. Review the Pack source, executable, and Pack Policy
+before invoking Quill.
+
 Use reviewed, pinned tool versions. Do not substitute ambient executables in CI. Do not use
 `@latest` or an unverified release binary for a protected branch.
 
 ## Filesystem safety
 
-Quill discovers a repository by locating both `STYLE.md` and `quill.toml`. Use `--repo-root` when
-running from automation that could otherwise discover the wrong parent repository.
+Quill discovers a repository by locating both `STYLE.md` and `quill.toml`. Use
+`--repository-root` when running from automation that could otherwise
+discover the wrong parent repository.
 
 Generated files, dependency trees, caches, and fixture directories should be excluded in the
 Profile. Exclusions reduce unintended scanning and rewriting; they do not create a security
