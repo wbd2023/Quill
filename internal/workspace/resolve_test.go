@@ -150,6 +150,49 @@ func TestResolveRepoRelativeAcceptsNonExistentTarget(t *testing.T) {
 	}
 }
 
+func TestResolveRepoRelativeRejectsMissingPathBeneathEscapingSymlink(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	outside := t.TempDir()
+	link := filepath.Join(root, "escape")
+	if err := os.Symlink(filepath.Join(outside, "missing"), link); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	if _, err := ResolveRepoRelative(root, "escape/future"); err == nil {
+		t.Fatal("ResolveRepoRelative accepted a missing path beneath an escaping symlink")
+	}
+}
+
+func TestResolveRepoRelativeRejectsRelativeDanglingSymlinkBeneathAlias(t *testing.T) {
+	t.Parallel()
+
+	parent := t.TempDir()
+	root := filepath.Join(parent, "root")
+	real := filepath.Join(root, "real")
+	alias := filepath.Join(root, "deep", "nested", "alias")
+	if err := os.MkdirAll(filepath.Dir(alias), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(real, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(parent, "outside"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../../real", alias); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+	if err := os.Symlink("../../outside/missing", filepath.Join(real, "escape")); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	if _, err := ResolveRepoRelative(root, "deep/nested/alias/escape/future"); err == nil {
+		t.Fatal("ResolveRepoRelative accepted a dangling symlink below an aliased directory")
+	}
+}
+
 func TestResolveRepoRelativeRejectsLexicalEscape(t *testing.T) {
 	t.Parallel()
 

@@ -17,13 +17,20 @@ func TestCommandBuildsGoInstallRequest(t *testing.T) {
 		Install:       toolchain.GoInstall{Source: "golang.org/x/tools/cmd/goimports"},
 	}
 
-	cmd, err := command(layout, tool, "/tool/bin:/usr/bin")
+	const bootstrapPath = "/tool/bin:/usr/bin"
+	const resolvedGo = "/tool/bin/go"
+
+	cmd, err := command(layout, tool, resolvedGo, bootstrapPath)
 	if err != nil {
 		t.Fatalf("command: %v", err)
 	}
 
-	if cmd.Name != "go" {
-		t.Fatalf("Name = %q, want %q", cmd.Name, "go")
+	if cmd.Name != resolvedGo {
+		t.Fatalf("Name = %q, want absolute bootstrap-resolved go %q", cmd.Name, resolvedGo)
+	}
+
+	if cmd.Variables["PATH"] != bootstrapPath {
+		t.Fatalf("PATH = %q, want bootstrap PATH %q", cmd.Variables["PATH"], bootstrapPath)
 	}
 
 	if cmd.Directory != layout.StateDirectory {

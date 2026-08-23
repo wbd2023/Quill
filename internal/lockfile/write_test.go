@@ -1,10 +1,14 @@
 package lockfile
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 /* -------------------------------------- Lockfile Writing -------------------------------------- */
@@ -15,7 +19,7 @@ func TestWriteAppliesSharedFilePermissions(t *testing.T) {
 	root := t.TempDir()
 	lockfile := Lockfile{} // empty archives is a valid (if useless) lockfile
 
-	path, err := Write(root, lockfile)
+	path, err := Write(context.Background(), root, lockfile)
 	if err != nil {
 		t.Fatalf("Write: %v", err)
 	}
@@ -29,7 +33,7 @@ func TestWriteAppliesSharedFilePermissions(t *testing.T) {
 		t.Fatalf("stat lockfile: %v", err)
 	}
 
-	if info.Mode().Perm() != standardLockfilePermissions {
+	if runtime.GOOS != "windows" && info.Mode().Perm() != standardLockfilePermissions {
 		t.Fatalf(
 			"lockfile permissions = %04o, want %04o",
 			info.Mode().Perm(),
@@ -54,7 +58,7 @@ func TestWriteCreatesParentDirectories(t *testing.T) {
 		},
 	}
 
-	path, err := Write(root, lockfile)
+	path, err := Write(context.Background(), root, lockfile)
 	if err != nil {
 		t.Fatalf("Write: %v", err)
 	}
@@ -83,7 +87,7 @@ func TestWriteRoundTripsThroughDecode(t *testing.T) {
 		},
 	}
 
-	path, err := Write(root, original)
+	path, err := Write(context.Background(), root, original)
 	if err != nil {
 		t.Fatalf("Write: %v", err)
 	}
@@ -105,4 +109,55 @@ func TestWriteRoundTripsThroughDecode(t *testing.T) {
 	if len(archive.Hashes) != 2 {
 		t.Fatalf("expected 2 hashes, got %d", len(archive.Hashes))
 	}
+}
+
+func TestWriteDoesNotReplaceAfterCancellationAtCommit(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	path := filepath.Join(root, DefaultFilename)
+	original := []byte("preserve existing lockfile\n")
+	if err := os.WriteFile(path, original, standardLockfilePermissions); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := &cancellationAtCommitContext{done: make(chan struct{})}
+	_, err := Write(ctx, root, Lockfile{})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Write error = %v, want context.Canceled", err)
+	}
+
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != string(original) {
+		t.Fatalf("lockfile contents = %q, want %q", contents, original)
+	}
+}
+
+type cancellationAtCommitContext struct {
+	done   chan struct{}
+	checks int
+}
+
+func (*cancellationAtCommitContext) Deadline() (deadline time.Time, ok bool) {
+	return time.Time{}, false
+}
+
+func (ctx *cancellationAtCommitContext) Done() <-chan struct{} {
+	return ctx.done
+}
+
+func (ctx *cancellationAtCommitContext) Err() error {
+	ctx.checks++
+	if ctx.checks < 2 {
+		return nil
+	}
+	close(ctx.done)
+	return context.Canceled
+}
+
+func (*cancellationAtCommitContext) Value(any) any {
+	return nil
 }

@@ -2,6 +2,8 @@ package node
 
 import (
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/wbd2023/quill/internal/workspace"
 )
@@ -14,6 +16,15 @@ func InstallDirectory(layout workspace.Layout) (directory string) {
 // BinaryDirectory returns the directory where Node-installed binaries live.
 func BinaryDirectory(layout workspace.Layout) (directory string) {
 	return filepath.Join(InstallDirectory(layout), "node_modules", ".bin")
+}
+
+// BinaryPath returns the platform-specific path of a managed npm tool.
+func BinaryPath(layout workspace.Layout, command string) (path string) {
+	if runtime.GOOS == "windows" && !strings.EqualFold(filepath.Ext(command), ".cmd") {
+		command += ".cmd"
+	}
+
+	return filepath.Join(BinaryDirectory(layout), command)
 }
 
 // CacheDirectory returns the npm cache directory.

@@ -1,7 +1,6 @@
 package execution
 
 import (
-	"os"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -30,12 +29,12 @@ func collectFileSetCandidates(
 	}
 
 	roots := resolveScopeRoots(context.RepoRoot, context.Profile.Repository, scopes)
-	files, err = filewalk.CollectFilesInRoots(
+	files, err = filewalk.CollectFiles(
+		roots,
 		filewalk.WalkConfig{
 			ExcludedDirectories: context.Profile.Repository.ExcludedDirectories,
 			GeneratedMarker:     context.Profile.Repository.GeneratedMarker,
 		},
-		roots,
 		fileSet.Include.Extensions...,
 	)
 	if err != nil {
@@ -78,8 +77,7 @@ func explicitFileCandidates(
 	for _, scope := range scopes {
 		for _, file := range fileSet.Include.Files[scope] {
 			path := filepath.Join(context.RepoRoot, file)
-			info, err := os.Stat(path)
-			if err != nil || !info.Mode().IsRegular() {
+			if !filewalk.IsRegularLeaf(path) {
 				continue
 			}
 

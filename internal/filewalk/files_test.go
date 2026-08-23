@@ -1,6 +1,7 @@
 package filewalk
 
 import (
+	"os"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -81,7 +82,7 @@ func TestCollectFilesKeepsProseMentionsOfGeneratedMarker(t *testing.T) {
 	}
 }
 
-func TestCollectFilesInRootsDeduplicatesOverlappingRoots(t *testing.T) {
+func TestCollectFilesDeduplicatesOverlappingRoots(t *testing.T) {
 	repoRoot := t.TempDir()
 	commandFile := testutil.WriteFile(t, repoRoot, "cmd/main.go", "package main\n")
 	internalFile := testutil.WriteFile(t, repoRoot, "internal/app.go", "package internal\n")
@@ -99,6 +100,25 @@ func TestCollectFilesInRootsDeduplicatesOverlappingRoots(t *testing.T) {
 	}
 
 	requirePaths(t, files, []string{commandFile, internalFile, toolsFile})
+}
+
+func TestCollectFilesWithoutExtensionsCollectsOnlyRegularFiles(t *testing.T) {
+	repoRoot := t.TempDir()
+	regular := testutil.WriteFile(t, repoRoot, "regular.go", "package regular\n")
+	directory := filepath.Join(repoRoot, "directory")
+	if err := os.MkdirAll(directory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(directory, filepath.Join(repoRoot, "directory.go")); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	files, err := CollectFiles([]string{repoRoot}, walkConfig(profiles.RepositoryConfig()))
+	if err != nil {
+		t.Fatalf("CollectFiles: %v", err)
+	}
+
+	requirePaths(t, files, []string{regular})
 }
 
 func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
@@ -140,6 +160,40 @@ func TestCollectAllFilesSkipsBinaryFiles(t *testing.T) {
 	if slices.Contains(files, binaryFile) {
 		t.Fatalf("unexpected binary file %q in %v", binaryFile, files)
 	}
+}
+
+func TestCollectFilesExcludesSymlinkLeafMatchingExtension(t *testing.T) {
+	repoRoot := t.TempDir()
+	regular := testutil.WriteFile(t, repoRoot, "kept.sh", "#!/bin/sh\necho hi\n")
+
+	target := testutil.WriteFile(t, t.TempDir(), "secret.sh", "#!/bin/sh\necho secret\n")
+	if err := os.Symlink(target, filepath.Join(repoRoot, "evil.sh")); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	files, err := CollectFiles([]string{repoRoot}, walkConfig(profiles.RepositoryConfig()), ".sh")
+	if err != nil {
+		t.Fatalf("CollectFiles: %v", err)
+	}
+
+	requirePaths(t, files, []string{regular})
+}
+
+func TestCollectAllFilesExcludesSymlinkLeaf(t *testing.T) {
+	repoRoot := t.TempDir()
+	regular := testutil.WriteFile(t, repoRoot, "kept.txt", "hello\n")
+
+	target := testutil.WriteFile(t, t.TempDir(), "secret.txt", "secret\n")
+	if err := os.Symlink(target, filepath.Join(repoRoot, "evil.txt")); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	files, err := CollectAllFiles([]string{repoRoot}, walkConfig(profiles.RepositoryConfig()))
+	if err != nil {
+		t.Fatalf("CollectAllFiles: %v", err)
+	}
+
+	requirePaths(t, files, []string{regular})
 }
 
 /* ---------------------------------------- Policy Checks --------------------------------------- */

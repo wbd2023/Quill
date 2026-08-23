@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/wbd2023/quill/internal/lockfile"
 	"github.com/wbd2023/quill/internal/toolchain"
@@ -43,6 +44,10 @@ func resolveWith(
 ) (entries []lockfile.Archive, err error) {
 	var errs []error
 	for _, tool := range tools {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return entries, errors.Join(append(errs, ctxErr)...)
+		}
+
 		install, ok := tool.Install.(toolchain.GitHubInstall)
 		if !ok {
 			continue
@@ -78,8 +83,22 @@ func resolveArchive(
 	resolveOne platformResolver,
 ) (archive lockfile.Archive, err error) {
 	hashes := make(map[string]string, len(install.Platforms))
-
+	platforms := make([]string, 0, len(install.Platforms))
 	for platformKey := range install.Platforms {
+		platforms = append(platforms, platformKey)
+	}
+	slices.Sort(platforms)
+
+	for _, platformKey := range platforms {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return lockfile.Archive{}, fmt.Errorf(
+				"resolve %s %s: %w",
+				tool.ID,
+				platformKey,
+				ctxErr,
+			)
+		}
+
 		hash, hashErr := resolveOne(ctx, writer, install, tool, platformKey)
 		if hashErr != nil {
 			return lockfile.Archive{}, fmt.Errorf(

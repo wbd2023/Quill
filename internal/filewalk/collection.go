@@ -11,7 +11,8 @@ import (
 /* ----------------------------------------- Collection ----------------------------------------- */
 
 // CollectFiles collects files under roots that match any of extensions. If no extensions are
-// given, every regular file is collected.
+// given, every regular file is collected. Symlinks and other non-regular leaves (FIFO, socket,
+// device) are excluded before any content is read so they never reach a generated/binary probe.
 func CollectFiles(
 	roots []string,
 	config WalkConfig,
@@ -32,41 +33,10 @@ func CollectFiles(
 	})
 }
 
-// CollectFilesInRoots collects files in roots that match any of extensions. If no extensions are
-// given, every regular file is collected.
-func CollectFilesInRoots(
-	config WalkConfig,
-	roots []string,
-	extensions ...string,
-) (paths []string, err error) {
-	return collectFilesInRoots(roots, config, func(path string) bool {
-		if len(extensions) == 0 {
-			info, statErr := os.Stat(path)
-			if statErr != nil {
-				return false
-			}
-
-			return info.Mode().IsRegular()
-		}
-
-		for _, extension := range extensions {
-			if strings.HasSuffix(path, extension) {
-				return true
-			}
-		}
-
-		return false
-	})
-}
-
-// CollectAllFiles collects all non-binary regular files under roots.
+// CollectAllFiles collects all non-binary regular files under roots. Symlinks and other
+// non-regular leaves are excluded before any content is read.
 func CollectAllFiles(roots []string, config WalkConfig) (paths []string, err error) {
 	return collectFilesInRoots(roots, config, func(path string) bool {
-		info, statErr := os.Stat(path)
-		if statErr != nil || !info.Mode().IsRegular() {
-			return false
-		}
-
 		return !IsBinaryFile(path)
 	})
 }
@@ -96,6 +66,14 @@ func collectFilesInRoots(
 					return nil
 				}
 
+				// Reject symlink and other non-regular leaves (FIFO, socket,
+				// device) using the walk entry's lstat type. This runs before
+				// any generated/binary probe reads the leaf, so a link or
+				// special file is excluded rather than opened or followed.
+				if !entry.Type().IsRegular() {
+					return nil
+				}
+
 				if isGeneratedFile(path, config.GeneratedMarker) {
 					return nil
 				}
@@ -115,4 +93,19 @@ func collectFilesInRoots(
 
 	sort.Strings(paths)
 	return dedupePaths(paths), nil
+}
+
+/* ------------------------------------- Leaf Classification ------------------------------------ */
+
+// IsRegularLeaf reports whether path is a regular, non-symlink leaf using lstat, so symlinks,
+// FIFOs, sockets, and devices all report false. Collection already enforces this invariant
+// through the walk entry; this helper covers explicit candidate paths that bypass the walk,
+// letting callers fail closed before reading a candidate or handing it off to a driver.
+func IsRegularLeaf(path string) (regular bool) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return false
+	}
+
+	return info.Mode().IsRegular()
 }

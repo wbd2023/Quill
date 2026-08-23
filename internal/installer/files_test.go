@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -43,7 +44,7 @@ func TestWriteExecutableReplacesRegularDestination(t *testing.T) {
 	if err != nil {
 		t.Fatalf("inspect destination: %v", err)
 	}
-	if info.Mode().Perm() != standardPermissions {
+	if runtime.GOOS != "windows" && info.Mode().Perm() != standardPermissions {
 		t.Fatalf("destination mode = %v, want %v", info.Mode().Perm(), standardPermissions)
 	}
 }

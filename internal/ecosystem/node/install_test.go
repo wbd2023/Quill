@@ -17,13 +17,20 @@ func TestCommandBuildsNpmInstallRequest(t *testing.T) {
 		Install:       toolchain.NpmInstall{Source: "markdownlint-cli"},
 	}
 
-	cmd, err := command(layout, tool, "/tool/bin:/usr/bin")
+	const bootstrapPath = "/tool/bin:/usr/bin"
+	const resolvedNpm = "/tool/bin/npm"
+
+	cmd, err := command(layout, tool, resolvedNpm, bootstrapPath)
 	if err != nil {
 		t.Fatalf("command: %v", err)
 	}
 
-	if cmd.Name != "npm" {
-		t.Fatalf("Name = %q, want %q", cmd.Name, "npm")
+	if cmd.Name != resolvedNpm {
+		t.Fatalf("Name = %q, want absolute bootstrap-resolved npm %q", cmd.Name, resolvedNpm)
+	}
+
+	if cmd.Variables["PATH"] != bootstrapPath {
+		t.Fatalf("PATH = %q, want bootstrap PATH %q", cmd.Variables["PATH"], bootstrapPath)
 	}
 
 	if cmd.Directory != InstallDirectory(layout) {

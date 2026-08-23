@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -62,9 +63,9 @@ func ValidateRepoRelative(value string) (err error) {
 }
 
 // ResolveRepoRelative joins value under root and enforces lexical and physical containment.
-// root must be canonical (see CanonicalRoot). When the joined target exists, its symlinks are
-// resolved and the result must remain inside root; a non-existent target is accepted because its
-// escape is already ruled out by the lexical check and resolution is not yet possible.
+// root must be canonical (see CanonicalRoot). An existing target must resolve inside root. A
+// missing target is accepted only when its deepest existing ancestor resolves inside root; the
+// returned path is a snapshot, not a race-proof filesystem capability.
 func ResolveRepoRelative(root string, value string) (absolute string, err error) {
 	if err = ValidateRepoRelative(value); err != nil {
 		return "", err
@@ -72,18 +73,63 @@ func ResolveRepoRelative(root string, value string) (absolute string, err error)
 
 	joined := filepath.Join(root, filepath.FromSlash(value))
 	resolved, err := filepath.EvalSymlinks(joined)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return joined, nil
+	if err == nil {
+		if !isWithinRoot(root, resolved) {
+			return "", fmt.Errorf("path %q resolves outside the repository root", value)
 		}
+		return resolved, nil
+	}
+	if !errors.Is(err, fs.ErrNotExist) {
 		return "", fmt.Errorf("resolve repository path %q: %w", value, err)
 	}
 
-	if !isWithinRoot(root, resolved) {
+	ancestor, err := resolveExistingAncestor(joined)
+	if err != nil {
+		return "", fmt.Errorf("resolve repository path %q: %w", value, err)
+	}
+	if !isWithinRoot(root, ancestor) {
 		return "", fmt.Errorf("path %q resolves outside the repository root", value)
 	}
 
-	return resolved, nil
+	return joined, nil
+}
+
+func resolveExistingAncestor(path string) (resolved string, err error) {
+	for {
+		resolved, err = filepath.EvalSymlinks(path)
+		if err == nil {
+			return resolved, nil
+		}
+		if !errors.Is(err, fs.ErrNotExist) {
+			return "", err
+		}
+
+		info, statErr := os.Lstat(path)
+		if statErr == nil && info.Mode()&fs.ModeSymlink != 0 {
+			target, readErr := os.Readlink(path)
+			if readErr != nil {
+				return "", readErr
+			}
+			if !filepath.IsAbs(target) {
+				parent, parentErr := filepath.EvalSymlinks(filepath.Dir(path))
+				if parentErr != nil {
+					return "", parentErr
+				}
+				target = filepath.Join(parent, target)
+			}
+			path = filepath.Clean(target)
+			continue
+		}
+		if statErr != nil && !errors.Is(statErr, fs.ErrNotExist) {
+			return "", statErr
+		}
+
+		parent := filepath.Dir(path)
+		if parent == path {
+			return "", err
+		}
+		path = parent
+	}
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */

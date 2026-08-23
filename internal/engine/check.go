@@ -65,8 +65,15 @@ func (engine *Engine) Check(
 
 	selected := selectRulesForCheck(runContext.Effective.Rules, runContext, options.Mode)
 	toolIDs := execution.ToolIDsForRules(selected)
-	result.Toolchain = engine.inspectTools(operationContext, runContext.Tools, toolIDs,
-		runContext.ToolEnvironment)
+	result.Toolchain, err = engine.inspectTools(
+		operationContext,
+		runContext.Tools,
+		toolIDs,
+		runContext.ToolEnvironment,
+	)
+	if err != nil {
+		return result, err
+	}
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
 	if err := operationContext.Err(); err != nil {
 		return result, err

@@ -39,11 +39,14 @@ func (engine *Engine) Install(
 		return InstallResult{}, err
 	}
 
-	result.Toolchain = engine.inspectTools(
+	result.Toolchain, err = engine.inspectTools(
 		operationContext,
 		runContext.Tools,
 		toolIDs(runContext.Tools),
 		runContext.ToolEnvironment,
 	)
+	if err != nil {
+		return result, err
+	}
 	return result, nil
 }

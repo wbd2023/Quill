@@ -4,28 +4,26 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/wbd2023/quill/internal/process"
 	"github.com/wbd2023/quill/internal/toolchain"
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
-// standardPermissions is the filesystem mode for created directories.
-const standardPermissions os.FileMode = 0o755
-
-// Install runs npm install for the tool using an isolated npm environment derived from layout. It
-// skips installation when the tool is already present at the pinned version.
+// Install runs npm install for a tool that needs installation. The installer normally checks the
+// managed binary before resolving bootstrap PATH; this package repeats that early return so direct
+// callers also never need a host npm executable for an already-installed tool.
 func Install(
 	ctx context.Context,
 	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
+	executable string,
 	path string,
+	runner toolchain.CommandRunner,
 ) (err error) {
-	binary := filepath.Join(BinaryDirectory(layout), tool.Command)
-	installed, err := toolchain.IsInstalled(ctx, process.Runner{}, tool, binary)
+	binary := BinaryPath(layout, tool.Command)
+	installed, err := toolchain.IsInstalled(ctx, runner, tool, binary)
 	if err != nil {
 		return err
 	}
@@ -43,12 +41,8 @@ func Install(
 		return err
 	}
 
-	command, err := command(layout, tool, path)
+	command, err := command(layout, tool, executable, path)
 	if err != nil {
-		return err
-	}
-
-	if err = os.MkdirAll(command.Directory, standardPermissions); err != nil {
 		return err
 	}
 
@@ -60,11 +54,13 @@ func Install(
 }
 
 // command builds the CommandRequest for running npm install with an isolated npm environment.
-// --ignore-scripts prevents arbitrary postinstall scripts from running; the remaining flags pin
-// the exact version and suppress side output.
+// --ignore-scripts prevents arbitrary postinstall scripts; --no-save and --package-lock=false
+// prevent npm from rewriting repository-state manifests. The executable is the trusted,
+// bootstrap-resolved npm binary, and path never searches repository or state directories.
 func command(
 	layout workspace.Layout,
 	tool toolchain.Tool,
+	executable string,
 	path string,
 ) (cmd process.CommandRequest, err error) {
 	install, ok := tool.Install.(toolchain.NpmInstall)
@@ -77,10 +73,10 @@ func command(
 	}
 
 	return process.CommandRequest{
-		Name: "npm",
+		Name: executable,
 		Arguments: []string{
 			"install",
-			"--save-exact", "--ignore-scripts", "--no-audit", "--no-fund",
+			"--ignore-scripts", "--no-save", "--package-lock=false", "--no-audit", "--no-fund",
 			install.Source + "@" + tool.PinnedVersion,
 		},
 		Environment: process.EnvironmentInherit,

@@ -4,28 +4,26 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/wbd2023/quill/internal/process"
 	"github.com/wbd2023/quill/internal/toolchain"
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
-// standardPermissions is the filesystem mode for created directories.
-const standardPermissions os.FileMode = 0o755
-
-// Install runs go install for the tool using an isolated Go environment derived from layout. It
-// skips installation when the tool is already present at the pinned version.
+// Install runs go install for a tool that needs installation. The installer normally checks the
+// managed binary before resolving bootstrap PATH; this package repeats that early return so direct
+// callers also never need a host Go executable for an already-installed tool.
 func Install(
 	ctx context.Context,
 	layout workspace.Layout,
 	writer io.Writer,
 	tool toolchain.Tool,
+	executable string,
 	path string,
+	runner toolchain.CommandRunner,
 ) (err error) {
-	binary := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	installed, err := toolchain.IsInstalled(ctx, process.Runner{}, tool, binary)
+	binary := BinaryPath(layout, tool.Command)
+	installed, err := toolchain.IsInstalled(ctx, runner, tool, binary)
 	if err != nil {
 		return err
 	}
@@ -43,12 +41,8 @@ func Install(
 		return err
 	}
 
-	command, err := command(layout, tool, path)
+	command, err := command(layout, tool, executable, path)
 	if err != nil {
-		return err
-	}
-
-	if err = os.MkdirAll(command.Directory, standardPermissions); err != nil {
 		return err
 	}
 
@@ -59,10 +53,13 @@ func Install(
 	return nil
 }
 
-// command builds the CommandRequest for running go install with an isolated Go environment.
+// command builds the CommandRequest for running go install with an isolated Go environment. The
+// executable is the absolute bootstrap-resolved go binary; path is the bootstrap PATH passed
+// through to the child so it never searches repository or state directories.
 func command(
 	layout workspace.Layout,
 	tool toolchain.Tool,
+	executable string,
 	path string,
 ) (command process.CommandRequest, err error) {
 	install, ok := tool.Install.(toolchain.GoInstall)
@@ -78,7 +75,7 @@ func command(
 	environment["GOBIN"] = layout.BinaryDirectory()
 
 	return process.CommandRequest{
-		Name:        "go",
+		Name:        executable,
 		Arguments:   []string{"install", install.Source + "@" + tool.PinnedVersion},
 		Environment: process.EnvironmentInherit,
 		Variables:   environment,

@@ -99,6 +99,44 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	}
 }
 
+func TestResolveArchiveProcessesPlatformsInOrder(t *testing.T) {
+	t.Parallel()
+
+	tool := toolchain.Tool{ID: "test-tool", Name: "Test", PinnedVersion: "1.0.0"}
+	install := testGitHubInstall("linux/amd64", "darwin/arm64", "linux/arm64")
+	var platforms []string
+
+	_, err := resolveArchive(
+		context.Background(),
+		io.Discard,
+		tool,
+		install,
+		func(
+			_ context.Context,
+			_ io.Writer,
+			_ toolchain.GitHubInstall,
+			_ toolchain.Tool,
+			platform string,
+		) (string, error) {
+			platforms = append(platforms, platform)
+			return "hash", nil
+		},
+	)
+	if err != nil {
+		t.Fatalf("resolveArchive: %v", err)
+	}
+
+	want := []string{"darwin/arm64", "linux/amd64", "linux/arm64"}
+	if len(platforms) != len(want) {
+		t.Fatalf("platform order = %v, want %v", platforms, want)
+	}
+	for index, platform := range want {
+		if platforms[index] != platform {
+			t.Fatalf("platform order = %v, want %v", platforms, want)
+		}
+	}
+}
+
 func TestResolveArchivePropagatesPlatformError(t *testing.T) {
 	t.Parallel()
 
@@ -187,5 +225,40 @@ func TestResolveSkipsNonArchiveTools(t *testing.T) {
 
 	if len(entries) != 0 {
 		t.Fatalf("expected 0 entries (non-archive tool skipped), got %d", len(entries))
+	}
+}
+
+func TestResolveStopsBeforeStartingSecondToolAfterCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var calls []string
+	entries, err := resolveWith(
+		ctx,
+		io.Discard,
+		[]toolchain.Tool{
+			{ID: "first", Install: testGitHubInstall("linux/amd64")},
+			{ID: "later", Install: testGitHubInstall("linux/amd64")},
+		},
+		func(
+			_ context.Context,
+			_ io.Writer,
+			tool toolchain.Tool,
+			_ toolchain.GitHubInstall,
+			_ platformResolver,
+		) (lockfile.Archive, error) {
+			calls = append(calls, tool.ID)
+			cancel()
+			return lockfile.Archive{Tool: tool.ID}, nil
+		},
+	)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Resolve error = %v, want context.Canceled", err)
+	}
+	if len(entries) != 1 || entries[0].Tool != "first" {
+		t.Fatalf("Resolve entries = %v, want first entry only", entries)
+	}
+	if len(calls) != 1 || calls[0] != "first" {
+		t.Fatalf("Resolve calls = %v, want [first]", calls)
 	}
 }

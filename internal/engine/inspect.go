@@ -21,12 +21,17 @@ func (engine *Engine) Inspect(
 		return ToolchainInspection{}, err
 	}
 
-	return engine.inspectTools(
+	inspection, err = engine.inspectTools(
 		operationContext,
 		runContext.Tools,
 		toolIDs(runContext.Tools),
 		runContext.ToolEnvironment,
-	), nil
+	)
+	if err != nil {
+		return ToolchainInspection{}, err
+	}
+
+	return inspection, nil
 }
 
 func (engine *Engine) inspectTools(
@@ -34,13 +39,17 @@ func (engine *Engine) inspectTools(
 	tools map[string]toolchain.Tool,
 	toolIDs []string,
 	environment map[string]string,
-) (inspection ToolchainInspection) {
+) (inspection ToolchainInspection, inspectionError error) {
 	selected := selectTools(tools, toolIDs)
-	statuses := toolchain.InspectTools(ctx, engine.commandRunner, selected, environment)
+	statuses, err := toolchain.InspectTools(ctx, engine.commandRunner, selected, environment)
+	if err != nil {
+		return ToolchainInspection{}, err
+	}
+
 	return ToolchainInspection{
 		Statuses: statuses,
 		AllValid: toolchain.NewStatusMap(statuses).AreAllValid(toolIDs),
-	}
+	}, nil
 }
 
 func selectTools(

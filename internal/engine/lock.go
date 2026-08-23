@@ -31,12 +31,24 @@ func (engine *Engine) Lock(
 		return LockResult{}, err
 	}
 
+	return writeResolvedLock(operationContext, engine.repositoryRoot, archives)
+}
+
+func writeResolvedLock(
+	operationContext context.Context,
+	repositoryRoot string,
+	archives []lockfile.Archive,
+) (result LockResult, operationError error) {
 	archiveByID := make(map[string]lockfile.Archive, len(archives))
 	for _, archive := range archives {
 		archiveByID[archive.Tool] = archive
 	}
 
-	path, err := lockfile.Write(engine.repositoryRoot, lockfile.Lockfile{Archives: archiveByID})
+	if err := operationContext.Err(); err != nil {
+		return LockResult{}, err
+	}
+
+	path, err := lockfile.Write(operationContext, repositoryRoot, lockfile.Lockfile{Archives: archiveByID})
 	if err != nil {
 		return LockResult{}, err
 	}

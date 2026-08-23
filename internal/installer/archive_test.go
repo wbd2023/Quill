@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -61,7 +62,7 @@ func TestExtractBinaryExtractsExpectedAsset(t *testing.T) {
 		t.Fatalf("stat extracted binary: %v", err)
 	}
 
-	if info.Mode().Perm() != standardPermissions {
+	if runtime.GOOS != "windows" && info.Mode().Perm() != standardPermissions {
 		t.Fatalf("extracted binary mode = %v, want %v", info.Mode().Perm(), standardPermissions)
 	}
 

@@ -2,6 +2,8 @@ package golang
 
 import (
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/wbd2023/quill/internal/workspace"
 )
@@ -14,6 +16,15 @@ func BuildCacheDirectory(layout workspace.Layout) (cache string) {
 // ModuleCacheDirectory returns the Go module cache directory.
 func ModuleCacheDirectory(layout workspace.Layout) (cache string) {
 	return filepath.Join(layout.CacheDirectory(), "go-mod")
+}
+
+// BinaryPath returns the platform-specific path of a managed Go tool.
+func BinaryPath(layout workspace.Layout, command string) (path string) {
+	if runtime.GOOS == "windows" && !strings.EqualFold(filepath.Ext(command), ".exe") {
+		command += ".exe"
+	}
+
+	return filepath.Join(layout.BinaryDirectory(), command)
 }
 
 // GoPath returns the GOPATH directory.

@@ -48,8 +48,15 @@ func (engine *Engine) Fix(
 
 	rules := selectRulesForFix(runContext.Effective.Rules, runContext)
 	toolIDs := execution.ToolIDsForFixes(rules)
-	result.Toolchain = engine.inspectTools(operationContext, runContext.Tools, toolIDs,
-		runContext.ToolEnvironment)
+	result.Toolchain, err = engine.inspectTools(
+		operationContext,
+		runContext.Tools,
+		toolIDs,
+		runContext.ToolEnvironment,
+	)
+	if err != nil {
+		return result, err
+	}
 	if err := operationContext.Err(); err != nil {
 		return result, err
 	}
