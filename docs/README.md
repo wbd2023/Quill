@@ -14,9 +14,18 @@ and decision records. Each document has one owner and purpose.
 ## Interfaces and architecture
 
 - [cli-protocol.md](cli-protocol.md) defines the public machine CLI contract.
+- [pack-protocol.md](pack-protocol.md) defines the public local external-Pack
+  manifest and subprocess protocol.
 - [architecture.md](architecture.md) describes current package ownership,
   dependency direction, and runtime flow.
 - [adr/](adr/) records durable architectural decisions and their alternatives.
+
+## Engineering review
+
+- [codebase-review.md](codebase-review.md) is the mutable, design-first
+  whole-codebase review programme. It owns review scope, sequence, evidence,
+  and completion state without redefining product, protocol, architecture,
+  security, or delivery contracts.
 
 ## Repository-root documents
 
