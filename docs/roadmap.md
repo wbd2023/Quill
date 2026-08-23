@@ -4,9 +4,10 @@
 the mutable, ordered delivery plan for that target. It records completed work,
 remaining work, and dependency order; it does not define a smaller feature cut.
 
-Quill's stable integration surface remains the `quill` command and the
-repository-owned `STYLE.md`, `quill.toml`, and `quill.lock` files. All Go
-implementation packages remain internal.
+Quill's stable integration surface is the `quill` command, the repository-owned
+`STYLE.md`, `quill.toml`, and `quill.lock` files, and the local external-Pack
+manifest and subprocess protocol. All Go implementation packages remain
+internal.
 
 ## Phase 1: Complete the CLI-first release foundation
 
@@ -16,6 +17,8 @@ Completed:
   `internal/engine`.
 - Defined versioned JSON envelopes, stdout purity, structured failures, and
   signal cancellation for machine commands.
+- Added executable `quill_version` metadata to every machine envelope and
+  published per-command result schemas and compatibility rules.
 - Added tagged release automation that builds, executes, and smoke-tests every
   declared platform archive on its native runner (Linux amd64 and arm64, macOS
   amd64 and arm64, Windows amd64), then verifies archive contents and checksum
@@ -23,9 +26,6 @@ Completed:
 
 Remaining:
 
-- Add `quill_version` to every machine envelope.
-- Publish per-command schema, field, path, position, error, and compatibility
-  documentation.
 - Keep cancellation, child-process cleanup, stdout purity, exit codes, binary
   archives, checksums, and release smoke tests as release gates.
 
@@ -34,8 +34,9 @@ Remaining:
 - Validate every Rule `requirement_ids` entry against the loaded `STYLE.md`
   requirement set during Profile preparation.
 - Share one validated requirement graph between coverage and execution.
-- Decide whether enabling a Pack activates its default Rules while preserving
-  consumer-owned enforcement, scope, and requirement bindings.
+- Completed: enabling a Pack makes its declarations available; a Profile Rule
+  binding makes a Rule active and owns its enforcement, Scope, and Requirement
+  bindings.
 - Co-locate each shipped Pack's Rule declarations and runtime bindings without
   `init` registration or mutable global registries.
 - Give invalid Tool diagnostics one reachable owner rather than competing
@@ -58,25 +59,28 @@ Remaining:
 
 ## Phase 4: External Pack data model and runtime
 
-- Define the versioned local Pack manifest and repository-contained source
+Completed:
+
+- Defined the versioned local Pack manifest and repository-contained source
   layout.
-- Validate Pack roots, manifests, IDs, Rule IDs, runtime commands, conflicts,
+- Validated Pack roots, manifests, IDs, Rule IDs, runtime commands, conflicts,
   and path escapes before execution.
-- Compose local external Pack definitions with shipped Pack definitions through
+- Composed local external Pack definitions with Shipped Pack definitions through
   the existing Profile and engine path.
-- Define `quill-pack-v1` JSON Lines requests, diagnostics, completions, and
+- Defined `quill-pack-v1` JSON Lines requests, Diagnostics, completions, and
   protocol failures.
-- Run external checks with bounded direct subprocess execution, cancellation,
+- Ran external checks with bounded direct subprocess execution, cancellation,
   output limits, controlled environment inheritance, and captured stderr.
-- Migrate built-in and external findings to one documented diagnostic range
-  model and render them through the same report path.
+- Migrated Shipped and external findings to one documented Diagnostic range
+  model and rendered them through the same report path.
+- Published [pack-protocol.md](pack-protocol.md) and accepted ADR 0006 as the
+  public-contract and trust-model owners.
 
 ## Phase 5: Diagnostic and user-product completion
 
-- Complete the shared diagnostic range model for built-in and external Rules.
-- Add deterministic `quill init` presets that never overwrite policy without
-  explicit force.
-- Add `quill list` and `quill explain` from the loaded compiled snapshot.
+- Complete the shared Diagnostic range model for Shipped and external Rules.
+- Completed: deterministic `quill init` presets that never overwrite policy.
+- Completed: `quill list` and `quill explain` from the loaded compiled snapshot.
 - Publish complete CLI, JSON, Profile, Pack-author, and trust-model references.
 
 ## Phase 6: Independent adoption proof

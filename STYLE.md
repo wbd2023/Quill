@@ -1895,13 +1895,13 @@ mode=review_only
 reason=Role-specific ordering grammars require package-aware judgement.
 -->
 * Files with the same platform role SHOULD follow the same internal ordering grammar: CLI commands
-  use `runX`, option parsing, flag construction, selection/execution, then rendering/status helpers.
-  Profile schema, conversion, and validation files follow `quill.toml` policy order. Rule scanners
-  use exported check, file collection, scan/traversal, diagnostic construction, parsing/extraction
-  helpers, then predicates. Drivers use driver entrypoint, dispatch, concrete Driver, then command
-  helpers. Runtime installers use orchestration, inspection, preparation and validation, install
-  execution, then low-level filesystem helpers. Report files use public writer, text rendering, JSON
-  conversion, then formatting helpers.
+  use command grammar declarations, command preparation, selection/execution, then rendering/status
+  helpers. Profile schema, conversion, and validation files follow `quill.toml` policy order. Rule
+  scanners use exported check, file collection, scan/traversal, diagnostic construction,
+  parsing/extraction helpers, then predicates. Drivers use driver entrypoint, dispatch, concrete
+  Driver, then command helpers. Runtime installers use orchestration, inspection, preparation and
+  validation, install execution, then low-level filesystem helpers. Report files use public writer,
+  text rendering, JSON conversion, then formatting helpers.
 <!-- style:
 id=3.9.split-by-responsibility
 mode=review_only

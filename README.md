@@ -4,8 +4,9 @@ Quill turns a repository's human-authored `STYLE.md` and machine-readable `quill
 executable style checks. It resolves Pack defaults, validates Rule bindings, installs pinned tools,
 runs checks and safe fixes, writes `quill.lock`, and reports requirement coverage.
 
-Quill is a CLI application. Its Go packages are internal implementation details; the stable
-integration surface is the `quill` command and the repository-owned files it consumes.
+Quill is a CLI application. Its Go packages are internal implementation details.
+The stable integration surface is the `quill` command, its repository formats,
+and the local External Pack manifest and subprocess protocol.
 
 ## Status
 
@@ -50,7 +51,7 @@ supported interfaces and planned machine protocol.
 
 `quill version` reads the main module version from `runtime/debug.BuildInfo`. Go 1.24 stamps that
 version from the repository tag or commit and appends `+dirty` when the checkout has uncommitted
-changes. Builds without usable module or VCS version information report `devel`.
+changes. Builds without usable module or VCS version information report `(devel)`.
 
 The Git tag is the only version source. Quill has no separate version file and
 does not inject a second version with linker flags. This keeps local tagged
@@ -91,8 +92,17 @@ A checked repository owns the policy that Quill executes:
 Quill has no built-in knowledge of a consuming repository's package layout, scope names, naming
 vocabulary, or policy values. Those decisions belong in that repository's Profile.
 
-When `--repo-root` is omitted, Quill walks upward from the current directory until it finds both
-`STYLE.md` and `quill.toml`.
+When `--repository-root` is omitted, Quill walks upward from the current
+directory until it finds both `STYLE.md` and `quill.toml`.
+
+## External Packs
+
+A repository can add a local external Pack through `[[pack_sources]]` in its
+Profile. The Pack's `pack.toml` manifest and `quill-pack-v1` subprocess protocol
+are supported first-release interfaces. See
+[docs/pack-protocol.md](docs/pack-protocol.md) before authoring or reviewing one.
+External Pack executables run with the invoking user's permissions; Quill does
+not sandbox them.
 
 ## CLI
 
@@ -109,20 +119,28 @@ Commands:
 - `quill install` installs or refreshes pinned tools in the repository-local cache.
 - `quill lock` resolves archive-tool hashes and atomically rewrites `quill.lock`.
 - `quill version` prints the version recorded by the Go toolchain.
+- `quill init` creates a minimal `STYLE.md` and `quill.toml` in an empty directory.
+- `quill list <packs|rules|tools|scopes>` lists compiled Profile metadata.
+- `quill explain <rule:ID>` explains an active Rule.
 
-Use `quill help <command>` for command-specific flags.
+Use `quill help <command>` for command-specific flags. Canonical flags use
+the long `--flag` spelling.
 
 Common examples:
 
 ```sh
-quill check --repo-root . --mode required
-quill check --repo-root . --mode all --strict-recommendations --verbose
-quill check --repo-root . --scope all --format json
-quill fix --repo-root . --scope all --format json
-quill doctor --repo-root . --format json
-quill coverage --repo-root . --format json
-quill install --repo-root . --format json
-quill lock --repo-root . --format json
+quill check --repository-root . --mode required
+quill check --repository-root . --mode all --strict-recommendations --verbose
+quill check --repository-root . --scope all --format json
+quill fix --repository-root . --scope all --format json
+quill doctor --repository-root . --format json
+quill coverage --repository-root . --format json
+quill install --repository-root . --format json
+quill lock --repository-root . --format json
+quill version
+quill init --repository-root .
+quill list packs --format json --repository-root .
+quill explain rule:profile/enforcement-levels --format json --repository-root .
 ```
 
 Exit codes:
@@ -205,27 +223,30 @@ ADR 0004 is complete: no production Go package exists at the repository root.
 - `cmd/quill` contains only process entrypoint wiring.
 - `internal/cli` owns argument parsing, output streams, exit codes, and the
   language-neutral command protocol.
-- `internal/engine` is the private application facade for check, fix,
-  inspection, coverage, installation, and lock operations.
-- `internal/profile` loads, validates, and compiles Profiles.
-- `internal/profile/toml` owns the persisted Profile codec.
+- `internal/engine` is the private application facade for repository workflows,
+  including check, fix, inspection, coverage, installation, locking,
+  metadata, explanation, and initialization.
+- `internal/profile` owns the Profile model and persisted codec, then loads,
+  validates, and compiles Profiles into executable plans.
 - `internal/pack` defines Pack contracts and resolution.
-- `internal/pack/shipped` assembles shipped Pack declarations and Pack-local
+- `internal/pack/shipped` assembles Shipped Pack declarations and Pack-local
   runtime bindings.
-- `internal/checks` contains concrete repository Checks and Pack Policy codecs.
-- `internal/execution` runs resolved jobs through Drivers.
+- `internal/checks` contains concrete repository Checks.
+- `internal/execution` runs compiled Jobs through Drivers.
 - `internal/installer`, `internal/toolchain`, and `internal/process` own
   external-tool boundaries.
 - `internal/styleguide` parses STYLE.md requirement metadata.
 - `internal/coverage` derives requirement coverage from the compiled Profile.
 - `internal/report` renders command results as CLI text and JSON.
 
-Architecture tests under `internal/architecture` enforce the intended import direction.
+Architecture tests under `internal/architecture` enforce important import and
+ownership boundaries.
 
 ## Security
 
-Quill executes repository policy and downloaded tools on the host. It is not a sandbox. Review
-`quill.toml`, `quill.lock`, and changes to shipped tool capabilities before running Quill on an
+Quill executes repository policy, local external Packs, and downloaded tools on
+the host. It is not a sandbox. Review `quill.toml`, `quill.lock`, local Pack
+sources, and changes to Shipped Pack capabilities before running Quill on an
 untrusted checkout.
 
 Archive downloads are HTTPS-only and are verified against lockfile hashes. Installer tests defend

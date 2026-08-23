@@ -11,30 +11,30 @@ standalone implementation and current package names.
 
 Quill ships reusable Packs while keeping execution infrastructure generic. A Pack must declare its
 profile-visible Rules, tools, file-selection defaults, and Pack Policy, but those declarations must
-not make generic execution code depend on the built-in catalogue.
+not make generic execution code depend on the Shipped Pack catalogue.
 
 Concrete Checks also have a different responsibility from Pack declarations. Packs define what a
 Rule means and which execution identity it selects. Checks observe repository state. Drivers adapt a
 resolved Job to a generic execution family. Toolchain code inspects capabilities independently of
 which shipped Pack requires them.
 
-Combining these concerns would make Profile vocabulary, built-in policy, execution mechanics, and
-tool health change together. It would also make adding or reorganising a shipped Pack alter generic
+Combining these concerns would make Profile vocabulary, Shipped Pack policy, execution mechanics,
+and tool health change together. It would also make adding or reorganising a Shipped Pack alter
 Driver dependencies.
 
 ## Decision
 
 Quill separates these responsibilities:
 
-- `internal/pack/shipped/<pack>` owns built-in Pack identity and profile-visible Rule declarations.
+- `internal/pack/shipped/<pack>` owns Shipped Pack identity and profile-visible Rule declarations.
 - `internal/pack/shipped/<pack>/policy` owns that Pack's typed persisted Policy codec.
-- `internal/pack/shipped/<pack>/bindings` maps that Pack's local execution identities to concrete
-  scanners, commands, Checks, and file interpreters.
-- `internal/pack/shipped/bindings` assembles those Pack-local bindings into one explicit runtime
-  value.
+- `internal/pack/shipped/<pack>/bindings` maps Pack-qualified execution identities to concrete
+  scanners, commands, and Checks.
+- `internal/pack/shipped/bindings` assembles those Pack-local bindings and Tool-global file
+  interpreter mappings into one explicit runtime value.
 - `internal/checks` owns concrete repository observations.
-- `internal/execution/drivers` owns generic adapters for resolved execution families and receives a
-  complete `drivers.Bindings` value during composition.
+- `internal/execution/drivers` owns generic adapters for resolved Job families and the
+  `drivers.Bindings` completeness invariant.
 - `internal/toolchain` owns generic capability health, inspection, and version detection.
 - `internal/installer` owns verified installation of external tools.
 - `internal/engine` composes Pack definitions and runtime bindings without moving shipped identities
@@ -42,12 +42,13 @@ Quill separates these responsibilities:
 
 `pack/shipped/bindings.Build` is the explicit composition point for shipped runtime behaviour.
 Pack-local binding children contain concrete adapters. `drivers.NewBindings` constructs the generic
-binding collection; Drivers do not import shipped Packs, Pack Policy, or concrete Checks.
+binding collection, and `Bindings.Validate` confirms every active Rule Job has the required binding.
+Drivers do not import shipped Packs, Pack Policy, or concrete Checks.
 
 ## Consequences
 
 - Profile language remains independent of Driver implementation details.
-- Generic Drivers can be tested without loading Quill's built-in Pack catalogue.
+- Generic Drivers can be tested without loading Quill's Shipped Pack catalogue.
 - Shipped Packs can add Rules and bindings without introducing global registration or `init` side
   effects.
 - Check implementations remain reusable across execution families without owning presentation,

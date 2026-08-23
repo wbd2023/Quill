@@ -34,20 +34,36 @@ The supported public interfaces are:
 - versioned JSON output for machine-integrable operations;
 - documented text output for people;
 - documented exit status and stderr behaviour;
-- `STYLE.md`, `quill.toml`, and `quill.lock`; and
+- `STYLE.md`, `quill.toml`, and `quill.lock`;
+- local external-Pack `pack.toml` manifests and the versioned Pack subprocess
+  protocol; and
 - verified release binaries for supported platforms.
+
+## Repository formats and Pack extensions
+
+`quill.toml`, `quill.lock`, and local external-Pack `pack.toml` have explicit
+schema versions. `STYLE.md` requirement metadata has no independent schema
+marker: its accepted grammar and compatibility are part of the pinned Quill
+release contract. Additive metadata must state the minimum Quill version; an
+incompatible metadata change requires a documented migration.
+
+[pack-protocol.md](pack-protocol.md) defines the external Pack manifest,
+subprocess records, Diagnostic coordinates, compatibility rules, and trust
+model. The external Pack interface is local and repository-contained; it is
+not a remote registry, Go SDK, native plugin, or service API.
 
 ## Machine contract
 
 A machine-integrable command must provide:
 
-- an explicit `--repo-root` path for callers that cannot rely on the current
+- an explicit `--repository-root` path for callers that cannot rely on the current
   directory;
 - `--format json` output with a documented schema version;
 - exactly one JSON document on stdout, with no progress or human text mixed in;
 - structured operation and preparation errors in the JSON result;
 - documented 0, 1, and 2 exit status semantics independent of JSON parsing;
-- stderr reserved for diagnostics outside the JSON result; and
+- stderr reserved for human-readable operational messages outside the JSON
+  result; and
 - documented signal cancellation and child-process cleanup behaviour.
 
 The JSON protocol is an intentionally separate public DTO contract. It must not
@@ -95,6 +111,7 @@ Quill does not support:
 The root Go facade has been removed. `internal/cli` now calls `internal/engine`
 directly, and no production Go package exists at the repository root.
 
-The source implements the CLI protocol, binary distribution workflow, and
-contract tests required by ADR 0004. They remain release gates until the first
-standalone release is published.
+The source implements the CLI protocol, binary distribution workflow, local
+external-Pack manifest and subprocess protocol, and the contract tests required
+by ADRs 0004 and 0006. They remain release gates until the first standalone
+release is published.

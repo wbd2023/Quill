@@ -34,7 +34,7 @@ It combines:
 - a human-authored `STYLE.md`;
 - a machine-readable `quill.toml` Profile;
 - reusable Packs;
-- built-in and external checks;
+- Shipped Packs and local External Packs;
 - external formatters and linters;
 - pinned tool installation;
 - verified archive hashes in `quill.lock`;
@@ -62,7 +62,7 @@ Quill's MVP is complete when an unrelated repository can:
 
 1. install a pinned Quill release;
 2. initialise or author `STYLE.md`, `quill.toml`, and `quill.lock`;
-3. enable Quill's built-in Packs;
+3. enable Quill's Shipped Packs;
 4. install all required pinned tools;
 5. run checks and safe fixes;
 6. receive stable text and JSON results;
@@ -70,7 +70,7 @@ Quill's MVP is complete when an unrelated repository can:
 8. add a local external Pack without changing Quill's source;
 9. bind an external Rule to a `STYLE.md` requirement;
 10. execute that Rule through a versioned subprocess protocol; and
-11. use the same configuration locally and in CI.
+11. use the same Profile locally and in CI.
 
 The MVP must demonstrate this workflow in at least one repository other than Quill itself.
 
@@ -93,6 +93,8 @@ quill coverage
 quill install
 quill lock
 quill version
+quill list
+quill explain
 ```
 
 These commands remain the primary supported integration surface.
@@ -110,23 +112,23 @@ quill.lock
 `STYLE.md` remains the human source of truth.
 
 `quill.toml` remains the executable Profile containing repository policy, enabled Packs, Pack
-configuration, scopes, Targets, file sets, tool pins, and Rule bindings.
+Policy, scopes, Targets, file sets, tool pins, and Rule bindings.
 
 `quill.lock` remains the verified archive-hash record for archive-installed tools.
 
-### 3.3 Built-in Pack model
+### 3.3 Shipped Pack model
 
-Quill retains its built-in Packs, including the current project, text, Markdown, Bash, Go, security,
-and vocabulary capabilities.
+Quill retains its Shipped Packs, including the current project, text, Markdown,
+Bash, Go, security, and vocabulary capabilities.
 
-A Pack may provide:
+A Pack may declare or provide:
 
-- Tool capabilities;
+- Tool requirements;
 - Rule definitions;
 - file-set defaults;
 - Pack Policy;
-- configuration validation;
-- check execution; and
+- Pack Policy validation;
+- Check execution; and
 - optional fix execution.
 
 The consuming Profile continues to own:
@@ -260,42 +262,11 @@ runtime executable.
 
 ### 5.4 Pack manifest
 
-The initial manifest format is versioned:
-
-```toml
-schema_version = 1
-
-[pack]
-id = "company"
-name = "Company Engineering Policy"
-version = "0.1.0"
-quill_protocol = "quill-pack-v1"
-
-[runtime]
-command = "bin/company-quill"
-timeout = "30s"
-
-[[rules]]
-id = "company/no-direct-database-access"
-name = "No direct database access"
-check = "no-direct-database-access"
-supports_fix = false
-```
-
-The exact persisted field names may change before release, but the manifest must represent:
-
-- manifest schema version;
-- Pack identity;
-- Pack version;
-- required Quill protocol version;
-- runtime command;
-- execution limits;
-- Rule identity;
-- runtime check identifier;
-- optional fix identifier;
-- Tool requirements, where supported;
-- file-set requirements, where supported; and
-- Pack configuration expectations.
+The versioned `pack.toml` schema is a first-release public interface. Its exact
+fields, validation rules, compatibility policy, and example are owned by
+[pack-protocol.md](pack-protocol.md). A manifest remains data-only and exposes
+only concepts an external author needs; it must not mirror Quill's private Go
+types.
 
 ### 5.5 Manifest restrictions
 
@@ -308,38 +279,17 @@ The persisted model should contain only concepts required by an external author.
 
 ### 5.6 Pack composition
 
-Quill composes:
-
-```text
-built-in Pack definitions
-+
-local external Pack manifests
-=
-one validated Pack catalogue
-```
-
-The existing `PackProvider` seam should be used or adapted to support this composition without
-creating a second Profile or execution pipeline.
-
-Built-in and external Packs must participate in the same:
-
-- Pack selection;
-- Rule binding;
-- scope resolution;
-- requirement binding;
-- validation;
-- execution;
-- reporting; and
-- coverage calculation.
+Quill composes Shipped Pack declarations and local external Pack manifests into
+one validated Pack catalogue. Both kinds of Pack use the same Profile,
+selection, Rule binding, scope and Requirement validation, execution, reporting,
+and coverage path. No external Pack process may execute until all source,
+manifest, executable, and catalogue validation succeeds.
 
 ### 5.7 Conflicts
 
-Profile preparation must reject:
-
 - duplicate Pack IDs;
 - duplicate Rule IDs;
-- duplicate Tool IDs with incompatible definitions;
-- incompatible file-set ownership;
+- catalogue-level Tool or file-set identity conflicts;
 - unsupported manifest schema versions;
 - unsupported Pack protocol versions;
 - missing runtime executables;
@@ -353,232 +303,28 @@ No external Pack process may execute before these checks pass.
 
 ## 6. External Pack subprocess protocol
 
-### 6.1 Rationale
+[pack-protocol.md](pack-protocol.md) owns the versioned manifest and subprocess
+schemas. It defines the first-release request's `policy` object as the raw Pack
+Policy from the repository Profile, JSON Lines stream rules, completion records,
+Diagnostic coordinates, executable containment, output bounds, timeout, and
+cancellation behaviour.
 
-Quill's internal Go packages remain private.
-
-The MVP does not publish a Go SDK or use Go's native plugin mechanism.
-
-External Pack checks run as subprocesses using a small, versioned JSON protocol over standard input
-and standard output.
-
-This provides:
-
-- language-independent Pack implementations;
-- process isolation;
-- crash containment;
-- timeout enforcement;
-- bounded output;
-- independent protocol versioning; and
-- freedom to continue refactoring Quill's internal packages.
-
-### 6.2 Invocation model
-
-Quill launches the Pack runtime executable for a selected operation.
-
-Quill writes one request object to standard input.
-
-The Pack writes zero or more result records to standard output using JSON Lines.
-
-Diagnostic or protocol records must not be written to standard error. Standard error is reserved for
-human-readable runtime debugging and is captured separately.
-
-### 6.3 Check request
-
-A check request contains at least:
-
-```json
-{
-  "protocol": "quill-pack-v1",
-  "operation": "check",
-  "repository_root": "/absolute/path/to/repository",
-  "pack_id": "company",
-  "rule_id": "company/no-direct-database-access",
-  "check_id": "no-direct-database-access",
-  "scope": "all",
-  "files": [
-    "internal/service/users.go"
-  ],
-  "configuration": {}
-}
-```
-
-Repository files sent to the plugin use repository-relative paths.
-
-The request may later include Target information and execution metadata, but the MVP should avoid
-sending Quill's complete internal Plan.
-
-### 6.4 Diagnostic record
-
-A diagnostic record contains at least:
-
-```json
-{
-  "type": "diagnostic",
-  "code": "direct-database-access",
-  "message": "Use the repository interface instead of accessing the database directly.",
-  "file": "internal/service/users.go",
-  "start": {
-    "line": 42,
-    "column": 5
-  },
-  "end": {
-    "line": 42,
-    "column": 18
-  },
-  "help_url": ""
-}
-```
-
-The engine supplies or derives:
-
-- Pack ID;
-- Rule ID;
-- enforcement level;
-- selected scope; and
-- requirement bindings.
-
-An external process may not override the Profile's enforcement level or claim a different Rule ID.
-
-### 6.5 Completion record
-
-A successful invocation terminates with:
-
-```json
-{
-  "type": "complete",
-  "success": true
-}
-```
-
-A protocol-level failure may use:
-
-```json
-{
-  "type": "complete",
-  "success": false,
-  "error": "configuration field \"allowed_packages\" is required"
-}
-```
-
-Unexpected process termination, invalid JSON, missing completion, output overflow, or timeout is
-reported as a Rule execution error.
-
-### 6.6 Fix operation
-
-External fixes are optional in the MVP.
-
-A Rule declares whether it supports fixing.
-
-Where supported, Quill sends:
-
-```json
-{
-  "protocol": "quill-pack-v1",
-  "operation": "fix",
-  "repository_root": "/absolute/path/to/repository",
-  "pack_id": "company",
-  "rule_id": "company/format-config",
-  "fix_id": "format-config",
-  "scope": "all",
-  "files": [
-    "config/example.conf"
-  ],
-  "configuration": {}
-}
-```
-
-The MVP may limit external fixes to one of these models:
-
-1. the Pack directly rewrites declared files and reports changed paths; or
-2. the Pack returns complete replacement content for individual files.
-
-Quill should choose one explicit model before implementation. It should not introduce a general
-overlapping text-edit protocol unless required by a concrete Pack.
-
-### 6.7 Process controls
-
-Quill must apply:
-
-- `context.Context` cancellation;
-- a configured timeout;
-- a bounded standard-output buffer;
-- a bounded standard-error buffer;
-- a minimal, deliberate environment;
-- repository-root working directory;
-- explicit executable resolution; and
-- clear error classification.
-
-Quill is not a sandbox. Documentation must state that a local Pack executable runs with the user's
-operating-system permissions.
+The first release supports check-only external Packs. A future external fix
+protocol requires a new explicit operation and edit-safety contract; Quill will
+not introduce a general text-edit protocol without a demonstrated Pack need.
 
 ---
 
 ## 7. Diagnostic model
 
-### 7.1 Goal
+Shipped and external Rules produce the same Diagnostic representation.
+`cli-protocol.md` and `pack-protocol.md` define its public path and coordinate
+semantics. A Diagnostic is a structured policy finding; it is distinct from an
+execution error or a human-readable operational message.
 
-The MVP must support diagnostics produced by both built-in and external Rules through one stable
-interchange representation.
-
-### 7.2 Required fields
-
-The internal or reporting-layer diagnostic model should represent:
-
-```go
-type Position struct {
-    Line   int
-    Column int
-    Offset int
-}
-
-type Diagnostic struct {
-    Code    string
-    Message string
-
-    File  string
-    Start Position
-    End   Position
-
-    HelpURL string
-}
-```
-
-The implementation may keep legacy convenience fields temporarily during migration, but persisted
-JSON and plugin protocol formats must have a clear range model.
-
-### 7.3 Position semantics
-
-The protocol and JSON documentation must define:
-
-- whether lines are zero-based or one-based;
-- whether columns are zero-based or one-based;
-- whether columns count bytes, Unicode code points, or UTF-16 code units;
-- whether end positions are inclusive or exclusive;
-- how an unknown end position is represented; and
-- how diagnostics without a file location are represented.
-
-The recommended MVP contract is:
-
-- one-based lines;
-- one-based UTF-8 byte columns or one-based Unicode code-point columns, chosen explicitly;
-- zero for unknown values;
-- end position exclusive; and
-- repository-relative slash-separated paths in persisted output.
-
-### 7.4 Engine-owned metadata
-
-The final rendered finding may include:
-
-- Rule ID;
-- Pack ID;
-- source Tool or Check;
-- enforcement level;
-- requirement IDs;
-- check status; and
-- whether a fix is available.
-
-These values need not all be supplied by the Pack diagnostic itself.
+The engine derives Pack and Rule identity, enforcement, scope, Requirement
+bindings, and final Rule status. An external Pack cannot override those
+Profile-owned values.
 
 ---
 
@@ -712,7 +458,7 @@ The command reports both available and active entities where appropriate.
 The MVP adds:
 
 ```text
-quill explain <rule-id>
+quill explain rule:<id>
 ```
 
 A Rule explanation includes:
@@ -727,9 +473,9 @@ A Rule explanation includes:
 - active binding;
 - enforcement level;
 - scope;
-- requirement IDs;
-- relevant Pack configuration; and
-- whether the Pack is built-in or external.
+- Requirement IDs;
+- relevant Pack Policy; and
+- whether the Pack is Shipped or external.
 
 Support for explaining requirement IDs is desirable but not required for the first MVP release.
 
@@ -881,7 +627,7 @@ quill.lock
 It must use:
 
 - different repository paths from Quill;
-- at least one built-in Pack;
+- at least one Shipped Pack;
 - at least one external local Pack;
 - at least one required Rule;
 - at least one recommendation;
@@ -917,7 +663,7 @@ The example must include:
 
 ## 14. Security and trust model
 
-### 14.1 Built-in Tools
+### 14.1 Shipped Tools
 
 Existing archive security properties remain required.
 
@@ -1009,7 +755,7 @@ The MVP adds tests for:
 - diagnostic decoding;
 - malformed JSON;
 - missing completion record;
-- plugin-declared failure;
+- external Pack-reported failure;
 - non-zero process exit;
 - timeout;
 - cancellation;
@@ -1076,18 +822,18 @@ The MVP must include:
 - cancellation;
 - timeouts;
 - output limits;
-- configuration;
+- Pack Policy;
 - local testing; and
 - security implications.
 
 ### 17.3 Rule reference
 
-Built-in Rules should have discoverable documentation containing:
+Shipped Rules should have discoverable documentation containing:
 
 - Rule ID;
 - purpose;
 - Pack;
-- expected configuration;
+- expected Pack Policy;
 - check behaviour;
 - fix behaviour;
 - examples; and
@@ -1161,13 +907,13 @@ Tree-sitter or another declarative structural Rule format may be added later.
 
 ### 18.10 No universal semantic analysis model
 
-Language-specific built-in Checks may use official compiler or parser APIs.
+Language-specific Shipped Checks may use official compiler or parser APIs.
 
 Quill does not create a language-neutral semantic database in the MVP.
 
 ### 18.11 No general fix-composition engine
 
-The MVP preserves built-in safe fixes and supports only a deliberately narrow external fix contract.
+The MVP preserves Shipped safe fixes; external fixes remain outside the first-release protocol.
 
 ### 18.12 No distributed or cloud execution
 
@@ -1183,7 +929,7 @@ Quill's MVP is complete when all criteria below are satisfied.
 
 - All current public commands remain available.
 - Existing Quill self-checking behaviour remains operational.
-- Existing built-in Packs and representative Rules remain operational.
+- Existing Shipped Packs and representative Rules remain operational.
 - Existing safe fixes remain operational.
 - Tool installation remains pinned and repository-local.
 - Archive tools remain verified through `quill.lock`.
@@ -1196,11 +942,11 @@ Quill's MVP is complete when all criteria below are satisfied.
 - A Profile can declare a local Pack source.
 - Quill validates a versioned Pack manifest.
 - The external Pack appears in normal Pack resolution.
-- An external Rule can be enabled and bound through ordinary `[[rules]]` configuration.
+- An external Rule can be enabled and bound through ordinary Profile Rule bindings.
 - An external Rule can bind to a `STYLE.md` requirement.
 - Quill invokes the Pack through the versioned subprocess protocol.
 - The Pack can return structured diagnostics.
-- Diagnostics are rendered with built-in diagnostics.
+- Diagnostics are rendered with Shipped Diagnostics.
 - A failed or timed-out Pack does not crash Quill.
 - The external Rule appears correctly in coverage.
 - No Quill source modification or rebuild is required.
@@ -1226,7 +972,7 @@ Quill's MVP is complete when all criteria below are satisfied.
 - Users can list available and active Rules.
 - Users can list pinned Tools and configured scopes.
 - Users can explain an active Rule.
-- External Packs and Rules are identified as external.
+- External Packs and Rule list rows identify their provenance.
 
 ### 19.6 Automation contract
 
@@ -1251,7 +997,7 @@ Quill's MVP is complete when all criteria below are satisfied.
 
 - At least one repository other than Quill uses the release.
 - That repository uses its own Profile and style guide.
-- It uses at least one built-in Pack.
+- It uses at least one Shipped Pack.
 - It uses at least one external local Pack.
 - It runs Quill in CI through a pinned version.
 - Its setup is documented and reproducible.
@@ -1296,7 +1042,7 @@ The following may be included if they do not delay the core acceptance criteria:
 - external Pack checksum entries;
 - a dry-run external fix mode;
 - Pack manifest JSON Schema;
-- generated built-in Rule reference;
+- generated Shipped Rule reference;
 - shell completion;
 - more `quill init` presets; and
 - parallel Rule execution with deterministic output.
@@ -1310,12 +1056,12 @@ Stretch goals do not redefine MVP completion.
 The Quill MVP is:
 
 > A self-hosting, reproducible, and externally extensible style-policy platform that compiles
-> repository-owned written standards into executable checks, combines built-in semantic Rules with
+> repository-owned written standards into executable checks, combines Shipped semantic Rules with
 > pinned external Tools, installs those Tools securely, applies safe fixes, validates requirement
 > traceability, reports automation coverage, and supports locally authored third-party Packs through
 > a stable file-and-subprocess boundary.
 
-The decisive proof of the MVP is not the number of built-in Rules.
+The decisive proof of the MVP is not the number of Shipped Rules.
 
 It is that another repository can adopt a pinned Quill release, define its own policy, add a custom
 Pack without rebuilding Quill, and receive reproducible checks and coverage through the same
