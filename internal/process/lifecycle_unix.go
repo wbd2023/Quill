@@ -15,13 +15,15 @@ import (
 // negative process id delivers the signal to every member of the group, including grandchildren
 // the child may have spawned. The returned killState records whether the cancellation actually
 // killed a running process, so termination cause is attributed from the kill rather than from a
-// Unix-specific exit code.
-func configureProcessTree(command *exec.Cmd) (state *killState) {
+// Unix-specific exit code. POSIX process groups need no post-start binding (afterStart is nil) and
+// no tracked resources to release (release is a no-op); the caller splits Start and Wait only on
+// Windows.
+func configureProcessTree(command *exec.Cmd) (state *killState, afterStart func(cmd *exec.Cmd) error, release func(), err error) {
 	state = &killState{}
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Cancel = cancelProcessGroup(command, state)
 	command.WaitDelay = childWaitDelay
-	return state
+	return state, nil, func() {}, nil
 }
 
 // cancelProcessGroup returns the exec.Cancel function for the child's process group. A successful

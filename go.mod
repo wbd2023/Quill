@@ -7,6 +7,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/ulikunitz/xz v0.5.15
 	github.com/yuin/goldmark v1.8.2
+	golang.org/x/sys v0.41.0
 	golang.org/x/tools v0.42.0
 )
 

@@ -122,14 +122,45 @@ func RunCommand(
 	if len(request.Stdin) > 0 {
 		command.Stdin = bytes.NewReader(request.Stdin)
 	}
-	tracker := configureProcessTree(command)
+	tracker, afterStart, release, err := configureProcessTree(command)
+	if err != nil {
+		// The process tree cannot be tracked safely (for example the Windows Job Object could not
+		// be established). Fail closed before the child is ever started, so no untrusted
+		// instruction runs outside the managed tree.
+		result = CommandResult{ExitCode: resolveExitCode(err)}
+		return result, classifyError(request, err, nil, result)
+	}
 
 	limit := resolveOutputLimit(request.OutputLimitBytes)
 	stdout, stderr, combined := newOutputBuffers(limit)
 	command.Stdout = &streamSink{stream: stdout, combined: combined}
 	command.Stderr = &streamSink{stream: stderr, combined: combined}
 
-	runErr := command.Run()
+	// Start and Wait are split (rather than command.Run) so the Windows build can bind the
+	// suspended child to its Job Object and resume it between the two calls; that ordering is what
+	// makes descendant termination race-safe. POSIX returns no afterStart hook, so the split is a
+	// no-op there.
+	runErr := command.Start()
+	if runErr != nil {
+		release()
+		result = CommandResult{ExitCode: resolveExitCode(runErr)}
+		return result, classifyError(request, runErr, parent.Err(), result)
+	}
+
+	if afterStart != nil {
+		if bindErr := afterStart(command); bindErr != nil {
+			// The suspended child could not be bound to the managed tree. It has not executed, so
+			// terminate it and fail closed before any untrusted instruction runs.
+			_ = command.Process.Kill()
+			_ = command.Wait()
+			release()
+			result = CommandResult{ExitCode: resolveExitCode(bindErr)}
+			return result, classifyError(request, bindErr, nil, result)
+		}
+	}
+	defer release()
+
+	runErr = command.Wait()
 
 	// Termination cause is attributed from whether the cancellation function actually killed a
 	// running process, not from a process exit code: a Unix signal death reports a negative exit
