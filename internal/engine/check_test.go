@@ -8,7 +8,7 @@ import (
 	"github.com/wbd2023/quill/internal/execution"
 	"github.com/wbd2023/quill/internal/pack/shipped/golang"
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
 )
@@ -34,8 +34,8 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 
 	context := execution.RunContext{
 		Scope: style.Scope("tools"),
-		Profile: policy.Profile{
-			Repository: policy.RepositoryConfig{
+		Profile: profile.Profile{
+			Repository: profile.RepositoryConfig{
 				ScopeRoots: map[style.Scope][]string{
 					"all":   {"."},
 					"tools": {"tools"},

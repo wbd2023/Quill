@@ -3,7 +3,6 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 	"github.com/wbd2023/quill/internal/style"
@@ -116,28 +115,53 @@ func TestCheckRejectsDuplicateEnabledPacks(t *testing.T) {
 	requireErrorContains(t, err, "duplicate pack")
 }
 
-func TestCheckRejectsDisabledPackConfig(t *testing.T) {
+func TestCheckRejectsReservedEnabledPack(t *testing.T) {
 	t.Parallel()
 
 	config := profiletest.Config()
-	config.PackConfigs = policy.PackConfigs{
-		"disabled": policy.PackConfig{"enabled": true},
+	config.EnabledPacks = []string{profile.EnabledPacksKey}
+
+	requireErrorContains(t, profile.Validate(config), "reserved pack")
+	_, err := profile.Format(config)
+	requireErrorContains(t, err, "reserved pack")
+}
+
+func TestCheckRejectsDisabledPackPolicy(t *testing.T) {
+	t.Parallel()
+
+	config := profiletest.Config()
+	config.PackPolicies = profile.PackPolicies{
+		"disabled": profile.PackPolicy{"enabled": true},
 	}
 
 	err := profile.Validate(config)
 	requireErrorContains(t, err, "packs.disabled")
 }
 
-func TestCheckRejectsEmptyPackConfig(t *testing.T) {
+func TestCheckAllowsEmptyPackPolicy(t *testing.T) {
 	t.Parallel()
 
 	config := profiletest.Config()
-	config.PackConfigs = policy.PackConfigs{
-		config.EnabledPacks[0]: policy.PackConfig{},
+	config.PackPolicies = profile.PackPolicies{
+		config.EnabledPacks[0]: {},
 	}
 
-	err := profile.Validate(config)
-	requireErrorContains(t, err, "must not be empty")
+	if err := profile.Validate(config); err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
+}
+
+func TestCheckAllowsDistinctRulesToBindSameRequirement(t *testing.T) {
+	t.Parallel()
+
+	config := profiletest.Config()
+	overlappingBinding := config.Rules[0]
+	overlappingBinding.RuleID = "test/overlapping-rule"
+	config.Rules = append(config.Rules, overlappingBinding)
+
+	if err := profile.Validate(config); err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
 }
 
 func TestCheckRejectsUnknownRuleScope(t *testing.T) {

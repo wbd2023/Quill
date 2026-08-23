@@ -1,6 +1,11 @@
 package report
 
-import "io"
+import (
+	"fmt"
+	"io"
+
+	"github.com/wbd2023/quill/internal/engine"
+)
 
 /* ----------------------------------------- Lock Result ---------------------------------------- */
 
@@ -12,8 +17,25 @@ type LockResult struct {
 	ArchiveCount int
 }
 
-// WriteLock writes the machine-mode lock result envelope for command. Text-mode lock output is
-// owned by the CLI, so this renderer only emits the JSON envelope.
-func WriteLock(writer io.Writer, command string, result LockResult) (err error) {
-	return writeResultEnvelope(writer, command, newLockJSON(result))
+// NewLockResult converts a completed engine lock into the explicit report result.
+func NewLockResult(result engine.LockResult) (lock LockResult) {
+	return LockResult{Path: result.Path, ArchiveCount: result.ArchiveCount}
+}
+
+// WriteLock writes a lock result in the requested format.
+func WriteLock(
+	writer io.Writer,
+	metadata EnvelopeMetadata,
+	format OutputFormat,
+	result LockResult,
+) (err error) {
+	switch format {
+	case FormatText:
+		_, err = fmt.Fprintf(writer, "Wrote %s (%d tools)\n", result.Path, result.ArchiveCount)
+		return err
+	case FormatJSON:
+		return writeResultEnvelope(writer, metadata, newLockJSON(result))
+	default:
+		return fmt.Errorf("unsupported output format %q", format)
+	}
 }

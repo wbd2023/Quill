@@ -42,8 +42,12 @@ type sectionJSON struct {
 
 /* ------------------------------------------ Rendering ----------------------------------------- */
 
-func writeCoverageJSON(writer io.Writer, command string, view CoverageView) (err error) {
-	return writeResultEnvelope(writer, command, newCoverageJSON(view))
+func writeCoverageJSON(
+	writer io.Writer,
+	metadata EnvelopeMetadata,
+	view CoverageView,
+) (err error) {
+	return writeResultEnvelope(writer, metadata, newCoverageJSON(view))
 }
 
 func newCoverageJSON(view CoverageView) (payload coverageJSON) {

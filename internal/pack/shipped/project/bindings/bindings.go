@@ -47,7 +47,7 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 func checkEnforcementLevels(
 	_ context.Context,
 	_ execution.RunContext,
-	_ style.ProfileExecution,
+	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
 	message, err := checks.CheckEnforcementLevels()
 	return enforcementResult(message), err
@@ -56,7 +56,7 @@ func checkEnforcementLevels(
 func checkExcludedDirectories(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.ProfileExecution,
+	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
 	message, err := checks.CheckExcludedDirectories(context.Profile.Repository)
 	return enforcementResult(message), err
@@ -65,7 +65,7 @@ func checkExcludedDirectories(
 func checkCommands(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.ProfileExecution,
+	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
 	projectConfig, err := decodeProjectConfig(context, project.PackID)
 	if err != nil {
@@ -80,14 +80,14 @@ func decodeProjectConfig(
 	context execution.RunContext,
 	packID string,
 ) (config projectpolicy.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(packID)
+	pack, found := context.Profile.PackPolicies.Lookup(packID)
 	if !found {
-		return projectpolicy.Config{}, errMissingPackConfig(packID)
+		return projectpolicy.Config{}, errMissingPackPolicy(packID)
 	}
 
 	return projectpolicy.DecodeConfig(pack)
 }
 
-func errMissingPackConfig(packID string) (err error) {
-	return fmt.Errorf("packs.%s must be configured", packID)
+func errMissingPackPolicy(packID string) (err error) {
+	return fmt.Errorf("packs.%s policy is required", packID)
 }

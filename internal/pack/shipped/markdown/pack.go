@@ -3,7 +3,7 @@ package markdown
 import (
 	"github.com/wbd2023/quill/internal/pack"
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -34,10 +34,10 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 	}
 }
 
-func fileSets() (fileSets policy.FileSets) {
-	return append(fileSets, policy.FileSetConfig{
+func fileSets() (fileSets profile.FileSets) {
+	return append(fileSets, profile.FileSetConfig{
 		Name: "markdown",
-		Include: policy.FileSetInclude{
+		Include: profile.FileSetInclude{
 			Extensions: []string{".md"},
 		},
 	})
@@ -53,7 +53,7 @@ func fileCommandRuleWithConfig(
 	configFile string,
 ) (rule style.RuleDefinition) {
 	rule = fileCommandRule(id, name, toolID, fileSet, arguments)
-	execution := rule.Check.(style.FileCommandExecution)
+	execution := rule.Check.(style.FileCommand)
 	execution.ConfigArgument = configArgument
 	execution.ConfigFile = configFile
 	rule.Check = execution
@@ -71,7 +71,7 @@ func fileCommandRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupExternal,
-		Check: style.FileCommandExecution{
+		Check: style.FileCommand{
 			ToolID:    toolID,
 			FileSet:   fileSet,
 			Arguments: append([]string{}, arguments...),

@@ -9,7 +9,7 @@ import (
 	"github.com/wbd2023/quill/internal/execution"
 	"github.com/wbd2023/quill/internal/filewalk"
 	projectpolicy "github.com/wbd2023/quill/internal/pack/shipped/project/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -49,7 +49,7 @@ func CheckEnforcementLevels() (message string, err error) {
 
 // CheckExcludedDirectories checks whether repository exclusions form a valid collector policy.
 func CheckExcludedDirectories(
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 ) (message string, err error) {
 	if err = filewalk.ValidateCollectorPolicy(filewalk.WalkConfig{
 		ExcludedDirectories: repository.ExcludedDirectories,

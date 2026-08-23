@@ -32,30 +32,30 @@ func (validator ruleExecutionValidator) validate(template style.Template) (err e
 	}
 
 	switch detail := template.(type) {
-	case style.ToolchainExecution:
-		return validator.validateToolchainExecution(detail)
+	case style.ToolchainCheck:
+		return validator.validateToolchainCheck(detail)
 
-	case style.ProfileExecution:
-		return validator.validateProfileExecution(detail)
+	case style.ProfileCheck:
+		return validator.validateProfileCheck(detail)
 
-	case style.FileCommandExecution:
-		return validator.validateFileCommandExecution(detail)
+	case style.FileCommand:
+		return validator.validateFileCommand(detail)
 
 	case style.TargetCommandTemplate:
-		return validator.validateTargetCommandExecution(detail)
+		return validator.validateTargetCommand(detail)
 
 	case style.TargetCheckTemplate:
-		return validator.validateTargetCheckExecution(detail)
+		return validator.validateTargetCheck(detail)
 
-	case style.RepositoryScanExecution:
-		return validator.validateRepositoryScanExecution(detail)
+	case style.RepositoryScan:
+		return validator.validateRepositoryScan(detail)
 
-	case style.ExternalCheckTemplate:
-		return validator.validateExternalCheckExecution(detail)
+	case style.ExternalCheck:
+		return validator.validateExternalCheck(detail)
 
 	default:
 		return fmt.Errorf(
-			"rule definition %q %s uses unknown execution detail",
+			"rule definition %q %s uses unknown execution template",
 			validator.ruleID,
 			validator.label,
 		)

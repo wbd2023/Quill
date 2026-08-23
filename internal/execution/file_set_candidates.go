@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/wbd2023/quill/internal/filewalk"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -14,7 +14,7 @@ import (
 
 func collectFileSetCandidates(
 	context RunContext,
-	fileSet policy.FileSetConfig,
+	fileSet profile.FileSetConfig,
 ) (files []string, err error) {
 	scopes := []style.Scope{context.Scope}
 	if fileSetUsesScopedIncludes(fileSet) {
@@ -49,7 +49,7 @@ func collectFileSetCandidates(
 /* -------------------------------------- Scope Resolution -------------------------------------- */
 
 func findOverlappingScopes(
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	scope style.Scope,
 	candidates []style.Scope,
 ) (scopes []style.Scope) {
@@ -71,7 +71,7 @@ func findOverlappingScopes(
 
 func explicitFileCandidates(
 	context RunContext,
-	fileSet policy.FileSetConfig,
+	fileSet profile.FileSetConfig,
 	scopes []style.Scope,
 ) (files []string) {
 	for _, scope := range scopes {
@@ -106,7 +106,7 @@ func dedupeCandidatePaths(paths []string) (deduped []string) {
 
 func resolveScopeRoots(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	scopes []style.Scope,
 ) (roots []string) {
 	seen := make(map[string]bool)

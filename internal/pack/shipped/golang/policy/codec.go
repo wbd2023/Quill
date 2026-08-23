@@ -3,19 +3,19 @@ package policy
 import (
 	"fmt"
 
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* ------------------------------------------ Decoding ------------------------------------------ */
 
-// DecodeConfig decodes the Go pack config subtree.
-func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
-	if pack == nil {
+// DecodeConfig decodes the Go Pack Policy subtree.
+func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
+	if policy == nil {
 		return Config{}, fmt.Errorf("packs.go must be configured")
 	}
 
 	if err = rejectUnknownFields(
-		pack,
+		policy,
 		"packs.go",
 		"local_import_prefixes",
 		"parameters",
@@ -27,7 +27,7 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 	}
 
 	config.LocalImportPrefixes, err = stringList(
-		pack,
+		policy,
 		"local_import_prefixes",
 		"packs.go.local_import_prefixes",
 	)
@@ -35,7 +35,7 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 		return Config{}, err
 	}
 
-	parameters, err := configSection(pack, "parameters", "packs.go.parameters")
+	parameters, err := configSection(policy, "parameters", "packs.go.parameters")
 	if err != nil {
 		return Config{}, err
 	}
@@ -45,7 +45,7 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 		return Config{}, err
 	}
 
-	constructors, err := configSection(pack, "constructors", "packs.go.constructors")
+	constructors, err := configSection(policy, "constructors", "packs.go.constructors")
 	if err != nil {
 		return Config{}, err
 	}
@@ -56,7 +56,7 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 	}
 
 	domainValues, err := configSection(
-		pack,
+		policy,
 		"domain_values",
 		"packs.go.domain_values",
 	)
@@ -73,7 +73,7 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 		return Config{}, err
 	}
 
-	architecture, err := configSection(pack, "architecture", "packs.go.architecture")
+	architecture, err := configSection(policy, "architecture", "packs.go.architecture")
 	if err != nil {
 		return Config{}, err
 	}
@@ -88,17 +88,17 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 
 /* ----------------------------------------- Validation ----------------------------------------- */
 
-// ValidatePackConfig validates the raw Go pack config subtree.
-func ValidatePackConfig(pack corepolicy.PackConfig) (err error) {
-	_, err = DecodeConfig(pack)
+// ValidatePackPolicy validates the raw Go Pack Policy subtree.
+func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
+	_, err = DecodeConfig(policy)
 	return err
 }
 
 /* ------------------------------------------ Encoding ------------------------------------------ */
 
-// EncodeConfig encodes config as a raw Go pack config subtree.
-func EncodeConfig(config Config) (pack corepolicy.PackConfig) {
-	return corepolicy.PackConfig{
+// EncodeConfig encodes config as a raw Go Pack Policy subtree.
+func EncodeConfig(config Config) (policy profile.PackPolicy) {
+	return profile.PackPolicy{
 		"local_import_prefixes": cloneStrings(config.LocalImportPrefixes),
 		"parameters": map[string]any{
 			"secret_names": cloneStrings(config.Parameters.SecretNames),

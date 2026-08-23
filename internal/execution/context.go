@@ -1,7 +1,7 @@
 package execution
 
 import (
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
@@ -10,8 +10,8 @@ import (
 type RunContext struct {
 	RepoRoot        string
 	Scope           style.Scope
-	Profile         policy.Profile
-	Effective       style.Plan
+	Profile         profile.Profile
+	Plan            style.Plan
 	Tools           map[string]toolchain.Tool
 	ToolEnvironment map[string]string
 	GoEnvironment   map[string]string
@@ -22,8 +22,8 @@ type RunContext struct {
 func NewRunContext(
 	repoRoot string,
 	scope style.Scope,
-	config policy.Profile,
-	effective style.Plan,
+	config profile.Profile,
+	plan style.Plan,
 	capabilities []toolchain.Capability,
 	toolEnvironment map[string]string,
 	goEnvironment map[string]string,
@@ -47,7 +47,7 @@ func NewRunContext(
 		RepoRoot:        repoRoot,
 		Scope:           scope,
 		Profile:         config,
-		Effective:       effective,
+		Plan:            plan,
 		Tools:           tools,
 		ToolEnvironment: toolEnvironment,
 		GoEnvironment:   goEnvironment,

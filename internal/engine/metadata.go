@@ -7,7 +7,6 @@ import (
 
 	"github.com/wbd2023/quill/internal/pack"
 	"github.com/wbd2023/quill/internal/pack/shipped"
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
@@ -26,29 +25,38 @@ const (
 
 /* ------------------------------------------ Overview ------------------------------------------ */
 
+// PackProvenance identifies whether a Pack ships with Quill or is repository-provided.
+type PackProvenance string
+
+const (
+	PackProvenanceShipped  PackProvenance = "shipped"
+	PackProvenanceExternal PackProvenance = "external"
+)
+
 // MetadataSnapshot is the complete non-presentation metadata view of one prepared repository.
 // It is the single read-only query shared by the discoverability commands (list and explain).
 //
-// Metadata is metadata-only: it shares the prepare pipeline (Profile, STYLE.md document, shipped
-// Pack registry, and compiled effective profile) and never constructs a runner context, resolves
-// driver bindings, or inspects tools. The full shipped catalogue is assembled independently to
-// enumerate available inventory; the prepared profile selects the active subset.
+// Metadata is metadata-only: it shares the prepare pipeline (Profile, STYLE.md
+// document, Pack catalogue, and compiled Plan) and never constructs a runner
+// context, resolves driver bindings, or inspects tools. The full catalogue is
+// assembled independently to enumerate available inventory; the prepared
+// Profile selects the active subset.
 type MetadataSnapshot struct {
-	Packs       []PackMetadata
-	Rules       []RuleMetadata
-	Tools       []ToolMetadata
-	Scopes      []ScopeMetadata
-	PackConfigs policy.PackConfigs
+	Packs        []PackMetadata
+	Rules        []RuleMetadata
+	Tools        []ToolMetadata
+	Scopes       []ScopeMetadata
+	PackPolicies profile.PackPolicies
 }
 
 // PackMetadata describes one catalogue Pack and whether the prepared profile activates it.
 type PackMetadata struct {
-	ID       string
-	Name     string
-	Active   bool
-	External bool
-	ToolIDs  []string
-	RuleIDs  []string
+	ID         string
+	Name       string
+	Active     bool
+	Provenance PackProvenance
+	ToolIDs    []string
+	RuleIDs    []string
 }
 
 // RuleMetadata describes one catalogue Rule and, when active, its compiled binding.
@@ -73,7 +81,6 @@ type ToolMetadata struct {
 	Command       string
 	PinnedVersion string
 	PackIDs       []string
-	External      bool
 }
 
 // ScopeMetadata describes one repository scope.
@@ -90,7 +97,6 @@ type ExecutionDetail struct {
 	ToolIDs  []string
 	FileSet  string
 	Language string
-	Detail   string
 }
 
 // Metadata loads the prepared repository snapshot and assembles its discoverability metadata. It
@@ -131,25 +137,24 @@ func (engine *Engine) Metadata(
 		externalIDs[definition.ID] = true
 	}
 
-	return buildMetadataSnapshot(prepared.profile, available, externalIDs), nil
+	return buildMetadataSnapshot(prepared.config, prepared.plan, available, externalIDs), nil
 }
 
 /* ------------------------------------------ Assembly ------------------------------------------ */
 
 func buildMetadataSnapshot(
-	effective profile.EffectiveProfile,
+	config profile.Profile,
+	plan style.Plan,
 	registry pack.Registry,
 	external map[string]bool,
 ) (snapshot MetadataSnapshot) {
-	config := effective.Profile
-
 	enabled := make(map[string]bool, len(config.EnabledPacks))
 	for _, packID := range config.EnabledPacks {
 		enabled[packID] = true
 	}
 
-	activeRules := make(map[string]style.Rule, len(effective.Effective.Rules))
-	for _, rule := range effective.Effective.Rules {
+	activeRules := make(map[string]style.Rule, len(plan.Rules))
+	for _, rule := range plan.Rules {
 		activeRules[rule.ID] = rule
 	}
 
@@ -157,7 +162,7 @@ func buildMetadataSnapshot(
 	snapshot.Rules = buildRuleMetadata(registry.Rules(), activeRules)
 	snapshot.Tools = buildToolMetadata(registry.ToolCapabilities(), registry.Packs(), config.Tools)
 	snapshot.Scopes = buildScopeMetadata(config.Repository)
-	snapshot.PackConfigs = config.PackConfigs
+	snapshot.PackPolicies = config.PackPolicies
 
 	return snapshot
 }
@@ -175,13 +180,18 @@ func buildPackMetadata(
 		}
 		slices.Sort(ruleIDs)
 
+		provenance := PackProvenanceShipped
+		if external[definition.ID] {
+			provenance = PackProvenanceExternal
+		}
+
 		packs = append(packs, PackMetadata{
-			ID:       definition.ID,
-			Name:     definition.Name,
-			Active:   enabled[definition.ID],
-			External: external[definition.ID],
-			ToolIDs:  sortedClone(definition.ToolIDs),
-			RuleIDs:  ruleIDs,
+			ID:         definition.ID,
+			Name:       definition.Name,
+			Active:     enabled[definition.ID],
+			Provenance: provenance,
+			ToolIDs:    sortedClone(definition.ToolIDs),
+			RuleIDs:    ruleIDs,
 		})
 	}
 
@@ -222,7 +232,7 @@ func buildRuleMetadata(
 func buildToolMetadata(
 	capabilities []toolchain.Capability,
 	packs []pack.Definition,
-	pinned policy.PinnedTools,
+	pinned profile.PinnedTools,
 ) (tools []ToolMetadata) {
 	ownerPacks := make(map[string][]string)
 	for _, definition := range packs {
@@ -246,7 +256,6 @@ func buildToolMetadata(
 			Command:       capability.Command,
 			PinnedVersion: version,
 			PackIDs:       packIDs,
-			External:      false,
 		})
 	}
 
@@ -254,7 +263,7 @@ func buildToolMetadata(
 	return tools
 }
 
-func buildScopeMetadata(repository policy.RepositoryConfig) (scopes []ScopeMetadata) {
+func buildScopeMetadata(repository profile.RepositoryConfig) (scopes []ScopeMetadata) {
 	scopes = make([]ScopeMetadata, 0, len(repository.ScopeRoots))
 	for name, roots := range repository.ScopeRoots {
 		scopes = append(scopes, ScopeMetadata{
@@ -268,27 +277,24 @@ func buildScopeMetadata(repository policy.RepositoryConfig) (scopes []ScopeMetad
 	return scopes
 }
 
-// executionDetail classifies one declared execution template into structured metadata. It reads
-// only the template's own fields; it never binds targets or runs anything.
+// executionDetail classifies one declared Template into structured metadata. It reads only the
+// Template's own fields; it never binds targets or runs anything.
 func executionDetail(template style.Template) (detail ExecutionDetail) {
 	if template == nil {
 		return ExecutionDetail{}
 	}
 
 	switch execution := template.(type) {
-	case style.ToolchainExecution:
+	case style.ToolchainCheck:
 		return ExecutionDetail{
 			Category: ExecutionToolchain,
 			ToolIDs:  sortedClone(execution.ToolIDs),
 		}
 
-	case style.ProfileExecution:
-		return ExecutionDetail{
-			Category: ExecutionProfile,
-			Detail:   execution.Check,
-		}
+	case style.ProfileCheck:
+		return ExecutionDetail{Category: ExecutionProfile}
 
-	case style.FileCommandExecution:
+	case style.FileCommand:
 		toolIDs := []string(nil)
 		if execution.ToolID != "" {
 			toolIDs = []string{execution.ToolID}
@@ -299,11 +305,10 @@ func executionDetail(template style.Template) (detail ExecutionDetail) {
 			FileSet:  execution.FileSet,
 		}
 
-	case style.RepositoryScanExecution:
+	case style.RepositoryScan:
 		return ExecutionDetail{
 			Category: ExecutionRepositoryScan,
 			FileSet:  execution.FileSet,
-			Detail:   execution.Scanner,
 		}
 
 	case style.TargetCommandTemplate:
@@ -311,7 +316,6 @@ func executionDetail(template style.Template) (detail ExecutionDetail) {
 			Category: ExecutionTargetCommand,
 			ToolIDs:  sortedClone(execution.ToolIDs),
 			Language: execution.Language,
-			Detail:   execution.Action,
 		}
 
 	case style.TargetCheckTemplate:
@@ -319,14 +323,12 @@ func executionDetail(template style.Template) (detail ExecutionDetail) {
 			Category: ExecutionTargetCheck,
 			ToolIDs:  sortedClone(execution.ToolIDs),
 			Language: execution.Language,
-			Detail:   execution.Check,
 		}
 
-	case style.ExternalCheckTemplate:
+	case style.ExternalCheck:
 		return ExecutionDetail{
 			Category: ExecutionExternal,
 			FileSet:  execution.FileSet,
-			Detail:   execution.CheckID,
 		}
 
 	default:

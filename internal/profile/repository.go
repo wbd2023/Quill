@@ -2,13 +2,85 @@ package profile
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/style"
 )
+
+// RepositoryConfig defines repository scope roots, exclusions, and generated-file detection.
+type RepositoryConfig struct {
+	RootMarkers         []string
+	ScopeRoots          map[style.Scope][]string
+	DefaultScope        style.Scope
+	ExcludedDirectories []string
+	GeneratedMarker     string
+}
+
+// HasScope reports whether the repository defines the named scope.
+func (r RepositoryConfig) HasScope(scope style.Scope) (found bool) {
+	_, found = r.ScopeRoots[scope]
+	return found
+}
+
+// ResolveScopeRoots returns the filesystem roots for a scope under the repository root.
+func (r RepositoryConfig) ResolveScopeRoots(
+	repositoryRoot string,
+	scope style.Scope,
+) (roots []string) {
+	scopeRoots := r.ScopeRoots[scope]
+	roots = make([]string, 0, len(scopeRoots))
+	for _, scopeRoot := range scopeRoots {
+		scopeRoot = cleanScopeRoot(scopeRoot)
+		if scopeRoot == "." {
+			roots = append(roots, repositoryRoot)
+			continue
+		}
+
+		roots = append(roots, filepath.Join(repositoryRoot, scopeRoot))
+	}
+
+	return roots
+}
+
+// HasScopeOverlap reports whether two scopes cover any common root.
+func (r RepositoryConfig) HasScopeOverlap(
+	scope style.Scope,
+	other style.Scope,
+) (overlap bool) {
+	scopeRoots, otherRoots := r.ScopeRoots[scope], r.ScopeRoots[other]
+	for _, scopeRoot := range scopeRoots {
+		for _, otherRoot := range otherRoots {
+			if hasRootOverlap(scopeRoot, otherRoot) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func hasRootOverlap(left string, right string) (overlap bool) {
+	left, right = cleanScopeRoot(left), cleanScopeRoot(right)
+	if left == "." || right == "." {
+		return true
+	}
+
+	return left == right || strings.HasPrefix(left, right+"/") || strings.HasPrefix(right, left+"/")
+}
+
+func cleanScopeRoot(root string) (cleaned string) {
+	root = strings.TrimSpace(root)
+	if root == "" {
+		return "."
+	}
+
+	return filepath.ToSlash(filepath.Clean(root))
+}
 
 /* ----------------------------------------- Repository ----------------------------------------- */
 
-func validateRepository(repository policy.RepositoryConfig) (err error) {
+func validateRepository(repository RepositoryConfig) (err error) {
 	if err = validateRepositoryMarkers(repository.RootMarkers); err != nil {
 		return err
 	}
@@ -53,7 +125,7 @@ func validateRepositoryMarkers(markers []string) (err error) {
 
 /* ------------------------------------------- Scopes ------------------------------------------- */
 
-func validateRepositoryScopes(repository policy.RepositoryConfig) (err error) {
+func validateRepositoryScopes(repository RepositoryConfig) (err error) {
 	if len(repository.ScopeRoots) == 0 {
 		return fmt.Errorf("repository.scope_roots must not be empty")
 	}
@@ -135,7 +207,7 @@ func validateRepositoryExclusions(exclusions []string) (err error) {
 
 /* --------------------------------------- Generated Files -------------------------------------- */
 
-func validateGeneratedFilePolicy(repository policy.RepositoryConfig) (err error) {
+func validateGeneratedFilePolicy(repository RepositoryConfig) (err error) {
 	if isBlank(repository.GeneratedMarker) {
 		return fmt.Errorf("repository.generated_marker must not be empty")
 	}

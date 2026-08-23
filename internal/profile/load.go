@@ -3,31 +3,51 @@ package profile
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/wbd2023/quill/internal/policy"
-	"github.com/wbd2023/quill/internal/profile/toml"
 )
 
 // DefaultFilename is the Quill Profile filename loaded from repository roots.
 const DefaultFilename = "quill.toml"
 
-// Load reads the default profile file from a repository root and validates it.
-func Load(root string) (config policy.Profile, err error) {
+// Load reads the default profile through a repository-confined filesystem and
+// validates it.
+func Load(root string) (config Profile, err error) {
 	path := filepath.Join(root, DefaultFilename)
-	contents, err := os.ReadFile(path)
+	repository, err := os.OpenRoot(root)
 	if err != nil {
-		return policy.Profile{}, fmt.Errorf("read style profile %q: %w", path, err)
+		return Profile{}, fmt.Errorf(
+			"open repository root %q: %w",
+			root,
+			err,
+		)
+	}
+
+	contents, readErr := fs.ReadFile(repository.FS(), DefaultFilename)
+	closeErr := repository.Close()
+	if readErr != nil {
+		return Profile{}, fmt.Errorf(
+			"read style profile %q: %w",
+			path,
+			readErr,
+		)
+	}
+	if closeErr != nil {
+		return Profile{}, fmt.Errorf(
+			"close repository root %q: %w",
+			root,
+			closeErr,
+		)
 	}
 
 	config, err = Parse(string(contents))
 	if err != nil {
-		return policy.Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
+		return Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
 	}
 
 	if err = validateRepositoryPaths(config, root); err != nil {
-		return policy.Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
+		return Profile{}, fmt.Errorf("load style profile %q: %w", path, err)
 	}
 
 	for _, marker := range config.Repository.RootMarkers {
@@ -37,14 +57,14 @@ func Load(root string) (config policy.Profile, err error) {
 			continue
 
 		case errors.Is(err, os.ErrNotExist):
-			return policy.Profile{}, fmt.Errorf(
+			return Profile{}, fmt.Errorf(
 				"repository root missing marker %q: %w",
 				marker,
 				err,
 			)
 
 		default:
-			return policy.Profile{}, fmt.Errorf(
+			return Profile{}, fmt.Errorf(
 				"repository root marker %q cannot be checked: %w",
 				marker,
 				err,
@@ -56,14 +76,14 @@ func Load(root string) (config policy.Profile, err error) {
 }
 
 // Parse parses style profile TOML source and validates it.
-func Parse(source string) (config policy.Profile, err error) {
-	config, err = toml.Decode(source)
+func Parse(source string) (config Profile, err error) {
+	config, err = decodeTOML(source)
 	if err != nil {
-		return policy.Profile{}, err
+		return Profile{}, err
 	}
 
 	if err = Validate(config); err != nil {
-		return policy.Profile{}, err
+		return Profile{}, err
 	}
 
 	return config, nil

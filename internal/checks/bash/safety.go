@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/wbd2023/quill/internal/filewalk"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -43,7 +43,7 @@ type shellSafetyState struct {
 // CheckSafety check safety.
 func CheckSafety(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectFiles(

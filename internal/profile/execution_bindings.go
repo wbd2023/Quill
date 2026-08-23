@@ -3,15 +3,14 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 
 /* ----------------------------------- Rule Execution Bindings ---------------------------------- */
 
 func validateRuleExecutionBinding(
-	config policy.Profile,
-	binding policy.RuleBinding,
+	config Profile,
+	binding RuleBinding,
 	template style.Template,
 ) (err error) {
 	if template == nil {
@@ -32,8 +31,8 @@ func validateRuleExecutionBinding(
 }
 
 func resolveTargets(
-	config policy.Profile,
-	binding policy.RuleBinding,
+	config Profile,
+	binding RuleBinding,
 	template style.Template,
 ) (targets []string, err error) {
 	requirements := style.Describe(template)
@@ -51,7 +50,7 @@ func resolveTargets(
 }
 
 func inferTargets(
-	config policy.Profile,
+	config Profile,
 	ruleID string,
 	scope style.Scope,
 	language string,

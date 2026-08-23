@@ -13,29 +13,29 @@ func targetCommandDriver(commands TargetCommands) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		rule style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := job.(style.TargetCommandJob)
-		if !found {
+		command, ok := job.(style.TargetCommandJob)
+		if !ok {
 			return style.ExecutionResult{}, fmt.Errorf(
-				"target command driver received empty job",
+				"target command driver received unsupported execution job %T",
+				job,
 			)
 		}
 
-		command, found := commands.Lookup(execution.PackID, execution.Language, execution.Action)
+		bound, found := commands.Lookup(rule.PackID, command.Language, command.Action)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf(
 				"unknown target command %q for language %q in pack %q",
-				execution.Action,
-				execution.Language,
-				execution.PackID,
+				command.Action,
+				command.Language,
+				rule.PackID,
 			)
 		}
 
-		result, err = command(ctx, context, execution)
-		result.PackID = execution.PackID
-		return result, err
+		return bound(ctx, context, command)
 	}
 }
 
@@ -43,26 +43,28 @@ func targetCheckDriver(checks TargetChecks) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		rule style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := job.(style.TargetCheckJob)
-		if !found {
-			return style.ExecutionResult{}, fmt.Errorf("target check driver received empty job")
-		}
-
-		check, found := checks.Lookup(execution.PackID, execution.Language, execution.Check)
-		if !found {
+		check, ok := job.(style.TargetCheckJob)
+		if !ok {
 			return style.ExecutionResult{}, fmt.Errorf(
-				"unknown target check %q for language %q in pack %q",
-				execution.Check,
-				execution.Language,
-				execution.PackID,
+				"target check driver received unsupported execution job %T",
+				job,
 			)
 		}
 
-		result, err = check(ctx, context, execution)
-		result.PackID = execution.PackID
-		return result, err
+		bound, found := checks.Lookup(rule.PackID, check.Language, check.Check)
+		if !found {
+			return style.ExecutionResult{}, fmt.Errorf(
+				"unknown target check %q for language %q in pack %q",
+				check.Check,
+				check.Language,
+				rule.PackID,
+			)
+		}
+
+		return bound(ctx, context, check)
 	}
 }

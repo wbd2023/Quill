@@ -3,7 +3,7 @@ package vocabulary
 import (
 	"github.com/wbd2023/quill/internal/filewalk"
 	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -14,7 +14,7 @@ const bashAssignmentMatchLength = 4
 // CheckVocabulary check vocabulary.
 func CheckVocabulary(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	config vocabularypolicy.Config,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {

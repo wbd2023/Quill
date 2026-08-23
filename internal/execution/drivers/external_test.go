@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/wbd2023/quill/internal/execution"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -21,9 +21,9 @@ import (
 // protocol. It compiles a real helper binary that speaks the JSONL protocol, then drives every
 // success and failure path through the flat external driver: valid diagnostics, completion failure,
 // malformed output, missing completion, invalid range, nonzero exit, timeout, and truncation all
-// become structured results or safe execution errors.
+// become structured results or safe execution errors. Pack and rule provenance for the request is
+// supplied by the Rule, never by the ExternalCheck Job.
 func TestExternalCheckDriver(t *testing.T) {
-	t.Parallel()
 
 	helper := compilePackHelper(t)
 	packDir := stagePackBinary(t, helper)
@@ -31,7 +31,7 @@ func TestExternalCheckDriver(t *testing.T) {
 	run := execution.RunContext{
 		RepoRoot: t.TempDir(),
 		Scope:    "all",
-		Profile:  policy.Profile{},
+		Profile:  profile.Profile{},
 	}
 	driver := externalCheckDriver()
 	ctx := context.Background()
@@ -39,12 +39,11 @@ func TestExternalCheckDriver(t *testing.T) {
 	t.Run("diagnostic flows through as a structured result", func(t *testing.T) {
 		t.Parallel()
 
-		result, err := driver(ctx, run, externalJob(packDir, "diagnostic", 5*time.Second), nil)
+		result, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "diagnostic", 5*time.Second), nil,
+		)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
-		}
-		if result.PackID != "testpack" {
-			t.Fatalf("expected pack id provenance, got %q", result.PackID)
 		}
 		if len(result.Diagnostics) != 1 {
 			t.Fatalf("expected 1 diagnostic, got %d", len(result.Diagnostics))
@@ -57,7 +56,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("completion failure becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "fail-completion", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "fail-completion", 5*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected completion failure error")
 		}
@@ -65,7 +66,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("malformed output becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "malformed", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "malformed", 5*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected malformed output error")
 		}
@@ -73,7 +76,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("missing completion becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "no-completion", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "no-completion", 5*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected missing completion error")
 		}
@@ -81,7 +86,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("invalid range becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "bad-range", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "bad-range", 5*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected invalid range error")
 		}
@@ -89,7 +96,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("nonzero exit becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "nonzero", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "nonzero", 5*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected nonzero exit error")
 		}
@@ -97,7 +106,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("timeout becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		result, err := driver(ctx, run, externalJob(packDir, "timeout", 200*time.Millisecond), nil)
+		result, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "timeout", 200*time.Millisecond), nil,
+		)
 		if err == nil {
 			t.Fatal("expected timeout error")
 		}
@@ -108,7 +119,9 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("output truncation becomes an execution error", func(t *testing.T) {
 		t.Parallel()
-		result, err := driver(ctx, run, externalJob(packDir, "truncate", 10*time.Second), nil)
+		result, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "truncate", 10*time.Second), nil,
+		)
 		if err == nil {
 			t.Fatal("expected truncation error")
 		}
@@ -119,19 +132,20 @@ func TestExternalCheckDriver(t *testing.T) {
 
 	t.Run("stderr is captured but does not fail a clean run", func(t *testing.T) {
 		t.Parallel()
-		_, err := driver(ctx, run, externalJob(packDir, "stderr-debug", 5*time.Second), nil)
+		_, err := driver(
+			ctx, run, externalRule(), externalJob(packDir, "stderr-debug", 5*time.Second), nil,
+		)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	})
 }
 
-// TestExternalCheckRequestShape asserts the request contract: configuration is an empty JSON object
-// (never null) when no pack config exists, and files are repository-relative slash paths (never
-// absolute). The helper echoes both back so the assertions cover the wire format the subprocess
-// receives.
+// TestExternalCheckRequestShape asserts the request contract: policy is an empty JSON object
+// (never null) when no Pack Policy exists, files are repository-relative slash paths (never
+// absolute), and Pack/Rule provenance is derived from the Rule, not the Job. The helper echoes all
+// of these back so the assertions cover the wire format the subprocess receives.
 func TestExternalCheckRequestShape(t *testing.T) {
-	t.Parallel()
 
 	helper := compilePackHelper(t)
 	packDir := stagePackBinary(t, helper)
@@ -149,15 +163,21 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	run := execution.RunContext{
 		RepoRoot: repoRoot,
 		Scope:    "all",
-		Profile: policy.Profile{
-			Repository: policy.RepositoryConfig{
+		Profile: profile.Profile{
+			Repository: profile.RepositoryConfig{
 				ScopeRoots: map[style.Scope][]string{"all": {"."}},
 			},
 		},
 	}
 
-	result, err := externalCheckDriver()(context.Background(), run,
-		externalJob(packDir, "inspect-request", 5*time.Second), nil)
+	driver := externalCheckDriver()
+	result, err := driver(
+		context.Background(),
+		run,
+		externalRule(),
+		externalJob(packDir, "inspect-request", 5*time.Second),
+		nil,
+	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -166,8 +186,14 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	}
 
 	message := result.Diagnostics[0].Message
-	if !strings.Contains(message, "config={}") {
-		t.Fatalf("expected empty configuration object {}, got %q", message)
+	if !strings.Contains(message, "pack=testpack") {
+		t.Fatalf("expected pack provenance from the rule, got %q", message)
+	}
+	if !strings.Contains(message, "rule=testpack/rule") {
+		t.Fatalf("expected rule provenance from the rule, got %q", message)
+	}
+	if !strings.Contains(message, "policy={}") {
+		t.Fatalf("expected empty policy object {}, got %q", message)
 	}
 	if !strings.Contains(message, "files=src/file.go") {
 		t.Fatalf("expected repository-relative file path, got %q", message)
@@ -181,14 +207,25 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	}
 }
 
+func TestStderrContextPreservesMessageBeforeTrailingWhitespace(t *testing.T) {
+	t.Parallel()
+
+	stderr := "external Pack failed" + strings.Repeat(" ", stderrExcerpt+1)
+	if got, want := stderrContext(stderr), "\nexternal Pack failed"; got != want {
+		t.Fatalf("stderrContext() = %q, want %q", got, want)
+	}
+}
+
+func externalRule() (rule style.Rule) {
+	return style.Rule{ID: "testpack/rule", PackID: "testpack"}
+}
+
 func externalJob(
 	packDirectory string,
 	checkID string,
 	timeout time.Duration,
-) (job style.ExternalCheckJob) {
-	return style.ExternalCheckJob{
-		PackID:        "testpack",
-		RuleID:        "testpack/rule",
+) (job style.ExternalCheck) {
+	return style.ExternalCheck{
 		CheckID:       checkID,
 		PackDirectory: packDirectory,
 		Command:       "bin/packhelper",

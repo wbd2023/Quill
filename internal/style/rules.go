@@ -3,8 +3,8 @@ package style
 // RuleGroup represents a rule category, for example Go syntax or repository text.
 type RuleGroup string
 
-// Definitions represents raw tool and rule definitions assembled from packs before the effective
-// profile is compiled.
+// Definitions represents raw Tool and Rule definitions assembled from Packs
+// before Profile compilation produces a Plan.
 type Definitions struct {
 	ToolIDs []string
 	Rules   []RuleDefinition
@@ -16,9 +16,10 @@ type Plan struct {
 	Rules []Rule
 }
 
-// RuleDefinition represents a pack-declared rule before profile binding. It carries check and fix
-// execution templates but not enforcement or scope. PackID records the Pack that declared the rule
-// so compiled rules, jobs, and results carry Pack provenance.
+// RuleDefinition represents a pack-declared rule before profile binding. It carries check and
+// fix Templates but not enforcement or scope. PackID records the Pack that declared the rule so
+// compiled rules and results carry Pack provenance; execution values carry no Pack or rule
+// identity of their own.
 type RuleDefinition struct {
 	ID     string
 	PackID string
@@ -29,8 +30,9 @@ type RuleDefinition struct {
 	Fix   Template
 }
 
-// Rule represents a profile-bound, enforceable style requirement with bound execution jobs.
-// PackID carries the declaring Pack through to compiled jobs and results.
+// Rule represents a Profile-bound executable capability with bound enforcement,
+// Scope, Requirements, and execution Jobs. PackID carries the declaring Pack
+// through to results.
 type Rule struct {
 	ID     string
 	PackID string
@@ -45,7 +47,7 @@ type Rule struct {
 	Fix   Job
 }
 
-// CheckToolIDs returns the tool IDs required by the rule's check template.
+// CheckToolIDs returns the tool IDs required by the rule definition's check Template.
 func (rule RuleDefinition) CheckToolIDs() (toolIDs []string) {
 	if rule.Check == nil {
 		return nil
@@ -53,7 +55,7 @@ func (rule RuleDefinition) CheckToolIDs() (toolIDs []string) {
 	return Describe(rule.Check).ToolIDs
 }
 
-// FixToolIDs returns the tool IDs required by the rule's fix template.
+// FixToolIDs returns the tool IDs required by the rule definition's fix Template.
 func (rule RuleDefinition) FixToolIDs() (toolIDs []string) {
 	if rule.Fix == nil {
 		return nil
@@ -61,7 +63,7 @@ func (rule RuleDefinition) FixToolIDs() (toolIDs []string) {
 	return Describe(rule.Fix).ToolIDs
 }
 
-// CheckToolIDs returns the tool IDs required by the rule's check job.
+// CheckToolIDs returns the tool IDs required by the rule's check Job.
 func (rule Rule) CheckToolIDs() (toolIDs []string) {
 	if rule.Check == nil {
 		return nil
@@ -69,7 +71,7 @@ func (rule Rule) CheckToolIDs() (toolIDs []string) {
 	return ToolIDs(rule.Check)
 }
 
-// FixToolIDs returns the tool IDs required by the rule's fix job.
+// FixToolIDs returns the tool IDs required by the rule's fix Job.
 func (rule Rule) FixToolIDs() (toolIDs []string) {
 	if rule.Fix == nil {
 		return nil

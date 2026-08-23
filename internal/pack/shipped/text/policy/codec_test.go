@@ -7,13 +7,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
-func TestDecodeConfigReadsTextPackConfig(t *testing.T) {
+func TestDecodeConfigReadsTextPackPolicy(t *testing.T) {
 	t.Parallel()
 
-	config, err := textpolicy.DecodeConfig(corepolicy.PackConfig{
+	config, err := textpolicy.DecodeConfig(profile.PackPolicy{
 		"section_headers": map[string]any{
 			"large_min_lines":  int64(100),
 			"short_max_lines":  int64(79),

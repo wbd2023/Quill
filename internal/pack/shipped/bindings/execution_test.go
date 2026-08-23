@@ -20,7 +20,6 @@ import (
 	"github.com/wbd2023/quill/internal/pack/shipped/tool"
 	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
 	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
@@ -41,7 +40,8 @@ func TestRepositoryScanDriverAcceptsKnownScanner(t *testing.T) {
 	if _, err := scanDriver()(
 		context.Background(),
 		runCtx,
-		repositoryScanSpec(text.PackID, text.ScannerASCII),
+		packRule(text.PackID),
+		repositoryScanSpec(text.ScannerASCII),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanDriver(ascii): %v", err)
@@ -50,11 +50,11 @@ func TestRepositoryScanDriverAcceptsKnownScanner(t *testing.T) {
 
 func TestRepositoryScanDriverRejectsUnknownScanner(t *testing.T) {
 	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
-
 	_, err := scanDriver()(
 		context.Background(),
 		runCtx,
-		repositoryScanSpec("", "unknown"),
+		packRule(""),
+		repositoryScanSpec("unknown"),
 		nil,
 	)
 	if err == nil {
@@ -116,7 +116,8 @@ func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
 	if _, err := scanDriver()(
 		context.Background(),
 		runCtx,
-		repositoryScanSpec(golang.PackID, golang.ScannerArchitecture),
+		packRule(golang.PackID),
+		repositoryScanSpec(golang.ScannerArchitecture),
 		nil,
 	); err != nil {
 		t.Fatalf("repositoryScanDriver(architecture): %v", err)
@@ -124,7 +125,8 @@ func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
 	result, err := scanDriver()(
 		context.Background(),
 		runCtx,
-		repositoryScanSpec(vocabulary.PackID, vocabulary.ScannerVocabulary),
+		packRule(vocabulary.PackID),
+		repositoryScanSpec(vocabulary.ScannerVocabulary),
 		nil,
 	)
 	if err != nil {
@@ -157,18 +159,22 @@ func TestGolangciTargetCommandPassesCleanRepository(t *testing.T) {
 	testutil.WriteFile(t, repoRoot, "internal/example/example.go", "package example\n")
 	writeExecutable(t, repoRoot, "goimports")
 	writeExecutable(t, repoRoot, "golangci-lint")
-
 	runCtx := testContext(t, repoRoot, style.Scope("all"))
 
 	job := style.TargetCommandJob{
-		PackID:   golang.PackID,
 		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
 		Action:   golang.TargetActionGolangci,
 		Language: golang.Language,
 		Targets:  []string{"go"},
 	}
 
-	result, err := targetCommandDriver()(context.Background(), runCtx, job, nil)
+	result, err := targetCommandDriver()(
+		context.Background(),
+		runCtx,
+		packRule(golang.PackID),
+		job,
+		nil,
+	)
 	if err != nil {
 		t.Fatalf("golangciDriver(all): %v", err)
 	}
@@ -194,11 +200,12 @@ func writeExecutable(t *testing.T, repoRoot string, name string) {
 
 /* ---------------------------------------- Test Helpers ---------------------------------------- */
 
-func repositoryScanSpec(packID string, scanner string) (job style.Job) {
-	return style.RepositoryScanExecution{
-		PackID:  packID,
-		Scanner: scanner,
-	}
+func packRule(packID string) (rule style.Rule) {
+	return style.Rule{PackID: packID}
+}
+
+func repositoryScanSpec(scanner string) (job style.RepositoryScan) {
+	return style.RepositoryScan{Scanner: scanner}
 }
 
 func scanDriver() (driver execution.Driver) {
@@ -245,8 +252,8 @@ func testContext(
 	return execution.NewRunContext(
 		repoRoot,
 		scope,
-		compiled.Profile,
-		compiled.Effective,
+		config,
+		compiled,
 		registry.ToolCapabilities(),
 		toolEnvironment,
 		goEnvironment,
@@ -282,7 +289,7 @@ func hasDiagnosticMatching(
 
 /* --------------------------------------- Policy Fixture --------------------------------------- */
 
-func buildAlternateProfile(t *testing.T) (config policy.Profile) {
+func buildAlternateProfile(t *testing.T) (config profile.Profile) {
 	t.Helper()
 
 	config = profiles.Self(t)
@@ -295,9 +302,9 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 		"tools": {"tools"},
 		"all":   {"."},
 	}
-	config.FileSets = replaceFileSet(config.FileSets, policy.FileSetConfig{
+	config.FileSets = replaceFileSet(config.FileSets, profile.FileSetConfig{
 		Name: "markdown",
-		Include: policy.FileSetInclude{
+		Include: profile.FileSetInclude{
 			Extensions: []string{".md"},
 			Files: map[style.Scope][]string{
 				"app": {"STYLE.md"},
@@ -308,12 +315,12 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 			},
 		},
 	})
-	goConfig, err := gopolicy.DecodeConfig(config.PackConfigs[golang.PackID])
+	goConfig, err := gopolicy.DecodeConfig(config.PackPolicies[golang.PackID])
 	if err != nil {
 		t.Fatalf("Decode Go config: %v", err)
 	}
 	goConfig.LocalImportPrefixes = []string{"example.com/altchat"}
-	config.PathRoles = policy.PathRoles{
+	config.PathRoles = profile.PathRoles{
 		"go_source":        {"cmd/", "internal/"},
 		"application_port": {"internal/app/ports/"},
 		"concrete_infra":   {"internal/adapters/"},
@@ -321,7 +328,7 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 		"domain_errors":    {"internal/domain/errors.go"},
 		"test_mocks":       {"internal/testsupport/mocks/"},
 	}
-	config.Targets = []policy.TargetConfig{
+	config.Targets = []profile.TargetConfig{
 		{
 			Name:             "app_go",
 			Language:         "go",
@@ -345,7 +352,7 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 			IdentifierSuffixes: map[string][]string{"Store": {"Repository"}},
 		},
 	}
-	config.PackConfigs[vocabulary.PackID] = vocabularypolicy.EncodeConfig(vocabularyConfig)
+	config.PackPolicies[vocabulary.PackID] = vocabularypolicy.EncodeConfig(vocabularyConfig)
 	parameters := &goConfig.Constructors
 	parameters.ParameterOrder = replaceParameterGroup(
 		parameters.ParameterOrder,
@@ -381,7 +388,7 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 			AllowedLayers: []string{"service", "adapter"},
 		},
 	}
-	config.PackConfigs[golang.PackID] = gopolicy.EncodeConfig(goConfig)
+	config.PackPolicies[golang.PackID] = gopolicy.EncodeConfig(goConfig)
 
 	return config
 }
@@ -389,10 +396,10 @@ func buildAlternateProfile(t *testing.T) (config policy.Profile) {
 /* --------------------------------------- Config Updates --------------------------------------- */
 
 func replaceFileSet(
-	fileSets []policy.FileSetConfig,
-	replacement policy.FileSetConfig,
-) (updated []policy.FileSetConfig) {
-	updated = append([]policy.FileSetConfig{}, fileSets...)
+	fileSets []profile.FileSetConfig,
+	replacement profile.FileSetConfig,
+) (updated []profile.FileSetConfig) {
+	updated = append([]profile.FileSetConfig{}, fileSets...)
 	for index, fileSet := range updated {
 		if fileSet.Name != replacement.Name {
 			continue

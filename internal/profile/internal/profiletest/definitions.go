@@ -11,7 +11,7 @@ func Definitions() (definitions style.Definitions) {
 				ID:    Rule,
 				Name:  "Test rule",
 				Group: "test",
-				Check: style.RepositoryScanExecution{
+				Check: style.RepositoryScan{
 					Scanner: "test",
 				},
 			},
@@ -22,7 +22,7 @@ func Definitions() (definitions style.Definitions) {
 // FileCommandDefinitions returns definitions with a file-command rule.
 func FileCommandDefinitions() (definitions style.Definitions) {
 	definitions = Definitions()
-	definitions.Rules[0].Check = style.FileCommandExecution{
+	definitions.Rules[0].Check = style.FileCommand{
 		ToolID:  Tool,
 		FileSet: FileSet,
 	}

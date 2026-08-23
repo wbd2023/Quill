@@ -44,7 +44,7 @@ func registerRepositoryScanners(bindings *drivers.Bindings) {
 func scanMagicValues(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckMagicValues(
 		context.RepoRoot,
@@ -56,7 +56,7 @@ func scanMagicValues(
 func scanSafety(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckSafety(context.RepoRoot, context.Profile.Repository, context.Scope)
 }
@@ -64,7 +64,7 @@ func scanSafety(
 func scanStructure(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckStructure(
 		context.RepoRoot,
@@ -76,7 +76,7 @@ func scanStructure(
 func scanTestHygiene(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckTestHygiene(
 		context.RepoRoot,

@@ -4,12 +4,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/wbd2023/quill/internal/pack"
 	"github.com/wbd2023/quill/internal/pack/external"
 	"github.com/wbd2023/quill/internal/pack/shipped"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -25,7 +26,7 @@ func TestLoadSourcesProducesDefinition(t *testing.T) {
 	writeFile(t, filepath.Join(packDir, "pack.toml"), validManifest)
 	writeExecutable(t, filepath.Join(binDir, "company-quill"))
 
-	definitions, err := external.LoadSources(repoRoot, []policy.PackSource{
+	definitions, err := external.LoadSources(repoRoot, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	})
 	if err != nil {
@@ -43,9 +44,9 @@ func TestLoadSourcesProducesDefinition(t *testing.T) {
 		t.Fatalf("expected 1 rule, got %d", len(definition.Rules))
 	}
 
-	template, ok := definition.Rules[0].Check.(style.ExternalCheckTemplate)
+	template, ok := definition.Rules[0].Check.(style.ExternalCheck)
 	if !ok {
-		t.Fatalf("expected ExternalCheckTemplate, got %T", definition.Rules[0].Check)
+		t.Fatalf("expected ExternalCheck, got %T", definition.Rules[0].Check)
 	}
 	if template.CheckID != "no-direct-database-access" {
 		t.Fatalf("unexpected check id: %q", template.CheckID)
@@ -55,13 +56,40 @@ func TestLoadSourcesProducesDefinition(t *testing.T) {
 	}
 }
 
+func TestLoadSourcesDefaultsOmittedRuleNameToRuleID(t *testing.T) {
+	t.Parallel()
+
+	repoRoot := t.TempDir()
+	packDir := filepath.Join(repoRoot, ".quill", "packs", "company")
+	binDir := filepath.Join(packDir, "bin")
+	mkdirAll(t, binDir)
+	manifest := strings.Replace(
+		validManifest,
+		`name = "No direct database access"`+"\n",
+		"",
+		1,
+	)
+	writeFile(t, filepath.Join(packDir, "pack.toml"), manifest)
+	writeExecutable(t, filepath.Join(binDir, "company-quill"))
+
+	definitions, err := external.LoadSources(repoRoot, []profile.PackSource{
+		{Path: ".quill/packs/company"},
+	})
+	if err != nil {
+		t.Fatalf("LoadSources: %v", err)
+	}
+	if got, want := definitions[0].Rules[0].Name, "company/no-direct-database-access"; got != want {
+		t.Fatalf("Rule name = %q, want %q", got, want)
+	}
+}
+
 func TestLoadSourcesRejectsMissingManifest(t *testing.T) {
 	t.Parallel()
 
 	repoRoot := t.TempDir()
 	mkdirAll(t, filepath.Join(repoRoot, "empty"))
 
-	if _, err := external.LoadSources(repoRoot, []policy.PackSource{{Path: "empty"}}); err == nil {
+	if _, err := external.LoadSources(repoRoot, []profile.PackSource{{Path: "empty"}}); err == nil {
 		t.Fatal("expected missing manifest error")
 	}
 }
@@ -74,7 +102,7 @@ func TestLoadSourcesRejectsUnresolvableExecutable(t *testing.T) {
 	mkdirAll(t, packDir)
 	writeFile(t, filepath.Join(packDir, "pack.toml"), validManifest)
 
-	if _, err := external.LoadSources(repoRoot, []policy.PackSource{
+	if _, err := external.LoadSources(repoRoot, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	}); err == nil {
 		t.Fatal("expected missing executable error before any launch")
@@ -97,7 +125,7 @@ func TestLoadSourcesRejectsEscapingPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := external.LoadSources(repoRoot, []policy.PackSource{{Path: relative}}); err == nil {
+	if _, err := external.LoadSources(repoRoot, []profile.PackSource{{Path: relative}}); err == nil {
 		t.Fatal("expected repository escape rejection")
 	}
 }
@@ -121,7 +149,7 @@ func TestLoadSourcesRejectsSymlinkedManifestEscape(t *testing.T) {
 		t.Skipf("symlink unsupported: %v", err)
 	}
 
-	if _, err := external.LoadSources(repoRoot, []policy.PackSource{
+	if _, err := external.LoadSources(repoRoot, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	}); err == nil {
 		t.Fatal("expected symlinked manifest escape rejection")
@@ -131,7 +159,7 @@ func TestLoadSourcesRejectsSymlinkedManifestEscape(t *testing.T) {
 /* ------------------------------------ Catalogue Composition ----------------------------------- */
 
 // TestDuplicateExternalPackIDConflicts proves that two external Packs sharing an ID fail at
-// catalogue assembly, the same boundary built-in Packs use, so no external process runs.
+// catalogue assembly, the same boundary Shipped Packs use, so no external process runs.
 func TestDuplicateExternalPackIDConflicts(t *testing.T) {
 	t.Parallel()
 
@@ -157,7 +185,7 @@ func TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled(t *testing.T) {
 		Name: "Alpha",
 		Rules: []style.RuleDefinition{{
 			ID:    "shared/rule",
-			Check: style.ExternalCheckTemplate{CheckID: "c"},
+			Check: style.ExternalCheck{CheckID: "c"},
 		}},
 	}
 	disabled := pack.Definition{
@@ -165,7 +193,7 @@ func TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled(t *testing.T) {
 		Name: "Beta",
 		Rules: []style.RuleDefinition{{
 			ID:    "shared/rule",
-			Check: style.ExternalCheckTemplate{CheckID: "c"},
+			Check: style.ExternalCheck{CheckID: "c"},
 		}},
 	}
 
@@ -177,7 +205,7 @@ func TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled(t *testing.T) {
 }
 
 // TestExternalPackComposesWithShipped proves an external Pack with a unique ID composes into one
-// catalogue alongside the built-in Packs and participates in normal selection.
+// catalogue alongside the Shipped Packs and participates in normal selection.
 func TestExternalPackComposesWithShipped(t *testing.T) {
 	t.Parallel()
 

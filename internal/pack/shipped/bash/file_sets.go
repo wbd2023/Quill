@@ -1,11 +1,11 @@
 package bash
 
-import "github.com/wbd2023/quill/internal/policy"
+import "github.com/wbd2023/quill/internal/profile"
 
-func fileSets() (fileSets policy.FileSets) {
-	return append(fileSets, policy.FileSetConfig{
+func fileSets() (fileSets profile.FileSets) {
+	return append(fileSets, profile.FileSetConfig{
 		Name: "bash",
-		Include: policy.FileSetInclude{
+		Include: profile.FileSetInclude{
 			Extensions: []string{".sh"},
 		},
 	})

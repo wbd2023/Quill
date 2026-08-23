@@ -14,7 +14,7 @@ import (
 func scanArchitecture(
 	ctx context.Context,
 	run execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	modulePath, err := runGoList(ctx, run, "-m", "-f", "{{.Path}}")
 	if err != nil {

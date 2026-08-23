@@ -3,42 +3,33 @@ package architecture
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
-// TestNoPublicProductionPackageAtRoot enforces ADR 0004: Quill is CLI-first and language
-// neutral, so it ships no supported in-process Go library. No production Go file may live in
-// the repository root, and no source file may import the bare module path (the removed root
-// facade). All production implementation packages must live under internal/.
-func TestNoPublicProductionPackageAtRoot(t *testing.T) {
+// TestProductionSourceStaysWithinEntrypointAndInternal enforces ADR 0004: Quill is CLI-first
+// and language neutral, so it ships no supported in-process Go library. Production source may
+// exist only in the cmd/quill entrypoint or a private internal package.
+func TestProductionSourceStaysWithinEntrypointAndInternal(t *testing.T) {
 	t.Parallel()
 
-	toolsRoot := importBoundaryRoot(t)
-
-	entries, err := os.ReadDir(toolsRoot)
-	if err != nil {
-		t.Fatalf("read repository root: %v", err)
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-
-		path := filepath.Join(toolsRoot, entry.Name())
-		if !isProductionGoFile(path) {
-			continue
-		}
-
-		relative, err := filepath.Rel(toolsRoot, path)
+	repositoryRoot := importBoundaryRoot(t)
+	for _, file := range productionGoFiles(t, repositoryRoot, true, nil) {
+		relative, err := filepath.Rel(repositoryRoot, file)
 		if err != nil {
-			t.Fatalf("rel %s: %v", path, err)
+			t.Fatalf("rel %s: %v", file, err)
+		}
+
+		relative = filepath.ToSlash(relative)
+		if strings.HasPrefix(relative, "cmd/quill/") ||
+			strings.HasPrefix(relative, "internal/") {
+			continue
 		}
 
 		t.Fatalf(
-			"production Go file %s lives at the repository root; "+
-				"all production packages must live under internal/ per ADR 0004",
-			filepath.ToSlash(relative),
+			"production Go file %s lives outside cmd/quill or internal; "+
+				"all implementation packages must be private per ADR 0004",
+			relative,
 		)
 	}
 }
@@ -61,7 +52,7 @@ func TestNoSourceImportsRootPackage(t *testing.T) {
 
 			if entry.IsDir() {
 				switch entry.Name() {
-				case "testdata", ".git", "vendor", "third_party":
+				case "testdata", ".cache", ".git", "vendor", "third_party":
 					return filepath.SkipDir
 				}
 				return nil

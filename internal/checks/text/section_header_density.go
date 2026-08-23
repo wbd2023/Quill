@@ -5,14 +5,14 @@ import (
 
 	"github.com/wbd2023/quill/internal/filewalk"
 	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
 // CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	sectionHeaders textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {

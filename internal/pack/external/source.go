@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/wbd2023/quill/internal/pack"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -28,7 +28,7 @@ const defaultGroup style.RuleGroup = "external"
 // is verified to remain inside the repository after symlink resolution.
 func LoadSources(
 	repoRoot string,
-	sources []policy.PackSource,
+	sources []profile.PackSource,
 ) (definitions []pack.Definition, err error) {
 	canonicalRoot, err := filepath.EvalSymlinks(repoRoot)
 	if err != nil {
@@ -49,7 +49,7 @@ func LoadSources(
 
 func loadSource(
 	canonicalRoot string,
-	source policy.PackSource,
+	source profile.PackSource,
 ) (definition pack.Definition, err error) {
 	packDirectory := filepath.Join(canonicalRoot, filepath.Clean(source.Path))
 	resolved, err := filepath.EvalSymlinks(packDirectory)
@@ -77,9 +77,6 @@ func loadSource(
 	if err != nil {
 		return pack.Definition{}, err
 	}
-	if err = manifest.Validate(); err != nil {
-		return pack.Definition{}, err
-	}
 
 	if _, err = ResolveExecutable(resolved, manifest.Runtime.Command); err != nil {
 		return pack.Definition{}, err
@@ -96,12 +93,16 @@ func toDefinition(manifest Manifest, packDirectory string) (definition pack.Defi
 			group = string(defaultGroup)
 		}
 
+		name := rule.Name
+		if name == "" {
+			name = rule.ID
+		}
+
 		rules = append(rules, style.RuleDefinition{
 			ID:    rule.ID,
-			Name:  rule.Name,
+			Name:  name,
 			Group: style.RuleGroup(group),
-			Check: style.ExternalCheckTemplate{
-				RuleID:        rule.ID,
+			Check: style.ExternalCheck{
 				CheckID:       rule.Check,
 				FileSet:       rule.FileSet,
 				PackDirectory: packDirectory,
@@ -115,16 +116,16 @@ func toDefinition(manifest Manifest, packDirectory string) (definition pack.Defi
 		ID:    manifest.Pack.ID,
 		Name:  manifest.Pack.Name,
 		Rules: rules,
-		Config: pack.Config{
-			Validate: acceptPackConfig,
+		Policy: pack.Policy{
+			Validate: acceptPackPolicy,
 		},
 	}
 }
 
-// acceptPackConfig is the external Pack config policy: any config block is accepted unchanged and
-// forwarded to the subprocess through Request.Configuration, so the external Pack validates its own
-// configuration rather than Quill interpreting it.
-func acceptPackConfig(_ policy.PackConfig) (err error) {
+// acceptPackPolicy accepts an external Pack Policy unchanged. It is forwarded to the subprocess
+// through Request.Policy, so the external Pack validates its own policy rather than Quill
+// interpreting Pack-specific values.
+func acceptPackPolicy(_ profile.PackPolicy) (err error) {
 	return nil
 }
 

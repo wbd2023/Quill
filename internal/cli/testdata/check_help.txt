@@ -4,15 +4,15 @@ usage:
 run STYLE.md checks
 
 flags:
-    -format string
+    --format string
         format: text|json (default "text")
-    -mode string
+    --mode string
         mode: required|all (default "required")
-    -repo-root string
+    --repository-root string
         repository root (auto-detected when omitted)
-    -scope string
+    --scope string
         configured scope (profile default when omitted)
-    -strict-recommendations
+    --strict-recommendations
         fail on recommendation findings
-    -verbose
+    --verbose
         print failing output

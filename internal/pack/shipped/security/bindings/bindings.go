@@ -25,7 +25,7 @@ func Register(bindings *drivers.Bindings) {
 func scanSecrets(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckSecrets(
 		context.RepoRoot,

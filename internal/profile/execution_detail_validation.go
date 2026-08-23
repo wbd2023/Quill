@@ -8,14 +8,14 @@ import (
 
 /* -------------------------------------- Execution Details ------------------------------------- */
 
-func (validator ruleExecutionValidator) validateToolchainExecution(
-	execution style.ToolchainExecution,
+func (validator ruleExecutionValidator) validateToolchainCheck(
+	execution style.ToolchainCheck,
 ) (err error) {
 	return validator.validateToolReferences(execution.ToolIDs)
 }
 
-func (validator ruleExecutionValidator) validateProfileExecution(
-	execution style.ProfileExecution,
+func (validator ruleExecutionValidator) validateProfileCheck(
+	execution style.ProfileCheck,
 ) (err error) {
 	if isBlank(execution.Check) {
 		return fmt.Errorf(
@@ -28,8 +28,8 @@ func (validator ruleExecutionValidator) validateProfileExecution(
 	return nil
 }
 
-func (validator ruleExecutionValidator) validateFileCommandExecution(
-	execution style.FileCommandExecution,
+func (validator ruleExecutionValidator) validateFileCommand(
+	execution style.FileCommand,
 ) (err error) {
 	if isBlank(execution.ToolID) {
 		return fmt.Errorf(
@@ -62,7 +62,7 @@ func (validator ruleExecutionValidator) validateFileCommandExecution(
 	return nil
 }
 
-func (validator ruleExecutionValidator) validateTargetCommandExecution(
+func (validator ruleExecutionValidator) validateTargetCommand(
 	execution style.TargetCommandTemplate,
 ) (err error) {
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
@@ -88,7 +88,7 @@ func (validator ruleExecutionValidator) validateTargetCommandExecution(
 	return nil
 }
 
-func (validator ruleExecutionValidator) validateTargetCheckExecution(
+func (validator ruleExecutionValidator) validateTargetCheck(
 	execution style.TargetCheckTemplate,
 ) (err error) {
 	if err = validator.validateToolReferences(execution.ToolIDs); err != nil {
@@ -114,8 +114,8 @@ func (validator ruleExecutionValidator) validateTargetCheckExecution(
 	return nil
 }
 
-func (validator ruleExecutionValidator) validateRepositoryScanExecution(
-	execution style.RepositoryScanExecution,
+func (validator ruleExecutionValidator) validateRepositoryScan(
+	execution style.RepositoryScan,
 ) (err error) {
 	if isBlank(execution.Scanner) {
 		return fmt.Errorf(
@@ -128,8 +128,8 @@ func (validator ruleExecutionValidator) validateRepositoryScanExecution(
 	return nil
 }
 
-func (validator ruleExecutionValidator) validateExternalCheckExecution(
-	execution style.ExternalCheckTemplate,
+func (validator ruleExecutionValidator) validateExternalCheck(
+	execution style.ExternalCheck,
 ) (err error) {
 	if isBlank(execution.CheckID) {
 		return fmt.Errorf(

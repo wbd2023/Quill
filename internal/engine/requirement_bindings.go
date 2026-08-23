@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/styleguide"
 )
 
@@ -14,7 +14,7 @@ import (
 // validation during profile loading; this check enforces that each binding references a real
 // requirement, so an unknown but syntactically valid id fails before any rule or tool operation.
 func validateRequirementBindings(
-	config policy.Profile,
+	config profile.Profile,
 	document styleguide.Document,
 ) (err error) {
 	documented := make(map[string]struct{}, len(document.Requirements))

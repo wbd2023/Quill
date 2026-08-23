@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/styleguide"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
@@ -20,9 +20,9 @@ const undocumentedRequirementID = "9.9.never-documented"
 func TestValidateRequirementBindingsAcceptsDocumentedIDs(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
-		StyleGuide: policy.StyleGuideConfig{Path: "STYLE.md"},
-		Rules: []policy.RuleBinding{
+	config := profile.Profile{
+		StyleGuide: profile.StyleGuideConfig{Path: "STYLE.md"},
+		Rules: []profile.RuleBinding{
 			{RuleID: "go/lint", RequirementIDs: []string{"3.1.foo", "3.2.bar"}},
 		},
 	}
@@ -42,9 +42,9 @@ func TestValidateRequirementBindingsAcceptsDocumentedIDs(t *testing.T) {
 func TestValidateRequirementBindingsRejectsUndocumentedID(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
-		StyleGuide: policy.StyleGuideConfig{Path: "STYLE.md"},
-		Rules: []policy.RuleBinding{
+	config := profile.Profile{
+		StyleGuide: profile.StyleGuideConfig{Path: "STYLE.md"},
+		Rules: []profile.RuleBinding{
 			{RuleID: "go/lint", RequirementIDs: []string{"3.1.foo", "9.9.missing"}},
 		},
 	}
@@ -67,9 +67,9 @@ func TestValidateRequirementBindingsRejectsUndocumentedID(t *testing.T) {
 func TestValidateRequirementBindingsReportsAllUndocumentedIDsSorted(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
-		StyleGuide: policy.StyleGuideConfig{Path: "STYLE.md"},
-		Rules: []policy.RuleBinding{
+	config := profile.Profile{
+		StyleGuide: profile.StyleGuideConfig{Path: "STYLE.md"},
+		Rules: []profile.RuleBinding{
 			{RuleID: "a", RequirementIDs: []string{"9.9.zeta"}},
 			{RuleID: "b", RequirementIDs: []string{"9.9.alpha", "9.9.zeta"}},
 		},

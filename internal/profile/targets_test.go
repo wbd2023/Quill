@@ -1,9 +1,10 @@
-package profile
+package profile_test
 
 import (
 	"slices"
 	"testing"
 
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -14,12 +15,12 @@ func TestCompileInfersTargetsFromRuleScope(t *testing.T) {
 	config := profiletest.Config()
 	want := []string{profiletest.Target, profiletest.OtherTarget}
 
-	compiled, err := compilePlan(config, profiletest.TargetCommandDefinitions())
+	plan, err := profile.Compile(config, profiletest.TargetCommandDefinitions())
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	rule := compiled.Rules[0]
+	rule := plan.Rules[0]
 	checkJob := rule.Check.(style.TargetCommandJob)
 	if !slices.Equal(checkJob.Targets, want) {
 		t.Fatalf("check targets = %v, want %v", checkJob.Targets, want)
@@ -37,8 +38,8 @@ func TestCompileRejectsMissingInferredTargets(t *testing.T) {
 	config := profiletest.Config()
 	config.Targets = nil
 
-	_, err := compilePlan(config, profiletest.TargetCommandDefinitions())
-	requireErrorContainsInternal(t, err, "has no test targets")
+	_, err := profile.Compile(config, profiletest.TargetCommandDefinitions())
+	requireErrorContains(t, err, "has no test targets")
 }
 
 func TestCompileRejectsTargetCheckWithoutCheckPaths(t *testing.T) {
@@ -47,6 +48,6 @@ func TestCompileRejectsTargetCheckWithoutCheckPaths(t *testing.T) {
 	config := profiletest.Config()
 	config.Targets[0].CheckPaths = nil
 
-	_, err := compilePlan(config, profiletest.TargetCheckDefinitions())
-	requireErrorContainsInternal(t, err, "must define check_paths")
+	_, err := profile.Compile(config, profiletest.TargetCheckDefinitions())
+	requireErrorContains(t, err, "must define check_paths")
 }

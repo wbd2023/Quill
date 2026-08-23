@@ -126,27 +126,18 @@ func buildRegistry(
 	return registry, nil
 }
 
-// stampPackRules returns copies of pack's rules with the Pack's ID carried on each rule and its
-// check/fix templates so compiled rules, jobs, and results retain Pack provenance.
+// stampPackRules returns copies of pack's rules with the Pack's ID carried on each rule. Templates
+// and Jobs carry no Pack identity, so provenance lives on the rule alone and flows to compiled
+// jobs and results through the Rule.
 func stampPackRules(pack Definition) (rules []style.RuleDefinition) {
 	rules = make([]style.RuleDefinition, len(pack.Rules))
 	for index, rule := range pack.Rules {
 		stamped := rule
 		stamped.PackID = pack.ID
-		stamped.Check = stampTemplate(rule.Check, pack.ID)
-		stamped.Fix = stampTemplate(rule.Fix, pack.ID)
 		rules[index] = stamped
 	}
 
 	return rules
-}
-
-func stampTemplate(template style.Template, packID string) (stamped style.Template) {
-	if template == nil {
-		return nil
-	}
-
-	return style.StampPackID(template, packID)
 }
 
 // validatePackRuleToolScope ensures every rule a Pack declares only references Tools the Pack

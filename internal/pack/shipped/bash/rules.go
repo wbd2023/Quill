@@ -21,7 +21,7 @@ func rules() (rules []style.RuleDefinition) {
 		"bash",
 		[]string{"-d"},
 	)
-	shfmtRule.Fix = style.FileCommandExecution{
+	shfmtRule.Fix = style.FileCommand{
 		ToolID:    tool.Shfmt,
 		FileSet:   "bash",
 		Arguments: []string{"-w"},
@@ -72,7 +72,7 @@ func fileCommandRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupExternal,
-		Check: style.FileCommandExecution{
+		Check: style.FileCommand{
 			ToolID:    toolID,
 			FileSet:   fileSet,
 			Arguments: append([]string{}, arguments...),
@@ -89,7 +89,7 @@ func scannerRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupText,
-		Check: style.RepositoryScanExecution{
+		Check: style.RepositoryScan{
 			Scanner: scanner,
 		},
 	}

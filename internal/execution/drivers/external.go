@@ -25,58 +25,59 @@ const stderrExcerpt = 512
 /* --------------------------------------- External Driver -------------------------------------- */
 
 // externalCheckDriver returns the flat driver for external Pack checks. Every external check is
-// self-describing - the bound job carries its executable command, Pack directory, and runtime
-// limits - so one driver serves all external Packs without a Pack-qualified binding registry. The
-// driver resolves the executable beneath the Pack directory, writes one JSON request to standard
-// input, and reads JSON Lines diagnostics followed by exactly one terminal completion from
-// standard output. Standard error is captured separately and surfaced in error context only.
+// self-describing - the ExternalCheck Job carries its executable command, Pack directory, and
+// runtime limits - so one driver serves all external Packs without a Pack-qualified binding
+// registry. The driver resolves the executable beneath the Pack directory, writes one JSON request
+// to standard input, and reads JSON Lines diagnostics followed by exactly one terminal completion
+// from standard output. Standard error is captured separately and surfaced in error context only.
+// Pack and rule provenance for the external request comes from the Rule.
 func externalCheckDriver() (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		run execution.RunContext,
+		rule style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		externalJob, found := job.(style.ExternalCheckJob)
-		if !found {
+		check, ok := job.(style.ExternalCheck)
+		if !ok {
 			return style.ExecutionResult{}, fmt.Errorf(
-				"external check driver received an empty job",
+				"external check driver received unsupported execution job %T",
+				job,
 			)
 		}
 
-		files, err := collectExternalFiles(run, externalJob.FileSet)
+		files, err := collectExternalFiles(run, check.FileSet)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 
-		executable, err := external.ResolveExecutable(
-			externalJob.PackDirectory, externalJob.Command,
-		)
+		executable, err := external.ResolveExecutable(check.PackDirectory, check.Command)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 
-		configuration, found := run.Profile.PackConfigs.Lookup(externalJob.PackID)
-		if !found || configuration == nil {
-			configuration = map[string]any{}
+		policy, found := run.Profile.PackPolicies.Lookup(rule.PackID)
+		if !found || policy == nil {
+			policy = map[string]any{}
 		}
 
 		payload, err := external.EncodeRequest(external.Request{
 			Protocol:       external.ProtocolVersion,
 			Operation:      "check",
 			RepositoryRoot: run.RepoRoot,
-			PackID:         externalJob.PackID,
-			RuleID:         externalJob.RuleID,
-			CheckID:        externalJob.CheckID,
+			PackID:         rule.PackID,
+			RuleID:         rule.ID,
+			CheckID:        check.CheckID,
 			Scope:          string(run.Scope),
 			Files:          files,
-			Configuration:  configuration,
+			Policy:         policy,
 		})
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 
-		timeout := externalJob.Timeout
+		timeout := check.Timeout
 		if timeout <= 0 {
 			timeout = external.DefaultTimeout
 		}
@@ -91,20 +92,19 @@ func externalCheckDriver() (driver execution.Driver) {
 		})
 
 		result = style.ExecutionResult{
-			PackID:    externalJob.PackID,
 			ExitCode:  commandResult.ExitCode,
 			TimedOut:  commandResult.TimedOut,
 			Truncated: commandResult.Truncated,
 		}
 
 		if runErr != nil {
-			return result, externalRunError(externalJob, commandResult, runErr)
+			return result, externalRunError(rule, commandResult, runErr)
 		}
 
 		if commandResult.Truncated {
 			return result, fmt.Errorf(
 				"external pack %q rule %q exceeded the output limit%s",
-				externalJob.PackID, externalJob.RuleID, stderrContext(commandResult.Stderr),
+				rule.PackID, rule.ID, stderrContext(commandResult.Stderr),
 			)
 		}
 
@@ -112,7 +112,7 @@ func externalCheckDriver() (driver execution.Driver) {
 		if parseErr != nil {
 			return result, fmt.Errorf(
 				"external pack %q rule %q: %w%s",
-				externalJob.PackID, externalJob.RuleID, parseErr,
+				rule.PackID, rule.ID, parseErr,
 				stderrContext(commandResult.Stderr),
 			)
 		}
@@ -120,7 +120,7 @@ func externalCheckDriver() (driver execution.Driver) {
 		if !outcome.Success {
 			return result, fmt.Errorf(
 				"external pack %q rule %q reported failure: %s%s",
-				externalJob.PackID, externalJob.RuleID, outcome.Error,
+				rule.PackID, rule.ID, outcome.Error,
 				stderrContext(commandResult.Stderr),
 			)
 		}
@@ -155,7 +155,7 @@ func collectExternalFiles(run execution.RunContext, fileSet string) (files []str
 }
 
 func externalRunError(
-	job style.ExternalCheckJob,
+	rule style.Rule,
 	result process.CommandResult,
 	runErr error,
 ) (err error) {
@@ -163,19 +163,19 @@ func externalRunError(
 	case result.TimedOut:
 		return fmt.Errorf(
 			"external pack %q rule %q timed out%s",
-			job.PackID, job.RuleID, stderrContext(result.Stderr),
+			rule.PackID, rule.ID, stderrContext(result.Stderr),
 		)
 
 	case result.Canceled:
 		return fmt.Errorf(
 			"external pack %q rule %q was canceled",
-			job.PackID, job.RuleID,
+			rule.PackID, rule.ID,
 		)
 
 	default:
 		return fmt.Errorf(
 			"external pack %q rule %q exited with status %d: %v%s",
-			job.PackID, job.RuleID, result.ExitCode, runErr, stderrContext(result.Stderr),
+			rule.PackID, rule.ID, result.ExitCode, runErr, stderrContext(result.Stderr),
 		)
 	}
 }
@@ -183,13 +183,14 @@ func externalRunError(
 // stderrContext folds a bounded tail of standard error into an error message when present, so a
 // failing Pack leaves a debugging breadcrumb. Standard error never carries diagnostics.
 func stderrContext(stderr string) (suffix string) {
-	if strings.TrimSpace(stderr) == "" {
+	trimmed := strings.TrimSpace(stderr)
+	if len(trimmed) > stderrExcerpt {
+		trimmed = trimmed[len(trimmed)-stderrExcerpt:]
+	}
+
+	if trimmed == "" {
 		return ""
 	}
 
-	excerpt := strings.TrimSpace(stderr)
-	if len(excerpt) > stderrExcerpt {
-		excerpt = excerpt[len(excerpt)-stderrExcerpt:]
-	}
-	return "\n" + excerpt
+	return "\n" + trimmed
 }

@@ -13,16 +13,20 @@ import (
 
 var errRuleBlocked = errors.New("rule blocked by toolchain")
 
-// Driver executes one rule's check or fix job against the repository.
+// Driver executes one rule's check or fix Job against the repository. The Job carries the bound
+// execution value and resolved targets; the Rule carries Pack and rule provenance so request and
+// error attribution derive from it rather than from the job or result.
 type Driver func(
 	ctx context.Context,
 	run RunContext,
+	rule style.Rule,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error)
 
-// DriverSet holds one Driver per execution job type. Fields that are nil are treated as
-// "no driver" for this job and produce an empty result.
+// DriverSet holds one Driver per execution Job family. A nil field is an unresolved driver for
+// that family: runExecution returns an error rather than silently producing an empty result, so a
+// missing binding fails loudly instead of masquerading as a clean check.
 type DriverSet struct {
 	Toolchain      Driver
 	Profile        Driver
@@ -47,8 +51,7 @@ func RunRule(
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(
-		ctx, rule.ID, rule.PackID,
-		rule.Check, rule.CheckToolIDs(),
+		ctx, rule, rule.Check, rule.CheckToolIDs(),
 		run, toolStatuses, drivers,
 	)
 }
@@ -62,16 +65,14 @@ func RunFix(
 	drivers DriverSet,
 ) (result style.ExecutionResult, err error) {
 	return runExecution(
-		ctx, rule.ID, rule.PackID,
-		rule.Fix, rule.FixToolIDs(),
+		ctx, rule, rule.Fix, rule.FixToolIDs(),
 		run, toolStatuses, drivers,
 	)
 }
 
 func runExecution(
 	ctx context.Context,
-	ruleID string,
-	packID string,
+	rule style.Rule,
 	job style.Job,
 	toolIDs []string,
 	run RunContext,
@@ -82,10 +83,9 @@ func runExecution(
 		return style.ExecutionResult{}, nil
 	}
 
-	if _, isToolchain := job.(style.ToolchainExecution); !isToolchain &&
+	if _, isToolchain := job.(style.ToolchainCheck); !isToolchain &&
 		len(toolIDs) > 0 && !toolStatuses.AreAllValid(toolIDs) {
 		return style.ExecutionResult{
-			PackID: packID,
 			Diagnostics: []style.Diagnostic{
 				{
 					Code:    "toolchain/blocked",
@@ -97,30 +97,30 @@ func runExecution(
 
 	driver, err := driverFor(job, drivers)
 	if err != nil {
-		return style.ExecutionResult{}, fmt.Errorf("rule %s: %w", ruleID, err)
+		return style.ExecutionResult{}, fmt.Errorf("rule %s: %w", rule.ID, err)
 	}
 
 	if driver == nil {
 		return style.ExecutionResult{}, fmt.Errorf(
 			"rule %s: no driver registered for execution job %T",
-			ruleID,
+			rule.ID,
 			job,
 		)
 	}
 
-	return driver(ctx, run, job, toolStatuses)
+	return driver(ctx, run, rule, job, toolStatuses)
 }
 
 func driverFor(job style.Job, drivers DriverSet) (driver Driver, err error) {
 	switch job.(type) {
 
-	case style.ToolchainExecution:
+	case style.ToolchainCheck:
 		return drivers.Toolchain, nil
 
-	case style.ProfileExecution:
+	case style.ProfileCheck:
 		return drivers.Profile, nil
 
-	case style.FileCommandExecution:
+	case style.FileCommand:
 		return drivers.FileCommand, nil
 
 	case style.TargetCommandJob:
@@ -129,10 +129,10 @@ func driverFor(job style.Job, drivers DriverSet) (driver Driver, err error) {
 	case style.TargetCheckJob:
 		return drivers.TargetCheck, nil
 
-	case style.RepositoryScanExecution:
+	case style.RepositoryScan:
 		return drivers.RepositoryScan, nil
 
-	case style.ExternalCheckJob:
+	case style.ExternalCheck:
 		return drivers.ExternalCheck, nil
 
 	default:

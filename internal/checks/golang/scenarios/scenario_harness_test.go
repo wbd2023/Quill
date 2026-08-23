@@ -6,7 +6,7 @@ import (
 	"github.com/wbd2023/quill/internal/checks/golang"
 	gopack "github.com/wbd2023/quill/internal/pack/shipped/golang"
 	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
@@ -24,7 +24,7 @@ func runGoStyleResult(
 func runGoStyleResultWithPolicy(
 	t *testing.T,
 	targetDirectory string,
-	config policy.Profile,
+	config profile.Profile,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
@@ -38,15 +38,15 @@ func runGoStyleResultWithPolicy(
 	return result, err
 }
 
-func goConfigForTest(t *testing.T, config policy.Profile) (goConfig gopolicy.Config) {
+func goConfigForTest(t *testing.T, config profile.Profile) (goConfig gopolicy.Config) {
 	t.Helper()
 
-	pack, found := config.PackConfigs.Lookup(gopack.PackID)
+	policy, found := config.PackPolicies.Lookup(gopack.PackID)
 	if !found {
-		t.Fatal("missing Go pack config")
+		t.Fatal("missing Go Pack Policy")
 	}
 
-	goConfig, err := gopolicy.DecodeConfig(pack)
+	goConfig, err := gopolicy.DecodeConfig(policy)
 	if err != nil {
 		t.Fatalf("Decode Go config: %v", err)
 	}
@@ -56,11 +56,11 @@ func goConfigForTest(t *testing.T, config policy.Profile) (goConfig gopolicy.Con
 
 /* -------------------------------------- Scenario Profile -------------------------------------- */
 
-func scenarioConfig(t *testing.T) (config policy.Profile) {
+func scenarioConfig(t *testing.T) (config profile.Profile) {
 	t.Helper()
 
 	config = profiles.Self(t)
-	config.PathRoles = policy.PathRoles{
+	config.PathRoles = profile.PathRoles{
 		"go_source": {"cmd/", "internal/", "test/"},
 		"application_port": {
 			"internal/client/application/port/",
@@ -159,7 +159,7 @@ func scenarioConfig(t *testing.T) (config policy.Profile) {
 			},
 		},
 	}
-	config.PackConfigs[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
+	config.PackPolicies[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
 
 	return config
 }
@@ -168,14 +168,14 @@ func scenarioConfig(t *testing.T) (config policy.Profile) {
 
 func updateGoConfigForTest(
 	t *testing.T,
-	config *policy.Profile,
+	config *profile.Profile,
 	update func(*gopolicy.Config),
 ) {
 	t.Helper()
 
 	goConfig := goConfigForTest(t, *config)
 	update(&goConfig)
-	config.PackConfigs[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
+	config.PackPolicies[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
 }
 
 func writeTypeAwareDomainFixture(t *testing.T, rootDirectory string) {

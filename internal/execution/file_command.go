@@ -6,24 +6,19 @@ import (
 	"github.com/wbd2023/quill/internal/style"
 )
 
-// FileCommandArguments extracts the command arguments from a file-command job, resolves its config
-// file path against the repository root, and appends the selected files.
+// FileCommandArguments extracts the command arguments from a file-command Job, resolves its
+// config file path against the repository root, and appends the selected files.
 func FileCommandArguments(
 	repoRoot string,
-	job style.Job,
+	command style.FileCommand,
 	files []string,
 ) (arguments []string) {
-	execution, found := job.(style.FileCommandExecution)
-	if !found {
-		return nil
-	}
-
-	arguments = append([]string{}, execution.Arguments...)
-	if execution.ConfigFile != "" {
+	arguments = append([]string{}, command.Arguments...)
+	if command.ConfigFile != "" {
 		arguments = append(
 			arguments,
-			execution.ConfigArgument,
-			filepath.Join(repoRoot, execution.ConfigFile),
+			command.ConfigArgument,
+			filepath.Join(repoRoot, command.ConfigFile),
 		)
 	}
 

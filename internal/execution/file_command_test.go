@@ -16,7 +16,7 @@ func TestFileCommandArgumentsAppendsSelectedFiles(t *testing.T) {
 		filepath.Join(repoRoot, "README.md"),
 		filepath.Join(repoRoot, "docs", "architecture.md"),
 	}
-	job := style.FileCommandExecution{
+	job := style.FileCommand{
 		Arguments:      []string{"--check"},
 		ConfigArgument: "--config",
 		ConfigFile:     ".markdownlint.jsonc",

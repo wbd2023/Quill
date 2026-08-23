@@ -6,7 +6,7 @@ import (
 
 	"github.com/wbd2023/quill/internal/filewalk"
 	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -30,7 +30,7 @@ type sectionHeaderPatterns struct {
 // CheckSectionHeaders check section headers.
 func CheckSectionHeaders(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	sectionHeaders textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {

@@ -1,12 +1,8 @@
 package profile
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
-)
-
-func validateStyleGuide(styleGuide policy.StyleGuideConfig) (err error) {
+func validateStyleGuide(styleGuide StyleGuideConfig) (err error) {
 	if isBlank(styleGuide.Path) {
 		return fmt.Errorf("style_guide.path must not be empty")
 	}

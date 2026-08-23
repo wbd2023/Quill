@@ -19,16 +19,16 @@ func Pack() (definition pack.Definition) {
 	return pack.Definition{
 		ID:   PackID,
 		Name: "Vocabulary",
-		Config: pack.Config{
+		Policy: pack.Policy{
 			Required: true,
-			Validate: vocabularypolicy.ValidatePackConfig,
+			Validate: vocabularypolicy.ValidatePackPolicy,
 		},
 		Rules: []style.RuleDefinition{
 			{
 				ID:    "vocabulary/project-terms",
 				Name:  "Project vocabulary",
 				Group: ruleGroupVocabulary,
-				Check: style.RepositoryScanExecution{
+				Check: style.RepositoryScan{
 					Scanner: ScannerVocabulary,
 				},
 			},

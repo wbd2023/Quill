@@ -49,7 +49,9 @@ func TestWriteCoverageText(t *testing.T) {
 	}
 
 	view := NewCoverageView(coverageReport)
-	if err := WriteCoverage(&buffer, "coverage", FormatText, view, true); err != nil {
+	if err := WriteCoverage(
+		&buffer, testEnvelopeMetadata("coverage"), FormatText, view, true,
+	); err != nil {
 		t.Fatalf("WriteCoverage: %v", err)
 	}
 
@@ -71,7 +73,9 @@ func TestWriteCoverageJSON(t *testing.T) {
 			},
 		},
 	})
-	if err := WriteCoverage(&buffer, "coverage", FormatJSON, view, false); err != nil {
+	if err := WriteCoverage(
+		&buffer, testEnvelopeMetadata("coverage"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCoverage: %v", err)
 	}
 

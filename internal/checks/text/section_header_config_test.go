@@ -10,12 +10,12 @@ import (
 func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {
 	t.Helper()
 
-	pack, found := profiles.Self(t).PackConfigs.Lookup("text")
+	policy, found := profiles.Self(t).PackPolicies.Lookup("text")
 	if !found {
-		t.Fatal("expected text pack config")
+		t.Fatal("expected Text Pack Policy")
 	}
 
-	config, err := textpolicy.DecodeConfig(pack)
+	config, err := textpolicy.DecodeConfig(policy)
 	if err != nil {
 		t.Fatalf("DecodeConfig: %v", err)
 	}

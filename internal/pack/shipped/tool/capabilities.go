@@ -9,7 +9,7 @@ import (
 // so a Tool capability is never duplicated across Packs.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{
-		buildBuiltin(Go, "Go", "go",
+		buildHostTool(Go, "Go", "go",
 			toolchain.DetectByCommand("version", toolchain.ExtractGoToken)),
 		buildGoBinary(
 			Goimports,

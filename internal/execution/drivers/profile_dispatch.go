@@ -14,25 +14,27 @@ func profileCheckDriver(checks ProfileChecks) (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		rule style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := job.(style.ProfileExecution)
-		if !found {
-			return style.ExecutionResult{}, fmt.Errorf("profile driver received empty job")
-		}
-
-		check, found := checks.Lookup(execution.PackID, execution.Check)
-		if !found {
+		check, ok := job.(style.ProfileCheck)
+		if !ok {
 			return style.ExecutionResult{}, fmt.Errorf(
-				"unknown profile check %q for pack %q",
-				execution.Check,
-				execution.PackID,
+				"profile driver received unsupported execution job %T",
+				job,
 			)
 		}
 
-		result, err = check(ctx, context, execution)
-		result.PackID = execution.PackID
-		return result, err
+		bound, found := checks.Lookup(rule.PackID, check.Check)
+		if !found {
+			return style.ExecutionResult{}, fmt.Errorf(
+				"unknown profile check %q for pack %q",
+				check.Check,
+				rule.PackID,
+			)
+		}
+
+		return bound(ctx, context, check)
 	}
 }

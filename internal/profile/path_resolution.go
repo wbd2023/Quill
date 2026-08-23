@@ -4,24 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/wbd2023/quill/internal/policy"
 )
 
 /* ---------------------------- Physical Repository Path Containment ---------------------------- */
 
 // validateRepositoryPaths enforces physical (symlink) containment for every repository-relative
-// path value in config against root. Lexical containment is already applied by Validate; this
-// pass resolves each value under root and rejects values whose symlinks escape the repository
-// where resolution is possible. A target that does not yet exist is accepted, because its escape
-// is already ruled out by the lexical check and physical resolution is not possible.
+// path value in config against root. Lexical containment is already applied by Validate. This pass
+// resolves each value, or its deepest existing ancestor, and rejects values whose symlinks escape
+// the repository. A missing target is accepted only when its resolved existing ancestor remains
+// inside the repository.
 //
 // Profile cannot import the workspace resolver (architectural boundary), so the physical policy
 // is mirrored here with standard-library primitives and kept in lock-step with
 // workspace.ResolveRepoRelative. Errors name the offending Profile field and value.
-func validateRepositoryPaths(config policy.Profile, root string) (err error) {
+func validateRepositoryPaths(config Profile, root string) (err error) {
 	canonical, err := filepath.EvalSymlinks(root)
 	if err != nil {
 		return fmt.Errorf("resolve repository root: %w", err)
@@ -99,15 +98,12 @@ func validateRepositoryPaths(config policy.Profile, root string) (err error) {
 	return nil
 }
 
-// validateResolvedPath joins value under root and rejects symlink escapes where the target
-// exists. root must already be canonical.
+// validateResolvedPath joins value under root and rejects a resolved path or its deepest existing
+// ancestor when it escapes root. root must already be canonical.
 func validateResolvedPath(root string, value string, field string) (err error) {
 	joined := filepath.Join(root, filepath.FromSlash(value))
-	resolved, err := filepath.EvalSymlinks(joined)
+	resolved, err := resolveExistingAncestor(joined)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return nil
-		}
 		return fmt.Errorf("%s: resolve path %q: %w", field, value, err)
 	}
 
@@ -116,6 +112,47 @@ func validateResolvedPath(root string, value string, field string) (err error) {
 	}
 
 	return nil
+}
+
+// resolveExistingAncestor resolves a path or, when it does not exist, its nearest physical
+// ancestor. A dangling symlink is followed even when its target does not yet exist, so its
+// resolved ancestor still participates in repository containment.
+func resolveExistingAncestor(path string) (resolved string, err error) {
+	for {
+		resolved, err = filepath.EvalSymlinks(path)
+		if err == nil {
+			return resolved, nil
+		}
+		if !errors.Is(err, fs.ErrNotExist) {
+			return "", err
+		}
+
+		info, statErr := os.Lstat(path)
+		if statErr == nil && info.Mode()&fs.ModeSymlink != 0 {
+			target, readErr := os.Readlink(path)
+			if readErr != nil {
+				return "", readErr
+			}
+			if !filepath.IsAbs(target) {
+				parent, parentErr := filepath.EvalSymlinks(filepath.Dir(path))
+				if parentErr != nil {
+					return "", parentErr
+				}
+				target = filepath.Join(parent, target)
+			}
+			path = filepath.Clean(target)
+			continue
+		}
+		if statErr != nil && !errors.Is(statErr, fs.ErrNotExist) {
+			return "", statErr
+		}
+
+		parent := filepath.Dir(path)
+		if parent == path {
+			return "", err
+		}
+		path = parent
+	}
 }
 
 func isWithinRepoRoot(root string, target string) (within bool) {

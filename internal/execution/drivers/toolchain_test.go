@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/wbd2023/quill/internal/execution"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
@@ -14,7 +14,7 @@ func TestToolchainDriverReportsMissingStatus(t *testing.T) {
 	run := execution.NewRunContext(
 		t.TempDir(),
 		style.Scope("all"),
-		policy.Profile{},
+		profile.Profile{},
 		style.Plan{},
 		nil,
 		nil,
@@ -24,7 +24,8 @@ func TestToolchainDriverReportsMissingStatus(t *testing.T) {
 	result, err := ToolchainDriver(
 		context.Background(),
 		run,
-		style.ToolchainExecution{ToolIDs: []string{"go"}},
+		style.Rule{},
+		style.ToolchainCheck{ToolIDs: []string{"go"}},
 		toolchain.StatusMap{},
 	)
 	if err != nil {

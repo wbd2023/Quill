@@ -1,6 +1,9 @@
 package report
 
-import "github.com/wbd2023/quill/internal/style"
+import (
+	"github.com/wbd2023/quill/internal/engine"
+	"github.com/wbd2023/quill/internal/style"
+)
 
 // CheckEntry is one rendered Rule outcome.
 type CheckEntry struct {
@@ -23,6 +26,21 @@ type RuleSummary struct {
 // CheckResult is check result.
 type CheckResult struct {
 	Entries []CheckEntry
+}
+
+// NewCheckResult converts a completed engine check into the explicit report result.
+func NewCheckResult(result engine.CheckResult) (check CheckResult) {
+	check.Entries = make([]CheckEntry, 0, len(result.Rules))
+	for _, rule := range result.Rules {
+		check.Entries = append(check.Entries, NewCheckEntry(
+			rule.Rule,
+			rule.Status,
+			rule.Execution,
+			rule.ExecutionError,
+		))
+	}
+
+	return check
 }
 
 // CheckSummary is the aggregate outcome of a check.

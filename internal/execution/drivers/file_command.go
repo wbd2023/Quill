@@ -21,10 +21,16 @@ func fileCommandCheckDriver(interpreters FileInterpreters) (driver execution.Dri
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		_ style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		return runFileCommand(ctx, context, job, interpreters, false)
+		command, ok := job.(style.FileCommand)
+		if !ok {
+			return style.ExecutionResult{}, errors.New(
+				"file-command driver received unsupported execution job")
+		}
+		return runFileCommand(ctx, context, command, interpreters, false)
 	}
 }
 
@@ -34,10 +40,16 @@ func fileCommandFixDriver() (driver execution.Driver) {
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		_ style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		return runFileCommand(ctx, context, job, FileInterpreters{}, true)
+		command, ok := job.(style.FileCommand)
+		if !ok {
+			return style.ExecutionResult{}, errors.New(
+				"file-command driver received unsupported execution job")
+		}
+		return runFileCommand(ctx, context, command, FileInterpreters{}, true)
 	}
 }
 
@@ -49,16 +61,11 @@ func fileCommandFixDriver() (driver execution.Driver) {
 func runFileCommand(
 	ctx context.Context,
 	context execution.RunContext,
-	job style.Job,
+	command style.FileCommand,
 	interpreters FileInterpreters,
 	isFix bool,
 ) (result style.ExecutionResult, err error) {
-	fileCommand, found := job.(style.FileCommandExecution)
-	if !found {
-		return style.ExecutionResult{}, errors.New("file-command driver received empty job")
-	}
-
-	files, err := execution.CollectFileSetFiles(context, fileCommand.FileSet)
+	files, err := execution.CollectFileSetFiles(context, command.FileSet)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
@@ -67,12 +74,12 @@ func runFileCommand(
 		return style.ExecutionResult{}, nil
 	}
 
-	tool, found := context.Tools[fileCommand.ToolID]
+	tool, found := context.Tools[command.ToolID]
 	if !found {
-		return style.ExecutionResult{}, errUnknownTool(fileCommand.ToolID)
+		return style.ExecutionResult{}, errUnknownTool(command.ToolID)
 	}
 
-	arguments := execution.FileCommandArguments(context.RepoRoot, job, files)
+	arguments := execution.FileCommandArguments(context.RepoRoot, command, files)
 	commandResult, runErr := process.RunCommand(ctx, process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        arguments,
@@ -84,7 +91,6 @@ func runFileCommand(
 	})
 
 	result = style.ExecutionResult{
-		PackID:    fileCommand.PackID,
 		ExitCode:  commandResult.ExitCode,
 		TimedOut:  commandResult.TimedOut,
 		Truncated: commandResult.Truncated,
@@ -95,11 +101,11 @@ func runFileCommand(
 		return result, runErr
 	}
 
-	interpreter, found := interpreters.Lookup(fileCommand.ToolID)
+	interpreter, found := interpreters.Lookup(command.ToolID)
 	if !found {
 		return style.ExecutionResult{}, fmt.Errorf(
 			"no interpreter registered for file-command tool %q",
-			fileCommand.ToolID,
+			command.ToolID,
 		)
 	}
 

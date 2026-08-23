@@ -27,17 +27,17 @@ type toolStatusJSON struct {
 
 func writeToolchainJSON(
 	writer io.Writer,
-	command string,
-	view ToolchainView,
+	metadata EnvelopeMetadata,
+	result ToolchainResult,
 ) (allValid bool, err error) {
-	err = writeResultEnvelope(writer, command, newToolchainJSON(view))
-	return view.AllValid, err
+	err = writeResultEnvelope(writer, metadata, newToolchainJSON(result))
+	return result.AllValid, err
 }
 
-func newToolchainJSON(view ToolchainView) (payload toolchainJSON) {
+func newToolchainJSON(result ToolchainResult) (payload toolchainJSON) {
 	return toolchainJSON{
-		Result:   toolchainResultJSON{Statuses: toolStatusListJSON(view.Result.Statuses)},
-		AllValid: view.AllValid,
+		Result:   toolchainResultJSON{Statuses: toolStatusListJSON(result.Statuses)},
+		AllValid: result.AllValid,
 	}
 }
 

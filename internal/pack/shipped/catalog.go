@@ -48,9 +48,8 @@ func DefaultRegistry(enabled []string) (registry pack.Registry, err error) {
 }
 
 // ComposeCatalog returns the Shipped catalogue augmented with external Pack definitions. External
-// Packs declare no canonical Tools - their rules reference self-describing ExternalCheckTemplate
-// jobs - so they compose alongside the built-in Packs into one validated catalogue without
-// creating a second selection, binding, or execution pipeline.
+// Packs declare no canonical Tools - their Rules reference self-describing ExternalCheck Jobs - so
+// composition does not create a second selection, binding, or execution pipeline.
 func ComposeCatalog(external []pack.Definition) (catalog pack.Catalog) {
 	base := DefaultCatalog()
 	return pack.NewCatalog(base.Tools(), append(base.Packs(), external...)...)

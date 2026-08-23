@@ -7,13 +7,13 @@ import (
 
 func writeToolchainText(
 	writer io.Writer,
-	view ToolchainView,
+	result ToolchainResult,
 ) (allValid bool, err error) {
 	if _, err = fmt.Fprintln(writer, "Style toolchain"); err != nil {
 		return false, err
 	}
 
-	for _, status := range view.Result.Statuses {
+	for _, status := range result.Statuses {
 		state := "PASS"
 		details := status.Version
 		if !status.Valid {
@@ -34,5 +34,5 @@ func writeToolchainText(
 		}
 	}
 
-	return view.AllValid, nil
+	return result.AllValid, nil
 }

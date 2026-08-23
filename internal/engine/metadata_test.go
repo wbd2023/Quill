@@ -65,8 +65,8 @@ func TestMetadataReportsAvailableAndActive(t *testing.T) {
 
 	var sawActivePack, sawActiveRule, sawDefaultScope bool
 	for _, pack := range snapshot.Packs {
-		if pack.External {
-			t.Fatalf("shipped packs must be built-in, %q marked external", pack.ID)
+		if pack.Provenance != PackProvenanceShipped {
+			t.Fatalf("Shipped Pack %q has provenance %q", pack.ID, pack.Provenance)
 		}
 		if pack.Active {
 			sawActivePack = true

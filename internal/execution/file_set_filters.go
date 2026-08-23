@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/wbd2023/quill/internal/filewalk"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* ------------------------------------------ Inclusion ----------------------------------------- */
 
 func fileSetCoversPath(
 	context RunContext,
-	fileSet policy.FileSetConfig,
+	fileSet profile.FileSetConfig,
 	path string,
 ) (covered bool) {
 	if len(fileSet.Include.Files) == 0 && len(fileSet.Include.Paths) == 0 {
@@ -76,7 +76,7 @@ func fileSetCoversRelativePath(
 
 /* ------------------------------------------ Exclusion ----------------------------------------- */
 
-func fileSetExcludesPath(fileSet policy.FileSetConfig, path string) (excluded bool) {
+func fileSetExcludesPath(fileSet profile.FileSetConfig, path string) (excluded bool) {
 	base := filepath.Base(path)
 	if hasMatchingSuffix(fileSet.Exclude.Extensions, path) {
 		return true

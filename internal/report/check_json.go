@@ -64,10 +64,10 @@ type commandResultJSON struct {
 
 func writeCheckJSON(
 	writer io.Writer,
-	command string,
+	metadata EnvelopeMetadata,
 	view CheckView,
 ) (summary CheckSummary, err error) {
-	err = writeResultEnvelope(writer, command, newCheckJSON(view))
+	err = writeResultEnvelope(writer, metadata, newCheckJSON(view))
 	return view.Summary, err
 }
 

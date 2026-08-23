@@ -2,17 +2,17 @@ package main
 
 import "runtime/debug"
 
-const developmentVersion = "devel"
+// developmentVersion is Go's version for an unversioned main module.
+const developmentVersion = "(devel)"
 
-func currentVersion() (version string) {
-	buildInfo, ok := debug.ReadBuildInfo()
-	return versionFromBuildInfo(buildInfo, ok)
+func version() (value string) {
+	return resolveVersion(debug.ReadBuildInfo())
 }
 
-func versionFromBuildInfo(buildInfo *debug.BuildInfo, ok bool) (version string) {
-	if !ok || buildInfo.Main.Version == "" || buildInfo.Main.Version == "(devel)" {
+func resolveVersion(info *debug.BuildInfo, ok bool) (version string) {
+	if !ok || info.Main.Version == "" {
 		return developmentVersion
 	}
 
-	return buildInfo.Main.Version
+	return info.Main.Version
 }

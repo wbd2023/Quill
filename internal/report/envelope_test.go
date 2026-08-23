@@ -10,6 +10,12 @@ import (
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
+const testQuillVersion = "test-version"
+
+func testEnvelopeMetadata(command string) (metadata EnvelopeMetadata) {
+	return EnvelopeMetadata{Command: command, QuillVersion: testQuillVersion}
+}
+
 /* ---------------------------------------- Fix Envelope ---------------------------------------- */
 
 func TestWriteFixDecodedEnvelope(t *testing.T) {
@@ -47,7 +53,7 @@ func TestWriteFixDecodedEnvelope(t *testing.T) {
 		},
 	)
 
-	if err := WriteFix(&buffer, "fix", view); err != nil {
+	if _, err := WriteFix(&buffer, testEnvelopeMetadata("fix"), FormatJSON, view); err != nil {
 		t.Fatalf("WriteFix: %v", err)
 	}
 
@@ -132,7 +138,7 @@ func TestWriteLockDecodedEnvelope(t *testing.T) {
 
 	var buffer bytes.Buffer
 
-	if err := WriteLock(&buffer, "lock", LockResult{
+	if err := WriteLock(&buffer, testEnvelopeMetadata("lock"), FormatJSON, LockResult{
 		Path:         "/repo/quill.lock",
 		ArchiveCount: 3,
 	}); err != nil {
@@ -170,7 +176,9 @@ func TestNewErrorEnvelopeShape(t *testing.T) {
 	var buffer bytes.Buffer
 
 	if err := WriteEnvelope(&buffer, NewErrorEnvelope(
-		"check", ErrorCodeInvalidArgument, "--scope must name a configured scope",
+		testEnvelopeMetadata("check"),
+		ErrorCodeInvalidArgument,
+		"--scope must name a configured scope",
 	)); err != nil {
 		t.Fatalf("WriteEnvelope: %v", err)
 	}
@@ -182,6 +190,10 @@ func TestNewErrorEnvelopeShape(t *testing.T) {
 
 	if envelope.SchemaVersion != SchemaVersion {
 		t.Fatalf("unexpected schema version: %d", envelope.SchemaVersion)
+	}
+
+	if envelope.QuillVersion != testQuillVersion {
+		t.Fatalf("unexpected Quill version: %q", envelope.QuillVersion)
 	}
 
 	if envelope.Command != "check" || envelope.Status != StatusError {
@@ -202,8 +214,12 @@ func TestNewErrorEnvelopeShape(t *testing.T) {
 func TestNewResultEnvelopeHasNoError(t *testing.T) {
 	t.Parallel()
 
-	envelope := NewResultEnvelope("coverage", map[string]int{"automated": 1})
+	envelope := NewResultEnvelope(testEnvelopeMetadata("coverage"), map[string]int{"automated": 1})
 	if envelope.Status != StatusOK || envelope.Error != nil {
 		t.Fatalf("result envelope must be ok with no error: %+v", envelope)
+	}
+
+	if envelope.QuillVersion != testQuillVersion {
+		t.Fatalf("unexpected Quill version: %q", envelope.QuillVersion)
 	}
 }

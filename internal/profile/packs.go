@@ -13,6 +13,10 @@ func validateEnabledPacks(enabledPacks []string) (err error) {
 			return fmt.Errorf("packs.enabled contains an empty pack")
 		}
 
+		if pack == EnabledPacksKey {
+			return fmt.Errorf("packs.enabled contains reserved pack %q", pack)
+		}
+
 		if seen[pack] {
 			return fmt.Errorf("packs.enabled contains duplicate pack %q", pack)
 		}

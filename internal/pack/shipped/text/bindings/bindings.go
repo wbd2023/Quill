@@ -61,7 +61,7 @@ func registerRepositoryScanners(bindings *drivers.Bindings) {
 func scanASCII(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
 }
@@ -69,7 +69,7 @@ func scanASCII(
 func scanExceptionMarkers(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckExceptionMarkers(
 		context.RepoRoot,
@@ -81,7 +81,7 @@ func scanExceptionMarkers(
 func scanLineLengths(
 	_ context.Context,
 	context execution.RunContext,
-	scanExec style.RepositoryScanExecution,
+	scanExec style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	files, err := execution.CollectFileSetFiles(context, scanExec.FileSet)
 	if err != nil {
@@ -94,7 +94,7 @@ func scanLineLengths(
 func scanMaintenanceMarkers(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckMaintenanceMarkers(
 		context.RepoRoot,
@@ -106,9 +106,9 @@ func scanMaintenanceMarkers(
 func scanSectionHeaderNames(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context, text.PackID)
+	config, err := decodeTextPackPolicy(context, text.PackID)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
@@ -124,9 +124,9 @@ func scanSectionHeaderNames(
 func scanSectionHeaderDensity(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context, text.PackID)
+	config, err := decodeTextPackPolicy(context, text.PackID)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
@@ -142,9 +142,9 @@ func scanSectionHeaderDensity(
 func scanSectionHeaders(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	config, err := decodeTextPackConfig(context, text.PackID)
+	config, err := decodeTextPackPolicy(context, text.PackID)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
@@ -159,18 +159,18 @@ func scanSectionHeaders(
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
-func decodeTextPackConfig(
+func decodeTextPackPolicy(
 	context execution.RunContext,
 	packID string,
 ) (config textpolicy.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(packID)
+	pack, found := context.Profile.PackPolicies.Lookup(packID)
 	if !found {
-		return textpolicy.Config{}, errMissingPackConfig(packID)
+		return textpolicy.Config{}, errMissingPackPolicy(packID)
 	}
 
 	return textpolicy.DecodeConfig(pack)
 }
 
-func errMissingPackConfig(packID string) (err error) {
-	return fmt.Errorf("packs.%s must be configured", packID)
+func errMissingPackPolicy(packID string) (err error) {
+	return fmt.Errorf("packs.%s policy is required", packID)
 }

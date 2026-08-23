@@ -3,13 +3,20 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 
+// RuleBinding binds a Rule to its enforcement, Scope, and Requirements.
+type RuleBinding struct {
+	RuleID         string
+	Enforcement    style.Enforcement
+	Scope          style.Scope
+	RequirementIDs []string
+}
+
 func validateRules(
-	repository policy.RepositoryConfig,
-	rules []policy.RuleBinding,
+	repository RepositoryConfig,
+	rules []RuleBinding,
 ) (err error) {
 	if len(rules) == 0 {
 		return fmt.Errorf("rules must not be empty")

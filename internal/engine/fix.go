@@ -46,7 +46,7 @@ func (engine *Engine) Fix(
 
 	result.Scope = runContext.Scope
 
-	rules := selectRulesForFix(runContext.Effective.Rules, runContext)
+	rules := selectRulesForFix(runContext.Plan.Rules, runContext)
 	toolIDs := execution.ToolIDsForFixes(rules)
 	result.Toolchain, err = engine.inspectTools(
 		operationContext,

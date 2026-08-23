@@ -8,15 +8,15 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* ------------------------------------------ Decoding ------------------------------------------ */
 
-func TestDecodeConfigReadsGoPackConfig(t *testing.T) {
+func TestDecodeConfigReadsGoPackPolicy(t *testing.T) {
 	t.Parallel()
 
-	config, err := gopolicy.DecodeConfig(corepolicy.PackConfig{
+	config, err := gopolicy.DecodeConfig(profile.PackPolicy{
 		"local_import_prefixes": []any{"ciphera"},
 		"parameters": map[string]any{
 			"secret_names": []any{"token"},

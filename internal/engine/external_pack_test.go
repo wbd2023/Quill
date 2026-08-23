@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
@@ -28,13 +28,13 @@ func TestExternalPackCheckIsTheAcceptancePath(t *testing.T) {
 	root := t.TempDir()
 	stageExternalPack(t, root)
 
-	config := policy.Profile{
-		SchemaVersion: policy.SchemaVersion,
+	config := profile.Profile{
+		SchemaVersion: profile.SchemaVersion,
 		Repository:    profiles.RepositoryConfig(),
-		StyleGuide:    policy.StyleGuideConfig{Path: "STYLE.md"},
+		StyleGuide:    profile.StyleGuideConfig{Path: "STYLE.md"},
 		EnabledPacks:  []string{"extpack"},
-		PackSources:   []policy.PackSource{{Path: ".quill/packs/extpack"}},
-		Rules: []policy.RuleBinding{
+		PackSources:   []profile.PackSource{{Path: ".quill/packs/extpack"}},
+		Rules: []profile.RuleBinding{
 			{
 				RuleID:         "extpack/forbidden-import",
 				Enforcement:    style.EnforcementRequired,
@@ -73,8 +73,8 @@ func TestExternalPackCheckIsTheAcceptancePath(t *testing.T) {
 		for _, packMeta := range snapshot.Packs {
 			if packMeta.ID == "extpack" {
 				seen = true
-				if !packMeta.External {
-					t.Fatal("expected external pack to carry External provenance")
+				if packMeta.Provenance != PackProvenanceExternal {
+					t.Fatalf("expected external Pack provenance, got %q", packMeta.Provenance)
 				}
 			}
 		}
@@ -119,25 +119,25 @@ func TestExternalPackCheckIsTheAcceptancePath(t *testing.T) {
 	})
 }
 
-// TestExternalPackConfigReachesRuntime proves a nonempty [packs.extpack] config block is accepted
-// by the external Pack's raw-config policy and forwarded unchanged to the subprocess through
-// Request.Configuration, so an external Pack validates its own configuration.
-func TestExternalPackConfigReachesRuntime(t *testing.T) {
+// TestExternalPackPolicyReachesRuntime proves a nonempty [packs.extpack] Pack Policy block is
+// accepted and forwarded unchanged to the subprocess through Request.Policy, so an external Pack
+// validates its own policy.
+func TestExternalPackPolicyReachesRuntime(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
 	stageExternalPack(t, root)
 
-	config := policy.Profile{
-		SchemaVersion: policy.SchemaVersion,
+	config := profile.Profile{
+		SchemaVersion: profile.SchemaVersion,
 		Repository:    profiles.RepositoryConfig(),
-		StyleGuide:    policy.StyleGuideConfig{Path: "STYLE.md"},
+		StyleGuide:    profile.StyleGuideConfig{Path: "STYLE.md"},
 		EnabledPacks:  []string{"extpack"},
-		PackSources:   []policy.PackSource{{Path: ".quill/packs/extpack"}},
-		PackConfigs: policy.PackConfigs{
-			"extpack": policy.PackConfig{"allowed_packages": []any{"database/sql"}},
+		PackSources:   []profile.PackSource{{Path: ".quill/packs/extpack"}},
+		PackPolicies: profile.PackPolicies{
+			"extpack": profile.PackPolicy{"allowed_packages": []any{"database/sql"}},
 		},
-		Rules: []policy.RuleBinding{
+		Rules: []profile.RuleBinding{
 			{
 				RuleID:         "extpack/inspect",
 				Enforcement:    style.EnforcementRequired,
@@ -173,10 +173,58 @@ func TestExternalPackConfigReachesRuntime(t *testing.T) {
 		}
 	}
 	if echoed == "" {
-		t.Fatal("expected the inspect rule to echo the request configuration")
+		t.Fatal("expected the inspect Rule to echo the request policy")
 	}
 	if !strings.Contains(echoed, "database/sql") {
-		t.Fatalf("expected external config to reach the runtime, got %q", echoed)
+		t.Fatalf("expected external Pack Policy to reach the runtime, got %q", echoed)
+	}
+}
+
+// TestExternalPackRequestScopeReachesRuntime proves the bound rule scope is forwarded to the
+// external Pack subprocess through Request.Scope, so a Pack can vary behaviour by scope rather
+// than inferring it from the repository root.
+func TestExternalPackRequestScopeReachesRuntime(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	stageExternalPack(t, root)
+
+	const boundScope = "all"
+	config := profile.Profile{
+		SchemaVersion: profile.SchemaVersion,
+		Repository:    profiles.RepositoryConfig(),
+		StyleGuide:    profile.StyleGuideConfig{Path: "STYLE.md"},
+		EnabledPacks:  []string{"extpack"},
+		PackSources:   []profile.PackSource{{Path: ".quill/packs/extpack"}},
+		Rules: []profile.RuleBinding{
+			{
+				RuleID:         "extpack/inspect",
+				Enforcement:    style.EnforcementRequired,
+				Scope:          style.Scope(boundScope),
+				RequirementIDs: []string{"9.1.external-rules"},
+			},
+		},
+	}
+
+	testutil.WriteFile(t, root, "STYLE.md",
+		"# Style Guide\n\n### 9.1 External Packs\n\n"+
+			"<!-- style: id=9.1.external-rules -->\n"+
+			"* External Pack rules MUST be bound to a requirement.\n")
+	testutil.WriteFile(t, root, "quill.toml", profiles.Format(t, config))
+
+	engine, err := New(root)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	result, err := engine.Check(context.Background(), CheckOptions{})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	echoed := externalInspectMessage(t, result, "extpack/inspect")
+	if want := "scope=" + boundScope; !strings.Contains(echoed, want) {
+		t.Fatalf("external Pack request must echo the bound %q, got %q", want, echoed)
 	}
 }
 
@@ -206,6 +254,26 @@ func stageExternalPack(t *testing.T, root string) {
 	}
 	testutil.WriteExecutable(t, root, ".quill/packs/extpack/bin/packhelper", string(contents))
 	testutil.WriteFile(t, root, ".quill/packs/extpack/pack.toml", externalAcceptanceManifest)
+}
+
+// externalInspectMessage returns the inspect-request diagnostic message an external Pack emitted,
+// proving the request fields that reached the subprocess. It fails when the rule is absent or
+// emitted no inspect diagnostic.
+func externalInspectMessage(t *testing.T, result CheckResult, ruleID string) (message string) {
+	t.Helper()
+
+	for _, entry := range result.Rules {
+		if entry.Rule.ID != ruleID {
+			continue
+		}
+		for _, diag := range entry.Execution.Diagnostics {
+			if diag.Code == "inspect" {
+				return diag.Message
+			}
+		}
+	}
+	t.Fatalf("expected an inspect diagnostic from rule %q, got %+v", ruleID, result.Rules)
+	return ""
 }
 
 const externalAcceptanceManifest = `

@@ -6,6 +6,8 @@ import (
 	"time"
 
 	codec "github.com/BurntSushi/toml"
+
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // SchemaVersion is the manifest schema version this implementation accepts.
@@ -84,9 +86,9 @@ type tomlRule struct {
 	SupportsFix bool   `toml:"supports_fix"`
 }
 
-// DecodeManifest decodes pack.toml source into a validated Manifest. The decode is strict: unknown
-// keys, an unsupported schema version, an unsupported protocol version, or any missing required
-// field is rejected before the manifest is trusted.
+// DecodeManifest strictly decodes pack.toml and validates the resulting Manifest. Unknown keys,
+// unsupported versions, and invalid or missing required fields are rejected before the manifest is
+// trusted.
 func DecodeManifest(source string) (manifest Manifest, err error) {
 	var schema tomlManifest
 	metadata, err := codec.Decode(source, &schema)
@@ -143,7 +145,7 @@ func DecodeManifest(source string) (manifest Manifest, err error) {
 		rules = append(rules, RuleMeta(rule))
 	}
 
-	return Manifest{
+	manifest = Manifest{
 		SchemaVersion: schema.SchemaVersion,
 		Pack: PackMeta{
 			ID:            schema.Pack.ID,
@@ -156,29 +158,37 @@ func DecodeManifest(source string) (manifest Manifest, err error) {
 			Timeout: timeout,
 		},
 		Rules: rules,
-	}, nil
+	}
+	if err = manifest.Validate(); err != nil {
+		return Manifest{}, err
+	}
+
+	return manifest, nil
 }
 
 // Validate reports whether a decoded manifest is internally consistent. It runs after decode so a
 // caller that constructs a Manifest directly cannot bypass field checks. Validation never touches
 // the filesystem; executable existence is enforced separately at source load time.
 func (manifest Manifest) Validate() (err error) {
-	if manifest.Pack.ID == "" {
+	if strings.TrimSpace(manifest.Pack.ID) == "" {
 		return errManifestField("pack.id")
 	}
-	if manifest.Pack.Name == "" {
+	if manifest.Pack.ID == profile.EnabledPacksKey {
+		return fmt.Errorf("pack.toml pack.id %q is reserved", manifest.Pack.ID)
+	}
+	if strings.TrimSpace(manifest.Pack.Name) == "" {
 		return errManifestField("pack.name")
 	}
-	if manifest.Runtime.Command == "" {
+	if strings.TrimSpace(manifest.Runtime.Command) == "" {
 		return errManifestField("runtime.command")
 	}
 
 	seen := make(map[string]struct{}, len(manifest.Rules))
 	for index, rule := range manifest.Rules {
-		if rule.ID == "" {
+		if strings.TrimSpace(rule.ID) == "" {
 			return fmt.Errorf("pack.toml rule at index %d is missing id", index)
 		}
-		if rule.Check == "" {
+		if strings.TrimSpace(rule.Check) == "" {
 			return fmt.Errorf("pack.toml rule %q is missing check", rule.ID)
 		}
 		if rule.SupportsFix {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
@@ -151,7 +151,7 @@ func TestCollectLineLengthFileSetCoversPrivacyDocument(t *testing.T) {
 	}
 }
 
-func scopedFileSetConfig(t *testing.T) (config policy.Profile) {
+func scopedFileSetConfig(t *testing.T) (config profile.Profile) {
 	t.Helper()
 
 	config = profiles.Self(t)

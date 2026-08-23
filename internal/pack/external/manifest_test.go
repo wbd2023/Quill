@@ -119,6 +119,34 @@ func TestDecodeManifestAppliesDefaultTimeoutWhenOmitted(t *testing.T) {
 	}
 }
 
+func TestDecodeManifestRejectsBlankRequiredFields(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		replace string
+		with    string
+	}{
+		{name: "pack ID", replace: `id = "company"`, with: `id = " "`},
+		{name: "pack name", replace: `name = "Company Engineering Policy"`, with: `name = "\t"`},
+		{name: "runtime command", replace: `command = "bin/company-quill"`, with: `command = " "`},
+		{name: "rule ID", replace: `id = "company/no-direct-database-access"`, with: `id = " "`},
+		{name: "rule check", replace: `check = "no-direct-database-access"`, with: `check = "\t"`},
+		{name: "reserved pack ID", replace: `id = "company"`, with: `id = "enabled"`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			source := strings.Replace(validManifest, test.replace, test.with, 1)
+			if _, err := external.DecodeManifest(source); err == nil {
+				t.Fatal("expected required-field validation error")
+			}
+		})
+	}
+}
+
 /* ----------------------------------------- Validation ----------------------------------------- */
 
 func TestValidateRejectsMissingPackID(t *testing.T) {

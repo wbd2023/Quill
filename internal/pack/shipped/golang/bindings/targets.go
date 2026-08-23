@@ -7,7 +7,7 @@ import (
 
 	"github.com/wbd2023/quill/internal/execution"
 	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -19,7 +19,7 @@ func goTargets(
 	run execution.RunContext,
 	names []string,
 	goLanguage string,
-) (targets []policy.TargetConfig, err error) {
+) (targets []profile.TargetConfig, err error) {
 	for _, name := range names {
 		target, err := goTarget(run.Profile, name, goLanguage)
 		if err != nil {
@@ -37,17 +37,17 @@ func goTargets(
 }
 
 func goTarget(
-	config policy.Profile,
+	config profile.Profile,
 	name string,
 	goLanguage string,
-) (target policy.TargetConfig, err error) {
+) (target profile.TargetConfig, err error) {
 	target, found := config.Targets.Lookup(name)
 	if !found {
-		return policy.TargetConfig{}, fmt.Errorf("unknown Go target %q", name)
+		return profile.TargetConfig{}, fmt.Errorf("unknown Go target %q", name)
 	}
 
 	if target.Language != goLanguage {
-		return policy.TargetConfig{}, fmt.Errorf(
+		return profile.TargetConfig{}, fmt.Errorf(
 			"target %q is %q, not go",
 			name,
 			target.Language,
@@ -59,7 +59,7 @@ func goTarget(
 
 // targetWorkDir resolves a target's working directory against the repository root, treating an
 // empty or current-directory path as the root itself.
-func targetWorkDir(repoRoot string, target policy.TargetConfig) (workDir string) {
+func targetWorkDir(repoRoot string, target profile.TargetConfig) (workDir string) {
 	if target.WorkingDirectory == "" || target.WorkingDirectory == "." {
 		return repoRoot
 	}
@@ -73,9 +73,9 @@ func decodeGoConfig(
 	run execution.RunContext,
 	packID string,
 ) (config gopolicy.Config, err error) {
-	pack, found := run.Profile.PackConfigs.Lookup(packID)
+	pack, found := run.Profile.PackPolicies.Lookup(packID)
 	if !found {
-		return gopolicy.Config{}, errMissingPackConfig(packID)
+		return gopolicy.Config{}, errMissingPackPolicy(packID)
 	}
 
 	return gopolicy.DecodeConfig(pack)
@@ -103,6 +103,6 @@ func appendDiagnostics(
 	})
 }
 
-func errMissingPackConfig(packID string) (err error) {
-	return fmt.Errorf("packs.%s must be configured", packID)
+func errMissingPackPolicy(packID string) (err error) {
+	return fmt.Errorf("packs.%s policy is required", packID)
 }

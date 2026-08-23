@@ -2,7 +2,7 @@ package tool
 
 import "github.com/wbd2023/quill/internal/toolchain"
 
-func buildBuiltin(
+func buildHostTool(
 	id string,
 	name string,
 	command string,

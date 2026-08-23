@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/wbd2023/quill/internal/filewalk"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -26,7 +26,7 @@ const (
 // CheckMagicValues check magic values.
 func CheckMagicValues(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	exitLiteralPattern := regexp.MustCompile(`^\s*exit\s+(-?\d+)\s*$`)

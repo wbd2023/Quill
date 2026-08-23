@@ -15,9 +15,9 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 		ID:      PackID,
 		Name:    "Go",
 		ToolIDs: append([]string{}, toolIDs...),
-		Config: pack.Config{
+		Policy: pack.Policy{
 			Required: true,
-			Validate: gopolicy.ValidatePackConfig,
+			Validate: gopolicy.ValidatePackPolicy,
 		},
 		Rules: rules(),
 	}

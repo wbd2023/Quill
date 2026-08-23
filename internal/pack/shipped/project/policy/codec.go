@@ -3,21 +3,21 @@ package policy
 import (
 	"fmt"
 
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // DecodeConfig decodes the Project Pack Policy subtree.
-func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
-	if pack == nil {
+func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
+	if policy == nil {
 		return Config{}, fmt.Errorf("packs.project must be configured")
 	}
 
-	if err = rejectUnknownFields(pack, "packs.project", "commands"); err != nil {
+	if err = rejectUnknownFields(policy, "packs.project", "commands"); err != nil {
 		return Config{}, err
 	}
 
 	section, err := configSection(
-		pack,
+		policy,
 		"commands",
 		"packs.project.commands",
 	)
@@ -33,17 +33,16 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 	return config, ValidateConfig(config)
 }
 
-// ValidatePackConfig validates the raw Project Pack Policy subtree.
-func ValidatePackConfig(pack corepolicy.PackConfig) (err error) {
-	_, err = DecodeConfig(pack)
+// ValidatePackPolicy validates the raw Project Pack Policy subtree.
+func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
+	_, err = DecodeConfig(policy)
 	return err
 }
 
 // EncodeConfig encodes config as a raw Project Pack Policy subtree.
-func EncodeConfig(config Config) (pack corepolicy.PackConfig) {
+func EncodeConfig(config Config) (policy profile.PackPolicy) {
 	makeConfig := config.Commands.Make
-
-	return corepolicy.PackConfig{
+	return profile.PackPolicy{
 		"commands": map[string]any{
 			"runner":             string(config.Commands.Runner),
 			"path":               makeConfig.Path,

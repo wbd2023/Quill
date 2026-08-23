@@ -3,13 +3,11 @@ package profile
 import (
 	"fmt"
 	"strings"
-
-	"github.com/wbd2023/quill/internal/policy"
 )
 
 // Validate checks config for supported schema version and internal consistency.
-func Validate(config policy.Profile) (err error) {
-	if config.SchemaVersion != policy.SchemaVersion {
+func Validate(config Profile) (err error) {
+	if config.SchemaVersion != SchemaVersion {
 		return fmt.Errorf("unsupported style profile version %d", config.SchemaVersion)
 	}
 
@@ -40,8 +38,7 @@ func Validate(config policy.Profile) (err error) {
 	if err = validateEnabledPacks(config.EnabledPacks); err != nil {
 		return err
 	}
-
-	if err = validatePackConfigs(config.EnabledPacks, config.PackConfigs); err != nil {
+	if err = validatePackPolicies(config.EnabledPacks, config.PackPolicies); err != nil {
 		return err
 	}
 
@@ -63,7 +60,7 @@ func isBlank(value string) (blank bool) {
 	return strings.TrimSpace(value) == ""
 }
 
-func validatePackSources(sources []policy.PackSource) (err error) {
+func validatePackSources(sources []PackSource) (err error) {
 	seen := make(map[string]bool, len(sources))
 	for _, source := range sources {
 		if source.Path == "" {

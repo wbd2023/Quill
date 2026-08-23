@@ -70,12 +70,12 @@ lint:
 func currentCommands(t *testing.T) (commands projectpolicy.CommandsConfig) {
 	t.Helper()
 
-	pack, found := profiles.Self(t).PackConfigs.Lookup(projectpack.PackID)
+	policy, found := profiles.Self(t).PackPolicies.Lookup(projectpack.PackID)
 	if !found {
-		t.Fatal("missing project pack config")
+		t.Fatal("missing Project Pack Policy")
 	}
 
-	config, err := projectpolicy.DecodeConfig(pack)
+	config, err := projectpolicy.DecodeConfig(policy)
 	if err != nil {
 		t.Fatalf("Decode project config: %v", err)
 	}

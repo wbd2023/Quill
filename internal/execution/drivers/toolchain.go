@@ -13,17 +13,21 @@ import (
 func ToolchainDriver(
 	_ context.Context,
 	_ execution.RunContext,
+	_ style.Rule,
 	job style.Job,
 	toolStatuses toolchain.StatusMap,
 ) (result style.ExecutionResult, err error) {
-	execution, found := job.(style.ToolchainExecution)
-	if !found {
-		return style.ExecutionResult{}, fmt.Errorf("toolchain driver received wrong job type")
+	check, ok := job.(style.ToolchainCheck)
+	if !ok {
+		return style.ExecutionResult{}, fmt.Errorf(
+			"toolchain driver received unsupported execution job %T",
+			job,
+		)
 	}
 
-	diagnostics := make([]style.Diagnostic, 0, len(execution.ToolIDs))
+	diagnostics := make([]style.Diagnostic, 0, len(check.ToolIDs))
 	foundFailure := false
-	for _, toolID := range execution.ToolIDs {
+	for _, toolID := range check.ToolIDs {
 		status, found := toolStatuses[toolID]
 		if !found {
 			foundFailure = true
@@ -45,11 +49,10 @@ func ToolchainDriver(
 	}
 
 	if !foundFailure {
-		return style.ExecutionResult{PackID: execution.PackID}, nil
+		return style.ExecutionResult{}, nil
 	}
 
 	return style.ExecutionResult{
-		PackID:      execution.PackID,
 		Diagnostics: diagnostics,
 	}, nil
 }

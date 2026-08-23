@@ -1,17 +1,17 @@
 package text
 
-import "github.com/wbd2023/quill/internal/policy"
+import "github.com/wbd2023/quill/internal/profile"
 
-func fileSets() (fileSets policy.FileSets) {
-	fileSets = append(fileSets, policy.FileSetConfig{
+func fileSets() (fileSets profile.FileSets) {
+	fileSets = append(fileSets, profile.FileSetConfig{
 		Name: "line_length",
-		Exclude: policy.FileSetExclude{
+		Exclude: profile.FileSetExclude{
 			Files: []string{"go.sum", "package-lock.json"},
 		},
 	})
-	fileSets = append(fileSets, policy.FileSetConfig{
+	fileSets = append(fileSets, profile.FileSetConfig{
 		Name: "spelling",
-		Exclude: policy.FileSetExclude{
+		Exclude: profile.FileSetExclude{
 			Extensions: []string{".go"},
 			Files: []string{
 				"COPYING",

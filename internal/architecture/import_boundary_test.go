@@ -27,7 +27,9 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 			files := productionGoFiles(t, directory, testCase.recursive, testCase.excludeSubdirs)
 			for _, file := range files {
 				for _, imported := range fileImports(t, file) {
-					if !forbiddenImport(imported, modulePath, testCase.forbidden) {
+					if !forbiddenImportExcept(
+						imported, modulePath, testCase.allowed, testCase.forbidden,
+					) {
 						continue
 					}
 
@@ -83,7 +85,10 @@ func productionGoFiles(
 					if path == directory {
 						return nil
 					}
-
+					switch entry.Name() {
+					case "testdata", ".cache", ".git", "vendor", "third_party":
+						return filepath.SkipDir
+					}
 					if isExcludedSubdir(path, directory, excludeSubdirs) {
 						return filepath.SkipDir
 					}
@@ -165,16 +170,77 @@ func fileImports(t *testing.T, path string) (imports []string) {
 }
 
 func forbiddenImport(imported string, modulePath string, forbidden []string) (found bool) {
+	return forbiddenImportExcept(imported, modulePath, nil, forbidden)
+}
+
+func forbiddenImportExcept(
+	imported string,
+	modulePath string,
+	allowed []string,
+	forbidden []string,
+) (found bool) {
 	localPrefix := modulePath + "/"
 	if !strings.HasPrefix(imported, localPrefix) {
 		return false
 	}
 
 	relative := strings.TrimPrefix(imported, localPrefix)
+	for _, allowedPath := range allowed {
+		if relative == allowedPath || strings.HasPrefix(relative, allowedPath+"/") {
+			return false
+		}
+	}
+
 	for _, forbiddenPath := range forbidden {
-		if relative == forbiddenPath || strings.HasPrefix(relative, forbiddenPath) {
+		if relative == forbiddenPath || strings.HasPrefix(relative, forbiddenPath+"/") {
 			return true
 		}
 	}
+
 	return false
+}
+
+func TestForbiddenImportExceptMatchesWholePackagePaths(t *testing.T) {
+	t.Parallel()
+
+	const modulePath = "example.test/quill"
+	testCases := []struct {
+		name      string
+		imported  string
+		forbidden []string
+		want      bool
+	}{
+		{
+			name:      "exact package",
+			imported:  modulePath + "/internal/process",
+			forbidden: []string{"internal/process"},
+			want:      true,
+		},
+		{
+			name:      "package child",
+			imported:  modulePath + "/internal/process/runner",
+			forbidden: []string{"internal/process"},
+			want:      true,
+		},
+		{
+			name:      "similarly prefixed sibling",
+			imported:  modulePath + "/internal/processors",
+			forbidden: []string{"internal/process"},
+			want:      false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			got := forbiddenImportExcept(
+				testCase.imported,
+				modulePath,
+				nil,
+				testCase.forbidden,
+			)
+			if got != testCase.want {
+				t.Fatalf("forbiddenImportExcept() = %t, want %t", got, testCase.want)
+			}
+		})
+	}
 }

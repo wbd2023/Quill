@@ -35,10 +35,10 @@ func TestEveryShippedExecutionIdentityHasExactlyOneRuntimeBinding(t *testing.T) 
 	var missing []string
 	for _, rule := range registry.Rules() {
 		if rule.Check != nil {
-			missing = append(missing, assertTemplateBound(rule.ID, "check", rule.Check, built)...)
+			missing = append(missing, assertTemplateBound(rule, "check", rule.Check, built)...)
 		}
 		if rule.Fix != nil {
-			missing = append(missing, assertTemplateBound(rule.ID, "fix", rule.Fix, built)...)
+			missing = append(missing, assertTemplateBound(rule, "fix", rule.Fix, built)...)
 		}
 	}
 
@@ -54,83 +54,89 @@ func TestEveryShippedExecutionIdentityHasExactlyOneRuntimeBinding(t *testing.T) 
 }
 
 // assertTemplateBound resolves one template's execution identity against built and returns a
-// description (rule side, kind, key) for each identity that has no binding.
+// description (rule side, kind, key) for each identity that has no binding. Pack identity comes
+// from the RuleDefinition, never from the execution value.
 func assertTemplateBound(
-	ruleID string,
+	rule style.RuleDefinition,
 	side string,
 	template style.Template,
 	built drivers.Bindings,
 ) (missing []string) {
 	switch execution := template.(type) {
-	case style.ToolchainExecution:
+	case style.ToolchainCheck:
 		// Toolchain execution has no per-identity binding; it always resolves to the shared
 		// Toolchain driver. Nothing to verify.
 		return nil
 
-	case style.ProfileExecution:
-		if _, found := built.LookupProfileCheck(execution.PackID, execution.Check); !found {
+	case style.ProfileCheck:
+		if _, found := built.LookupProfileCheck(rule.PackID, execution.Check); !found {
 			missing = append(
 				missing,
-				describe(ruleID, side, "profile check", execution.PackID+"/"+execution.Check),
+				describe(rule.ID, side, "profile check", rule.PackID+"/"+execution.Check),
 			)
 		}
 
-	case style.FileCommandExecution:
+	case style.FileCommand:
 		if _, found := built.LookupFileInterpreter(execution.ToolID); !found {
-			missing = append(missing, describe(ruleID, side, "file interpreter", execution.ToolID))
+			missing = append(missing, describe(rule.ID, side, "file interpreter", execution.ToolID))
 		}
 
-	case style.RepositoryScanExecution:
-		if _, found := built.LookupRepositoryScanner(execution.PackID, execution.Scanner); !found {
+	case style.RepositoryScan:
+		if _, found := built.LookupRepositoryScanner(rule.PackID, execution.Scanner); !found {
 			missing = append(
 				missing,
 				describe(
-					ruleID,
+					rule.ID,
 					side,
 					"repository scanner",
-					execution.PackID+"/"+execution.Scanner,
+					rule.PackID+"/"+execution.Scanner,
 				),
 			)
 		}
 
 	case style.TargetCommandTemplate:
 		if _, found := built.LookupTargetCommand(
-			execution.PackID,
+			rule.PackID,
 			execution.Language,
 			execution.Action,
 		); !found {
 			missing = append(
 				missing,
 				describe(
-					ruleID,
+					rule.ID,
 					side,
 					"target command",
-					execution.PackID+"/"+execution.Language+"/"+execution.Action,
+					rule.PackID+"/"+execution.Language+"/"+execution.Action,
 				),
 			)
 		}
 
 	case style.TargetCheckTemplate:
 		if _, found := built.LookupTargetCheck(
-			execution.PackID,
+			rule.PackID,
 			execution.Language,
 			execution.Check,
 		); !found {
 			missing = append(
 				missing,
 				describe(
-					ruleID,
+					rule.ID,
 					side,
 					"target check",
-					execution.PackID+"/"+execution.Language+"/"+execution.Check,
+					rule.PackID+"/"+execution.Language+"/"+execution.Check,
 				),
 			)
 		}
 
+	case style.ExternalCheck:
+		// External checks are self-describing and resolve through the flat external driver; they
+		// have no Pack-local runtime binding to verify.
+		return nil
+
 	default:
 		missing = append(
 			missing,
-			describe(ruleID, side, "unknown template", fmt.Sprintf("%T", template)),
+			describe(rule.ID, side, "unknown template", fmt.Sprintf("%T", template)),
 		)
 	}
 

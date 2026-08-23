@@ -75,7 +75,7 @@ func TestCurrentProfileRulesReferenceRequirements(t *testing.T) {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	for _, rule := range compiled.Effective.Rules {
+	for _, rule := range compiled.Rules {
 		if len(rule.RequirementIDs) == 0 {
 			t.Fatalf("rule %q must reference at least one STYLE.md requirement", rule.ID)
 		}

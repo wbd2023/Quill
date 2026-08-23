@@ -3,7 +3,7 @@ package pack
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -15,15 +15,15 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		Rules: []style.RuleDefinition{
 			{
 				ID: "custom/rule",
-				Check: style.FileCommandExecution{
+				Check: style.FileCommand{
 					Arguments: []string{"-w"},
 				},
 			},
 		},
-		FileSets: policy.FileSets{
+		FileSets: profile.FileSets{
 			{
 				Name: "source",
-				Include: policy.FileSetInclude{
+				Include: profile.FileSetInclude{
 					Extensions: []string{".go"},
 				},
 			},
@@ -34,7 +34,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 	clone.ToolIDs[0] = "changed"
 	clone.FileSets[0].Include.Extensions[0] = ".txt"
 
-	execution := clone.Rules[0].Check.(style.FileCommandExecution)
+	execution := clone.Rules[0].Check.(style.FileCommand)
 	execution.Arguments[0] = "-changed"
 
 	if got := original.ToolIDs[0]; got != "tool" {
@@ -45,7 +45,7 @@ func TestCloneDefinitionReturnsIndependentCopy(t *testing.T) {
 		t.Fatalf("original file set extension = %q, want .go", got)
 	}
 
-	execution = original.Rules[0].Check.(style.FileCommandExecution)
+	execution = original.Rules[0].Check.(style.FileCommand)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("original rule argument = %q, want -w", got)
 	}

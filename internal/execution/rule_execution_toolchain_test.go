@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
@@ -12,14 +12,14 @@ import (
 func TestRunRuleDispatchesToolchainJobWithInvalidTool(t *testing.T) {
 	rule := style.Rule{
 		ID: "toolchain/health",
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: []string{"go"},
 		},
 	}
 	run := NewRunContext(
 		t.TempDir(),
 		style.Scope("all"),
-		policy.Profile{},
+		profile.Profile{},
 		style.Plan{},
 		nil,
 		nil,
@@ -37,6 +37,7 @@ func TestRunRuleDispatchesToolchainJobWithInvalidTool(t *testing.T) {
 		Toolchain: func(
 			_ context.Context,
 			_ RunContext,
+			_ style.Rule,
 			_ style.Job,
 			_ toolchain.StatusMap,
 		) (style.ExecutionResult, error) {

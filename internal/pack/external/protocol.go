@@ -20,7 +20,7 @@ type Request struct {
 	CheckID        string         `json:"check_id"`
 	Scope          string         `json:"scope"`
 	Files          []string       `json:"files"`
-	Configuration  map[string]any `json:"configuration"`
+	Policy         map[string]any `json:"policy"`
 }
 
 // EncodeRequest marshals request as the standard-input payload.

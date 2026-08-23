@@ -32,15 +32,15 @@ func TestCompileResolvesCurrentProfileEnabledPacks(t *testing.T) {
 		t.Fatalf("Compile: %v", err)
 	}
 
-	if len(compiled.Effective.Rules) != len(config.Rules) {
+	if len(compiled.Rules) != len(config.Rules) {
 		t.Fatalf(
-			"expected %d effective rules, got %d",
+			"expected %d compiled rules, got %d",
 			len(config.Rules),
-			len(compiled.Effective.Rules),
+			len(compiled.Rules),
 		)
 	}
 
-	if _, found := compiled.Profile.FileSets.Lookup("line_length"); !found {
-		t.Fatal("expected compiled profile to include Text Pack default file sets")
+	if _, found := config.FileSets.Lookup("line_length"); !found {
+		t.Fatal("expected resolved profile to include Text Pack default file sets")
 	}
 }

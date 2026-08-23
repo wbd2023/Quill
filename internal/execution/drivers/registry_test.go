@@ -37,13 +37,13 @@ func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
 func driverForDetail(detail style.Template, set execution.DriverSet) (driver execution.Driver) {
 	switch detail.(type) {
 
-	case style.ToolchainExecution:
+	case style.ToolchainCheck:
 		return set.Toolchain
 
-	case style.ProfileExecution:
+	case style.ProfileCheck:
 		return set.Profile
 
-	case style.FileCommandExecution:
+	case style.FileCommand:
 		return set.FileCommand
 
 	case style.TargetCommandTemplate:
@@ -52,8 +52,11 @@ func driverForDetail(detail style.Template, set execution.DriverSet) (driver exe
 	case style.TargetCheckTemplate:
 		return set.TargetCheck
 
-	case style.RepositoryScanExecution:
+	case style.RepositoryScan:
 		return set.RepositoryScan
+
+	case style.ExternalCheck:
+		return set.ExternalCheck
 
 	default:
 		return nil

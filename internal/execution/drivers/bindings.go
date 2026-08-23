@@ -1,11 +1,9 @@
 package drivers
 
-import "github.com/wbd2023/quill/internal/style"
-
 // Bindings is the aggregate of every shipped runtime binding. Repository scanners, Profile checks,
 // target commands, and target checks are keyed by Pack-qualified identity; file interpreters stay
-// keyed by global Tool ID. Bindings satisfies style.RuntimeBindings so the completeness validation
-// can verify every active execution resolves to exactly one registered binding.
+// keyed by global Tool ID. Validate walks a compiled Plan and asks Bindings whether every active
+// execution resolves to exactly one registered binding.
 type Bindings struct {
 	repositoryScanners RepositoryScanners
 	targetCommands     TargetCommands
@@ -13,9 +11,6 @@ type Bindings struct {
 	profileChecks      ProfileChecks
 	fileInterpreters   FileInterpreters
 }
-
-// Compile-time assertion that Bindings satisfies the Pack-qualified runtime binding contract.
-var _ style.RuntimeBindings = Bindings{}
 
 // NewBindings new bindings.
 func NewBindings() (bindings Bindings) {

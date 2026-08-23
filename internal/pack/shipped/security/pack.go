@@ -23,7 +23,7 @@ func Pack() (definition pack.Definition) {
 				ID:    "security/secrets",
 				Name:  "Committed secrets",
 				Group: ruleGroupSecurity,
-				Check: style.RepositoryScanExecution{
+				Check: style.RepositoryScan{
 					Scanner: ScannerSecrets,
 				},
 			},

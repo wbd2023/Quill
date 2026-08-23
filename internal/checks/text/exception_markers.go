@@ -3,14 +3,14 @@ package text
 import (
 	"github.com/wbd2023/quill/internal/filewalk"
 	"github.com/wbd2023/quill/internal/markers"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
 // CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers(
 	repoRoot string,
-	repository policy.RepositoryConfig,
+	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectFiles(

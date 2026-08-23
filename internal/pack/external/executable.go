@@ -49,8 +49,11 @@ func ResolveExecutable(packDirectory string, command string) (resolved string, e
 	if err != nil {
 		return "", fmt.Errorf("pack runtime executable %q: %w", command, err)
 	}
-	if info.IsDir() {
-		return "", fmt.Errorf("pack runtime command %q resolves to a directory", command)
+	if !info.Mode().IsRegular() {
+		return "", fmt.Errorf(
+			"pack runtime command %q must resolve to an executable regular file",
+			command,
+		)
 	}
 
 	if runtime.GOOS != "windows" && info.Mode()&0o111 == 0 {

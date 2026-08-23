@@ -6,10 +6,10 @@ import (
 )
 
 // WriteCheck writes a check result in the requested format. In JSON mode it writes the full
-// machine envelope tagged with command.
+// machine envelope identified by metadata.
 func WriteCheck(
 	writer io.Writer,
-	command string,
+	metadata EnvelopeMetadata,
 	format OutputFormat,
 	view CheckView,
 	verbose bool,
@@ -18,7 +18,7 @@ func WriteCheck(
 	case FormatText:
 		return writeCheckText(writer, view, verbose)
 	case FormatJSON:
-		return writeCheckJSON(writer, command, view)
+		return writeCheckJSON(writer, metadata, view)
 	default:
 		return summary, fmt.Errorf("unsupported output format %q", format)
 	}

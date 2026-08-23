@@ -15,26 +15,25 @@ func repositoryScanDriver(scanners RepositoryScanners) (driver execution.Driver)
 	return func(
 		ctx context.Context,
 		context execution.RunContext,
+		rule style.Rule,
 		job style.Job,
 		_ toolchain.StatusMap,
 	) (result style.ExecutionResult, err error) {
-		execution, found := job.(style.RepositoryScanExecution)
-		if !found {
+		scan, ok := job.(style.RepositoryScan)
+		if !ok {
 			return style.ExecutionResult{},
-				errors.New("repository-scan driver received empty job")
+				errors.New("repository-scan driver received unsupported execution job")
 		}
 
-		scanner, found := scanners.Lookup(execution.PackID, execution.Scanner)
+		scanner, found := scanners.Lookup(rule.PackID, scan.Scanner)
 		if !found {
 			return style.ExecutionResult{}, fmt.Errorf(
 				"unknown repository scanner %q for pack %q",
-				execution.Scanner,
-				execution.PackID,
+				scan.Scanner,
+				rule.PackID,
 			)
 		}
 
-		result, err = scanner(ctx, context, execution)
-		result.PackID = execution.PackID
-		return result, err
+		return scanner(ctx, context, scan)
 	}
 }

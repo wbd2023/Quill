@@ -3,7 +3,7 @@ package pack
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
@@ -19,7 +19,7 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 				{
 					ID:   "duplicate",
 					Name: "first",
-					Check: style.RepositoryScanExecution{
+					Check: style.RepositoryScan{
 						Scanner: "test",
 					},
 				},
@@ -32,7 +32,7 @@ func TestRegistryRejectsDuplicateRuleIDs(t *testing.T) {
 				{
 					ID:   "duplicate",
 					Name: "second",
-					Check: style.RepositoryScanExecution{
+					Check: style.RepositoryScan{
 						Scanner: "test",
 					},
 				},
@@ -72,14 +72,14 @@ func TestRegistryRejectsDuplicatePackFileSets(t *testing.T) {
 		{
 			ID:   "one",
 			Name: "one",
-			FileSets: policy.FileSets{
+			FileSets: profile.FileSets{
 				{Name: "source"},
 			},
 		},
 		{
 			ID:   "two",
 			Name: "two",
-			FileSets: policy.FileSets{
+			FileSets: profile.FileSets{
 				{Name: "source"},
 			},
 		},
@@ -102,7 +102,7 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 				{
 					ID:   "custom/rule",
 					Name: "Custom rule",
-					Check: style.FileCommandExecution{
+					Check: style.FileCommand{
 						Arguments: []string{"-w"},
 					},
 				},
@@ -114,11 +114,11 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 	}
 
 	rules := registry.Rules()
-	execution := rules[0].Check.(style.FileCommandExecution)
+	execution := rules[0].Check.(style.FileCommand)
 	execution.Arguments[0] = "-changed"
 
 	rules = registry.Rules()
-	execution = rules[0].Check.(style.FileCommandExecution)
+	execution = rules[0].Check.(style.FileCommand)
 	if got := execution.Arguments[0]; got != "-w" {
 		t.Fatalf("registry rule argument = %q, want -w", got)
 	}
@@ -149,6 +149,75 @@ func TestCatalogRejectsBlankToolName(t *testing.T) {
 	}
 }
 
+func TestCatalogRejectsBlankPackIdentity(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		pack Definition
+	}{
+		{name: "blank ID", pack: Definition{ID: " ", Name: "Name"}},
+		{name: "reserved ID", pack: Definition{ID: profile.EnabledPacksKey, Name: "Name"}},
+		{name: "blank name", pack: Definition{ID: "pack", Name: "\t"}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			if _, err := NewCatalog(nil, test.pack).Registry(nil); err == nil {
+				t.Fatal("expected Pack identity validation error")
+			}
+		})
+	}
+}
+
+func TestCatalogRejectsBlankRuleID(t *testing.T) {
+	t.Parallel()
+
+	pack := Definition{
+		ID:   "pack",
+		Name: "Pack",
+		Rules: []style.RuleDefinition{{
+			ID:    " ",
+			Name:  "Rule",
+			Check: style.RepositoryScan{Scanner: "test"},
+		}},
+	}
+	if _, err := NewCatalog(nil, pack).Registry(nil); err == nil {
+		t.Fatal("expected blank Rule ID validation error")
+	}
+}
+
+func TestCatalogAcceptsRuleIDsOutsidePackNamespaces(t *testing.T) {
+	t.Parallel()
+
+	packs := []Definition{
+		{
+			ID:   "project",
+			Name: "Project",
+			Rules: []style.RuleDefinition{{
+				ID:    "readme",
+				Name:  "README",
+				Check: style.RepositoryScan{Scanner: "test"},
+			}},
+		},
+		{
+			ID:   "company",
+			Name: "Company",
+			Rules: []style.RuleDefinition{{
+				ID:    "architecture/no-direct-database-access",
+				Name:  "No direct database access",
+				Check: style.RepositoryScan{Scanner: "test"},
+			}},
+		},
+	}
+
+	if _, err := NewCatalog(nil, packs...).Registry(nil); err != nil {
+		t.Fatalf("Registry: %v", err)
+	}
+}
+
 func TestRegistryRejectsUnknownToolReference(t *testing.T) {
 	tools := []toolchain.Capability{
 		{ID: "go", Name: "Go", Command: "go"},
@@ -162,7 +231,7 @@ func TestRegistryRejectsUnknownToolReference(t *testing.T) {
 			{
 				ID:   "custom/rule",
 				Name: "Custom rule",
-				Check: style.ToolchainExecution{
+				Check: style.ToolchainCheck{
 					ToolIDs: []string{"go", "ghost"},
 				},
 			},
@@ -188,7 +257,7 @@ func TestRegistryResolvesSharedToolOnce(t *testing.T) {
 				{
 					ID:    "alpha/rule",
 					Name:  "Alpha rule",
-					Check: style.ToolchainExecution{ToolIDs: []string{"go"}},
+					Check: style.ToolchainCheck{ToolIDs: []string{"go"}},
 				},
 			},
 		},
@@ -200,7 +269,7 @@ func TestRegistryResolvesSharedToolOnce(t *testing.T) {
 				{
 					ID:    "beta/rule",
 					Name:  "Beta rule",
-					Check: style.ToolchainExecution{ToolIDs: []string{"go"}},
+					Check: style.ToolchainCheck{ToolIDs: []string{"go"}},
 				},
 			},
 		},
@@ -236,7 +305,7 @@ func TestRegistryRejectsCrossPackToolReference(t *testing.T) {
 				ID:    "alpha/versions",
 				Name:  "Alpha versions",
 				Group: "project",
-				Check: style.ToolchainExecution{ToolIDs: []string{"go"}},
+				Check: style.ToolchainCheck{ToolIDs: []string{"go"}},
 			},
 		},
 	}
@@ -250,7 +319,7 @@ func TestRegistryRejectsCrossPackToolReference(t *testing.T) {
 				ID:    "beta/versions",
 				Name:  "Beta versions",
 				Group: "project",
-				Check: style.ToolchainExecution{ToolIDs: []string{"go"}},
+				Check: style.ToolchainCheck{ToolIDs: []string{"go"}},
 			},
 		},
 	}
@@ -274,7 +343,7 @@ func TestRegistryAcceptsInPackToolReference(t *testing.T) {
 				ID:    "beta/versions",
 				Name:  "Beta versions",
 				Group: "project",
-				Check: style.ToolchainExecution{ToolIDs: []string{"go"}},
+				Check: style.ToolchainCheck{ToolIDs: []string{"go"}},
 			},
 		},
 	}
@@ -301,13 +370,14 @@ func TestRegistryStampsPackIDOntoRules(t *testing.T) {
 		t.Fatalf("rule PackID = %q, want provenance", got)
 	}
 
-	execution, ok := rules[0].Check.(style.RepositoryScanExecution)
+	execution, ok := rules[0].Check.(style.RepositoryScan)
 	if !ok {
-		t.Fatalf("expected RepositoryScanExecution, got %T", rules[0].Check)
+		t.Fatalf("expected RepositoryScan, got %T", rules[0].Check)
 	}
 
-	if got := execution.PackID; got != "provenance" {
-		t.Fatalf("execution PackID = %q, want provenance", got)
+	// Execution values carry no Pack identity; provenance is stamped onto the RuleDefinition only.
+	if got := execution.Scanner; got != "test" {
+		t.Fatalf("execution Scanner = %q, want test", got)
 	}
 }
 
@@ -328,7 +398,7 @@ func TestRegistryToolCapabilitiesAreDefensiveCopies(t *testing.T) {
 				ID:    "custom/rule",
 				Name:  "Custom rule",
 				Group: "external_tools",
-				Check: style.ToolchainExecution{ToolIDs: []string{"shellcheck"}},
+				Check: style.ToolchainCheck{ToolIDs: []string{"shellcheck"}},
 			},
 		},
 	}
@@ -375,10 +445,10 @@ func TestCatalogPacksReturnIndependentCopies(t *testing.T) {
 	catalog := NewCatalog(nil, Definition{
 		ID:   "custom",
 		Name: "Custom",
-		FileSets: policy.FileSets{
+		FileSets: profile.FileSets{
 			{
 				Name: "source",
-				Include: policy.FileSetInclude{
+				Include: profile.FileSetInclude{
 					Extensions: []string{".go"},
 				},
 			},
@@ -422,7 +492,7 @@ func testPack(id string) (definition Definition) {
 			{
 				ID:   id + "/rule",
 				Name: id + " rule",
-				Check: style.RepositoryScanExecution{
+				Check: style.RepositoryScan{
 					Scanner: "test",
 				},
 			},

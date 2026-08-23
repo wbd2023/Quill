@@ -1,12 +1,21 @@
 package profile
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
-)
+// PathRoles maps profile-owned role names to path patterns.
+type PathRoles map[string][]string
 
-func validatePathRoles(paths policy.PathRoles) (err error) {
+// LookupPatterns returns a defensive copy of the patterns for the named path role.
+func (p PathRoles) LookupPatterns(name string) (patterns []string) {
+	values, found := p[name]
+	if !found {
+		return nil
+	}
+
+	return append([]string{}, values...)
+}
+
+func validatePathRoles(paths PathRoles) (err error) {
 	for role, patterns := range paths {
 		if isBlank(role) {
 			return fmt.Errorf("path_roles contains an empty path role")

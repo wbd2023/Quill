@@ -2,76 +2,76 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
-	"strings"
 
+	"github.com/wbd2023/quill/internal/engine"
 	"github.com/wbd2023/quill/internal/report"
 )
 
-func (tool Tool) writeUsageError(usage string, err error) {
+func (r Runner) writeUsageError(usage string, err error) {
 	if err != nil {
-		_, _ = fmt.Fprintln(tool.stderr, err)
-		_, _ = fmt.Fprintln(tool.stderr)
+		_, _ = fmt.Fprintln(r.stderr, err)
+		_, _ = fmt.Fprintln(r.stderr)
 	}
 
-	_, _ = io.WriteString(tool.stderr, usage)
+	_, _ = io.WriteString(r.stderr, usage)
 }
 
-func (tool Tool) writeError(err error) {
-	_, _ = fmt.Fprintln(tool.stderr, err)
+func (r Runner) writeError(err error) {
+	_, _ = fmt.Fprintln(r.stderr, err)
 }
 
-func (tool Tool) writeCommandOutput(output string) {
-	trimmed := strings.TrimSpace(output)
-	if trimmed == "" {
-		return
-	}
-
-	_, _ = fmt.Fprintln(tool.stderr, trimmed)
+func (r Runner) envelopeMetadata(command string) (metadata report.EnvelopeMetadata) {
+	return report.EnvelopeMetadata{Command: command, QuillVersion: r.version}
 }
 
-// reportCommandError renders an executed command's runtime error. In machine mode it writes a
-// stable error envelope to stdout. Only a cancelled operation context receives the cancelled code;
-// other errors, including child command timeouts, are operation_failed. It always returns exit code
-// 1. In text mode it writes the error to stderr.
-func (tool Tool) reportCommandError(
-	operationContext context.Context,
+// reportCommandError renders an executed command's error. Machine output distinguishes semantic
+// argument errors, cancellation returned by the operation, and operational failures. It always
+// returns the corresponding conventional exit status. Text output writes only the error.
+func (r Runner) reportCommandError(
 	command string,
 	format report.OutputFormat,
 	err error,
 ) (exitCode int) {
 	if format == report.FormatJSON {
-		code := report.ErrorCodeOperationFailed
-		if operationContext.Err() != nil {
-			code = report.ErrorCodeCancelled
+		r.writeMachineErrorEnvelope(command, errorCode(err), err)
+		if isArgumentError(err) {
+			return usageExitCode
 		}
-		tool.writeMachineErrorEnvelope(command, code, err)
 		return 1
 	}
 
-	tool.writeError(err)
+	r.writeError(err)
+	if isArgumentError(err) {
+		return usageExitCode
+	}
 	return 1
+}
+
+func errorCode(err error) (code string) {
+	if isArgumentError(err) {
+		return report.ErrorCodeInvalidArgument
+	}
+	if errors.Is(err, context.Canceled) {
+		return report.ErrorCodeCancelled
+	}
+	return report.ErrorCodeOperationFailed
+}
+
+func isArgumentError(err error) (isArgument bool) {
+	var argumentError *engine.ArgumentError
+	return errors.As(err, &argumentError)
 }
 
 // writeMachineErrorEnvelope writes one error envelope to stdout. It must be the only stdout
 // content in machine mode.
-func (tool Tool) writeMachineErrorEnvelope(command string, code string, err error) {
+func (r Runner) writeMachineErrorEnvelope(command string, code string, err error) {
 	if encodeErr := report.WriteEnvelope(
-		tool.stdout, report.NewErrorEnvelope(command, code, err.Error()),
+		r.stdout,
+		report.NewErrorEnvelope(r.envelopeMetadata(command), code, err.Error()),
 	); encodeErr != nil {
-		_, _ = fmt.Fprintln(tool.stderr, encodeErr)
+		_, _ = fmt.Fprintln(r.stderr, encodeErr)
 	}
-}
-
-// renderToolchainStatus writes a toolchain inspection in the requested format. In JSON mode it
-// writes the full machine envelope tagged with command (shared by doctor and install).
-func renderToolchainStatus(
-	writer io.Writer,
-	command string,
-	format report.OutputFormat,
-	result report.ToolchainResult,
-) (allValid bool, err error) {
-	view := report.NewToolchainView(result)
-	return report.WriteToolchain(writer, command, format, view)
 }

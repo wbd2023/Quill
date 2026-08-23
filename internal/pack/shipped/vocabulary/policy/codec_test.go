@@ -7,13 +7,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
-func TestDecodeConfigReadsVocabularyPackConfig(t *testing.T) {
+func TestDecodeConfigReadsVocabularyPackPolicy(t *testing.T) {
 	t.Parallel()
 
-	config, err := vocabularypolicy.DecodeConfig(corepolicy.PackConfig{
+	config, err := vocabularypolicy.DecodeConfig(profile.PackPolicy{
 		"go": map[string]any{
 			"type_suffixes": map[string]any{
 				"Repository": []any{"Store"},
@@ -55,7 +55,7 @@ func TestDecodeConfigReadsEncodedConfig(t *testing.T) {
 func TestDecodeConfigRejectsUnknownFields(t *testing.T) {
 	t.Parallel()
 
-	_, err := vocabularypolicy.DecodeConfig(corepolicy.PackConfig{
+	_, err := vocabularypolicy.DecodeConfig(profile.PackPolicy{
 		"go": map[string]any{
 			"type_suffixes": map[string]any{
 				"Repository": []any{"Store"},

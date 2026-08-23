@@ -3,7 +3,6 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 )
@@ -13,19 +12,19 @@ func TestCheckRejectsNegativeToolExecutionLimits(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		adjust func(*policy.PinnedTool)
+		adjust func(*profile.PinnedTool)
 		error  string
 	}{
 		{
 			name: "negative timeout",
-			adjust: func(tool *policy.PinnedTool) {
+			adjust: func(tool *profile.PinnedTool) {
 				tool.TimeoutSeconds = -1
 			},
 			error: "timeout_seconds",
 		},
 		{
 			name: "negative output limit",
-			adjust: func(tool *policy.PinnedTool) {
+			adjust: func(tool *profile.PinnedTool) {
 				tool.OutputLimitBytes = -1
 			},
 			error: "output_limit_bytes",

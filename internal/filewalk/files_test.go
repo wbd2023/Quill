@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/testutil"
 	"github.com/wbd2023/quill/internal/testutil/profiles"
@@ -215,7 +215,7 @@ func requirePaths(t *testing.T, actual []string, expected []string) {
 	}
 }
 
-func walkConfig(repository policy.RepositoryConfig) (config WalkConfig) {
+func walkConfig(repository profile.RepositoryConfig) (config WalkConfig) {
 	return WalkConfig{
 		ExcludedDirectories: repository.ExcludedDirectories,
 		GeneratedMarker:     repository.GeneratedMarker,

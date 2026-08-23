@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wbd2023/quill/internal/engine"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
@@ -14,21 +15,27 @@ import (
 func TestWriteToolchainText(t *testing.T) {
 	var buffer bytes.Buffer
 
-	allValid, err := WriteToolchain(&buffer, "doctor", FormatText, NewToolchainView(ToolchainResult{
-		Statuses: []toolchain.Status{
-			{
-				Tool:    toolchain.Tool{Name: "Go"},
-				Version: "1.24.5",
-				Valid:   true,
-			},
-			{
-				Tool:    toolchain.Tool{Name: "markdownlint"},
-				Version: "0.48.0",
-				Valid:   false,
-				Issue:   "requires pinned version 0.45.0",
+	allValid, err := WriteToolchain(
+		&buffer,
+		testEnvelopeMetadata("doctor"),
+		FormatText,
+		ToolchainResult{
+			AllValid: false,
+			Statuses: []toolchain.Status{
+				{
+					Tool:    toolchain.Tool{Name: "Go"},
+					Version: "1.24.5",
+					Valid:   true,
+				},
+				{
+					Tool:    toolchain.Tool{Name: "markdownlint"},
+					Version: "0.48.0",
+					Valid:   false,
+					Issue:   "requires pinned version 0.45.0",
+				},
 			},
 		},
-	}))
+	)
 	if err != nil {
 		t.Fatalf("WriteToolchain: %v", err)
 	}
@@ -46,7 +53,8 @@ func TestWriteToolchainText(t *testing.T) {
 func TestWriteToolchainJSON(t *testing.T) {
 	var buffer bytes.Buffer
 
-	view := NewToolchainView(ToolchainResult{
+	result := ToolchainResult{
+		AllValid: false,
 		Statuses: []toolchain.Status{
 			{
 				Tool:  toolchain.Tool{Name: "Go"},
@@ -58,8 +66,8 @@ func TestWriteToolchainJSON(t *testing.T) {
 				Issue: "requires pinned version 0.45.0",
 			},
 		},
-	})
-	allValid, err := WriteToolchain(&buffer, "doctor", FormatJSON, view)
+	}
+	allValid, err := WriteToolchain(&buffer, testEnvelopeMetadata("doctor"), FormatJSON, result)
 	if err != nil {
 		t.Fatalf("WriteToolchain: %v", err)
 	}
@@ -99,5 +107,24 @@ func TestWriteToolchainJSON(t *testing.T) {
 		if strings.Contains(buffer.String(), forbidden) {
 			t.Fatalf("toolchain JSON leaked internal field %q: %s", forbidden, buffer.String())
 		}
+	}
+}
+
+func TestNewToolchainResultPreservesEngineValidity(t *testing.T) {
+	t.Parallel()
+
+	inspection := engine.ToolchainInspection{
+		AllValid: false,
+		Statuses: []toolchain.Status{
+			{
+				Tool:  toolchain.Tool{Name: "Go"},
+				Valid: true,
+			},
+		},
+	}
+
+	result := NewToolchainResult(inspection)
+	if result.AllValid {
+		t.Fatal("expected engine toolchain validity to remain false")
 	}
 }

@@ -27,9 +27,9 @@ func Register(bindings *drivers.Bindings) {
 func scanVocabulary(
 	_ context.Context,
 	context execution.RunContext,
-	_ style.RepositoryScanExecution,
+	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	config, err := decodeVocabularyPackConfig(context, vocabulary.PackID)
+	config, err := decodeVocabularyPackPolicy(context, vocabulary.PackID)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
@@ -42,18 +42,18 @@ func scanVocabulary(
 	)
 }
 
-func decodeVocabularyPackConfig(
+func decodeVocabularyPackPolicy(
 	context execution.RunContext,
 	packID string,
 ) (config vocabularypolicy.Config, err error) {
-	pack, found := context.Profile.PackConfigs.Lookup(packID)
+	pack, found := context.Profile.PackPolicies.Lookup(packID)
 	if !found {
-		return vocabularypolicy.Config{}, errMissingPackConfig(packID)
+		return vocabularypolicy.Config{}, errMissingPackPolicy(packID)
 	}
 
 	return vocabularypolicy.DecodeConfig(pack)
 }
 
-func errMissingPackConfig(packID string) (err error) {
-	return fmt.Errorf("packs.%s must be configured", packID)
+func errMissingPackPolicy(packID string) (err error) {
+	return fmt.Errorf("packs.%s policy is required", packID)
 }

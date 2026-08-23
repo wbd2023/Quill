@@ -1,10 +1,6 @@
 package profile
 
-import (
-	"fmt"
-
-	"github.com/wbd2023/quill/internal/policy"
-)
+import "fmt"
 
 // indexToolIDs builds a set of valid tool IDs for reference checking.
 func indexToolIDs(toolIDs []string) (available map[string]bool) {
@@ -17,7 +13,7 @@ func indexToolIDs(toolIDs []string) (available map[string]bool) {
 
 // validatePins checks that every pinned tool references a real definition and every definition
 // has a pin.
-func validatePins(config policy.Profile, available map[string]bool) (err error) {
+func validatePins(config Profile, available map[string]bool) (err error) {
 	for _, pinnedTool := range config.Tools {
 		if !available[pinnedTool.ID] {
 			return fmt.Errorf(

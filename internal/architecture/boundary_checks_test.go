@@ -43,7 +43,6 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 			name:      "bash checks use filewalk directly",
 			directory: "internal/checks/bash",
 			forbidden: []string{
-				"internal/profile",
 				"internal/checks/text",
 			},
 		},
@@ -55,7 +54,6 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 				"internal/cli",
 				"internal/coverage",
 				"internal/installer",
-				"internal/profile",
 				"internal/pack/shipped/bash",
 				"internal/pack/shipped/golang/bindings",
 				"internal/pack/shipped/markdown",
@@ -69,27 +67,6 @@ func checkBoundaryCases() (testCases []importBoundaryCase) {
 				"internal/workspace",
 				"internal/checks/text",
 				"internal/styleguide",
-			},
-		},
-		{
-			name:      "text checks do not import profile",
-			directory: "internal/checks/text",
-			forbidden: []string{
-				"internal/profile",
-			},
-		},
-		{
-			name:      "security checks do not import profile",
-			directory: "internal/checks/security",
-			forbidden: []string{
-				"internal/profile",
-			},
-		},
-		{
-			name:      "vocabulary checks do not import profile",
-			directory: "internal/checks/vocabulary",
-			forbidden: []string{
-				"internal/profile",
 			},
 		},
 	}
@@ -107,7 +84,6 @@ func packPolicyBoundaryCase(packID string) (testCase importBoundaryCase) {
 			"internal/filewalk",
 			"internal/installer",
 			"internal/process",
-			"internal/profile",
 			"internal/report",
 			"internal/style",
 			"internal/styleguide",

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -17,6 +18,7 @@ import (
 // is kept raw so command-specific payloads can be inspected independently.
 type decodedEnvelope struct {
 	SchemaVersion int             `json:"schema_version"`
+	QuillVersion  string          `json:"quill_version"`
 	Command       string          `json:"command"`
 	Status        string          `json:"status"`
 	Result        json.RawMessage `json:"result,omitempty"`
@@ -61,7 +63,7 @@ func TestMachineDoctorEmitsDecodedEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"doctor", "--format", "json", "--repo-root", testutil.RepositoryRoot(t),
+		"doctor", "--format", "json", "--repository-root", testutil.RepositoryRoot(t),
 	})
 
 	// doctor completes regardless of tool validity; an invalid toolchain still reports status ok
@@ -86,7 +88,8 @@ func TestMachineCheckInvalidArgumentEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"check", "--format", "json", "--mode", "invalid", "--repo-root", testutil.RepositoryRoot(t),
+		"check", "--format", "json", "--mode", "invalid",
+		"--repository-root", testutil.RepositoryRoot(t),
 	})
 	if exitCode != usageExitCode {
 		t.Fatalf("expected usage exit code %d for invalid argument, got %d",
@@ -114,7 +117,7 @@ func TestMachineFixInvalidArgumentEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"fix", "--format", "json", "unexpected", "--repo-root", testutil.RepositoryRoot(t),
+		"fix", "--format", "json", "unexpected", "--repository-root", testutil.RepositoryRoot(t),
 	})
 	if exitCode != usageExitCode {
 		t.Fatalf("expected usage exit code %d for positional argument, got %d",
@@ -128,7 +131,7 @@ func TestMachineCoverageOperationFailedEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"coverage", "--format", "json", "--repo-root", t.TempDir(),
+		"coverage", "--format", "json", "--repository-root", t.TempDir(),
 	})
 	if exitCode != 1 {
 		t.Fatalf("expected exit 1 for operation failure, got %d", exitCode)
@@ -137,11 +140,23 @@ func TestMachineCoverageOperationFailedEnvelope(t *testing.T) {
 	assertErrorEnvelope(t, stdout.Bytes(), "coverage", report.ErrorCodeOperationFailed)
 }
 
+func TestMachineAutoDetectedMissingRootIsOperationFailed(t *testing.T) {
+	t.Chdir(t.TempDir())
+
+	tool, stdout, _ := newMachineCLI()
+	exitCode := tool.Run(context.Background(), []string{"check", "--format", "json"})
+	if exitCode != 1 {
+		t.Fatalf("expected operation exit 1, got %d", exitCode)
+	}
+
+	assertErrorEnvelope(t, stdout.Bytes(), "check", report.ErrorCodeOperationFailed)
+}
+
 func TestMachineInstallOperationFailedEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"install", "--format", "json", "--repo-root", t.TempDir(),
+		"install", "--format", "json", "--repository-root", t.TempDir(),
 	})
 	if exitCode != 1 {
 		t.Fatalf("expected exit 1 for operation failure, got %d", exitCode)
@@ -154,7 +169,7 @@ func TestMachineLockOperationFailedEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.Run(context.Background(), []string{
-		"lock", "--format", "json", "--repo-root", t.TempDir(),
+		"lock", "--format", "json", "--repository-root", t.TempDir(),
 	})
 	if exitCode != 1 {
 		t.Fatalf("expected exit 1 for operation failure, got %d", exitCode)
@@ -167,7 +182,6 @@ func TestMachineCommandTimeoutEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
 	exitCode := tool.reportCommandError(
-		context.Background(),
 		"check",
 		report.FormatJSON,
 		context.DeadlineExceeded,
@@ -177,6 +191,21 @@ func TestMachineCommandTimeoutEnvelope(t *testing.T) {
 	}
 
 	assertErrorEnvelope(t, stdout.Bytes(), "check", report.ErrorCodeOperationFailed)
+}
+
+func TestMachineCommandErrorUsesReturnedCancellation(t *testing.T) {
+	tool, stdout, _ := newMachineCLI()
+
+	exitCode := tool.reportCommandError(
+		"check",
+		report.FormatJSON,
+		fmt.Errorf("operation: %w", context.Canceled),
+	)
+	if exitCode != 1 {
+		t.Fatalf("expected exit 1 for cancellation, got %d", exitCode)
+	}
+
+	assertErrorEnvelope(t, stdout.Bytes(), "check", report.ErrorCodeCancelled)
 }
 
 /* ---------------------------------------- Cancellation ---------------------------------------- */
@@ -202,7 +231,7 @@ func TestMachineCheckCancelledEnvelope(t *testing.T) {
 	cancel()
 
 	exitCode := tool.Run(operationContext, []string{
-		"check", "--format", "json", "--repo-root", testutil.RepositoryRoot(t),
+		"check", "--format", "json", "--repository-root", testutil.RepositoryRoot(t),
 	})
 	if exitCode != 1 {
 		t.Fatalf("expected exit 1 for cancelled operation, got %d", exitCode)
@@ -222,19 +251,19 @@ func TestMachineStdoutCarriesOnlyEnvelope(t *testing.T) {
 		{
 			name: "check invalid argument",
 			args: []string{"check", "--format", "json", "--mode", "invalid",
-				"--repo-root", testutil.RepositoryRoot(t)},
+				"--repository-root", testutil.RepositoryRoot(t)},
 		},
 		{
 			name: "coverage operation failed",
-			args: []string{"coverage", "--format", "json", "--repo-root", t.TempDir()},
+			args: []string{"coverage", "--format", "json", "--repository-root", t.TempDir()},
 		},
 	}
 
-	for _, command := range cases {
-		t.Run(command.name, func(t *testing.T) {
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
 			tool, stdout, stderr := newMachineCLI()
 
-			_ = tool.Run(context.Background(), command.args)
+			_ = tool.Run(context.Background(), test.args)
 
 			output := stdout.Bytes()
 			// json.Valid guarantees the entire stdout is exactly one JSON document (it rejects
@@ -250,44 +279,13 @@ func TestMachineStdoutCarriesOnlyEnvelope(t *testing.T) {
 	}
 }
 
-/* ------------------------------------- Check Machine Mode ------------------------------------- */
-
-func TestCheckMachineMode(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		name      string
-		arguments []string
-		requested bool
-	}{
-		{name: "space separated json", arguments: []string{"--format", "json"}, requested: true},
-		{name: "equals json", arguments: []string{"--format=json"}, requested: true},
-		{name: "single dash json", arguments: []string{"-format", "json"}, requested: true},
-		{name: "equals text", arguments: []string{"--format=text"}, requested: false},
-		{name: "space text", arguments: []string{"--format", "text"}, requested: false},
-		{name: "no format flag", arguments: []string{"--verbose"}, requested: false},
-		{name: "trailing flag only", arguments: []string{"--format"}, requested: false},
-	}
-
-	for _, command := range cases {
-		t.Run(command.name, func(t *testing.T) {
-			t.Parallel()
-
-			if got := checkMachineMode(command.arguments); got != command.requested {
-				t.Fatalf("checkMachineMode(%v) = %v, want %v",
-					command.arguments, got, command.requested)
-			}
-		})
-	}
-}
-
 /* ---------------------------------------- Test Harness ---------------------------------------- */
 
-func newMachineCLI() (tool Tool, stdout *bytes.Buffer, stderr *bytes.Buffer) {
+func newMachineCLI() (runner Runner, stdout *bytes.Buffer, stderr *bytes.Buffer) {
 	stdout = &bytes.Buffer{}
 	stderr = &bytes.Buffer{}
-	tool = New(stdout, stderr, "test-version")
-	return tool, stdout, stderr
+	runner = New(stdout, stderr, "test-version")
+	return runner, stdout, stderr
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
@@ -316,6 +314,10 @@ func assertResultEnvelope(
 	envelope = decodeEnvelope(t, output)
 	if envelope.SchemaVersion != report.SchemaVersion {
 		t.Fatalf("schema_version = %d, want %d", envelope.SchemaVersion, report.SchemaVersion)
+	}
+
+	if envelope.QuillVersion != "test-version" {
+		t.Fatalf("quill_version = %q, want %q", envelope.QuillVersion, "test-version")
 	}
 
 	if envelope.Command != command {
@@ -350,6 +352,10 @@ func assertErrorEnvelope(
 		t.Fatalf("schema_version = %d, want %d", envelope.SchemaVersion, report.SchemaVersion)
 	}
 
+	if envelope.QuillVersion != "test-version" {
+		t.Fatalf("quill_version = %q, want %q", envelope.QuillVersion, "test-version")
+	}
+
 	if envelope.Command != command {
 		t.Fatalf("command = %q, want %q", envelope.Command, command)
 	}
@@ -379,5 +385,5 @@ func assertErrorEnvelope(
 
 func machineCoverageArgs(t *testing.T) (arguments []string) {
 	t.Helper()
-	return []string{"coverage", "--format", "json", "--repo-root", testutil.RepositoryRoot(t)}
+	return []string{"coverage", "--format", "json", "--repository-root", testutil.RepositoryRoot(t)}
 }

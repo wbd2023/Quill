@@ -45,7 +45,7 @@ func loadPlan(t *testing.T) (plan style.Plan) {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	return compiled.Effective
+	return compiled
 }
 
 func loadCoverageReport(t *testing.T) (report Report) {

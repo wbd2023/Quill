@@ -16,9 +16,9 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 		Name:     "Text",
 		ToolIDs:  append([]string{}, toolIDs...),
 		FileSets: fileSets(),
-		Config: pack.Config{
+		Policy: pack.Policy{
 			Required: true,
-			Validate: textpolicy.ValidatePackConfig,
+			Validate: textpolicy.ValidatePackPolicy,
 		},
 		Rules: rules(),
 	}

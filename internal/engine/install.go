@@ -48,5 +48,6 @@ func (engine *Engine) Install(
 	if err != nil {
 		return result, err
 	}
+
 	return result, nil
 }

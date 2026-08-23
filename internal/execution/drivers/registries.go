@@ -15,17 +15,19 @@ import (
 type RepositoryScanner func(
 	ctx context.Context,
 	run execution.RunContext,
-	execution style.RepositoryScanExecution,
+	scan style.RepositoryScan,
 ) (result style.ExecutionResult, err error)
 
-// TargetCommand is a resolved target command.
+// TargetCommand is a bound target command. The resolved target names are carried by the Job, not
+// declared by the Pack, so the closure receives one self-contained typed value.
 type TargetCommand func(
 	ctx context.Context,
 	run execution.RunContext,
 	job style.TargetCommandJob,
 ) (result style.ExecutionResult, err error)
 
-// TargetCheck is a resolved target check.
+// TargetCheck is a bound target check. The resolved target names are carried by the Job, not
+// declared by the Pack, so the closure receives one self-contained typed value.
 type TargetCheck func(
 	ctx context.Context,
 	run execution.RunContext,
@@ -36,7 +38,7 @@ type TargetCheck func(
 type ProfileCheck func(
 	ctx context.Context,
 	run execution.RunContext,
-	execution style.ProfileExecution,
+	check style.ProfileCheck,
 ) (result style.ExecutionResult, err error)
 
 // FileInterpreter converts a tool's raw command output into style diagnostics. It owns the

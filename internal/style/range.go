@@ -43,9 +43,9 @@ func (r Range) IsUnknown() (unknown bool) {
 // VerifyRange is the diagnostic protocol-boundary check. It rejects, rather than repairs, file
 // paths and ranges that are not safe to admit into Quill's trusted diagnostic model: file must be
 // a clean repository-relative slash path with no escape, positions must be valid one-based UTF-8
-// byte locations, and a known End must not precede its Start. External Pack diagnostics must pass
-// this check at the point they cross into Quill; built-in producers construct valid ranges
-// directly.
+// byte locations, and a known End must not precede its Start. External Pack
+// diagnostics must pass this check at the point they cross into Quill; Shipped
+// diagnostic producers construct valid ranges directly.
 func VerifyRange(file string, location Range) (err error) {
 	if err = verifyFile(file); err != nil {
 		return err

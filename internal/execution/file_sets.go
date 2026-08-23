@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/wbd2023/quill/internal/filewalk"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // CollectFileSetFiles collect file set files.
@@ -42,7 +42,7 @@ func CollectFileSetFiles(context RunContext, name string) (files []string, err e
 // filtering. External Pack checks that declare no file set receive this candidate list so the Pack
 // can scope its own analysis without re-walking the repository.
 func CollectScopeFiles(context RunContext) (files []string, err error) {
-	candidates, err := collectFileSetCandidates(context, policy.FileSetConfig{})
+	candidates, err := collectFileSetCandidates(context, profile.FileSetConfig{})
 	if err != nil {
 		return nil, err
 	}

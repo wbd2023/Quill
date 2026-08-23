@@ -7,15 +7,15 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	projectpolicy "github.com/wbd2023/quill/internal/pack/shipped/project/policy"
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* ------------------------------------------ Decoding ------------------------------------------ */
 
-func TestDecodeConfigReadsProjectPackConfig(t *testing.T) {
+func TestDecodeConfigReadsProjectPackPolicy(t *testing.T) {
 	t.Parallel()
 
-	config, err := projectpolicy.DecodeConfig(corepolicy.PackConfig{
+	config, err := projectpolicy.DecodeConfig(profile.PackPolicy{
 		"commands": map[string]any{
 			"runner": "make",
 			"path":   "mk/quality.mk",
@@ -70,7 +70,7 @@ func TestDecodeConfigRejectsUnknownFields(t *testing.T) {
 func TestDecodeConfigRejectsOldQualitySurfaceKey(t *testing.T) {
 	t.Parallel()
 
-	_, err := projectpolicy.DecodeConfig(corepolicy.PackConfig{
+	_, err := projectpolicy.DecodeConfig(profile.PackPolicy{
 		"quality_surface": map[string]any{},
 	})
 	if err == nil {

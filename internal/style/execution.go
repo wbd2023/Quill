@@ -7,8 +7,10 @@ import (
 
 /* -------------------------------------- Core Abstractions ------------------------------------- */
 
-// Requirements describes what a template needs to compile into a job.
-type Requirements struct {
+// TemplateRequirements describes what a Template needs to compile into a runnable Job. It is the
+// closed query the profile compiler uses to resolve file sets and targets; drivers switch on the
+// concrete Job directly rather than reading TemplateRequirements.
+type TemplateRequirements struct {
 	ToolIDs []string
 	FileSet string
 
@@ -17,61 +19,52 @@ type Requirements struct {
 	NeedsCheckPaths bool
 }
 
-// Template is an unbound execution strategy declared by a pack. The profile compiler calls Describe
-// to inspect requirements, then Bind to produce a Job for the execution. Each Template carries the
-// PackID of the Pack that declared it so runtime binding identities stay Pack-qualified and results
-// carry provenance.
+// Template is a sealed, Pack-declared check or fix shape before Profile target binding. Each
+// closed variant describes one kind of check or fix a Pack may declare; the profile compiler binds
+// a target Template into a Job by resolving its targets. Rule and Pack provenance lives on
+// RuleDefinition and Rule, not on a Template or Job: an execution value carries only the strategy
+// a binding or driver executes.
 type Template interface {
-	isTemplate()
-	describe() (requirements Requirements)
-	bind(targets []string) (job Job)
-	stamp(packID string) (stamped Template)
+	describe() (requirements TemplateRequirements)
 }
 
-// Job is a bound execution ready for the execution.
+// Job is a Profile-compiled check or fix ready for driver dispatch. Non-target values satisfy Job
+// directly because Profile binding adds nothing to them; target Jobs are produced by their paired
+// Template's Bind method, which copies tool IDs and target names so the Job owns them independently
+// of the resolver.
 type Job interface {
-	isJob()
 	toolIDs() (ids []string)
 }
 
-// Describe returns the requirements of a template.
-func Describe(template Template) (requirements Requirements) {
+// Describe returns the compile-time requirements of a Template. It defensively clones owned slices
+// so callers cannot mutate the Template through the returned TemplateRequirements.
+func Describe(template Template) (requirements TemplateRequirements) {
 	return template.describe()
 }
 
-// Bind resolves targets into a bound job.
-func Bind(template Template, targets []string) (job Job) {
-	return template.bind(targets)
-}
-
-// ToolIDs returns the tool IDs a job requires.
+// ToolIDs returns the tool IDs a Job requires. It defensively clones the slice so callers cannot
+// mutate the Job through the returned value.
 func ToolIDs(job Job) (ids []string) {
 	return job.toolIDs()
 }
 
-// StampPackID returns a copy of template with its PackID set to packID. The Pack stamps provenance
-// onto every rule execution it declares at registry build time.
-func StampPackID(template Template, packID string) (stamped Template) {
-	return template.stamp(packID)
-}
+/* ------------------------------------- Non-Target Families ------------------------------------ */
 
-/* --------------------------------------- Execution Types -------------------------------------- */
-
-// ToolchainExecution represents a check that verifies pinned external tools are installed.
-type ToolchainExecution struct {
-	PackID  string
+// ToolchainCheck represents a check that verifies pinned external tools are installed. It is
+// runnable unchanged once a Rule supplies its policy, so it satisfies both Template and Job.
+type ToolchainCheck struct {
 	ToolIDs []string
 }
 
-// ProfileExecution represents a check that validates the profile configuration.
-type ProfileExecution struct {
-	PackID string
-	Check  string
+// ProfileCheck represents a check that validates the profile configuration. It is runnable
+// unchanged once a Rule supplies its policy, so it satisfies both Template and Job.
+type ProfileCheck struct {
+	Check string
 }
 
-// FileCommandExecution represents running a tool against files selected by a file set.
-type FileCommandExecution struct {
-	PackID  string
+// FileCommand represents running a tool against files selected by a file set. It is runnable
+// unchanged once a Rule supplies its policy, so it satisfies both Template and Job.
+type FileCommand struct {
 	ToolID  string
 	FileSet string
 
@@ -81,35 +74,50 @@ type FileCommandExecution struct {
 	ConfigFile     string
 }
 
-// RepositoryScanExecution represents a repository-wide scan over files from a file set.
-type RepositoryScanExecution struct {
-	PackID  string
+// RepositoryScan represents a repository-wide scan over files from a file set. It is runnable
+// unchanged once a Rule supplies its policy, so it satisfies both Template and Job.
+type RepositoryScan struct {
 	Scanner string
 	FileSet string
 }
 
-// TargetCommandTemplate represents running a tool against language-specific targets before target
-// resolution.
+// ExternalCheck represents an external Pack check executed as a subprocess over a file set. The
+// external protocol is check-only for this MVP: external rules carry no fix. The value is
+// self-describing: it carries the runtime executable command, the Pack directory used to resolve
+// it, and the timeout, so one flat driver runs every external Pack check without a Pack-qualified
+// binding registry. Pack and rule provenance for the external request comes from the Rule.
+type ExternalCheck struct {
+	CheckID       string
+	FileSet       string
+	PackDirectory string
+	Command       string
+	Timeout       time.Duration
+}
+
+/* -------------------------------------- Target Templates -------------------------------------- */
+
+// TargetCommandTemplate represents running a tool against language-specific targets before Profile
+// target binding. Bind resolves it into a TargetCommandJob carrying the inferred target names.
 type TargetCommandTemplate struct {
-	PackID  string
 	ToolIDs []string
 
 	Action   string
 	Language string
 }
 
-// TargetCheckTemplate represents a language-specific check before target resolution.
+// TargetCheckTemplate represents a language-specific check before Profile target binding. Bind
+// resolves it into a TargetCheckJob carrying the inferred target names.
 type TargetCheckTemplate struct {
-	PackID  string
 	ToolIDs []string
 
 	Check    string
 	Language string
 }
 
-// TargetCommandJob represents a tool run against resolved language-specific targets.
+/* ----------------------------------------- Target Jobs ---------------------------------------- */
+
+// TargetCommandJob is a bound target command: the declared shape plus the resolved target names.
 type TargetCommandJob struct {
-	PackID  string
 	ToolIDs []string
 
 	Action   string
@@ -117,9 +125,8 @@ type TargetCommandJob struct {
 	Targets  []string
 }
 
-// TargetCheckJob represents a language-specific check against resolved targets.
+// TargetCheckJob is a bound target check: the declared shape plus the resolved target names.
 type TargetCheckJob struct {
-	PackID  string
 	ToolIDs []string
 
 	Check    string
@@ -127,170 +134,102 @@ type TargetCheckJob struct {
 	Targets  []string
 }
 
-// ExternalCheckTemplate represents an external Pack check executed as a subprocess over a file set.
-// The external protocol is check-only for this MVP: external rules carry no fix job. The template
-// is self-describing: it carries the runtime executable command, the Pack directory used to
-// resolve it, and the timeout, so one flat driver runs every external Pack check without a
-// Pack-qualified binding registry. PackID is stamped by the Pack that declared the rule.
-type ExternalCheckTemplate struct {
-	PackID        string
-	RuleID        string
-	CheckID       string
-	FileSet       string
-	PackDirectory string
-	Command       string
-	Timeout       time.Duration
+/* ---------------------------------------- Phase Methods --------------------------------------- */
+
+func (check ToolchainCheck) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{ToolIDs: slices.Clone(check.ToolIDs)}
 }
 
-// ExternalCheckJob is a bound external Pack check ready for execution. It carries everything the
-// flat external driver needs to build the request and launch the subprocess.
-type ExternalCheckJob struct {
-	PackID        string
-	RuleID        string
-	CheckID       string
-	FileSet       string
-	PackDirectory string
-	Command       string
-	Timeout       time.Duration
+func (check ToolchainCheck) toolIDs() (ids []string) {
+	return slices.Clone(check.ToolIDs)
 }
 
-/* -------------------------------------- Interface Methods ------------------------------------- */
-
-func (ToolchainExecution) isTemplate()      {}
-func (ProfileExecution) isTemplate()        {}
-func (FileCommandExecution) isTemplate()    {}
-func (RepositoryScanExecution) isTemplate() {}
-func (TargetCommandTemplate) isTemplate()   {}
-func (TargetCheckTemplate) isTemplate()     {}
-func (ExternalCheckTemplate) isTemplate()   {}
-
-func (e ToolchainExecution) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
+func (check ProfileCheck) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{}
 }
 
-func (e ProfileExecution) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
+func (check ProfileCheck) toolIDs() (ids []string) {
+	return nil
 }
 
-func (e FileCommandExecution) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
-}
-
-func (e RepositoryScanExecution) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
-}
-
-func (e TargetCommandTemplate) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
-}
-
-func (e TargetCheckTemplate) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
-}
-
-func (e ExternalCheckTemplate) stamp(packID string) (stamped Template) {
-	e.PackID = packID
-	return e
-}
-
-func (ToolchainExecution) isJob()      {}
-func (ProfileExecution) isJob()        {}
-func (FileCommandExecution) isJob()    {}
-func (RepositoryScanExecution) isJob() {}
-func (TargetCommandJob) isJob()        {}
-func (TargetCheckJob) isJob()          {}
-func (ExternalCheckJob) isJob()        {}
-
-func (e ToolchainExecution) describe() (requirements Requirements) {
-	return Requirements{ToolIDs: slices.Clone(e.ToolIDs)}
-}
-
-func (ProfileExecution) describe() (requirements Requirements) {
-	return Requirements{}
-}
-
-func (e FileCommandExecution) describe() (requirements Requirements) {
+func (command FileCommand) describe() (requirements TemplateRequirements) {
 	toolIDs := []string(nil)
-	if e.ToolID != "" {
-		toolIDs = []string{e.ToolID}
+	if command.ToolID != "" {
+		toolIDs = []string{command.ToolID}
 	}
-	return Requirements{ToolIDs: toolIDs, FileSet: e.FileSet}
+	return TemplateRequirements{ToolIDs: toolIDs, FileSet: command.FileSet}
 }
 
-func (e RepositoryScanExecution) describe() (requirements Requirements) {
-	return Requirements{FileSet: e.FileSet}
+func (command FileCommand) toolIDs() (ids []string) {
+	if command.ToolID == "" {
+		return nil
+	}
+	return []string{command.ToolID}
 }
 
-func (e TargetCommandTemplate) describe() (requirements Requirements) {
-	return Requirements{
-		ToolIDs:        slices.Clone(e.ToolIDs),
+func (scan RepositoryScan) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{FileSet: scan.FileSet}
+}
+
+func (scan RepositoryScan) toolIDs() (ids []string) {
+	return nil
+}
+
+func (check ExternalCheck) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{FileSet: check.FileSet}
+}
+
+func (check ExternalCheck) toolIDs() (ids []string) {
+	return nil
+}
+
+func (template TargetCommandTemplate) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{
+		ToolIDs:        slices.Clone(template.ToolIDs),
 		NeedsTargets:   true,
-		TargetLanguage: e.Language,
+		TargetLanguage: template.Language,
 	}
 }
 
-func (e TargetCheckTemplate) describe() (requirements Requirements) {
-	return Requirements{
-		ToolIDs:         slices.Clone(e.ToolIDs),
+func (template TargetCheckTemplate) describe() (requirements TemplateRequirements) {
+	return TemplateRequirements{
+		ToolIDs:         slices.Clone(template.ToolIDs),
 		NeedsTargets:    true,
-		TargetLanguage:  e.Language,
+		TargetLanguage:  template.Language,
 		NeedsCheckPaths: true,
 	}
 }
 
-func (e ExternalCheckTemplate) describe() (requirements Requirements) {
-	return Requirements{FileSet: e.FileSet}
+func (job TargetCommandJob) toolIDs() (ids []string) {
+	return slices.Clone(job.ToolIDs)
 }
 
-func (e ToolchainExecution) bind([]string) (job Job)      { return e }
-func (e ProfileExecution) bind([]string) (job Job)        { return e }
-func (e FileCommandExecution) bind([]string) (job Job)    { return e }
-func (e RepositoryScanExecution) bind([]string) (job Job) { return e }
-
-func (e ExternalCheckTemplate) bind([]string) (job Job) {
-	return ExternalCheckJob(e)
+func (job TargetCheckJob) toolIDs() (ids []string) {
+	return slices.Clone(job.ToolIDs)
 }
 
-func (e TargetCommandTemplate) bind(targets []string) (job Job) {
+/* --------------------------------------- Target Binding --------------------------------------- */
+
+// Bind resolves a target command Template into a runnable Job by attaching the inferred target
+// names. It clones the tool IDs and target names so the returned Job owns them independently of
+// the resolver.
+func (template TargetCommandTemplate) Bind(targets []string) (job TargetCommandJob) {
 	return TargetCommandJob{
-		PackID:   e.PackID,
-		ToolIDs:  slices.Clone(e.ToolIDs),
-		Action:   e.Action,
-		Language: e.Language,
+		ToolIDs:  slices.Clone(template.ToolIDs),
+		Action:   template.Action,
+		Language: template.Language,
 		Targets:  slices.Clone(targets),
 	}
 }
 
-func (e TargetCheckTemplate) bind(targets []string) (job Job) {
+// Bind resolves a target check Template into a runnable Job by attaching the inferred target
+// names. It clones the tool IDs and target names so the returned Job owns them independently of
+// the resolver.
+func (template TargetCheckTemplate) Bind(targets []string) (job TargetCheckJob) {
 	return TargetCheckJob{
-		PackID:   e.PackID,
-		ToolIDs:  slices.Clone(e.ToolIDs),
-		Check:    e.Check,
-		Language: e.Language,
+		ToolIDs:  slices.Clone(template.ToolIDs),
+		Check:    template.Check,
+		Language: template.Language,
 		Targets:  slices.Clone(targets),
 	}
 }
-
-func (e ToolchainExecution) toolIDs() (ids []string) { return slices.Clone(e.ToolIDs) }
-
-func (ProfileExecution) toolIDs() (ids []string) { return nil }
-
-func (e FileCommandExecution) toolIDs() (ids []string) {
-	if e.ToolID == "" {
-		return nil
-	}
-	return []string{e.ToolID}
-}
-
-func (e TargetCommandJob) toolIDs() (ids []string) { return slices.Clone(e.ToolIDs) }
-func (e TargetCheckJob) toolIDs() (ids []string)   { return slices.Clone(e.ToolIDs) }
-
-func (RepositoryScanExecution) toolIDs() (ids []string) { return nil }
-
-func (ExternalCheckJob) toolIDs() (ids []string) { return nil }

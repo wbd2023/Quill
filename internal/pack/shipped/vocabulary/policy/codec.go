@@ -3,25 +3,25 @@ package policy
 import (
 	"fmt"
 
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // DecodeConfig decodes the Vocabulary Pack Policy subtree.
-func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
-	if pack == nil {
+func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
+	if policy == nil {
 		return Config{}, fmt.Errorf("packs.vocabulary must be configured")
 	}
 
-	if err = rejectUnknownFields(pack, "packs.vocabulary", "go", "bash"); err != nil {
+	if err = rejectUnknownFields(policy, "packs.vocabulary", "go", "bash"); err != nil {
 		return Config{}, err
 	}
 
-	goSection, err := configSection(pack, "go", "packs.vocabulary.go")
+	goSection, err := configSection(policy, "go", "packs.vocabulary.go")
 	if err != nil {
 		return Config{}, err
 	}
 
-	bashSection, err := configSection(pack, "bash", "packs.vocabulary.bash")
+	bashSection, err := configSection(policy, "bash", "packs.vocabulary.bash")
 	if err != nil {
 		return Config{}, err
 	}
@@ -39,15 +39,15 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 	return config, ValidateConfig(config)
 }
 
-// ValidatePackConfig validates the raw Vocabulary Pack Policy subtree.
-func ValidatePackConfig(pack corepolicy.PackConfig) (err error) {
-	_, err = DecodeConfig(pack)
+// ValidatePackPolicy validates the raw Vocabulary Pack Policy subtree.
+func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
+	_, err = DecodeConfig(policy)
 	return err
 }
 
 // EncodeConfig encodes config as a raw Vocabulary Pack Policy subtree.
-func EncodeConfig(config Config) (pack corepolicy.PackConfig) {
-	return corepolicy.PackConfig{
+func EncodeConfig(config Config) (policy profile.PackPolicy) {
+	return profile.PackPolicy{
 		"go": map[string]any{
 			"type_suffixes":       encodeStringListMap(config.Go.TypeSuffixes),
 			"identifier_suffixes": encodeStringListMap(config.Go.IdentifierSuffixes),

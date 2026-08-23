@@ -39,8 +39,8 @@ func testContext(
 	return NewRunContext(
 		repoRoot,
 		scope,
-		compiled.Profile,
-		compiled.Effective,
+		config,
+		compiled,
 		registry.ToolCapabilities(),
 		map[string]string{"PATH": ""},
 		map[string]string{"PATH": ""},

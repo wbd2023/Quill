@@ -72,7 +72,7 @@ func fileCommandRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupExternal,
-		Check: style.FileCommandExecution{
+		Check: style.FileCommand{
 			ToolID:    toolID,
 			FileSet:   fileSet,
 			Arguments: append([]string{}, arguments...),
@@ -98,7 +98,7 @@ func scanRule(
 		ID:    id,
 		Name:  name,
 		Group: group,
-		Check: style.RepositoryScanExecution{
+		Check: style.RepositoryScan{
 			Scanner: scanner,
 		},
 	}
@@ -110,7 +110,7 @@ func lineLengthRule() (rule style.RuleDefinition) {
 		"Line length",
 		ScannerLineLength,
 	)
-	execution := rule.Check.(style.RepositoryScanExecution)
+	execution := rule.Check.(style.RepositoryScan)
 	execution.FileSet = "line_length"
 	rule.Check = execution
 	return rule

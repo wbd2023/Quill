@@ -3,7 +3,6 @@ package profile
 import (
 	"fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -11,7 +10,7 @@ import (
 
 // compilePlan resolves a validated style profile against available rule and tool definitions.
 func compilePlan(
-	config policy.Profile,
+	config Profile,
 	definitions style.Definitions,
 ) (effective style.Plan, err error) {
 	availableTools := indexToolIDs(definitions.ToolIDs)
@@ -38,7 +37,7 @@ func compilePlan(
 /* --------------------------------------- Rule Resolution -------------------------------------- */
 
 func resolveRules(
-	config policy.Profile,
+	config Profile,
 	availableRules map[string]style.RuleDefinition,
 ) (rules []style.Rule, err error) {
 	rules = make([]style.Rule, 0, len(config.Rules))
@@ -63,8 +62,8 @@ func resolveRules(
 }
 
 func resolveRule(
-	config policy.Profile,
-	binding policy.RuleBinding,
+	config Profile,
+	binding RuleBinding,
 	definition style.RuleDefinition,
 ) (rule style.Rule, err error) {
 	check, err := resolveExecution(config, binding, definition.Check)
@@ -89,10 +88,9 @@ func resolveRule(
 		Fix:            fix,
 	}, nil
 }
-
 func resolveExecution(
-	config policy.Profile,
-	binding policy.RuleBinding,
+	config Profile,
+	binding RuleBinding,
 	template style.Template,
 ) (resolved style.Job, err error) {
 	if template == nil {
@@ -103,10 +101,24 @@ func resolveExecution(
 		return nil, err
 	}
 
-	targets, err := resolveTargets(config, binding, template)
-	if err != nil {
-		return nil, err
-	}
+	switch detail := template.(type) {
+	case style.TargetCommandTemplate:
+		targets, err := resolveTargets(config, binding, detail)
+		if err != nil {
+			return nil, err
+		}
+		return detail.Bind(targets), nil
 
-	return style.Bind(template, targets), nil
+	case style.TargetCheckTemplate:
+		targets, err := resolveTargets(config, binding, detail)
+		if err != nil {
+			return nil, err
+		}
+		return detail.Bind(targets), nil
+
+	default:
+		// Non-target Templates already satisfy style.Job because Profile binding adds nothing
+		// to them; carry the value through unchanged.
+		return template.(style.Job), nil
+	}
 }

@@ -63,7 +63,7 @@ func (engine *Engine) Check(
 
 	result.Scope = runContext.Scope
 
-	selected := selectRulesForCheck(runContext.Effective.Rules, runContext, options.Mode)
+	selected := selectRulesForCheck(runContext.Plan.Rules, runContext, options.Mode)
 	toolIDs := execution.ToolIDsForRules(selected)
 	result.Toolchain, err = engine.inspectTools(
 		operationContext,

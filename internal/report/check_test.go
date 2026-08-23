@@ -47,7 +47,9 @@ func TestWriteCheckText(t *testing.T) {
 		},
 	}
 
-	summary, err := WriteCheck(&buffer, "check", FormatText, NewCheckView(result), true)
+	summary, err := WriteCheck(
+		&buffer, testEnvelopeMetadata("check"), FormatText, NewCheckView(result), true,
+	)
 	if err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
@@ -78,7 +80,7 @@ func TestWriteCheckJSON(t *testing.T) {
 			},
 		},
 	})
-	summary, err := WriteCheck(&buffer, "check", FormatJSON, view, false)
+	summary, err := WriteCheck(&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false)
 	if err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
@@ -159,7 +161,9 @@ func TestWriteCheckJSONEncodesRange(t *testing.T) {
 		},
 	})
 
-	if _, err := WriteCheck(&buffer, "check", FormatJSON, view, false); err != nil {
+	if _, err := WriteCheck(
+		&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
 
@@ -244,7 +248,9 @@ func TestWriteCheckJSONSerializesHelpURL(t *testing.T) {
 		},
 	})
 
-	if _, err := WriteCheck(&buffer, "check", FormatJSON, view, false); err != nil {
+	if _, err := WriteCheck(
+		&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
 

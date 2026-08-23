@@ -28,7 +28,7 @@ func TestNewRunContextLoadsCurrentProfileFixture(t *testing.T) {
 
 	context := testContext(t, fixtureRoot, style.Scope("all"))
 
-	if len(context.Effective.Rules) == 0 {
-		t.Fatal("expected effective rules to be loaded for fixture")
+	if len(context.Plan.Rules) == 0 {
+		t.Fatal("expected compiled rules to be loaded for fixture")
 	}
 }

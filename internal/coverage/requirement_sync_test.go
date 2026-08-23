@@ -37,7 +37,7 @@ func TestRuleRequirementIDsExistInStyleGuide(t *testing.T) {
 		t.Fatalf("profile.Compile: %v", err)
 	}
 
-	for _, rule := range compiled.Effective.Rules {
+	for _, rule := range compiled.Rules {
 		for _, requirementID := range rule.RequirementIDs {
 			if requirements[requirementID] {
 				continue

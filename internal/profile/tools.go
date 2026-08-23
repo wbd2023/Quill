@@ -1,12 +1,30 @@
 package profile
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
-)
+// PinnedTools defines the external tools pinned by the profile.
+type PinnedTools []PinnedTool
 
-func validateTools(tools []policy.PinnedTool) (err error) {
+// PinnedTool defines a pinned external tool version and its execution limits.
+type PinnedTool struct {
+	ID               string
+	Version          string
+	TimeoutSeconds   int
+	OutputLimitBytes int64
+}
+
+// Lookup returns the pinned tool with the given ID.
+func (t PinnedTools) Lookup(id string) (tool PinnedTool, found bool) {
+	for _, candidate := range t {
+		if candidate.ID == id {
+			return candidate, true
+		}
+	}
+
+	return PinnedTool{}, false
+}
+
+func validateTools(tools []PinnedTool) (err error) {
 	seen := make(map[string]bool, len(tools))
 	for _, tool := range tools {
 		if isBlank(tool.ID) {

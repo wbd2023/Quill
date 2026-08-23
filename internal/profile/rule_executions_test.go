@@ -1,9 +1,9 @@
-package profile
+package profile_test
 
 import (
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/profile/internal/profiletest"
 	"github.com/wbd2023/quill/internal/style"
 )
@@ -15,11 +15,11 @@ func TestCompileRejectsIncompleteFileCommandExecution(t *testing.T) {
 
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/bad-file-command",
-		Check: style.FileCommandExecution{
+		Check: style.FileCommand{
 			ToolID: profiletest.Tool,
 		},
 	})
-	requireErrorContainsInternal(t, err, "must define a file set")
+	requireErrorContains(t, err, "must define a file set")
 }
 
 func TestCompileRejectsMissingRuleCheck(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCompileRejectsMissingRuleCheck(t *testing.T) {
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/missing-check",
 	})
-	requireErrorContainsInternal(t, err, "must define check execution")
+	requireErrorContains(t, err, "must define check execution")
 }
 
 func TestCompileRejectsUnknownExecutionDetail(t *testing.T) {
@@ -44,11 +44,11 @@ func TestCompileRejectsBlankRuleToolReference(t *testing.T) {
 
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/blank-tool",
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: []string{" "},
 		},
 	})
-	requireErrorContainsInternal(t, err, "empty tool ID")
+	requireErrorContains(t, err, "empty tool ID")
 }
 
 func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
@@ -56,14 +56,14 @@ func TestCompileRejectsDuplicateRuleToolReference(t *testing.T) {
 
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/duplicate-tool",
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: []string{
 				profiletest.Tool,
 				profiletest.Tool,
 			},
 		},
 	})
-	requireErrorContainsInternal(t, err, "duplicates tool")
+	requireErrorContains(t, err, "duplicates tool")
 }
 
 func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
@@ -71,11 +71,11 @@ func TestCompileRejectsUnknownRuleToolReference(t *testing.T) {
 
 	err := compileRuleDefinition(t, style.RuleDefinition{
 		ID: "test/unknown-tool",
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: []string{"unknown"},
 		},
 	})
-	requireErrorContainsInternal(t, err, "references unknown tool")
+	requireErrorContains(t, err, "references unknown tool")
 }
 
 func TestCompileCarriesPackIDProvenance(t *testing.T) {
@@ -86,14 +86,11 @@ func TestCompileCarriesPackIDProvenance(t *testing.T) {
 		PackID: "test",
 		Name:   "Provenance rule",
 		Group:  "test",
-		Check: style.ProfileExecution{
-			PackID: "test",
-			Check:  "commands",
-		},
+		Check:  style.ProfileCheck{Check: "commands"},
 	}
 
 	config := profiletest.Config()
-	config.Rules = []policy.RuleBinding{
+	config.Rules = []profile.RuleBinding{
 		{
 			RuleID:         definition.ID,
 			Enforcement:    style.EnforcementRequired,
@@ -102,29 +99,29 @@ func TestCompileCarriesPackIDProvenance(t *testing.T) {
 		},
 	}
 
-	plan, err := compilePlan(config, style.Definitions{
+	plan, err := profile.Compile(config, style.Definitions{
 		ToolIDs: []string{profiletest.Tool},
 		Rules:   []style.RuleDefinition{definition},
 	})
 	if err != nil {
-		t.Fatalf("compilePlan: %v", err)
+		t.Fatalf("Compile: %v", err)
 	}
 	if len(plan.Rules) != 1 {
 		t.Fatalf("rules = %d, want 1", len(plan.Rules))
 	}
 
+	// Pack provenance is carried by the RuleDefinition/Rule alone; execution values carry none.
 	rule := plan.Rules[0]
 	if rule.PackID != "test" {
 		t.Fatalf("rule PackID = %q, want test", rule.PackID)
 	}
 
-	job, ok := rule.Check.(style.ProfileExecution)
+	job, ok := rule.Check.(style.ProfileCheck)
 	if !ok {
-		t.Fatalf("expected ProfileExecution, got %T", rule.Check)
+		t.Fatalf("expected ProfileCheck, got %T", rule.Check)
 	}
-
-	if job.PackID != "test" {
-		t.Fatalf("job PackID = %q, want test", job.PackID)
+	if job.Check != "commands" {
+		t.Fatalf("job Check = %q, want commands", job.Check)
 	}
 }
 
@@ -141,7 +138,7 @@ func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err e
 	}
 
 	config := profiletest.Config()
-	config.Rules = []policy.RuleBinding{
+	config.Rules = []profile.RuleBinding{
 		{
 			RuleID:         definition.ID,
 			Enforcement:    style.EnforcementRequired,
@@ -149,11 +146,11 @@ func compileRuleDefinition(t *testing.T, definition style.RuleDefinition) (err e
 			RequirementIDs: []string{profiletest.Requirement},
 		},
 	}
-	config.Tools = []policy.PinnedTool{
+	config.Tools = []profile.PinnedTool{
 		{ID: profiletest.Tool, Version: "1.0.0"},
 	}
 
-	_, err = compilePlan(config, style.Definitions{
+	_, err = profile.Compile(config, style.Definitions{
 		ToolIDs: []string{profiletest.Tool},
 		Rules:   []style.RuleDefinition{definition},
 	})

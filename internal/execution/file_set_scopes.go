@@ -1,12 +1,12 @@
 package execution
 
 import (
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
 func fileSetUsesScopedIncludes(
-	fileSet policy.FileSetConfig,
+	fileSet profile.FileSetConfig,
 ) (usesFilters bool) {
 	for _, files := range fileSet.Include.Files {
 		if len(files) > 0 {
@@ -23,7 +23,7 @@ func fileSetUsesScopedIncludes(
 	return false
 }
 
-func fileSetIncludeScopes(fileSet policy.FileSetConfig) (scopes []style.Scope) {
+func fileSetIncludeScopes(fileSet profile.FileSetConfig) (scopes []style.Scope) {
 	seen := make(map[style.Scope]bool)
 	for scope, files := range fileSet.Include.Files {
 		if len(files) == 0 || seen[scope] {

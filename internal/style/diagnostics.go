@@ -13,12 +13,10 @@ type Diagnostic struct {
 	HelpURL string
 }
 
-// ExecutionResult represents the outcome of running one check or fix against a rule. PackID
-// records the Pack whose rule produced the result so report aggregation can attribute findings by
-// Pack provenance.
+// ExecutionResult represents the outcome of running one check or fix against a rule. Pack
+// provenance is carried by the Rule that produced the result, not duplicated here: report
+// aggregation attributes findings through the rule association.
 type ExecutionResult struct {
-	PackID string
-
 	Diagnostics []Diagnostic
 
 	ExitCode int

@@ -4,19 +4,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // PathClassifier is path classifier.
 type PathClassifier struct {
 	repoRoot string
-	paths    policy.PathRoles
+	paths    profile.PathRoles
 }
 
 // NewPathClassifier new path classifier.
 func NewPathClassifier(
 	repoRoot string,
-	paths policy.PathRoles,
+	paths profile.PathRoles,
 ) (classifier PathClassifier) {
 	return PathClassifier{
 		repoRoot: filepath.Clean(repoRoot),

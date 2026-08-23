@@ -71,7 +71,7 @@ func New(repositoryRoot string, options ...Option) (engine *Engine, optionError 
 	}, nil
 }
 
-// WithCommandRunner replaces the command runner used for tool inspection and command execution.
+// WithCommandRunner replaces the command runner used for tool inspection.
 func WithCommandRunner(commandRunner toolchain.CommandRunner) (option Option) {
 	return func(configuration *engineConfiguration) (optionError error) {
 		configuration.commandRunner = commandRunner
@@ -79,8 +79,8 @@ func WithCommandRunner(commandRunner toolchain.CommandRunner) (option Option) {
 	}
 }
 
-// WithProgressWriter sets the writer for installation progress messages. The default discards
-// all output.
+// WithProgressWriter sets the writer for tool-installation and lock-resolution progress messages.
+// The default discards all output.
 func WithProgressWriter(writer io.Writer) (option Option) {
 	return func(configuration *engineConfiguration) (optionError error) {
 		configuration.progressWriter = writer
@@ -93,22 +93,24 @@ func WithProgressWriter(writer io.Writer) (option Option) {
 // preparedOperation holds the freshly loaded and validated state shared by every repository
 // operation. Engine loads it once per operation and never retains it.
 type preparedOperation struct {
-	profile       profile.EffectiveProfile
+	config        profile.Profile
+	plan          style.Plan
 	registry      pack.Registry
 	document      styleguide.Document
 	externalPacks []pack.Definition
 }
 
-// resolvedDrivers holds the shipped check and fix driver sets resolved for one runner operation.
+// resolvedDrivers holds the check and fix Driver sets for one runner operation.
 type resolvedDrivers struct {
 	check execution.DriverSet
 	fix   execution.DriverSet
 }
 
-// prepare loads a fresh repository snapshot for one operation: the Profile, the STYLE.md
-// document, the shipped Pack registry, and the compiled effective profile. Requirement IDs bound
-// by the Profile are validated against the parsed document before the profile is compiled, so an
-// unknown but syntactically valid requirement id fails before any rule or tool operation.
+// prepare loads a fresh repository snapshot for one operation: the Profile,
+// the STYLE.md document, the Pack catalogue, and the compiled Plan.
+// Requirement IDs bound by the Profile are validated against the parsed document
+// before the Profile is compiled, so an unknown but syntactically valid
+// Requirement ID fails before any Rule or Tool operation.
 func (engine *Engine) prepare(
 	operationContext context.Context,
 ) (prepared preparedOperation, prepareError error) {
@@ -162,13 +164,14 @@ func (engine *Engine) prepare(
 		return preparedOperation{}, err
 	}
 
-	effective, err := profile.Compile(config, registry.Definitions())
+	plan, err := profile.Compile(config, registry.Definitions())
 	if err != nil {
 		return preparedOperation{}, err
 	}
 
 	return preparedOperation{
-		profile:       effective,
+		config:        config,
+		plan:          plan,
 		registry:      registry,
 		document:      document,
 		externalPacks: externalPacks,
@@ -188,7 +191,7 @@ func (engine *Engine) prepareRun(
 		return execution.RunContext{}, resolvedDrivers{}, err
 	}
 
-	config := prepared.profile.Profile
+	config := prepared.config
 	if scope == "" {
 		scope = config.Repository.DefaultScope
 	}
@@ -198,7 +201,7 @@ func (engine *Engine) prepareRun(
 	}
 
 	built := bindings.Build()
-	if err = profile.ValidateRuntimeBindings(prepared.profile, built); err != nil {
+	if err = built.Validate(prepared.plan); err != nil {
 		return execution.RunContext{}, resolvedDrivers{}, err
 	}
 
@@ -216,8 +219,8 @@ func (engine *Engine) prepareRun(
 	runContext = execution.NewRunContext(
 		engine.repositoryRoot,
 		scope,
-		prepared.profile.Profile,
-		prepared.profile.Effective,
+		prepared.config,
+		prepared.plan,
 		prepared.registry.ToolCapabilities(),
 		toolEnvironment,
 		goEnvironment,

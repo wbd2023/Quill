@@ -2,7 +2,9 @@ package pack
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
@@ -71,8 +73,14 @@ func (catalog Catalog) Registry(enabled []string) (registry Registry, err error)
 func validateCatalog(catalog Catalog) (err error) {
 	seenPacks := make(map[string]bool, len(catalog.packs))
 	for _, pack := range catalog.packs {
-		if pack.ID == "" {
+		if strings.TrimSpace(pack.ID) == "" {
 			return fmt.Errorf("catalog contains an empty pack id")
+		}
+		if pack.ID == profile.EnabledPacksKey {
+			return fmt.Errorf("catalog contains reserved pack id %q", pack.ID)
+		}
+		if strings.TrimSpace(pack.Name) == "" {
+			return fmt.Errorf("catalog contains pack %q with an empty name", pack.ID)
 		}
 
 		if seenPacks[pack.ID] {
@@ -85,7 +93,7 @@ func validateCatalog(catalog Catalog) (err error) {
 	seenRules := make(map[string]string)
 	for _, pack := range catalog.packs {
 		for _, rule := range pack.Rules {
-			if rule.ID == "" {
+			if strings.TrimSpace(rule.ID) == "" {
 				return fmt.Errorf("catalog contains an empty rule id in pack %q", pack.ID)
 			}
 			if owner := seenRules[rule.ID]; owner != "" {

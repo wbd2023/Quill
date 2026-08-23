@@ -16,7 +16,7 @@ func TestBindingsDistinguishSameLocalIDAcrossPacks(t *testing.T) {
 	scanner := func(
 		_ context.Context,
 		_ execution.RunContext,
-		_ style.RepositoryScanExecution,
+		_ style.RepositoryScan,
 	) (style.ExecutionResult, error) {
 		return style.ExecutionResult{}, nil
 	}
@@ -37,7 +37,7 @@ func TestProfileChecksRejectSamePackLocalCollision(t *testing.T) {
 	check := func(
 		_ context.Context,
 		_ execution.RunContext,
-		_ style.ProfileExecution,
+		_ style.ProfileCheck,
 	) (style.ExecutionResult, error) {
 		return style.ExecutionResult{}, nil
 	}
@@ -104,10 +104,4 @@ func TestFileInterpretersRejectDuplicateToolID(t *testing.T) {
 	}()
 
 	bindings.AddFileInterpreter("misspell", InterpretPlainText(0, "x"))
-}
-
-// Satisfies the RuntimeBindings contract so a drivers.Bindings value is usable wherever the
-// completeness validation needs a resolver.
-func TestBindingsSatisfiesRuntimeBindingsContract(t *testing.T) {
-	var _ style.RuntimeBindings = NewBindings()
 }

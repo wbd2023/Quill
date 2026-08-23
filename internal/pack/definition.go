@@ -3,7 +3,7 @@ package pack
 import (
 	"slices"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -15,14 +15,14 @@ type Definition struct {
 	Name     string
 	ToolIDs  []string
 	Rules    []style.RuleDefinition
-	FileSets policy.FileSets
-	Config   Config
+	FileSets profile.FileSets
+	Policy   Policy
 }
 
-// Config describes the profile config accepted by a pack.
-type Config struct {
+// Policy describes the profile policy accepted by a Pack.
+type Policy struct {
 	Required bool
-	Validate func(policy.PackConfig) error
+	Validate func(profile.PackPolicy) error
 }
 
 // CloneDefinitions returns deep copies of the supplied pack definitions.
@@ -60,13 +60,16 @@ func cloneRule(rule style.RuleDefinition) (clone style.RuleDefinition) {
 	clone.Fix = cloneTemplate(rule.Fix)
 	return clone
 }
+
+// cloneTemplate returns a deep copy of an execution Template, cloning every slice the Template
+// owns so a Pack's declarations stay isolated when cloned for the registry.
 func cloneTemplate(template style.Template) (clone style.Template) {
 	switch detail := template.(type) {
-	case style.ToolchainExecution:
+	case style.ToolchainCheck:
 		detail.ToolIDs = slices.Clone(detail.ToolIDs)
 		return detail
 
-	case style.FileCommandExecution:
+	case style.FileCommand:
 		detail.Arguments = slices.Clone(detail.Arguments)
 		return detail
 

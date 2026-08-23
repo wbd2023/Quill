@@ -3,50 +3,50 @@ package pack
 import (
 	"fmt"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* --------------------------------------- Pack Resolution -------------------------------------- */
 
-// ResolvePacks applies pack-owned defaults and validates pack-owned profile config.
+// ResolvePacks applies Pack-owned defaults and validates Pack-owned Profile Policy.
 func ResolvePacks(
-	config policy.Profile,
+	config profile.Profile,
 	packs []Definition,
-) (resolved policy.Profile, err error) {
+) (resolved profile.Profile, err error) {
 	resolved = config
 	resolved.FileSets = resolveFileSets(config.FileSets, packs)
 
-	if err = validatePackConfigs(resolved, packs); err != nil {
-		return policy.Profile{}, err
+	if err = validatePackPolicies(resolved, packs); err != nil {
+		return profile.Profile{}, err
 	}
 
 	return resolved, nil
 }
 
-func validatePackConfigs(config policy.Profile, packs []Definition) (err error) {
+func validatePackPolicies(config profile.Profile, packs []Definition) (err error) {
 	active := indexPacks(packs)
-	for packID := range config.PackConfigs {
+	for packID := range config.PackPolicies {
 		definition, found := active[packID]
 		if !found {
-			return fmt.Errorf("packs.%s config is not active", packID)
+			return fmt.Errorf("packs.%s policy is not active", packID)
 		}
 
-		if definition.Config.Validate == nil {
-			return fmt.Errorf("packs.%s config is not supported", packID)
+		if definition.Policy.Validate == nil {
+			return fmt.Errorf("packs.%s policy is not supported", packID)
 		}
 	}
 
 	for _, definition := range packs {
-		packConfig, found := config.PackConfigs.Lookup(definition.ID)
-		if definition.Config.Required && !found {
-			return fmt.Errorf("packs.%s must be configured", definition.ID)
+		packPolicy, found := config.PackPolicies.Lookup(definition.ID)
+		if definition.Policy.Required && !found {
+			return fmt.Errorf("packs.%s policy is required", definition.ID)
 		}
 
-		if !found || definition.Config.Validate == nil {
+		if !found || definition.Policy.Validate == nil {
 			continue
 		}
 
-		if err = definition.Config.Validate(packConfig); err != nil {
+		if err = definition.Policy.Validate(packPolicy); err != nil {
 			return err
 		}
 	}
@@ -66,15 +66,15 @@ func indexPacks(packs []Definition) (indexed map[string]Definition) {
 /* ------------------------------------- File Set Resolution ------------------------------------ */
 
 func resolveFileSets(
-	configured policy.FileSets,
+	configured profile.FileSets,
 	packs []Definition,
-) (fileSets policy.FileSets) {
+) (fileSets profile.FileSets) {
 	defaultCount := countDefaultFileSets(packs)
 	if len(configured) == 0 && defaultCount == 0 {
 		return nil
 	}
 
-	fileSets = make(policy.FileSets, 0, len(configured)+defaultCount)
+	fileSets = make(profile.FileSets, 0, len(configured)+defaultCount)
 	for _, definition := range packs {
 		for _, fileSet := range definition.FileSets {
 			fileSets = upsertFileSet(fileSets, fileSet.Clone())
@@ -97,9 +97,9 @@ func countDefaultFileSets(packs []Definition) (count int) {
 }
 
 func upsertFileSet(
-	fileSets policy.FileSets,
-	fileSet policy.FileSetConfig,
-) (merged policy.FileSets) {
+	fileSets profile.FileSets,
+	fileSet profile.FileSetConfig,
+) (merged profile.FileSets) {
 	for index := range fileSets {
 		if fileSets[index].Name == fileSet.Name {
 			fileSets[index] = fileSet

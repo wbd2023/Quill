@@ -9,7 +9,7 @@ import (
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
 	"github.com/wbd2023/quill/internal/filewalk"
 	gopolicy "github.com/wbd2023/quill/internal/pack/shipped/golang/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
@@ -21,8 +21,8 @@ import (
 func CheckDirectories(
 	repoRoot string,
 	directories []string,
-	repository policy.RepositoryConfig,
-	paths policy.PathRoles,
+	repository profile.RepositoryConfig,
+	paths profile.PathRoles,
 	goConfig gopolicy.Config,
 	checks ...Check,
 ) (result style.ExecutionResult, err error) {
@@ -58,8 +58,8 @@ func validateScanRoots(directories []string) (err error) {
 func analyseDirectories(
 	repoRoot string,
 	directories []string,
-	repository policy.RepositoryConfig,
-	paths policy.PathRoles,
+	repository profile.RepositoryConfig,
+	paths profile.PathRoles,
 	goConfig gopolicy.Config,
 	checks []Check,
 ) (violations []analysis.Violation) {

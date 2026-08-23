@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 	"github.com/wbd2023/quill/internal/toolchain"
 )
@@ -13,14 +13,14 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := style.Rule{
 		ID: "test/rule",
-		Check: style.RepositoryScanExecution{
+		Check: style.RepositoryScan{
 			Scanner: "test",
 		},
 	}
 	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
-		policy.Profile{},
+		profile.Profile{},
 		style.Plan{},
 		nil,
 		nil,
@@ -30,6 +30,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		RepositoryScan: func(
 			_ context.Context,
 			_ RunContext,
+			_ style.Rule,
 			_ style.Job,
 			_ toolchain.StatusMap,
 		) (result style.ExecutionResult, err error) {
@@ -51,14 +52,14 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 	repoRoot := t.TempDir()
 	rule := style.Rule{
 		ID: "test/unsupported",
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: []string{"go"},
 		},
 	}
 	runCtx := NewRunContext(
 		repoRoot,
 		style.Scope("all"),
-		policy.Profile{},
+		profile.Profile{},
 		style.Plan{},
 		nil,
 		nil,

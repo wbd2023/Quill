@@ -140,6 +140,32 @@ func TestLoadAcceptsContainedRepository(t *testing.T) {
 	}
 }
 
+func TestLoadRejectsProfileSymlinkEscapingRepository(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	config := profiles.Self(t)
+	config.Repository.RootMarkers = []string{"STYLE.md"}
+	profiles.Write(t, root, config)
+
+	outside := t.TempDir()
+	profiles.Write(t, outside, config)
+
+	path := filepath.Join(root, profile.DefaultFilename)
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(
+		filepath.Join(outside, profile.DefaultFilename),
+		path,
+	); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	_, err := profile.Load(root)
+	requireErrorContains(t, err, profile.DefaultFilename)
+}
+
 func TestLoadRejectsSymlinkEscapingScopeRoot(t *testing.T) {
 	t.Parallel()
 
@@ -211,4 +237,167 @@ func TestLoadRejectsSymlinkEscapingStyleGuidePath(t *testing.T) {
 	_, err := profile.Load(root)
 	requireErrorContains(t, err, "style_guide.path")
 	requireErrorContains(t, err, "outside the repository root")
+}
+
+func TestLoadRejectsMissingPathBeneathEscapingSymlink(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		config func(*profile.Profile)
+	}{
+		{
+			name: "scope root",
+			config: func(config *profile.Profile) {
+				config.Repository.ScopeRoots = map[style.Scope][]string{
+					style.Scope("all"): {"escape/missing"},
+				}
+				config.Repository.DefaultScope = style.Scope("all")
+			},
+		},
+		{
+			name: "root marker",
+			config: func(config *profile.Profile) {
+				config.Repository.RootMarkers = []string{"escape/missing"}
+			},
+		},
+		{
+			name: "style guide",
+			config: func(config *profile.Profile) {
+				config.StyleGuide.Path = "escape/missing"
+			},
+		},
+		{
+			name: "target working directory",
+			config: func(config *profile.Profile) {
+				config.Targets[0].WorkingDirectory = "escape/missing"
+			},
+		},
+		{
+			name: "target format path",
+			config: func(config *profile.Profile) {
+				config.Targets[0].FormatPaths = []string{"escape/missing"}
+			},
+		},
+		{
+			name: "target check path",
+			config: func(config *profile.Profile) {
+				config.Targets[0].CheckPaths = []string{"escape/missing"}
+			},
+		},
+		{
+			name: "file set include file",
+			config: func(config *profile.Profile) {
+				config.FileSets[0].Include.Files = map[style.Scope][]string{
+					config.Repository.DefaultScope: {"escape/missing"},
+				}
+			},
+		},
+		{
+			name: "file set include path",
+			config: func(config *profile.Profile) {
+				config.FileSets[0].Include.Paths = map[style.Scope][]string{
+					config.Repository.DefaultScope: {"escape/missing"},
+				}
+			},
+		},
+		{
+			name: "Pack source",
+			config: func(config *profile.Profile) {
+				config.PackSources = []profile.PackSource{{Path: "escape/missing"}}
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			root := t.TempDir()
+			config := profiles.Self(t)
+			profiles.Write(t, root, config)
+
+			if err := os.Symlink(
+				filepath.Join(t.TempDir(), "missing"),
+				filepath.Join(root, "escape"),
+			); err != nil {
+				t.Skipf("symlink unsupported: %v", err)
+			}
+
+			test.config(&config)
+			contents := profiles.Format(t, config)
+			if err := os.WriteFile(
+				filepath.Join(root, profile.DefaultFilename),
+				[]byte(contents),
+				0o600,
+			); err != nil {
+				t.Fatal(err)
+			}
+
+			_, err := profile.Load(root)
+			requireErrorContains(t, err, "outside the repository root")
+		})
+	}
+}
+
+func TestLoadRejectsRelativeDanglingSymlinkBeneathAlias(t *testing.T) {
+	t.Parallel()
+
+	parent := t.TempDir()
+	root := filepath.Join(parent, "root")
+
+	config := profiles.Self(t)
+	profiles.Write(t, root, config)
+	real := filepath.Join(root, "real")
+	alias := filepath.Join(root, "deep", "nested", "alias")
+	if err := os.MkdirAll(filepath.Dir(alias), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(real, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(parent, "outside"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../../real", alias); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+	if err := os.Symlink("../../outside/missing", filepath.Join(real, "escape")); err != nil {
+		t.Skipf("symlink unsupported: %v", err)
+	}
+
+	config.StyleGuide.Path = "deep/nested/alias/escape/future"
+	contents := profiles.Format(t, config)
+	if err := os.WriteFile(
+		filepath.Join(root, profile.DefaultFilename),
+		[]byte(contents),
+		0o644,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := profile.Load(root)
+	requireErrorContains(t, err, "outside the repository root")
+}
+
+func TestLoadAcceptsMissingPathBeneathContainedAncestor(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	config := profiles.Self(t)
+	profiles.Write(t, root, config)
+
+	config.Targets[0].CheckPaths = []string{"generated/not-yet-created"}
+	contents := profiles.Format(t, config)
+	if err := os.WriteFile(
+		filepath.Join(root, profile.DefaultFilename),
+		[]byte(contents),
+		0o600,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := profile.Load(root); err != nil {
+		t.Fatalf("Load rejected missing contained path: %v", err)
+	}
 }

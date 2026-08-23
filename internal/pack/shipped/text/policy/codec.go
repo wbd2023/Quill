@@ -3,21 +3,21 @@ package policy
 import (
 	"fmt"
 
-	corepolicy "github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 // DecodeConfig decodes the Text Pack Policy subtree.
-func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
-	if pack == nil {
+func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
+	if policy == nil {
 		return Config{}, fmt.Errorf("packs.text must be configured")
 	}
 
-	if err = rejectUnknownFields(pack, "packs.text", "section_headers"); err != nil {
+	if err = rejectUnknownFields(policy, "packs.text", "section_headers"); err != nil {
 		return Config{}, err
 	}
 
 	section, err := configSection(
-		pack,
+		policy,
 		"section_headers",
 		"packs.text.section_headers",
 	)
@@ -33,15 +33,15 @@ func DecodeConfig(pack corepolicy.PackConfig) (config Config, err error) {
 	return config, ValidateConfig(config)
 }
 
-// ValidatePackConfig validates the raw Text Pack Policy subtree.
-func ValidatePackConfig(pack corepolicy.PackConfig) (err error) {
-	_, err = DecodeConfig(pack)
+// ValidatePackPolicy validates the raw Text Pack Policy subtree.
+func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
+	_, err = DecodeConfig(policy)
 	return err
 }
 
 // EncodeConfig encodes config as a raw Text Pack Policy subtree.
-func EncodeConfig(config Config) (pack corepolicy.PackConfig) {
-	return corepolicy.PackConfig{
+func EncodeConfig(config Config) (policy profile.PackPolicy) {
+	return profile.PackPolicy{
 		"section_headers": map[string]any{
 			"large_min_lines":  config.SectionHeaders.LargeMinLines,
 			"short_max_lines":  config.SectionHeaders.ShortMaxLines,

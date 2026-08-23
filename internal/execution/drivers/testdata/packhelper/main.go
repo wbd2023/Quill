@@ -14,9 +14,12 @@ import (
 
 type request struct {
 	CheckID        string         `json:"check_id"`
+	PackID         string         `json:"pack_id"`
+	RuleID         string         `json:"rule_id"`
 	RepositoryRoot string         `json:"repository_root"`
+	Scope          string         `json:"scope"`
 	Files          []string       `json:"files"`
-	Configuration  map[string]any `json:"configuration"`
+	Policy         map[string]any `json:"policy"`
 }
 
 func main() {
@@ -31,7 +34,7 @@ func main() {
 		fmt.Println(`{"type":"complete","success":true}`)
 
 	case "fail-completion":
-		fmt.Println(`{"type":"complete","success":false,"error":"configuration field is required"}`)
+		fmt.Println(`{"type":"complete","success":false,"error":"policy field is required"}`)
 
 	case "malformed":
 		fmt.Println("this is not json")
@@ -66,14 +69,14 @@ func main() {
 		fmt.Println(`{"type":"complete","success":true}`)
 
 	case "inspect-request":
-		encoded, _ := json.Marshal(req.Configuration)
+		encoded, _ := json.Marshal(req.Policy)
 		escaped := strings.ReplaceAll(strings.ReplaceAll(string(encoded), `\`, `\\`), `"`, `'`)
 		fileNil := "false"
 		if req.Files == nil {
 			fileNil = "true"
 		}
-		fmt.Printf(`{"type":"diagnostic","code":"inspect","message":"config=%s filecount=%d filenil=%s files=%s"}`+"\n",
-			escaped, len(req.Files), fileNil, strings.Join(req.Files, ","))
+		fmt.Printf(`{"type":"diagnostic","code":"inspect","message":"pack=%s rule=%s scope=%s policy=%s filecount=%d filenil=%s files=%s"}`+"\n",
+			req.PackID, req.RuleID, req.Scope, escaped, len(req.Files), fileNil, strings.Join(req.Files, ","))
 		fmt.Println(`{"type":"complete","success":true}`)
 	default:
 		fmt.Println(`{"type":"complete","success":true}`)

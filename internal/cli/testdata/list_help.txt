@@ -1,0 +1,10 @@
+usage:
+  quill list <selector> [flags]
+
+list packs, rules, tools, or scopes
+
+flags:
+    --format string
+        format: text|json (default "text")
+    --repository-root string
+        repository root (auto-detected when omitted)

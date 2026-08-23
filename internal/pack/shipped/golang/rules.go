@@ -116,7 +116,7 @@ func architectureRule() (rule style.RuleDefinition) {
 		ID:    "go/architecture-imports",
 		Name:  "Architecture imports",
 		Group: ruleGroupLanguage,
-		Check: style.RepositoryScanExecution{
+		Check: style.RepositoryScan{
 			Scanner: ScannerArchitecture,
 		},
 	}

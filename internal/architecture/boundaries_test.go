@@ -5,6 +5,7 @@ type importBoundaryCase struct {
 	directory      string
 	recursive      bool
 	excludeSubdirs []string
+	allowed        []string
 	forbidden      []string
 }
 

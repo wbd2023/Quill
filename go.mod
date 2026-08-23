@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	github.com/BurntSushi/toml v1.5.0
+	github.com/alecthomas/kong v1.16.0
 	github.com/google/go-cmp v0.6.0
 	github.com/ulikunitz/xz v0.5.15
 	github.com/yuin/goldmark v1.8.2

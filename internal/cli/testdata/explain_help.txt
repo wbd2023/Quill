@@ -1,0 +1,10 @@
+usage:
+  quill explain <subject> [flags]
+
+explain an active rule
+
+flags:
+    --format string
+        format: text|json (default "text")
+    --repository-root string
+        repository root (auto-detected when omitted)

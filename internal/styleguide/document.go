@@ -1,6 +1,6 @@
 package styleguide
 
-// Document is the parsed STYLE.md model used by coverage checks.
+// Document is the parsed STYLE.md model for requirement binding and coverage.
 type Document struct {
 	Headings     []Heading
 	Requirements []Requirement

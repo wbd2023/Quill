@@ -26,9 +26,9 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 		ID:      PackID,
 		Name:    "Project",
 		ToolIDs: append([]string{}, toolIDs...),
-		Config: pack.Config{
+		Policy: pack.Policy{
 			Required: true,
-			Validate: projectpolicy.ValidatePackConfig,
+			Validate: projectpolicy.ValidatePackPolicy,
 		},
 		Rules: rules(),
 	}
@@ -78,7 +78,7 @@ func toolchainRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupProject,
-		Check: style.ToolchainExecution{
+		Check: style.ToolchainCheck{
 			ToolIDs: append([]string{}, toolIDs...),
 		},
 	}
@@ -93,7 +93,7 @@ func projectRule(
 		ID:    id,
 		Name:  name,
 		Group: ruleGroupProject,
-		Check: style.ProfileExecution{
+		Check: style.ProfileCheck{
 			Check: check,
 		},
 	}

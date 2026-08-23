@@ -1,26 +1,26 @@
 package profiletest
 
 import (
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 	"github.com/wbd2023/quill/internal/style"
 )
 
 // Config returns a valid minimal profile config fixture.
-func Config() (config policy.Profile) {
-	return policy.Profile{
-		SchemaVersion: policy.SchemaVersion,
+func Config() (config profile.Profile) {
+	return profile.Profile{
+		SchemaVersion: profile.SchemaVersion,
 		Repository:    baselineRepository(),
-		StyleGuide: policy.StyleGuideConfig{
+		StyleGuide: profile.StyleGuideConfig{
 			Path: "STYLE.md",
 		},
-		PathRoles: policy.PathRoles{
+		PathRoles: profile.PathRoles{
 			PathRole: {"internal/"},
 		},
 		FileSets:     baselineFileSets(),
 		Targets:      baselineTargets(),
 		Tools:        baselineTools(),
 		EnabledPacks: []string{"test"},
-		Rules: []policy.RuleBinding{
+		Rules: []profile.RuleBinding{
 			{
 				RuleID:         Rule,
 				Enforcement:    style.EnforcementRequired,
@@ -31,8 +31,8 @@ func Config() (config policy.Profile) {
 	}
 }
 
-func baselineRepository() (repository policy.RepositoryConfig) {
-	return policy.RepositoryConfig{
+func baselineRepository() (repository profile.RepositoryConfig) {
+	return profile.RepositoryConfig{
 		RootMarkers: []string{
 			"PROJECT.marker",
 		},
@@ -44,10 +44,10 @@ func baselineRepository() (repository policy.RepositoryConfig) {
 	}
 }
 
-func baselineFileSets() (fileSets policy.FileSets) {
-	return append(fileSets, policy.FileSetConfig{
+func baselineFileSets() (fileSets profile.FileSets) {
+	return append(fileSets, profile.FileSetConfig{
 		Name: FileSet,
-		Include: policy.FileSetInclude{
+		Include: profile.FileSetInclude{
 			Extensions: []string{".go"},
 			Paths: map[style.Scope][]string{
 				Scope: {"internal/"},
@@ -56,16 +56,16 @@ func baselineFileSets() (fileSets policy.FileSets) {
 	})
 }
 
-func baselineTargets() (targets policy.TargetConfigs) {
+func baselineTargets() (targets profile.TargetConfigs) {
 	return append(targets,
-		policy.TargetConfig{
+		profile.TargetConfig{
 			Name:        Target,
 			Language:    Language,
 			Scope:       Scope,
 			FormatPaths: []string{"."},
 			CheckPaths:  []string{"."},
 		},
-		policy.TargetConfig{
+		profile.TargetConfig{
 			Name:        OtherTarget,
 			Language:    Language,
 			Scope:       Scope,
@@ -75,6 +75,6 @@ func baselineTargets() (targets policy.TargetConfigs) {
 	)
 }
 
-func baselineTools() (tools policy.PinnedTools) {
-	return append(tools, policy.PinnedTool{ID: Tool, Version: "1.0.0"})
+func baselineTools() (tools profile.PinnedTools) {
+	return append(tools, profile.PinnedTool{ID: Tool, Version: "1.0.0"})
 }

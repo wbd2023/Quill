@@ -12,7 +12,7 @@ import (
 	textpolicy "github.com/wbd2023/quill/internal/pack/shipped/text/policy"
 	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
 	vocabularypolicy "github.com/wbd2023/quill/internal/pack/shipped/vocabulary/policy"
-	"github.com/wbd2023/quill/internal/policy"
+	"github.com/wbd2023/quill/internal/profile"
 )
 
 /* ----------------------------------------- Validation ----------------------------------------- */
@@ -20,7 +20,7 @@ import (
 func TestResolvePacksRejectsMissingRequiredConfig(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{vocabulary.PackID},
 	}
 	registry := registryFor(t, config)
@@ -32,9 +32,9 @@ func TestResolvePacksRejectsMissingRequiredConfig(t *testing.T) {
 func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{vocabulary.PackID},
-		PackConfigs: policy.PackConfigs{
+		PackPolicies: profile.PackPolicies{
 			vocabulary.PackID: vocabularypolicy.EncodeConfig(vocabularypolicy.Config{
 				Go: vocabularypolicy.GoConfig{
 					TypeSuffixes: map[string][]string{"": {"Repository"}},
@@ -51,9 +51,9 @@ func TestResolvePacksRejectsInvalidConfig(t *testing.T) {
 func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{text.PackID},
-		PackConfigs: policy.PackConfigs{
+		PackPolicies: profile.PackPolicies{
 			text.PackID: textpolicy.EncodeConfig(textpolicy.Config{}),
 		},
 	}
@@ -66,22 +66,22 @@ func TestResolvePacksRejectsInvalidTextConfig(t *testing.T) {
 func TestResolvePacksRejectsUnsupportedConfig(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{markdown.PackID},
-		PackConfigs: policy.PackConfigs{
+		PackPolicies: profile.PackPolicies{
 			markdown.PackID: {"unknown": true},
 		},
 	}
 	registry := registryFor(t, config)
 
 	_, err := pack.ResolvePacks(config, registry.Packs())
-	requireErrorContains(t, err, "packs.markdown config is not supported")
+	requireErrorContains(t, err, "packs.markdown policy is not supported")
 }
 
 func TestResolvePacksAcceptsPacksWithoutConfig(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{markdown.PackID},
 	}
 	registry := registryFor(t, config)
@@ -96,7 +96,7 @@ func TestResolvePacksAcceptsPacksWithoutConfig(t *testing.T) {
 func TestResolvePacksAppliesPackDefaultFileSets(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{bash.PackID},
 	}
 	registry := registryFor(t, config)
@@ -119,10 +119,10 @@ func TestResolvePacksAppliesPackDefaultFileSets(t *testing.T) {
 func TestResolvePacksLetsProfileFileSetsOverridePackDefaults(t *testing.T) {
 	t.Parallel()
 
-	config := policy.Profile{
+	config := profile.Profile{
 		EnabledPacks: []string{bash.PackID},
-		FileSets: policy.FileSets{
-			{Name: "bash", Include: policy.FileSetInclude{Extensions: []string{".bash"}}},
+		FileSets: profile.FileSets{
+			{Name: "bash", Include: profile.FileSetInclude{Extensions: []string{".bash"}}},
 		},
 	}
 	registry := registryFor(t, config)
@@ -144,7 +144,7 @@ func TestResolvePacksLetsProfileFileSetsOverridePackDefaults(t *testing.T) {
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
-func registryFor(t *testing.T, config policy.Profile) (registry pack.Registry) {
+func registryFor(t *testing.T, config profile.Profile) (registry pack.Registry) {
 	t.Helper()
 
 	registry, err := shipped.DefaultRegistry(config.EnabledPacks)
