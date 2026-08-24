@@ -170,7 +170,7 @@ jobs:
           TOML
 
           echo "::group::quill check (no-external-tool repository check)"
-          "${bin}" check --repo-root "${smoke}"
+          "${bin}" check --repository-root "${smoke}"
           echo "::endgroup::"
 
           rm -rf "${smoke}"
@@ -320,13 +320,13 @@ jobs:
           if gh release view "$tag" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             echo "Release $tag already exists; uploading assets with --clobber."
             gh release upload "$tag" --repo "${GITHUB_REPOSITORY}" \
-              *.tar.gz *.zip *_checksums.txt --clobber
+              ./*.tar.gz ./*.zip ./*_checksums.txt --clobber
           else
             gh release create "$tag" --repo "${GITHUB_REPOSITORY}" \
               --title "$tag" \
               --generate-notes \
               --verify-tag \
-              *.tar.gz *.zip *_checksums.txt
+              ./*.tar.gz ./*.zip ./*_checksums.txt
           fi
           echo "Published release $tag with assets:"
           gh release view "$tag" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name'

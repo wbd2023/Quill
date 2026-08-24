@@ -41,6 +41,8 @@ docs/ai/
 .codex
 .pi/
 .pi-lens/
+.omp/
+.context/
 
 # Repo-local caches and tooling
 .cache/
