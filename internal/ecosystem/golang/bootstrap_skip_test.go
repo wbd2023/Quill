@@ -21,7 +21,7 @@ func (fakeInspectionRunner) ResolvePath(
 	_ context.Context,
 	_ map[string]string,
 	command string,
-) (string, error) {
+) (path string, err error) {
 	return command, nil
 }
 
@@ -30,7 +30,7 @@ func (runner fakeInspectionRunner) Run(
 	_ map[string]string,
 	_ string,
 	_ []string,
-) (string, error) {
+) (version string, err error) {
 	return runner.version, nil
 }
 

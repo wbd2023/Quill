@@ -8,20 +8,20 @@ import (
 	"github.com/wbd2023/quill/internal/style"
 )
 
-/* ----------------------------------------- Fix Command ---------------------------------------- */
-
 type fixCmd struct {
 	repoFlags
 	Scope style.Scope `kong:"name=scope,help=configured scope (profile default when omitted)"`
 }
 
 func (c *fixCmd) run(ctx context.Context, runner Runner) (exitCode int) {
-	engineInstance, err := c.newEngine()
+	options := engine.FixOptions{Scope: c.Scope}
+
+	engine, err := c.newEngine()
 	if err != nil {
 		return runner.reportCommandError("fix", c.Format, err)
 	}
 
-	result, err := engineInstance.Fix(ctx, engine.FixOptions{Scope: c.Scope})
+	result, err := engine.Fix(ctx, options)
 	if err != nil {
 		return runner.reportCommandError("fix", c.Format, err)
 	}
@@ -39,6 +39,7 @@ func (c *fixCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 	if err != nil {
 		return runner.reportCommandError("fix", c.Format, err)
 	}
+
 	if !summary.AllValid || summary.HasExecutionError {
 		return 1
 	}

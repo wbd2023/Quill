@@ -48,13 +48,13 @@ func loadPlan(t *testing.T) (plan style.Plan) {
 	return compiled
 }
 
-func loadCoverageReport(t *testing.T) (report Report) {
+func loadReport(t *testing.T) (report Report) {
 	t.Helper()
 
 	return Build(loadDocument(t), loadPlan(t).Rules)
 }
 
-func coverageRequirementByID(
+func requirementByID(
 	report Report,
 	requirementID string,
 ) (requirement Requirement, found bool) {

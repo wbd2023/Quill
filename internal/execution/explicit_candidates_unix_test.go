@@ -17,17 +17,17 @@ import (
 // symlinks are rejected by the explicit-file path. A Unix domain socket is never a
 // candidate, regardless of the name configured in include.files.
 func TestExplicitFileCandidatesExcludesSpecialFileLeaf(t *testing.T) {
-	repoRoot := t.TempDir()
-	regular := testutil.WriteFile(t, repoRoot, "kept.sh", "echo hi\n")
+	root := t.TempDir()
+	regular := testutil.WriteFile(t, root, "kept.sh", "echo hi\n")
 
-	socket := filepath.Join(repoRoot, "blocked.sh")
+	socket := filepath.Join(root, "blocked.sh")
 	listener, err := net.Listen("unix", socket)
 	if err != nil {
 		t.Skipf("unix socket unsupported: %v", err)
 	}
-	t.Cleanup(func() { _ = listener.Close() })
+	t.Cleanup(func() { _ = listener.Close() }) // the listener exists only to create the socket path
 
-	context := RunContext{RepoRoot: repoRoot}
+	context := RunContext{Root: root}
 	fileSet := profile.FileSetConfig{
 		Include: profile.FileSetInclude{
 			Files: map[style.Scope][]string{

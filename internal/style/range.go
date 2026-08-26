@@ -60,6 +60,7 @@ func VerifyRange(file string, location Range) (err error) {
 	if err = verifyPosition(location.Start, "start"); err != nil {
 		return err
 	}
+
 	if err = verifyPosition(location.End, "end"); err != nil {
 		return err
 	}
@@ -75,6 +76,7 @@ func VerifyRange(file string, location Range) (err error) {
 		if location.End.Line < location.Start.Line {
 			return errRangeEndBeforeStart
 		}
+
 		if location.End.Line == location.Start.Line &&
 			location.Start.Column > 0 && location.End.Column > 0 &&
 			location.End.Column < location.Start.Column {
@@ -119,6 +121,7 @@ func verifyPosition(position Position, label string) (err error) {
 	if position.Line < 0 || position.Column < 0 {
 		return fmt.Errorf("%w: %s", errPositionNegative, label)
 	}
+
 	if position.Line == 0 && position.Column > 0 {
 		return fmt.Errorf("%w: %s", errColumnWithoutLine, label)
 	}
@@ -126,8 +129,8 @@ func verifyPosition(position Position, label string) (err error) {
 	return nil
 }
 
-func isASCIILetter(byteValue byte) (letter bool) {
-	return (byteValue >= 'a' && byteValue <= 'z') || (byteValue >= 'A' && byteValue <= 'Z')
+func isASCIILetter(value byte) (letter bool) {
+	return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z')
 }
 
 var (

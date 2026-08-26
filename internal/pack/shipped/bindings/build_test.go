@@ -35,10 +35,10 @@ func TestEveryShippedExecutionIdentityHasExactlyOneRuntimeBinding(t *testing.T) 
 	var missing []string
 	for _, rule := range registry.Rules() {
 		if rule.Check != nil {
-			missing = append(missing, assertTemplateBound(rule, "check", rule.Check, built)...)
+			missing = append(missing, unboundTemplates(rule, "check", rule.Check, built)...)
 		}
 		if rule.Fix != nil {
-			missing = append(missing, assertTemplateBound(rule, "fix", rule.Fix, built)...)
+			missing = append(missing, unboundTemplates(rule, "fix", rule.Fix, built)...)
 		}
 	}
 
@@ -53,10 +53,10 @@ func TestEveryShippedExecutionIdentityHasExactlyOneRuntimeBinding(t *testing.T) 
 	}
 }
 
-// assertTemplateBound resolves one template's execution identity against built and returns a
+// unboundTemplates resolves one template's execution identity against built and returns a
 // description (rule side, kind, key) for each identity that has no binding. Pack identity comes
 // from the RuleDefinition, never from the execution value.
-func assertTemplateBound(
+func unboundTemplates(
 	rule style.RuleDefinition,
 	side string,
 	template style.Template,

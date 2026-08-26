@@ -39,12 +39,12 @@ func checkIgnoredCloseErrors(
 }
 
 func isCloseCall(expression ast.Expr) (found bool) {
-	callExpression, ok := expression.(*ast.CallExpr)
+	call, ok := expression.(*ast.CallExpr)
 	if !ok {
 		return false
 	}
 
-	selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+	selector, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok {
 		return false
 	}

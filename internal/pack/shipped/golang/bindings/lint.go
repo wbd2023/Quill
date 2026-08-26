@@ -32,7 +32,7 @@ func lintTargets(
 	var diagnostics []style.Diagnostic
 	localPrefix := joinGoLocalImportPrefixes(goConfig.LocalImportPrefixes)
 	for _, target := range targets {
-		workDir := targetWorkDir(run.RepoRoot, target)
+		workDir := targetWorkDir(run.Root, target)
 		output, err := runGoFormatChecks(
 			ctx,
 			run,
@@ -65,9 +65,9 @@ func runGolangciLint(
 	ctx context.Context,
 	run execution.RunContext,
 	workDir string,
-	golangciLintToolID string,
+	toolID string,
 ) (output string, err error) {
-	result, err := runTool(ctx, run, workDir, golangciLintToolID, "run", "./...")
+	result, err := runTool(ctx, run, workDir, toolID, "run", "./...")
 	if err == nil {
 		return "", nil
 	}
@@ -87,7 +87,7 @@ func runGoFormatChecks(
 	workDir string,
 	paths []string,
 	localPrefix string,
-	goimportsToolID string,
+	toolID string,
 ) (output string, err error) {
 	if len(paths) == 0 {
 		return "", nil
@@ -106,7 +106,7 @@ func runGoFormatChecks(
 		ctx,
 		run,
 		workDir,
-		goimportsToolID,
+		toolID,
 		append([]string{"-l", "-local", localPrefix}, paths...)...,
 	)
 	if err != nil {

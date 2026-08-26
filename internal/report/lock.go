@@ -7,8 +7,6 @@ import (
 	"github.com/wbd2023/quill/internal/engine"
 )
 
-/* ----------------------------------------- Lock Result ---------------------------------------- */
-
 // LockResult is the presentation result of a lock operation.
 type LockResult struct {
 	// Path is the absolute path of the written quill.lock.
@@ -33,8 +31,10 @@ func WriteLock(
 	case FormatText:
 		_, err = fmt.Fprintf(writer, "Wrote %s (%d tools)\n", result.Path, result.ArchiveCount)
 		return err
+
 	case FormatJSON:
 		return writeResultEnvelope(writer, metadata, newLockJSON(result))
+
 	default:
 		return fmt.Errorf("unsupported output format %q", format)
 	}

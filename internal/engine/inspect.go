@@ -14,15 +14,15 @@ type ToolchainInspection struct {
 
 // Inspect loads the repository and inspects every configured tool.
 func (engine *Engine) Inspect(
-	operationContext context.Context,
-) (inspection ToolchainInspection, operationError error) {
-	runContext, _, err := engine.prepareRun(operationContext, "")
+	ctx context.Context,
+) (inspection ToolchainInspection, err error) {
+	runContext, _, err := engine.prepareRun(ctx, "")
 	if err != nil {
 		return ToolchainInspection{}, err
 	}
 
 	inspection, err = engine.inspectTools(
-		operationContext,
+		ctx,
 		runContext.Tools,
 		toolIDs(runContext.Tools),
 		runContext.ToolEnvironment,

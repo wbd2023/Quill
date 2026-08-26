@@ -14,7 +14,7 @@ import (
 
 func checkGoVocabulary(
 	result *style.ExecutionResult,
-	repoRoot string,
+	root string,
 	path string,
 	config vocabularypolicy.Config,
 ) (err error) {
@@ -29,7 +29,7 @@ func checkGoVocabulary(
 		if typeSuffix != "" {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:  "vocabulary/project-terms/go-type-suffix",
-				File:  filewalk.DisplayPath(repoRoot, path),
+				File:  filewalk.DisplayPath(root, path),
 				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"type name suffix %q must be %s",
@@ -51,7 +51,7 @@ func checkGoVocabulary(
 		if idSuffix != "" {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:  "vocabulary/project-terms/go-identifier-suffix",
-				File:  filewalk.DisplayPath(repoRoot, path),
+				File:  filewalk.DisplayPath(root, path),
 				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"identifier suffix %q must be %s",

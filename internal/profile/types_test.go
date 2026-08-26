@@ -10,14 +10,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func requireEqual[T any](t *testing.T, want T, got T) {
-	t.Helper()
-
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Fatalf("unexpected value (-expected +actual):\n%s", diff)
-	}
-}
-
 const (
 	scopeAll         style.Scope = "all"
 	scopeApp         style.Scope = "app"
@@ -41,27 +33,27 @@ func TestRepositoryHasScope(t *testing.T) {
 }
 
 func TestRepositoryResolveScopeRoots(t *testing.T) {
-	repositoryRoot := filepath.Join("workspace", "repo")
+	root := filepath.Join("workspace", "repo")
 	repository := testRepository()
 
-	roots := repository.ResolveScopeRoots(repositoryRoot, scopeApp)
+	roots := repository.ResolveScopeRoots(root, scopeApp)
 	requireEqual(t, []string{
-		filepath.Join(repositoryRoot, "cmd"),
-		filepath.Join(repositoryRoot, "internal"),
+		filepath.Join(root, "cmd"),
+		filepath.Join(root, "internal"),
 	}, roots)
 
-	roots = repository.ResolveScopeRoots(repositoryRoot, scopeAll)
-	requireEqual(t, []string{repositoryRoot}, roots)
+	roots = repository.ResolveScopeRoots(root, scopeAll)
+	requireEqual(t, []string{root}, roots)
 }
 
 func TestRepositoryResolveScopeRootsNormalisesConfiguredRoots(t *testing.T) {
-	repositoryRoot := filepath.Join("workspace", "repo")
+	root := filepath.Join("workspace", "repo")
 	repository := testRepository()
 	normalisedScope := style.Scope("normalised")
 
 	repository.ScopeRoots[normalisedScope] = []string{" ./cmd/../tools/ "}
-	roots := repository.ResolveScopeRoots(repositoryRoot, normalisedScope)
-	requireEqual(t, []string{filepath.Join(repositoryRoot, "tools")}, roots)
+	roots := repository.ResolveScopeRoots(root, normalisedScope)
+	requireEqual(t, []string{filepath.Join(root, "tools")}, roots)
 }
 
 func TestRepositoryHasScopeOverlap(t *testing.T) {
@@ -88,21 +80,6 @@ func TestRepositoryHasScopeOverlap(t *testing.T) {
 				t.Fatalf("unexpected scope overlap %t", overlap)
 			}
 		})
-	}
-}
-
-/* ------------------------------------------- Helpers ------------------------------------------ */
-
-func testRepository() (repository profile.RepositoryConfig) {
-	return profile.RepositoryConfig{
-		ScopeRoots: map[style.Scope][]string{
-			scopeAll:         {"."},
-			scopeApp:         {"cmd", "internal"},
-			scopeCommand:     {"cmd"},
-			scopeCommandLine: {"cmdline"},
-			scopeNested:      {"cmd/client"},
-			scopeTools:       {"tools"},
-		},
 	}
 }
 
@@ -182,7 +159,7 @@ func TestPinnedToolsLookup(t *testing.T) {
 	}
 }
 
-/* ------------------------------------------- Path Roles --------------------------------------- */
+/* ----------------------------------------- Path Roles ----------------------------------------- */
 
 func TestPathRolesLookupPatterns(t *testing.T) {
 	roles := profile.PathRoles{
@@ -215,7 +192,7 @@ func TestPathRolesLookupPatternsHandlesMissingClasses(t *testing.T) {
 	}
 }
 
-/* ------------------------------------------ Pack Policies ------------------------------------- */
+/* ---------------------------------------- Pack Policies --------------------------------------- */
 
 func TestPackPolicyCloneCopiesArraysOfTables(t *testing.T) {
 	t.Parallel()
@@ -233,4 +210,25 @@ func TestPackPolicyCloneCopiesArraysOfTables(t *testing.T) {
 	cloneTable := clone["tables"].([]map[string]any)[0]
 	requireEqual(t, "first", cloneTable["name"])
 	requireEqual(t, "a", cloneTable["values"].([]string)[0])
+}
+
+func requireEqual[T any](t *testing.T, want T, got T) {
+	t.Helper()
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("unexpected value (-expected +actual):\n%s", diff)
+	}
+}
+
+func testRepository() (repository profile.RepositoryConfig) {
+	return profile.RepositoryConfig{
+		ScopeRoots: map[style.Scope][]string{
+			scopeAll:         {"."},
+			scopeApp:         {"cmd", "internal"},
+			scopeCommand:     {"cmd"},
+			scopeCommandLine: {"cmdline"},
+			scopeNested:      {"cmd/client"},
+			scopeTools:       {"tools"},
+		},
+	}
 }

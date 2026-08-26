@@ -22,18 +22,18 @@ func CheckDirectDomainValueCasts(
 	}
 
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
-		if !ok || len(callExpression.Args) != 1 {
+		call, ok := node.(*ast.CallExpr)
+		if !ok || len(call.Args) != 1 {
 			return true
 		}
 
-		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+		selector, ok := call.Fun.(*ast.SelectorExpr)
 		if !ok {
 			return true
 		}
 
-		packageIdentifier, ok := selector.X.(*ast.Ident)
-		if !ok || packageIdentifier.Name != "domain" {
+		ident, ok := selector.X.(*ast.Ident)
+		if !ok || ident.Name != "domain" {
 			return true
 		}
 
@@ -46,7 +46,7 @@ func CheckDirectDomainValueCasts(
 		}
 
 		violations = append(violations, analysis.Violation{
-			Position: fileSet.Position(callExpression.Pos()),
+			Position: fileSet.Position(call.Pos()),
 			Rule:     analysis.DiagnosticNoDirectDomainCasts,
 			Message: fmt.Sprintf(
 				"direct cast to domain.%s is disallowed; use %s",

@@ -34,14 +34,14 @@ type secretPattern struct {
 
 // CheckSecrets check secrets.
 func CheckSecrets(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := committedSecretPatterns()
 
 	files, err := filewalk.CollectAllFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -60,7 +60,7 @@ func CheckSecrets(
 
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    pattern.code,
-					File:    filewalk.DisplayPath(repoRoot, path),
+					File:    filewalk.DisplayPath(root, path),
 					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "contains " + pattern.message,
 				})

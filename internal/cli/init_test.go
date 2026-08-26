@@ -59,12 +59,12 @@ func TestInitGeneratesImmediatelyValidProfile(t *testing.T) {
 
 	// The generated repository must load, compile, and prepare through the same engine pipeline
 	// other commands use. Metadata is metadata-only and launches no tool process.
-	engineInstance, err := engine.New(root)
+	engine, err := engine.New(root)
 	if err != nil {
 		t.Fatalf("engine.New: %v", err)
 	}
 
-	if _, err := engineInstance.Metadata(context.Background()); err != nil {
+	if _, err := engine.Metadata(context.Background()); err != nil {
 		t.Fatalf("generated profile must be self-contained and valid: %v", err)
 	}
 }
@@ -254,7 +254,8 @@ func TestInitRejectsDanglingSymlink(t *testing.T) {
 	if _, err := os.Lstat(missingTarget); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("init must not create the symlink target (write-through): %v", err)
 	}
-	if _, err := os.Lstat(filepath.Join(root, profile.DefaultFilename)); !errors.Is(err, os.ErrNotExist) {
+	_, err := os.Lstat(filepath.Join(root, profile.DefaultFilename))
+	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("quill.toml must not be written, got %v", err)
 	}
 }

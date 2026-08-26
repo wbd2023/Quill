@@ -8,7 +8,7 @@ import (
 )
 
 // Definition describes a modular checker collection. Tools reference the canonical Tool
-// capabilities owned by the catalogue by global ID rather than carrying copies; the catalogue
+// capabilities owned by the catalog by global ID rather than carrying copies; the catalog
 // resolves each reference and rejects unknown or duplicate declarations.
 type Definition struct {
 	ID       string

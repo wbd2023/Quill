@@ -2,14 +2,14 @@ package bash
 
 import "strings"
 
-func (state *shellSafetyState) addCleanupDiagnostics(repoRoot string, path string) {
+func (state *shellSafetyState) addCleanupDiagnostics(root string, path string) {
 	if !state.foundMktemp || state.foundTrap {
 		return
 	}
 
 	state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 		"bash/safety/temp-path",
-		repoRoot,
+		root,
 		path,
 		0,
 		"Bash scripts using mktemp must install trap-based cleanup",

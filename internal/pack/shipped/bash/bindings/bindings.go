@@ -42,45 +42,45 @@ func registerRepositoryScanners(bindings *drivers.Bindings) {
 }
 
 func scanMagicValues(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckMagicValues(
-		context.RepoRoot,
-		context.Profile.Repository,
-		context.Scope,
+		run.Root,
+		run.Profile.Repository,
+		run.Scope,
 	)
 }
 
 func scanSafety(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	return checks.CheckSafety(context.RepoRoot, context.Profile.Repository, context.Scope)
+	return checks.CheckSafety(run.Root, run.Profile.Repository, run.Scope)
 }
 
 func scanStructure(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckStructure(
-		context.RepoRoot,
-		context.Profile.Repository,
-		context.Scope,
+		run.Root,
+		run.Profile.Repository,
+		run.Scope,
 	)
 }
 
 func scanTestHygiene(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckTestHygiene(
-		context.RepoRoot,
-		context.Profile.Repository,
-		context.Scope,
+		run.Root,
+		run.Profile.Repository,
+		run.Scope,
 	)
 }

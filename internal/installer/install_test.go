@@ -75,7 +75,8 @@ func TestInstallToolSkipsBootstrapPathForManagedTool(t *testing.T) {
 		Install:       toolchain.GoInstall{Source: "example.com/goimports"},
 		Version:       toolchain.DetectByCommand("--version", toolchain.ExtractFirstToken),
 	}
-	if err := installTool(context.Background(), layout, io.Discard, tool, lockfile.Lockfile{}); err != nil {
+	err := installTool(context.Background(), layout, io.Discard, tool, lockfile.Lockfile{})
+	if err != nil {
 		t.Fatalf("installTool: %v", err)
 	}
 }

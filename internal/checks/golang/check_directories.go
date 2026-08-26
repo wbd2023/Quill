@@ -19,7 +19,7 @@ import (
 
 // CheckDirectories runs the Go style checks for the provided directories.
 func CheckDirectories(
-	repoRoot string,
+	root string,
 	directories []string,
 	repository profile.RepositoryConfig,
 	paths profile.PathRoles,
@@ -30,13 +30,13 @@ func CheckDirectories(
 		return style.ExecutionResult{}, err
 	}
 
-	violations := analyseDirectories(repoRoot, directories, repository, paths, goConfig, checks)
+	violations := analyseDirectories(root, directories, repository, paths, goConfig, checks)
 	if len(violations) == 0 {
 		return style.ExecutionResult{}, nil
 	}
 
 	return style.ExecutionResult{
-		Diagnostics: diagnosticsFromViolations(repoRoot, violations),
+		Diagnostics: diagnosticsFromViolations(root, violations),
 	}, nil
 }
 
@@ -56,14 +56,14 @@ func validateScanRoots(directories []string) (err error) {
 }
 
 func analyseDirectories(
-	repoRoot string,
+	root string,
 	directories []string,
 	repository profile.RepositoryConfig,
 	paths profile.PathRoles,
 	goConfig gopolicy.Config,
 	checks []Check,
 ) (violations []analysis.Violation) {
-	state := newAnalysisState(repoRoot, repository, paths, goConfig, checks)
+	state := newAnalysisState(root, repository, paths, goConfig, checks)
 
 	files, err := goFilesInDirectories(directories, repository)
 	if err != nil {
@@ -82,24 +82,24 @@ func analyseDirectories(
 }
 
 func diagnosticsFromViolations(
-	repoRoot string,
+	root string,
 	violations []analysis.Violation,
 ) (diagnostics []style.Diagnostic) {
 	diagnostics = make([]style.Diagnostic, 0, len(violations))
 	for _, violation := range violations {
-		diagnostics = append(diagnostics, diagnosticFromViolation(repoRoot, violation))
+		diagnostics = append(diagnostics, diagnosticFromViolation(root, violation))
 	}
 
 	return diagnostics
 }
 
 func diagnosticFromViolation(
-	repoRoot string,
+	root string,
 	violation analysis.Violation,
 ) (diagnostic style.Diagnostic) {
 	path := violation.Position.Filename
-	if repoRoot != "" && filepath.IsAbs(path) {
-		path = filewalk.DisplayPath(repoRoot, path)
+	if root != "" && filepath.IsAbs(path) {
+		path = filewalk.DisplayPath(root, path)
 	}
 
 	return style.Diagnostic{

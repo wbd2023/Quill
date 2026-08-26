@@ -70,7 +70,7 @@ func TestStyleGuideRequirementIDsMatchTheirSection(t *testing.T) {
 
 func TestStyleGuideNonAutomatedRequirementsHaveReasons(t *testing.T) {
 	for _, requirement := range loadStyleRequirements(t) {
-		if !requirement.Review.Only {
+		if !requirement.Review.IsReviewOnly {
 			continue
 		}
 		if requirement.Review.Reason != "" {

@@ -9,18 +9,18 @@ import (
 
 // PathClassifier is path classifier.
 type PathClassifier struct {
-	repoRoot string
-	paths    profile.PathRoles
+	root  string
+	paths profile.PathRoles
 }
 
 // NewPathClassifier new path classifier.
 func NewPathClassifier(
-	repoRoot string,
+	root string,
 	paths profile.PathRoles,
 ) (classifier PathClassifier) {
 	return PathClassifier{
-		repoRoot: filepath.Clean(repoRoot),
-		paths:    paths,
+		root:  filepath.Clean(root),
+		paths: paths,
 	}
 }
 
@@ -65,7 +65,7 @@ func (classifier PathClassifier) FirstPattern(roleName string) (pattern string) 
 func (classifier PathClassifier) relativePath(path string) (relativePath string) {
 	cleanedPath := filepath.Clean(path)
 	if filepath.IsAbs(cleanedPath) {
-		relativePath, err := filepath.Rel(classifier.repoRoot, cleanedPath)
+		relativePath, err := filepath.Rel(classifier.root, cleanedPath)
 		if err == nil {
 			return filepath.ToSlash(filepath.Clean(relativePath))
 		}
@@ -75,12 +75,12 @@ func (classifier PathClassifier) relativePath(path string) (relativePath string)
 }
 
 func matchesRelativePathPattern(relativePath string, pattern string) (matches bool) {
-	normalisedPath := filepath.ToSlash(filepath.Clean(relativePath))
+	normalised := filepath.ToSlash(filepath.Clean(relativePath))
 	normalisedPattern := filepath.ToSlash(filepath.Clean(strings.TrimSuffix(pattern, "/")))
 	if strings.HasSuffix(pattern, "/") {
-		return normalisedPath == normalisedPattern ||
-			strings.HasPrefix(normalisedPath, normalisedPattern+"/")
+		return normalised == normalisedPattern ||
+			strings.HasPrefix(normalised, normalisedPattern+"/")
 	}
 
-	return normalisedPath == normalisedPattern
+	return normalised == normalisedPattern
 }

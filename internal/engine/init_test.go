@@ -11,6 +11,8 @@ import (
 	"github.com/wbd2023/quill/internal/profile"
 )
 
+/* -------------------------------------------- Tests ------------------------------------------- */
+
 func TestInitCreatesImmediatelyUsableRepository(t *testing.T) {
 	t.Parallel()
 
@@ -52,7 +54,8 @@ func TestInitRefusesSymlinkedPolicyFile(t *testing.T) {
 	if _, err := os.Lstat(missingTarget); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("Init must not create the symlink target: %v", err)
 	}
-	if _, err := os.Lstat(filepath.Join(root, profile.DefaultFilename)); !errors.Is(err, os.ErrNotExist) {
+	profilePath := filepath.Join(root, profile.DefaultFilename)
+	if _, err := os.Lstat(profilePath); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("quill.toml must not be written: %v", err)
 	}
 }
@@ -64,7 +67,8 @@ func TestWritePolicyFilesRollsBackAfterSecondWriteFailure(t *testing.T) {
 	stylePath := filepath.Join(root, styleFileName)
 	profilePath := filepath.Join(root, "missing", profileFileName)
 
-	if err := writePolicyFiles(context.Background(), stylePath, profilePath, "style", "profile"); err == nil {
+	err := writePolicyFiles(context.Background(), stylePath, profilePath, "style", "profile")
+	if err == nil {
 		t.Fatal("writePolicyFiles succeeded with a missing profile parent")
 	}
 	if _, err := os.Lstat(stylePath); !errors.Is(err, os.ErrNotExist) {
@@ -76,10 +80,10 @@ func TestInitCancellationBeforeWritesLeavesNoPolicyFiles(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := Init(operationContext, root, defaultPreset)
+	_, err := Init(ctx, root, defaultPreset)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("Init error = %v, want context.Canceled", err)
 	}
@@ -102,8 +106,18 @@ func TestInitRefusalNamesActuallyOccupiedFile(t *testing.T) {
 		named  string
 		other  string
 	}{
-		{name: "only style guide", create: styleFileName, named: styleFileName, other: profileFileName},
-		{name: "only profile", create: profileFileName, named: profileFileName, other: styleFileName},
+		{
+			name:   "only style guide",
+			create: styleFileName,
+			named:  styleFileName,
+			other:  profileFileName,
+		},
+		{
+			name:   "only profile",
+			create: profileFileName,
+			named:  profileFileName,
+			other:  styleFileName,
+		},
 	}
 
 	for _, test := range cases {
@@ -111,7 +125,8 @@ func TestInitRefusalNamesActuallyOccupiedFile(t *testing.T) {
 			t.Parallel()
 
 			root := t.TempDir()
-			if err := os.WriteFile(filepath.Join(root, test.create), []byte("#"), 0o644); err != nil {
+			path := filepath.Join(root, test.create)
+			if err := os.WriteFile(path, []byte("#"), 0o644); err != nil {
 				t.Fatal(err)
 			}
 
@@ -146,9 +161,15 @@ func TestInitGeneratedProfileDocumentsValidListSelector(t *testing.T) {
 
 	profileText := string(body)
 	if !strings.Contains(profileText, "quill list rules") {
-		t.Fatalf("generated profile must document the valid `quill list rules` selector:\n%s", profileText)
+		t.Fatalf(
+			"generated profile must document the valid `quill list rules` selector:\n%s",
+			profileText,
+		)
 	}
 	if strings.Contains(profileText, "quill list`") {
-		t.Fatalf("generated profile must not document the invalid bare `quill list`:\n%s", profileText)
+		t.Fatalf(
+			"generated profile must not document the invalid bare `quill list`:\n%s",
+			profileText,
+		)
 	}
 }

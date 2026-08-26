@@ -7,7 +7,7 @@ import (
 	"github.com/wbd2023/quill/internal/testutil/profiles"
 )
 
-func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig) {
+func currentSectionHeaders(t *testing.T) (config textpolicy.SectionHeaderConfig) {
 	t.Helper()
 
 	policy, found := profiles.Self(t).PackPolicies.Lookup("text")
@@ -15,10 +15,12 @@ func currentSectionHeaders(t *testing.T) (headers textpolicy.SectionHeaderConfig
 		t.Fatal("expected Text Pack Policy")
 	}
 
-	config, err := textpolicy.DecodeConfig(policy)
+	decoded, err := textpolicy.DecodeConfig(policy)
 	if err != nil {
 		t.Fatalf("DecodeConfig: %v", err)
 	}
 
-	return config.SectionHeaders
+	config = decoded.SectionHeaders
+
+	return config
 }

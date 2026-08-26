@@ -22,6 +22,6 @@ type Requirement struct {
 
 // Review describes review-only metadata for a STYLE.md requirement.
 type Review struct {
-	Only   bool
-	Reason string
+	IsReviewOnly bool
+	Reason       string
 }

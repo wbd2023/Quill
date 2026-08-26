@@ -12,6 +12,8 @@ import (
 
 const temporaryFilePermissions os.FileMode = 0o600
 
+/* ---------------------------------- Staged Executable Writes ---------------------------------- */
+
 // copyExecutable copies source to destination as an executable file.
 func copyExecutable(root string, source string, destination string) (err error) {
 	src, err := os.Open(source)
@@ -117,6 +119,8 @@ func writeExecutable(root string, destination string, reader io.Reader) (err err
 
 	return nil
 }
+
+/* ----------------------------------- Rooted Temporary Files ----------------------------------- */
 
 // createTempInRoot creates a unique temporary regular file inside dir, mirroring os.CreateTemp
 // against a rooted directory handle (Go 1.24 os.Root does not yet provide CreateTemp).

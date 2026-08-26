@@ -16,18 +16,18 @@ import (
 func TestStylePlatformImportBoundaries(t *testing.T) {
 	t.Parallel()
 
-	toolsRoot := importBoundaryRoot(t)
-	modulePath := moduleImportPath(t, toolsRoot)
+	root := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, root)
 	for _, testCase := range importBoundaryCases() {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			directory := filepath.Join(toolsRoot, testCase.directory)
+			directory := filepath.Join(root, testCase.directory)
 			files := productionGoFiles(t, directory, testCase.recursive, testCase.excludeSubdirs)
 			for _, file := range files {
 				for _, imported := range fileImports(t, file) {
-					if !forbiddenImportExcept(
+					if !hasForbiddenImportExcept(
 						imported, modulePath, testCase.allowed, testCase.forbidden,
 					) {
 						continue
@@ -40,17 +40,62 @@ func TestStylePlatformImportBoundaries(t *testing.T) {
 	}
 }
 
+func TestHasForbiddenImportExceptMatchesWholePackagePaths(t *testing.T) {
+	t.Parallel()
+
+	const modulePath = "example.test/quill"
+	testCases := []struct {
+		name      string
+		imported  string
+		forbidden []string
+		want      bool
+	}{
+		{
+			name:      "exact package",
+			imported:  modulePath + "/internal/process",
+			forbidden: []string{"internal/process"},
+			want:      true,
+		},
+		{
+			name:      "package child",
+			imported:  modulePath + "/internal/process/runner",
+			forbidden: []string{"internal/process"},
+			want:      true,
+		},
+		{
+			name:      "similarly prefixed sibling",
+			imported:  modulePath + "/internal/processors",
+			forbidden: []string{"internal/process"},
+			want:      false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			got := hasForbiddenImportExcept(
+				testCase.imported,
+				modulePath,
+				nil,
+				testCase.forbidden,
+			)
+			if got != testCase.want {
+				t.Fatalf("hasForbiddenImportExcept() = %t, want %t", got, testCase.want)
+			}
+		})
+	}
+}
+
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
-func importBoundaryRoot(t *testing.T) (toolsRoot string) {
+func importBoundaryRoot(t *testing.T) (root string) {
 	t.Helper()
 	return testutil.RepositoryRoot(t)
 }
 
-func moduleImportPath(t *testing.T, repositoryRoot string) (modulePath string) {
+func moduleImportPath(t *testing.T, root string) (modulePath string) {
 	t.Helper()
 
-	contents, err := os.ReadFile(filepath.Join(repositoryRoot, "go.mod"))
+	contents, err := os.ReadFile(filepath.Join(root, "go.mod"))
 	if err != nil {
 		t.Fatalf("read go.mod: %v", err)
 	}
@@ -169,11 +214,11 @@ func fileImports(t *testing.T, path string) (imports []string) {
 	return imports
 }
 
-func forbiddenImport(imported string, modulePath string, forbidden []string) (found bool) {
-	return forbiddenImportExcept(imported, modulePath, nil, forbidden)
+func hasForbiddenImport(imported string, modulePath string, forbidden []string) (found bool) {
+	return hasForbiddenImportExcept(imported, modulePath, nil, forbidden)
 }
 
-func forbiddenImportExcept(
+func hasForbiddenImportExcept(
 	imported string,
 	modulePath string,
 	allowed []string,
@@ -198,49 +243,4 @@ func forbiddenImportExcept(
 	}
 
 	return false
-}
-
-func TestForbiddenImportExceptMatchesWholePackagePaths(t *testing.T) {
-	t.Parallel()
-
-	const modulePath = "example.test/quill"
-	testCases := []struct {
-		name      string
-		imported  string
-		forbidden []string
-		want      bool
-	}{
-		{
-			name:      "exact package",
-			imported:  modulePath + "/internal/process",
-			forbidden: []string{"internal/process"},
-			want:      true,
-		},
-		{
-			name:      "package child",
-			imported:  modulePath + "/internal/process/runner",
-			forbidden: []string{"internal/process"},
-			want:      true,
-		},
-		{
-			name:      "similarly prefixed sibling",
-			imported:  modulePath + "/internal/processors",
-			forbidden: []string{"internal/process"},
-			want:      false,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			got := forbiddenImportExcept(
-				testCase.imported,
-				modulePath,
-				nil,
-				testCase.forbidden,
-			)
-			if got != testCase.want {
-				t.Fatalf("forbiddenImportExcept() = %t, want %t", got, testCase.want)
-			}
-		})
-	}
 }

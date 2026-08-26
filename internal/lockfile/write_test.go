@@ -145,11 +145,11 @@ func (*cancellationAtCommitContext) Deadline() (deadline time.Time, ok bool) {
 	return time.Time{}, false
 }
 
-func (ctx *cancellationAtCommitContext) Done() <-chan struct{} {
+func (ctx *cancellationAtCommitContext) Done() (done <-chan struct{}) {
 	return ctx.done
 }
 
-func (ctx *cancellationAtCommitContext) Err() error {
+func (ctx *cancellationAtCommitContext) Err() (err error) {
 	ctx.checks++
 	if ctx.checks < 2 {
 		return nil
@@ -158,6 +158,6 @@ func (ctx *cancellationAtCommitContext) Err() error {
 	return context.Canceled
 }
 
-func (*cancellationAtCommitContext) Value(any) any {
+func (*cancellationAtCommitContext) Value(any) (value any) {
 	return nil
 }

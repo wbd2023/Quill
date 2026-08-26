@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"io"
+	"os"
 	"path/filepath"
 
 	"github.com/wbd2023/quill/internal/ecosystem/golang"
@@ -29,26 +30,26 @@ import (
 // Engine holds only immutable configuration. It does not cache a loaded profile, compiled plan,
 // style guide, or toolchain state between operations. Each method loads a fresh snapshot through
 // one preparation pipeline.
-type Engine struct {
-	repositoryRoot string
+type Engine struct { // style: allow-package-stutter because: foundational package type
+	root           string
 	commandRunner  toolchain.CommandRunner
 	progressWriter io.Writer
 }
 
 // Option configures an Engine.
-type Option func(configuration *engineConfiguration) (optionError error)
+type Option func(configuration *engineConfiguration) error
 
 type engineConfiguration struct {
-	repositoryRoot string
+	root           string
 	commandRunner  toolchain.CommandRunner
 	progressWriter io.Writer
 }
 
-// New constructs an Engine for the repository at repositoryRoot. The default command runner
+// New constructs an Engine for the repository rooted at root. The default command runner
 // executes local commands.
-func New(repositoryRoot string, options ...Option) (engine *Engine, optionError error) {
+func New(root string, options ...Option) (engine *Engine, err error) {
 	configuration := engineConfiguration{
-		repositoryRoot: repositoryRoot,
+		root:           root,
 		commandRunner:  process.Runner{},
 		progressWriter: io.Discard,
 	}
@@ -59,13 +60,13 @@ func New(repositoryRoot string, options ...Option) (engine *Engine, optionError 
 		}
 	}
 
-	canonicalRoot, err := workspace.CanonicalRoot(configuration.repositoryRoot)
+	canonicalRoot, err := workspace.CanonicalRoot(configuration.root)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Engine{
-		repositoryRoot: canonicalRoot,
+		root:           canonicalRoot,
 		commandRunner:  configuration.commandRunner,
 		progressWriter: configuration.progressWriter,
 	}, nil
@@ -73,7 +74,7 @@ func New(repositoryRoot string, options ...Option) (engine *Engine, optionError 
 
 // WithCommandRunner replaces the command runner used for tool inspection.
 func WithCommandRunner(commandRunner toolchain.CommandRunner) (option Option) {
-	return func(configuration *engineConfiguration) (optionError error) {
+	return func(configuration *engineConfiguration) error {
 		configuration.commandRunner = commandRunner
 		return nil
 	}
@@ -82,7 +83,7 @@ func WithCommandRunner(commandRunner toolchain.CommandRunner) (option Option) {
 // WithProgressWriter sets the writer for tool-installation and lock-resolution progress messages.
 // The default discards all output.
 func WithProgressWriter(writer io.Writer) (option Option) {
-	return func(configuration *engineConfiguration) (optionError error) {
+	return func(configuration *engineConfiguration) error {
 		configuration.progressWriter = writer
 		return nil
 	}
@@ -107,47 +108,51 @@ type resolvedDrivers struct {
 }
 
 // prepare loads a fresh repository snapshot for one operation: the Profile,
-// the STYLE.md document, the Pack catalogue, and the compiled Plan.
+// the STYLE.md document, the Pack catalog, and the compiled Plan.
 // Requirement IDs bound by the Profile are validated against the parsed document
 // before the Profile is compiled, so an unknown but syntactically valid
 // Requirement ID fails before any Rule or Tool operation.
 func (engine *Engine) prepare(
-	operationContext context.Context,
-) (prepared preparedOperation, prepareError error) {
-	if err := operationContext.Err(); err != nil {
+	ctx context.Context,
+) (prepared preparedOperation, err error) {
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
-	config, err := profile.Load(engine.repositoryRoot)
+	config, err := profile.Load(engine.root)
 	if err != nil {
 		return preparedOperation{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
-	document, err := styleguide.Load(engine.repositoryRoot, styleguide.Config{
+	document, err := styleguide.Load(engine.root, styleguide.Config{
 		Filename: config.StyleGuide.Path,
 	})
 	if err != nil {
 		return preparedOperation{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
 	if err = validateRequirementBindings(config, document); err != nil {
 		return preparedOperation{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
-	externalPacks, err := external.LoadSources(engine.repositoryRoot, config.PackSources)
+	externalPacks, err := external.LoadSources(engine.root, config.PackSources)
 	if err != nil {
 		return preparedOperation{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
@@ -160,7 +165,8 @@ func (engine *Engine) prepare(
 	if err != nil {
 		return preparedOperation{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return preparedOperation{}, err
 	}
 
@@ -183,10 +189,10 @@ func (engine *Engine) prepare(
 // such as Coverage call prepare directly and never construct a runner context, drivers, or
 // inspected tools.
 func (engine *Engine) prepareRun(
-	operationContext context.Context,
+	ctx context.Context,
 	scope style.Scope,
-) (runContext execution.RunContext, driverSets resolvedDrivers, prepareError error) {
-	prepared, err := engine.prepare(operationContext)
+) (run execution.RunContext, resolved resolvedDrivers, err error) {
+	prepared, err := engine.prepare(ctx)
 	if err != nil {
 		return execution.RunContext{}, resolvedDrivers{}, err
 	}
@@ -205,19 +211,19 @@ func (engine *Engine) prepareRun(
 		return execution.RunContext{}, resolvedDrivers{}, err
 	}
 
-	driverSets = resolvedDrivers{
+	driverSets := resolvedDrivers{
 		check: drivers.CheckDrivers(built),
 		fix:   drivers.FixDrivers(built),
 	}
 
-	layout := workspace.NewLayout(engine.repositoryRoot)
-	path := layout.BuildPath(node.BinaryDirectory(layout))
+	layout := workspace.NewLayout(engine.root)
+	path := layout.BuildPath(os.Getenv("PATH"), node.BinaryDirectory(layout))
 	toolEnvironment := map[string]string{"PATH": path}
 	goEnvironment := golang.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
-	runContext = execution.NewRunContext(
-		engine.repositoryRoot,
+	runContext := execution.NewRunContext(
+		engine.root,
 		scope,
 		prepared.config,
 		prepared.plan,

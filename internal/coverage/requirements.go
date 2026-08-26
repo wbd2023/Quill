@@ -22,7 +22,7 @@ func buildRequirements(
 			mode = ModeAutomated
 			reason = ""
 		}
-		if documentedRequirement.Review.Only {
+		if documentedRequirement.Review.IsReviewOnly {
 			mode = ModeReviewOnly
 			reason = documentedRequirement.Review.Reason
 		}

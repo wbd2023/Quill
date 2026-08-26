@@ -6,19 +6,17 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* --------------------------------------- Doctor Command --------------------------------------- */
-
 type doctorCmd struct {
 	repoFlags
 }
 
 func (c *doctorCmd) run(ctx context.Context, runner Runner) (exitCode int) {
-	engineInstance, err := c.newEngine()
+	engine, err := c.newEngine()
 	if err != nil {
 		return runner.reportCommandError("doctor", c.Format, err)
 	}
 
-	inspection, err := engineInstance.Inspect(ctx)
+	inspection, err := engine.Inspect(ctx)
 	if err != nil {
 		return runner.reportCommandError("doctor", c.Format, err)
 	}
@@ -32,6 +30,7 @@ func (c *doctorCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 	if err != nil {
 		return runner.reportCommandError("doctor", c.Format, err)
 	}
+
 	if !allValid {
 		return 1
 	}

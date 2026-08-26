@@ -9,16 +9,16 @@ import (
 )
 
 func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/test.sh",
 		"#!/bin/bash\nset -euo pipefail\necho test # style: allow long-line\n",
 	)
 
 	result, err := CheckExceptionMarkers(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
@@ -35,16 +35,16 @@ func TestCheckExceptionMarkersRejectsMalformedMarkers(t *testing.T) {
 }
 
 func TestCheckExceptionMarkersAcceptsValidMarkers(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n// style: allow-non-ascii because: test vector\nconst value = \"ok\"\n",
 	)
 
 	result, err := CheckExceptionMarkers(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)

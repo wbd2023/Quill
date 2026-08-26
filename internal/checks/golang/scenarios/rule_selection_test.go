@@ -119,15 +119,15 @@ func Render(value string) (rendered string) {
 
 func runSelectedGoStyleCheck(
 	t *testing.T,
-	targetDirectory string,
+	directory string,
 	checkName golang.Check,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
 	config := scenarioConfig(t)
 	result, err = golang.CheckDirectories(
-		targetDirectory,
-		[]string{filepath.Join(targetDirectory, "internal")},
+		directory,
+		[]string{filepath.Join(directory, "internal")},
 		config.Repository,
 		config.PathRoles,
 		goConfigForTest(t, config),

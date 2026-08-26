@@ -5,7 +5,7 @@ import (
 )
 
 // BuildAll returns the canonical Shipped Tool capabilities. Each Tool is defined exactly once here;
-// Packs reference these Tools by global ID (see ids.go) and the catalogue resolves the references,
+// Packs reference these Tools by global ID (see ids.go) and the catalog resolves the references,
 // so a Tool capability is never duplicated across Packs.
 func BuildAll() (capabilities []toolchain.Capability) {
 	return []toolchain.Capability{

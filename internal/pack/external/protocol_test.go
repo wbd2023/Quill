@@ -31,7 +31,7 @@ func TestParseResponseAcceptsDiagnosticsAndCompletion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !outcome.Success {
+	if !outcome.Succeeded {
 		t.Fatalf("expected success completion")
 	}
 	if len(outcome.Diagnostics) != 2 {
@@ -115,7 +115,7 @@ func TestParseResponseCompletionFailure(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if outcome.Success {
+	if outcome.Succeeded {
 		t.Fatal("expected failure completion")
 	}
 	if outcome.Error != "config field missing" {
@@ -193,7 +193,7 @@ func TestParseResponseSkipsBlankLines(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !outcome.Success {
+	if !outcome.Succeeded {
 		t.Fatal("expected success")
 	}
 	if len(outcome.Diagnostics) != 0 {

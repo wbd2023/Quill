@@ -10,17 +10,17 @@ import (
 )
 
 func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
 	result, _ := CheckSectionHeaderDensity(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -41,7 +41,7 @@ func TestCheckSectionHeaderDensityWarnsForShortFileHeader(t *testing.T) {
 }
 
 func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
 	var builder strings.Builder
 	builder.WriteString("package example\n\n")
@@ -49,10 +49,10 @@ func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
 	for range 77 {
 		builder.WriteString("const value = 1\n")
 	}
-	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, root, "internal/example/example.go", builder.String())
 
 	result, err := CheckSectionHeaderDensity(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -66,17 +66,17 @@ func TestCheckSectionHeaderDensityAllowsEightyLineFile(t *testing.T) {
 }
 
 func TestCheckSectionHeaderDensityWarnsForManyHeaders(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
 	var builder strings.Builder
 	builder.WriteString("package example\n\n")
 	for range 7 {
 		builder.WriteString(header + "\n\n")
 	}
-	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, root, "internal/example/example.go", builder.String())
 
 	result, _ := CheckSectionHeaderDensity(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),

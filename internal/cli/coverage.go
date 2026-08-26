@@ -6,20 +6,18 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* -------------------------------------- Coverage Command -------------------------------------- */
-
 type coverageCmd struct {
 	repoFlags
 	Verbose bool `kong:"name=verbose,help=print requirement-level detail"`
 }
 
 func (c *coverageCmd) run(ctx context.Context, runner Runner) (exitCode int) {
-	engineInstance, err := c.newEngine()
+	engine, err := c.newEngine()
 	if err != nil {
 		return runner.reportCommandError("coverage", c.Format, err)
 	}
 
-	coverageReport, err := engineInstance.Coverage(ctx)
+	coverage, err := engine.Coverage(ctx)
 	if err != nil {
 		return runner.reportCommandError("coverage", c.Format, err)
 	}
@@ -28,7 +26,7 @@ func (c *coverageCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 		runner.stdout,
 		runner.envelopeMetadata("coverage"),
 		c.Format,
-		report.NewCoverageView(coverageReport),
+		report.NewCoverageView(coverage),
 		c.Verbose,
 	); err != nil {
 		return runner.reportCommandError("coverage", c.Format, err)

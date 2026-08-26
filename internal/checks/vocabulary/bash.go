@@ -12,7 +12,7 @@ import (
 
 func checkBashVocabulary(
 	result *style.ExecutionResult,
-	repoRoot string,
+	root string,
 	path string,
 	config vocabularypolicy.Config,
 ) (err error) {
@@ -27,7 +27,7 @@ func checkBashVocabulary(
 
 		result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 			Code:  "vocabulary/project-terms/bash-assignment",
-			File:  filewalk.DisplayPath(repoRoot, path),
+			File:  filewalk.DisplayPath(root, path),
 			Range: style.Range{Start: style.Position{Line: line.Number}},
 			Message: fmt.Sprintf(
 				"bash variable %q must be %s",

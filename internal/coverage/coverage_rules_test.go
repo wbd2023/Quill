@@ -12,7 +12,7 @@ func TestAutomatedRequirementsReferenceRules(t *testing.T) {
 		ruleIDs[rule.ID] = true
 	}
 
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, requirement := range report.Requirements {
 		if requirement.Mode != ModeAutomated {
 			continue
@@ -35,7 +35,7 @@ func TestAutomatedRequirementsReferenceRules(t *testing.T) {
 }
 
 func TestQuillCoverageUsesGranularRuleBindings(t *testing.T) {
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	expected := map[string]string{
 		"3.8.inline-comments-lowercase": "go/comments",
 		"3.1.adapters-wrap-with-cause":  "go/errors",
@@ -43,7 +43,7 @@ func TestQuillCoverageUsesGranularRuleBindings(t *testing.T) {
 	}
 
 	for requirementID, ruleID := range expected {
-		requirement, found := coverageRequirementByID(report, requirementID)
+		requirement, found := requirementByID(report, requirementID)
 		if !found {
 			t.Fatalf("requirement %q missing from coverage report", requirementID)
 		}
@@ -60,7 +60,7 @@ func TestQuillCoverageUsesGranularRuleBindings(t *testing.T) {
 }
 
 func TestGoStyleCoverageDoesNotReferenceLegacyMonolithRules(t *testing.T) {
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, requirement := range report.Requirements {
 		for _, ruleID := range requirement.RuleIDs {
 			switch ruleID {

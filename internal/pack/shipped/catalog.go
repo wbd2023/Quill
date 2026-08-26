@@ -12,7 +12,7 @@ import (
 	"github.com/wbd2023/quill/internal/pack/shipped/vocabulary"
 )
 
-// DefaultCatalog returns the Shipped Pack catalogue. The catalogue owns every canonical Tool
+// DefaultCatalog returns the Shipped Pack catalog. The catalog owns every canonical Tool
 // capability exactly once; each Pack references its Tools by global ID.
 func DefaultCatalog() (catalog pack.Catalog) {
 	return pack.NewCatalog(
@@ -42,12 +42,12 @@ func DefaultCatalog() (catalog pack.Catalog) {
 	)
 }
 
-// DefaultRegistry builds a registry from the Shipped Pack catalogue.
+// DefaultRegistry builds a registry from the Shipped Pack catalog.
 func DefaultRegistry(enabled []string) (registry pack.Registry, err error) {
 	return DefaultCatalog().Registry(enabled)
 }
 
-// ComposeCatalog returns the Shipped catalogue augmented with external Pack definitions. External
+// ComposeCatalog returns the Shipped catalog augmented with external Pack definitions. External
 // Packs declare no canonical Tools - their Rules reference self-describing ExternalCheck Jobs - so
 // composition does not create a second selection, binding, or execution pipeline.
 func ComposeCatalog(external []pack.Definition) (catalog pack.Catalog) {

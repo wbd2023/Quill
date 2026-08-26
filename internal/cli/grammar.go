@@ -33,7 +33,7 @@ type repoFlags struct {
 	Format report.OutputFormat `kong:"default=text,enum='text,json',help=format: text|json"`
 }
 
-func (flags repoFlags) newEngine(options ...engine.Option) (instance *engine.Engine, err error) {
+func (flags repoFlags) newEngine(options ...engine.Option) (application *engine.Engine, err error) {
 	root, err := resolveRepositoryRoot(flags.Root)
 	if err != nil {
 		return nil, err
@@ -56,9 +56,11 @@ func (reference *ruleRef) Decode(context *kong.DecodeContext) (err error) {
 	if !found {
 		return fmt.Errorf("invalid subject %q: expected rule:<id>", subject)
 	}
+
 	if kind != "rule" {
 		return fmt.Errorf("unsupported subject %q: only rule:<id> is supported", subject)
 	}
+
 	if strings.TrimSpace(id) == "" {
 		return fmt.Errorf("invalid subject %q: rule id must not be empty", subject)
 	}
@@ -104,31 +106,40 @@ type commandLine struct {
 }
 
 // lookup returns the command implementation backing the parsed node, or nil for the root.
-func (m *commandLine) lookup(node *kong.Node) (cmd command) {
+func (cl *commandLine) lookup(node *kong.Node) (cmd command) {
 	if node == nil {
 		return nil
 	}
 	switch node.Name {
 	case "check":
-		return &m.Check
+		return &cl.Check
+
 	case "fix":
-		return &m.Fix
+		return &cl.Fix
+
 	case "doctor":
-		return &m.Doctor
+		return &cl.Doctor
+
 	case "coverage":
-		return &m.Coverage
+		return &cl.Coverage
+
 	case "install":
-		return &m.Install
+		return &cl.Install
+
 	case "lock":
-		return &m.Lock
+		return &cl.Lock
+
 	case "version":
-		return &m.Version
+		return &cl.Version
+
 	case "init":
-		return &m.Init
+		return &cl.Init
+
 	case "list":
-		return &m.List
+		return &cl.List
+
 	case "explain":
-		return &m.Explain
+		return &cl.Explain
 	}
 	return nil
 }

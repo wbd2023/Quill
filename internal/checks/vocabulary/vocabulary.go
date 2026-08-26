@@ -11,14 +11,15 @@ const goTypeSuffixMatchLength = 2
 const goIdentifierSuffixMatchLength = 2
 const bashAssignmentMatchLength = 4
 
-// CheckVocabulary check vocabulary.
+// CheckVocabulary walks the scope's Go and shell files, skipping excluded and generated paths, and
+// flags identifiers and assignments that violate the pack's vocabulary policy.
 func CheckVocabulary(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	config vocabularypolicy.Config,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
-	roots := repository.ResolveScopeRoots(repoRoot, scope)
+	roots := repository.ResolveScopeRoots(root, scope)
 	walkConfig := filewalk.WalkConfig{
 		ExcludedDirectories: repository.ExcludedDirectories,
 		GeneratedMarker:     repository.GeneratedMarker,
@@ -35,14 +36,14 @@ func CheckVocabulary(
 	}
 
 	for _, path := range goFiles {
-		err = checkGoVocabulary(&result, repoRoot, path, config)
+		err = checkGoVocabulary(&result, root, path, config)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 	}
 
 	for _, path := range shellFiles {
-		err = checkBashVocabulary(&result, repoRoot, path, config)
+		err = checkBashVocabulary(&result, root, path, config)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}

@@ -11,10 +11,10 @@ import (
 func TestFileCommandArgumentsAppendsSelectedFiles(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	files := []string{
-		filepath.Join(repoRoot, "README.md"),
-		filepath.Join(repoRoot, "docs", "architecture.md"),
+		filepath.Join(root, "README.md"),
+		filepath.Join(root, "docs", "architecture.md"),
 	}
 	job := style.FileCommand{
 		Arguments:      []string{"--check"},
@@ -22,11 +22,11 @@ func TestFileCommandArgumentsAppendsSelectedFiles(t *testing.T) {
 		ConfigFile:     ".markdownlint.jsonc",
 	}
 
-	arguments := FileCommandArguments(repoRoot, job, files)
+	arguments := FileCommandArguments(root, job, files)
 	want := []string{
 		"--check",
 		"--config",
-		filepath.Join(repoRoot, ".markdownlint.jsonc"),
+		filepath.Join(root, ".markdownlint.jsonc"),
 		files[0],
 		files[1],
 	}

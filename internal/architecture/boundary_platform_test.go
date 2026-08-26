@@ -148,7 +148,7 @@ func platformBoundaryCases() (testCases []importBoundaryCase) {
 			},
 		},
 		{
-			name:      "shipped Pack catalogue avoids execution orchestration",
+			name:      "shipped Pack catalog avoids execution orchestration",
 			directory: "internal/pack/shipped",
 			forbidden: []string{
 				"internal/architecture",

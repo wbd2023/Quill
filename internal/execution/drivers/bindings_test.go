@@ -25,11 +25,13 @@ func TestBindingsDistinguishSameLocalIDAcrossPacks(t *testing.T) {
 	bindings.AddRepositoryScanner("alpha", "shared", scanner)
 	bindings.AddRepositoryScanner("beta", "shared", scanner)
 
-	if _, found := bindings.LookupRepositoryScanner("alpha", "shared"); !found {
-		t.Fatal("expected alpha/shared scanner registered")
+	alphaScanner, alphaFound := bindings.LookupRepositoryScanner("alpha", "shared")
+	if !alphaFound {
+		t.Fatalf("expected alpha/shared scanner registered, got scanner=%+v", alphaScanner)
 	}
-	if _, found := bindings.LookupRepositoryScanner("beta", "shared"); !found {
-		t.Fatal("expected beta/shared scanner registered")
+	betaScanner, betaFound := bindings.LookupRepositoryScanner("beta", "shared")
+	if !betaFound {
+		t.Fatalf("expected beta/shared scanner registered, got scanner=%+v", betaScanner)
 	}
 }
 

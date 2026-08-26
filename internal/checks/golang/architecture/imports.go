@@ -25,11 +25,11 @@ type listedPackage struct {
 // CheckImports checks import boundaries from a go list JSON stream.
 func CheckImports(
 	modulePath string,
-	packageList string,
+	packagesJSON string,
 	architecture gopolicy.ArchitectureConfig,
 ) (result style.ExecutionResult, err error) {
 	modulePath = strings.TrimSpace(modulePath)
-	decoder := json.NewDecoder(strings.NewReader(packageList))
+	decoder := json.NewDecoder(strings.NewReader(packagesJSON))
 	diagnostics := make([]style.Diagnostic, 0)
 
 	for decoder.More() {

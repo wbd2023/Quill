@@ -4,14 +4,14 @@ import "github.com/wbd2023/quill/internal/checks/golang/syntax"
 
 func (state *analysisState) addCrossFileViolations(scanRoots []string) {
 	if state.enabled(CheckDomainValues) {
-		typeAwareViolations, typeAwareRan := syntax.CollectTypeAwareDomainValueCastViolations(
+		violations, ran := syntax.CollectTypeAwareDomainValueCastViolations(
 			scanRoots,
 			state.scannedGoFiles,
 			state.pathClassifier,
 			state.domainValueConstructors,
 		)
-		if typeAwareRan {
-			state.violations = append(state.violations, typeAwareViolations...)
+		if ran {
+			state.violations = append(state.violations, violations...)
 		}
 	}
 

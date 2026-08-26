@@ -7,6 +7,8 @@ import (
 	"github.com/wbd2023/quill/internal/engine"
 )
 
+/* --------------------------------------- Explain Result --------------------------------------- */
+
 // ExplainResult is the presentation result of one explain operation.
 type ExplainResult struct {
 	Rule ExplainRule `json:"rule"`
@@ -46,6 +48,8 @@ type ExplainExecution struct {
 	Language string   `json:"language,omitempty"`
 }
 
+/* ------------------------------------------ Rendering ----------------------------------------- */
+
 // WriteExplain writes an explain result in the requested format. In JSON mode it writes the full
 // machine envelope identified by metadata.
 func WriteExplain(
@@ -63,6 +67,8 @@ func WriteExplain(
 		return fmt.Errorf("unsupported output format %q", format)
 	}
 }
+
+/* ----------------------------------------- Conversion ----------------------------------------- */
 
 // NewExplainResult converts an active engine explanation into the explicit explain protocol DTO.
 func NewExplainResult(explanation engine.ExplainResult) (result ExplainResult) {

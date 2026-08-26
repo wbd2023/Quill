@@ -9,7 +9,7 @@ func CheckStatus(
 	rule style.Rule,
 	result style.ExecutionResult,
 	err error,
-	strictRecommendations bool,
+	strict bool,
 ) (status style.CheckStatus) {
 	switch {
 	case IsBlocked(err):
@@ -21,7 +21,7 @@ func CheckStatus(
 	case result.Empty():
 		return style.CheckStatusPass
 
-	case rule.Enforcement == style.EnforcementRecommendation && !strictRecommendations:
+	case rule.Enforcement == style.EnforcementRecommendation && !strict:
 		return style.CheckStatusWarn
 
 	default:

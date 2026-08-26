@@ -18,7 +18,14 @@ import (
 // Unix-specific exit code. POSIX process groups need no post-start binding (afterStart is nil) and
 // no tracked resources to release (release is a no-op); the caller splits Start and Wait only on
 // Windows.
-func configureProcessTree(command *exec.Cmd) (state *killState, afterStart func(cmd *exec.Cmd) error, release func(), err error) {
+func configureProcessTree(
+	command *exec.Cmd,
+) (
+	state *killState,
+	afterStart func(cmd *exec.Cmd) error,
+	release func(),
+	err error,
+) {
 	state = &killState{}
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	command.Cancel = cancelProcessGroup(command, state)

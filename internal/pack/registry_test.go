@@ -124,7 +124,7 @@ func TestRegistryRulesReturnIndependentDefinitions(t *testing.T) {
 	}
 }
 
-/* ---------------------------------- Catalogue Tool Ownership ---------------------------------- */
+/* ----------------------------------- Catalog Tool Ownership ----------------------------------- */
 
 func TestCatalogRejectsDuplicateToolIDs(t *testing.T) {
 	tools := []toolchain.Capability{
@@ -289,7 +289,7 @@ func TestRegistryResolvesSharedToolOnce(t *testing.T) {
 }
 
 // A Pack's rule may only reference Tools the Pack itself declares. Even when the aggregate
-// catalogue contains a Tool (because another Pack declares it), a Pack borrowing that Tool for its
+// catalog contains a Tool (because another Pack declares it), a Pack borrowing that Tool for its
 // own rule is rejected at assembly.
 func TestRegistryRejectsCrossPackToolReference(t *testing.T) {
 	tools := []toolchain.Capability{

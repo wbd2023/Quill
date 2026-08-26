@@ -9,16 +9,16 @@ import (
 )
 
 func TestCheckStructureFindsMissingStrictMode(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/test.sh",
 		"#!/bin/bash\nprintf 'hello\\n'\n",
 	)
 
 	result, err := CheckStructure(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)

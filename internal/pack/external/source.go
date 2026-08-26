@@ -30,14 +30,14 @@ func LoadSources(
 	repoRoot string,
 	sources []profile.PackSource,
 ) (definitions []pack.Definition, err error) {
-	canonicalRoot, err := filepath.EvalSymlinks(repoRoot)
+	root, err := filepath.EvalSymlinks(repoRoot)
 	if err != nil {
 		return nil, fmt.Errorf("resolve repository root for pack sources: %w", err)
 	}
 
 	definitions = make([]pack.Definition, 0, len(sources))
 	for _, source := range sources {
-		definition, err := loadSource(canonicalRoot, source)
+		definition, err := loadSource(root, source)
 		if err != nil {
 			return nil, err
 		}
@@ -48,15 +48,16 @@ func LoadSources(
 }
 
 func loadSource(
-	canonicalRoot string,
+	root string,
 	source profile.PackSource,
 ) (definition pack.Definition, err error) {
-	packDirectory := filepath.Join(canonicalRoot, filepath.Clean(source.Path))
-	resolved, err := filepath.EvalSymlinks(packDirectory)
+	dir := filepath.Join(root, filepath.Clean(source.Path))
+	resolved, err := filepath.EvalSymlinks(dir)
 	if err != nil {
 		return pack.Definition{}, fmt.Errorf("resolve pack source %q: %w", source.Path, err)
 	}
-	if !isWithin(canonicalRoot, resolved) {
+
+	if !isWithinRoot(root, resolved) {
 		return pack.Definition{}, fmt.Errorf(
 			"pack source %q escapes the repository root",
 			source.Path,
@@ -85,7 +86,7 @@ func loadSource(
 	return toDefinition(manifest, resolved), nil
 }
 
-func toDefinition(manifest Manifest, packDirectory string) (definition pack.Definition) {
+func toDefinition(manifest Manifest, dir string) (definition pack.Definition) {
 	rules := make([]style.RuleDefinition, 0, len(manifest.Rules))
 	for _, rule := range manifest.Rules {
 		group := rule.Group
@@ -105,7 +106,7 @@ func toDefinition(manifest Manifest, packDirectory string) (definition pack.Defi
 			Check: style.ExternalCheck{
 				CheckID:       rule.Check,
 				FileSet:       rule.FileSet,
-				PackDirectory: packDirectory,
+				PackDirectory: dir,
 				Command:       manifest.Runtime.Command,
 				Timeout:       manifest.Runtime.Timeout,
 			},
@@ -133,13 +134,14 @@ func acceptPackPolicy(_ profile.PackPolicy) (err error) {
 // symlinks before returning the physical path. The resolved manifest must stay inside the Pack
 // directory and be a regular file: a symlinked manifest pointing outside the Pack, or a non-regular
 // file, is rejected so untrusted repository input cannot redirect the manifest read.
-func resolveManifest(packDirectory string) (manifestPath string, err error) {
-	joined := filepath.Join(packDirectory, ManifestName)
+func resolveManifest(dir string) (manifestPath string, err error) {
+	joined := filepath.Join(dir, ManifestName)
 	resolved, err := filepath.EvalSymlinks(joined)
 	if err != nil {
 		return "", fmt.Errorf("resolve pack manifest %q: %w", ManifestName, err)
 	}
-	if !isWithin(packDirectory, resolved) {
+
+	if !isWithinRoot(dir, resolved) {
 		return "", fmt.Errorf("pack manifest %q resolves outside the Pack directory", ManifestName)
 	}
 
@@ -147,6 +149,7 @@ func resolveManifest(packDirectory string) (manifestPath string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("resolve pack manifest %q: %w", ManifestName, err)
 	}
+
 	if !info.Mode().IsRegular() {
 		return "", fmt.Errorf("pack manifest %q must be a regular file", ManifestName)
 	}
@@ -156,10 +159,11 @@ func resolveManifest(packDirectory string) (manifestPath string, err error) {
 
 /* ----------------------------------------- Containment ---------------------------------------- */
 
-// isWithin reports whether target is root or a descendant of root. Both arguments must be absolute
-// and cleaned. It is the containment check shared by source loading (beneath the repository) and
-// executable resolution (beneath the Pack directory).
-func isWithin(root string, target string) (within bool) {
+// isWithinRoot reports whether target is root itself or a descendant of root. Both arguments must
+// already be absolute and cleaned; unlike workspace.isWithinRoot it cleans neither argument itself.
+// It is the containment check shared by source loading (beneath the repository) and executable
+// resolution (beneath the Pack directory).
+func isWithinRoot(root string, target string) (within bool) {
 	relative, err := filepath.Rel(root, target)
 	if err != nil {
 		return false

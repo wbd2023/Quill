@@ -9,16 +9,16 @@ import (
 )
 
 func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"test/smoke/example_test.sh",
 		"#!/bin/bash\nset -euo pipefail\n\ntmp_dir=\"$(mktemp -d)\"\n",
 	)
 
 	result, err := CheckTestHygiene(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
@@ -41,17 +41,17 @@ func TestCheckTestHygieneRequiresTrapCleanup(t *testing.T) {
 }
 
 func TestCheckTestHygieneAcceptsTrapCleanup(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"test/smoke/example_test.sh",
 		"#!/bin/bash\nset -euo pipefail\n\ntmp_dir=\"$(mktemp -d)\"\n"+
 			"trap 'rm -rf \"$tmp_dir\"' EXIT\n",
 	)
 
 	result, err := CheckTestHygiene(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)

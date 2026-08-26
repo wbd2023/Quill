@@ -12,16 +12,16 @@ import (
 
 // CheckSectionHeaderNames check section header names.
 func CheckSectionHeaderNames(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
-	sectionHeaders textpolicy.SectionHeaderConfig,
+	config textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
-	genericNames := sectionHeaderNameSet(sectionHeaders.GenericNames)
+	genericNames := sectionHeaderNameSet(config.GenericNames)
 
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -33,7 +33,7 @@ func CheckSectionHeaderNames(
 	}
 
 	for _, path := range files {
-		_, headers, _, err := scanSectionHeaders(repoRoot, path, patterns)
+		_, headers, _, err := scanSectionHeaders(root, path, patterns)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
@@ -46,7 +46,7 @@ func CheckSectionHeaderNames(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:  "text/section-header-names/generic",
-				File:  filewalk.DisplayPath(repoRoot, path),
+				File:  filewalk.DisplayPath(root, path),
 				Range: style.Range{Start: style.Position{Line: header.Line}},
 				Message: fmt.Sprintf(
 					"generic section header name %q; prefer a specific heading",

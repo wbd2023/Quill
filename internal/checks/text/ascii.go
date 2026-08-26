@@ -13,12 +13,12 @@ const nonASCIIMarker = "allow-non-ascii"
 
 // CheckASCII scans for non-ASCII characters in text files.
 func CheckASCII(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectAllFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -38,7 +38,7 @@ func CheckASCII(
 				if character > utf8.RuneSelf-1 {
 					result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 						Code:    "text/ascii/non-ascii",
-						File:    filewalk.DisplayPath(repoRoot, path),
+						File:    filewalk.DisplayPath(root, path),
 						Range:   style.Range{Start: style.Position{Line: line.Number}},
 						Message: "contains non-ASCII character",
 					})

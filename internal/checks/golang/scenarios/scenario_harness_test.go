@@ -14,23 +14,23 @@ import (
 
 func runGoStyleResult(
 	t *testing.T,
-	targetDirectory string,
+	directory string,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
-	return runGoStyleResultWithPolicy(t, targetDirectory, scenarioConfig(t))
+	return runGoStyleResultWithPolicy(t, directory, scenarioConfig(t))
 }
 
 func runGoStyleResultWithPolicy(
 	t *testing.T,
-	targetDirectory string,
+	directory string,
 	config profile.Profile,
 ) (result style.ExecutionResult, err error) {
 	t.Helper()
 
 	result, err = golang.CheckDirectories(
-		targetDirectory,
-		[]string{targetDirectory},
+		directory,
+		[]string{directory},
 		config.Repository,
 		config.PathRoles,
 		goConfigForTest(t, config),
@@ -178,13 +178,13 @@ func updateGoConfigForTest(
 	config.PackPolicies[gopack.PackID] = gopolicy.EncodeConfig(goConfig)
 }
 
-func writeTypeAwareDomainFixture(t *testing.T, rootDirectory string) {
+func writeTypeAwareDomainFixture(t *testing.T, root string) {
 	t.Helper()
 
-	testutil.WriteFile(t, rootDirectory, "go.mod", "module example\n\ngo 1.24.5\n")
+	testutil.WriteFile(t, root, "go.mod", "module example\n\ngo 1.24.5\n")
 	testutil.WriteFile(
 		t,
-		rootDirectory,
+		root,
 		"internal/core/domain/types.go",
 		`package domain
 

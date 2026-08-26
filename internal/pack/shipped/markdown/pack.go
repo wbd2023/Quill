@@ -13,7 +13,7 @@ const PackID = "markdown"
 const ruleGroupExternal style.RuleGroup = "external_tools"
 
 // Pack returns the Markdown Shipped Pack definition. toolIDs reference the canonical Tool
-// capabilities owned by the catalogue by global ID.
+// capabilities owned by the catalog by global ID.
 func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
 		ID:       PackID,

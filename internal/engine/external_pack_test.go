@@ -79,7 +79,8 @@ func TestExternalPackCheckIsTheAcceptancePath(t *testing.T) {
 			}
 		}
 		if !seen {
-			t.Fatal("expected external pack in metadata")
+			t.Fatalf("expected external pack \"extpack\" in metadata, got packs: %+v",
+				snapshot.Packs)
 		}
 
 		if _, err := os.Stat(marker); err == nil {
@@ -111,7 +112,10 @@ func TestExternalPackCheckIsTheAcceptancePath(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Fatal("expected the external rule in the check result")
+			t.Fatalf(
+				"expected external rule \"extpack/forbidden-import\" in result, got rules: %+v",
+				result.Rules,
+			)
 		}
 		if diagnostic != "internal/service/users.go" {
 			t.Fatalf("expected the external diagnostic file, got %q", diagnostic)

@@ -71,8 +71,8 @@ func TestParseExposesReviewMetadataThroughPublicAPI(t *testing.T) {
 				Section: "1.1",
 				Text:    "Public parsing should expose review metadata.",
 				Review: styleguide.Review{
-					Only:   true,
-					Reason: "Review this manually.",
+					IsReviewOnly: true,
+					Reason:       "Review this manually.",
 				},
 			},
 		},

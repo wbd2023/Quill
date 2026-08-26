@@ -26,12 +26,12 @@ func decodeArchitectureConfig(
 
 	config.Layers = make([]ArchitectureLayer, 0, len(layers))
 	for _, layer := range layers {
-		architectureLayer, err := decodeArchitectureLayer(layer)
+		decoded, err := decodeArchitectureLayer(layer)
 		if err != nil {
 			return ArchitectureConfig{}, err
 		}
 
-		config.Layers = append(config.Layers, architectureLayer)
+		config.Layers = append(config.Layers, decoded)
 	}
 
 	return config, nil

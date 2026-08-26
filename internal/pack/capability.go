@@ -4,7 +4,7 @@ import "github.com/wbd2023/quill/internal/toolchain"
 
 // CloneCapability returns a defensive copy of capability, including the mutable installer data a
 // Capability may carry (for example the platform map of a GitHub release install). Callers must
-// never observe aliasing into a catalogue's canonical capabilities.
+// never observe aliasing into a catalog's canonical capabilities.
 func CloneCapability(capability toolchain.Capability) (clone toolchain.Capability) {
 	clone = capability
 	clone.Install = CloneInstallMethod(capability.Install)

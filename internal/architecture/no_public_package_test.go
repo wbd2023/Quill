@@ -13,9 +13,9 @@ import (
 func TestProductionSourceStaysWithinEntrypointAndInternal(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
-	for _, file := range productionGoFiles(t, repositoryRoot, true, nil) {
-		relative, err := filepath.Rel(repositoryRoot, file)
+	root := importBoundaryRoot(t)
+	for _, file := range productionGoFiles(t, root, true, nil) {
+		relative, err := filepath.Rel(root, file)
 		if err != nil {
 			t.Fatalf("rel %s: %v", file, err)
 		}
@@ -40,11 +40,11 @@ func TestProductionSourceStaysWithinEntrypointAndInternal(t *testing.T) {
 func TestNoSourceImportsRootPackage(t *testing.T) {
 	t.Parallel()
 
-	toolsRoot := importBoundaryRoot(t)
-	forbiddenRoot := moduleImportPath(t, toolsRoot)
+	root := importBoundaryRoot(t)
+	forbiddenRoot := moduleImportPath(t, root)
 
 	err := filepath.WalkDir(
-		toolsRoot,
+		root,
 		func(path string, entry os.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				return walkErr
@@ -64,7 +64,7 @@ func TestNoSourceImportsRootPackage(t *testing.T) {
 
 			for _, imported := range fileImports(t, path) {
 				if imported == forbiddenRoot {
-					relative, relErr := filepath.Rel(toolsRoot, path)
+					relative, relErr := filepath.Rel(root, path)
 					if relErr != nil {
 						t.Fatalf("rel %s: %v", path, relErr)
 					}

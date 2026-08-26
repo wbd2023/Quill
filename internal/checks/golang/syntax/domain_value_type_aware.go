@@ -15,19 +15,19 @@ import (
 
 // CollectTypeAwareDomainValueCastViolations collect type aware domain value cast violations.
 func CollectTypeAwareDomainValueCastViolations(
-	rootDirectories []string,
+	roots []string,
 	filePaths []string,
 	classifier analysis.PathClassifier,
 	constructors gopolicy.DomainValueConstructors,
 ) (violations []analysis.Violation, ran bool) {
-	if len(filePaths) == 0 || len(rootDirectories) == 0 {
+	if len(filePaths) == 0 || len(roots) == 0 {
 		return nil, false
 	}
 
 	requestedFilePaths := requestedGoFiles(filePaths)
-	for _, rootDirectory := range rootDirectories {
+	for _, root := range roots {
 		rootViolations, rootRan := collectTypeAwareViolationsInRoot(
-			rootDirectory,
+			root,
 			requestedFilePaths,
 			classifier,
 			constructors,
@@ -44,17 +44,17 @@ func CollectTypeAwareDomainValueCastViolations(
 }
 
 func collectTypeAwareViolationsInRoot(
-	rootDirectory string,
+	root string,
 	requestedFilePaths map[string]bool,
 	classifier analysis.PathClassifier,
 	constructors gopolicy.DomainValueConstructors,
 ) (violations []analysis.Violation, ran bool) {
-	packageList, err := packages.Load(typeAwarePackageConfig(rootDirectory), "./...")
-	if err != nil || len(packageList) == 0 {
+	loaded, err := packages.Load(typeAwarePackageConfig(root), "./...")
+	if err != nil || len(loaded) == 0 {
 		return nil, false
 	}
 
-	for _, packageInfo := range packageList {
+	for _, packageInfo := range loaded {
 		violations = append(violations, collectTypeAwareViolationsInPackage(
 			packageInfo,
 			requestedFilePaths,
@@ -66,7 +66,7 @@ func collectTypeAwareViolationsInRoot(
 	return violations, true
 }
 
-func typeAwarePackageConfig(rootDirectory string) (config *packages.Config) {
+func typeAwarePackageConfig(root string) (config *packages.Config) {
 	return &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |
@@ -74,7 +74,7 @@ func typeAwarePackageConfig(rootDirectory string) (config *packages.Config) {
 			packages.NeedSyntax |
 			packages.NeedTypes |
 			packages.NeedTypesInfo,
-		Dir:   normalisePath(rootDirectory),
+		Dir:   normalisePath(root),
 		Tests: true,
 	}
 }
@@ -124,14 +124,14 @@ func collectTypeAwareViolationsInFile(
 	constructors gopolicy.DomainValueConstructors,
 ) (violations []analysis.Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
-		if !ok || len(callExpression.Args) != 1 {
+		call, ok := node.(*ast.CallExpr)
+		if !ok || len(call.Args) != 1 {
 			return true
 		}
 
 		violation, found := typeAwareDomainValueViolation(
 			packageInfo,
-			callExpression,
+			call,
 			classifier,
 			constructors,
 		)
@@ -147,11 +147,11 @@ func collectTypeAwareViolationsInFile(
 
 func typeAwareDomainValueViolation(
 	packageInfo *packages.Package,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 	classifier analysis.PathClassifier,
 	constructors gopolicy.DomainValueConstructors,
 ) (violation analysis.Violation, found bool) {
-	functionInfo, ok := packageInfo.TypesInfo.Types[callExpression.Fun]
+	functionInfo, ok := packageInfo.TypesInfo.Types[call.Fun]
 	if !ok {
 		return analysis.Violation{}, false
 	}
@@ -170,7 +170,7 @@ func typeAwareDomainValueViolation(
 		domainTypeName,
 	)
 	return analysis.Violation{
-		Position: packageInfo.Fset.Position(callExpression.Pos()),
+		Position: packageInfo.Fset.Position(call.Pos()),
 		Rule:     analysis.DiagnosticNoDirectDomainCasts,
 		Message: fmt.Sprintf(
 			"direct cast to domain.%s is disallowed; use %s",

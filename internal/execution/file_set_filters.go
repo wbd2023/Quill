@@ -28,7 +28,7 @@ func fileSetCoversPath(
 
 		foundScope = true
 		if fileSetCoversRelativePath(
-			context.RepoRoot,
+			context.Root,
 			path,
 			explicitFiles,
 			fileSet.Include.Paths[scope],
@@ -47,7 +47,7 @@ func fileSetCoversPath(
 		}
 
 		foundScope = true
-		if fileSetCoversRelativePath(context.RepoRoot, path, nil, pathPrefixes) {
+		if fileSetCoversRelativePath(context.Root, path, nil, pathPrefixes) {
 			return true
 		}
 	}
@@ -56,7 +56,7 @@ func fileSetCoversPath(
 }
 
 func fileSetCoversRelativePath(
-	repoRoot string,
+	root string,
 	path string,
 	explicitFiles []string,
 	pathPrefixes []string,
@@ -65,7 +65,7 @@ func fileSetCoversRelativePath(
 		return true
 	}
 
-	relativePath, err := filewalk.RelativePath(repoRoot, path)
+	relativePath, err := filewalk.RelativePath(root, path)
 	if err != nil {
 		return false
 	}

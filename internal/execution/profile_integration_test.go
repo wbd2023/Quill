@@ -10,23 +10,23 @@ import (
 )
 
 func TestNewRunContextLoadsCurrentProfileFixture(t *testing.T) {
-	fixtureRoot := t.TempDir()
-	profiles.Write(t, fixtureRoot, profiles.Self(t))
+	root := t.TempDir()
+	profiles.Write(t, root, profiles.Self(t))
 
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "core", "domain", "errors.go"),
 		"package domain\n\nvar ErrMissing = error(nil)\n",
 	)
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "client", "application", "port", "messages", "repository.go"),
 		"package messages\n\ntype MessageRepository interface { ListMessages() }\n",
 	)
 
-	context := testContext(t, fixtureRoot, style.Scope("all"))
+	context := testContext(t, root, style.Scope("all"))
 
 	if len(context.Plan.Rules) == 0 {
 		t.Fatal("expected compiled rules to be loaded for fixture")

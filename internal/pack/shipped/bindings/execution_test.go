@@ -35,11 +35,11 @@ import (
 // reach both the bindings and the generic driver set.
 
 func TestRepositoryScanDriverAcceptsKnownScanner(t *testing.T) {
-	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
+	run := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
 
 	if _, err := scanDriver()(
 		context.Background(),
-		runCtx,
+		run,
 		packRule(text.PackID),
 		repositoryScanSpec(text.ScannerASCII),
 		nil,
@@ -49,10 +49,10 @@ func TestRepositoryScanDriverAcceptsKnownScanner(t *testing.T) {
 }
 
 func TestRepositoryScanDriverRejectsUnknownScanner(t *testing.T) {
-	runCtx := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
+	run := testContext(t, testutil.RepositoryRoot(t), style.Scope("all"))
 	_, err := scanDriver()(
 		context.Background(),
-		runCtx,
+		run,
 		packRule(""),
 		repositoryScanSpec("unknown"),
 		nil,
@@ -67,31 +67,31 @@ func TestRepositoryScanDriverRejectsUnknownScanner(t *testing.T) {
 }
 
 func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
-	fixtureRoot := t.TempDir()
+	root := t.TempDir()
 	alternateProfile := buildAlternateProfile(t)
-	profiles.Write(t, fixtureRoot, alternateProfile)
-	testutil.WriteFile(t, fixtureRoot, "ALTROOT", "")
+	profiles.Write(t, root, alternateProfile)
+	testutil.WriteFile(t, root, "ALTROOT", "")
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		"go.mod",
 		"module example.com/altchat\n\ngo 1.24.5\n",
 	)
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "domain", "errors.go"),
 		"package domain\n\nvar ErrMissing = error(nil)\n",
 	)
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "app", "ports", "message_store.go"),
 		"package ports\n\ntype Message"+"Store interface { ListMessages() }\n",
 	)
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "app", "services", "message_service.go"),
 		"package services\n\n"+
 			"import (\n"+
@@ -107,15 +107,15 @@ func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
 	)
 	testutil.WriteFile(
 		t,
-		fixtureRoot,
+		root,
 		filepath.Join("internal", "domain", "message.go"),
 		"package domain\n\ntype Message struct{}\n",
 	)
 
-	runCtx := testContext(t, fixtureRoot, style.Scope("all"))
+	run := testContext(t, root, style.Scope("all"))
 	if _, err := scanDriver()(
 		context.Background(),
-		runCtx,
+		run,
 		packRule(golang.PackID),
 		repositoryScanSpec(golang.ScannerArchitecture),
 		nil,
@@ -124,9 +124,9 @@ func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
 	}
 	result, err := scanDriver()(
 		context.Background(),
-		runCtx,
+		run,
 		packRule(vocabulary.PackID),
-		repositoryScanSpec(vocabulary.ScannerVocabulary),
+		repositoryScanSpec(vocabulary.Scanner),
 		nil,
 	)
 	if err != nil {
@@ -153,13 +153,13 @@ func TestRepositoryScanDriverSupportsAlternateProfile(t *testing.T) {
 // the real Go golangci target command through the generic target-command dispatch over a clean
 // repository with stub goimports and golangci-lint executables.
 func TestGolangciTargetCommandPassesCleanRepository(t *testing.T) {
-	repoRoot := t.TempDir()
-	profiles.Write(t, repoRoot, profiles.Self(t))
-	testutil.WriteFile(t, repoRoot, "cmd/quill/main.go", "package main\n\nfunc main() {}\n")
-	testutil.WriteFile(t, repoRoot, "internal/example/example.go", "package example\n")
-	writeExecutable(t, repoRoot, "goimports")
-	writeExecutable(t, repoRoot, "golangci-lint")
-	runCtx := testContext(t, repoRoot, style.Scope("all"))
+	root := t.TempDir()
+	profiles.Write(t, root, profiles.Self(t))
+	testutil.WriteFile(t, root, "cmd/quill/main.go", "package main\n\nfunc main() {}\n")
+	testutil.WriteFile(t, root, "internal/example/example.go", "package example\n")
+	writeExecutable(t, root, "goimports")
+	writeExecutable(t, root, "golangci-lint")
+	run := testContext(t, root, style.Scope("all"))
 
 	job := style.TargetCommandJob{
 		ToolIDs:  []string{tool.Go, tool.Goimports, tool.GolangciLint},
@@ -170,7 +170,7 @@ func TestGolangciTargetCommandPassesCleanRepository(t *testing.T) {
 
 	result, err := targetCommandDriver()(
 		context.Background(),
-		runCtx,
+		run,
 		packRule(golang.PackID),
 		job,
 		nil,
@@ -184,12 +184,12 @@ func TestGolangciTargetCommandPassesCleanRepository(t *testing.T) {
 	}
 }
 
-func writeExecutable(t *testing.T, repoRoot string, name string) {
+func writeExecutable(t *testing.T, root string, name string) {
 	t.Helper()
 
 	path := testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		filepath.Join(".cache", "quill", "bin", name),
 		"#!/bin/sh\nexit 0\n",
 	)
@@ -218,12 +218,12 @@ func targetCommandDriver() (driver execution.Driver) {
 
 func testContext(
 	t *testing.T,
-	repoRoot string,
+	root string,
 	scope style.Scope,
-) (context execution.RunContext) {
+) (testContext execution.RunContext) {
 	t.Helper()
 
-	config, err := profile.Load(repoRoot)
+	config, err := profile.Load(root)
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -243,14 +243,14 @@ func testContext(
 		t.Fatalf("Compile: %v", err)
 	}
 
-	layout := workspace.NewLayout(repoRoot)
-	path := layout.BuildPath(node.BinaryDirectory(layout))
+	layout := workspace.NewLayout(root)
+	path := layout.BuildPath(os.Getenv("PATH"), node.BinaryDirectory(layout))
 	toolEnvironment := map[string]string{"PATH": path}
 	goEnvironment := goenv.Environment(layout, path)
 	goEnvironment["GOLANGCI_LINT_CACHE"] = filepath.Join(layout.CacheDirectory(), "golangci")
 
 	return execution.NewRunContext(
-		repoRoot,
+		root,
 		scope,
 		config,
 		compiled,

@@ -10,17 +10,17 @@ import (
 )
 
 func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	var builder strings.Builder
 	builder.WriteString("package example\n\n")
 	for range 105 {
 		builder.WriteString("const value = 1\n")
 	}
 
-	testutil.WriteFile(t, repoRoot, "internal/example/example.go", builder.String())
+	testutil.WriteFile(t, root, "internal/example/example.go", builder.String())
 
 	result, err := CheckSectionHeaders(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -38,17 +38,17 @@ func TestCheckSectionHeadersFindsMissingHeaderInLongFile(t *testing.T) {
 }
 
 func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 44) + " Types " + strings.Repeat("-", 43) + " */"
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\ntype Thing struct{}\n",
 	)
 
 	result, err := CheckSectionHeaders(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -59,17 +59,17 @@ func TestCheckSectionHeadersAcceptsValidGoHeader(t *testing.T) {
 }
 
 func TestCheckSectionHeadersCountsTabsAsFourColumns(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + "\tTypes " + strings.Repeat("-", 43) + " */"
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\ntype Thing struct{}\n",
 	)
 
 	result, err := CheckSectionHeaders(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),

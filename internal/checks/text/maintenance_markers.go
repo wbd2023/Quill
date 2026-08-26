@@ -13,12 +13,12 @@ import (
 
 // CheckMaintenanceMarkers check maintenance markers.
 func CheckMaintenanceMarkers(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectAllFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -44,7 +44,7 @@ func CheckMaintenanceMarkers(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "text/maintenance-markers/missing-action",
-				File:    filewalk.DisplayPath(repoRoot, path),
+				File:    filewalk.DisplayPath(root, path),
 				Range:   style.Range{Start: style.Position{Line: line.Number}},
 				Message: "TODO/FIXME markers must include actionable text after the colon",
 			})

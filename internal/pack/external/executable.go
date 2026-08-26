@@ -13,10 +13,10 @@ import (
 // repository-relative path with no parent-traversal escape: a Pack may not reach outside its own
 // directory through "..", absolute paths, drive roots, or symlinks.
 //
-// packDirectory must already be canonical (symlink-resolved). The resolved executable is
+// dir must already be canonical (symlink-resolved). The resolved executable is
 // returned as an absolute path suitable for direct subprocess launch; the launch boundary
 // does not re-resolve it against PATH.
-func ResolveExecutable(packDirectory string, command string) (resolved string, err error) {
+func ResolveExecutable(dir string, command string) (resolved string, err error) {
 	if strings.ContainsRune(command, '\x00') {
 		return "", fmt.Errorf("pack runtime command %q contains a NUL byte", command)
 	}
@@ -26,8 +26,8 @@ func ResolveExecutable(packDirectory string, command string) (resolved string, e
 		return "", fmt.Errorf("pack runtime command %q must be a Pack-relative path", command)
 	}
 
-	joined := filepath.Join(packDirectory, filepath.Clean(normalised))
-	if !isWithin(packDirectory, joined) {
+	joined := filepath.Join(dir, filepath.Clean(normalised))
+	if !isWithinRoot(dir, joined) {
 		return "", fmt.Errorf("pack runtime command %q escapes the Pack directory", command)
 	}
 
@@ -38,7 +38,8 @@ func ResolveExecutable(packDirectory string, command string) (resolved string, e
 	if err != nil {
 		return "", fmt.Errorf("pack runtime executable %q: %w", command, err)
 	}
-	if !isWithin(packDirectory, resolved) {
+
+	if !isWithinRoot(dir, resolved) {
 		return "", fmt.Errorf(
 			"pack runtime command %q resolves outside the Pack directory",
 			command,
@@ -49,6 +50,7 @@ func ResolveExecutable(packDirectory string, command string) (resolved string, e
 	if err != nil {
 		return "", fmt.Errorf("pack runtime executable %q: %w", command, err)
 	}
+
 	if !info.Mode().IsRegular() {
 		return "", fmt.Errorf(
 			"pack runtime command %q must resolve to an executable regular file",

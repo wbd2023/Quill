@@ -11,12 +11,12 @@ import (
 
 // CheckTestHygiene check test hygiene.
 func CheckTestHygiene(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectAllFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		walkConfig(repository),
 	)
 	if err != nil {
@@ -24,7 +24,7 @@ func CheckTestHygiene(
 	}
 
 	for _, path := range files {
-		if !isBashTestFile(repoRoot, path) {
+		if !isBashTestFile(root, path) {
 			continue
 		}
 
@@ -48,7 +48,7 @@ func CheckTestHygiene(
 		if foundMktemp && !foundTrap {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "bash/test-hygiene/missing-cleanup",
-				File:    filewalk.DisplayPath(repoRoot, path),
+				File:    filewalk.DisplayPath(root, path),
 				Message: "Bash tests using mktemp must install trap-based cleanup",
 			})
 		}
@@ -61,8 +61,8 @@ func CheckTestHygiene(
 	return result, nil
 }
 
-func isBashTestFile(repoRoot string, path string) (found bool) {
-	relativePath := filewalk.DisplayPath(repoRoot, path)
+func isBashTestFile(root string, path string) (found bool) {
+	relativePath := filewalk.DisplayPath(root, path)
 	base := filepath.Base(relativePath)
 
 	if strings.HasSuffix(base, "_test.sh") || strings.HasSuffix(base, ".bats") {

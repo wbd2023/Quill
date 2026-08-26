@@ -5,8 +5,6 @@ import (
 	"sync"
 )
 
-/* --------------------------------------- Output Capture --------------------------------------- */
-
 // boundedBuffer is a strings.Builder wrapper that caps the total bytes written and records whether
 // the limit was reached. It is safe for concurrent writers: os/exec copies stdout and stderr from
 // independent goroutines, and the combined stream receives writes from both, so every mutation is
@@ -54,7 +52,6 @@ func (buffer *boundedBuffer) String() (output string) {
 }
 
 // streamSink writes every byte to both the per-stream buffer and the combined buffer, so callers
-// can read separated stdout/stderr while legacy interpreters keep the combined stream. The combined
 // buffer is shared between the stdout and stderr sinks and is therefore reached by two goroutines;
 // boundedBuffer serialises those writes.
 type streamSink struct {

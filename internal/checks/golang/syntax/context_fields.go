@@ -51,10 +51,10 @@ func isContextType(expression ast.Expr, contextAliases map[string]bool) (found b
 		return false
 	}
 
-	packageIdentifier, ok := selector.X.(*ast.Ident)
+	ident, ok := selector.X.(*ast.Ident)
 	if !ok {
 		return false
 	}
 
-	return contextAliases[packageIdentifier.Name]
+	return contextAliases[ident.Name]
 }

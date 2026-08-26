@@ -29,14 +29,14 @@ func CheckStructuredLogging(
 	}
 
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
+		call, ok := node.(*ast.CallExpr)
 		if !ok {
 			return true
 		}
 
 		violations = append(violations, checkStructuredLogCall(
 			fileSet,
-			callExpression,
+			call,
 			slogAliases,
 			parameters,
 		)...)
@@ -49,33 +49,33 @@ func CheckStructuredLogging(
 
 func checkStructuredLogCall(
 	fileSet *token.FileSet,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 	slogAliases map[string]bool,
 	parameters gopolicy.ParameterConfig,
 ) (violations []analysis.Violation) {
-	selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+	selector, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok || !isStructuredLogCall(selector, slogAliases) {
 		return nil
 	}
 
-	fieldCount := len(callExpression.Args) - 1
+	fieldCount := len(call.Args) - 1
 	if fieldCount <= 0 {
 		return nil
 	}
 
 	if fieldCount%2 != 0 {
 		return []analysis.Violation{{
-			Position: fileSet.Position(callExpression.Pos()),
+			Position: fileSet.Position(call.Pos()),
 			Rule:     analysis.DiagnosticStructuredLogs,
 			Message:  "structured log calls must use key/value pairs",
 		}}
 	}
 
-	for argumentIndex := 1; argumentIndex < len(callExpression.Args); argumentIndex += 2 {
+	for argumentIndex := 1; argumentIndex < len(call.Args); argumentIndex += 2 {
 		violations = append(violations, checkStructuredLogPair(
 			fileSet,
-			callExpression.Args[argumentIndex],
-			callExpression.Args[argumentIndex+1],
+			call.Args[argumentIndex],
+			call.Args[argumentIndex+1],
 			parameters,
 		)...)
 	}

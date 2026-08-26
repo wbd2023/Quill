@@ -6,8 +6,6 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* ---------------------------------------- List Command ---------------------------------------- */
-
 type listCmd struct {
 	repoFlags
 
@@ -15,12 +13,12 @@ type listCmd struct {
 }
 
 func (c *listCmd) run(ctx context.Context, runner Runner) (exitCode int) {
-	engineInstance, err := c.newEngine()
+	engine, err := c.newEngine()
 	if err != nil {
 		return runner.reportCommandError("list", c.Format, err)
 	}
 
-	snapshot, err := engineInstance.Metadata(ctx)
+	snapshot, err := engine.Metadata(ctx)
 	if err != nil {
 		return runner.reportCommandError("list", c.Format, err)
 	}

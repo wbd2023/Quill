@@ -9,13 +9,13 @@ import (
 func TestOutsideDriverFacadeDoesNotImportDriverChildren(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
-	modulePath := moduleImportPath(t, repositoryRoot)
+	root := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, root)
 	driverDirectory := "internal/execution/drivers"
 	driverChildPrefix := modulePath + "/" + driverDirectory + "/"
 
-	for _, file := range productionGoFiles(t, repositoryRoot, true, nil) {
-		directory, err := filepath.Rel(repositoryRoot, filepath.Dir(file))
+	for _, file := range productionGoFiles(t, root, true, nil) {
+		directory, err := filepath.Rel(root, filepath.Dir(file))
 		if err != nil {
 			t.Fatalf("rel %s: %v", file, err)
 		}

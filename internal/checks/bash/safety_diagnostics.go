@@ -7,14 +7,14 @@ import (
 
 func bashSafetyDiagnostic(
 	code string,
-	repoRoot string,
+	root string,
 	path string,
 	line int,
 	message string,
 ) (diagnostic style.Diagnostic) {
 	return style.Diagnostic{
 		Code:    code,
-		File:    filewalk.DisplayPath(repoRoot, path),
+		File:    filewalk.DisplayPath(root, path),
 		Range:   style.Range{Start: style.Position{Line: line}},
 		Message: message,
 	}

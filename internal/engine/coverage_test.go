@@ -64,10 +64,10 @@ func TestCoverageRejectsCancelledContext(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	if _, err = engine.Coverage(operationContext); !errors.Is(err, context.Canceled) {
+	if _, err = engine.Coverage(ctx); !errors.Is(err, context.Canceled) {
 		t.Fatalf("Coverage error = %v, want context.Canceled", err)
 	}
 }

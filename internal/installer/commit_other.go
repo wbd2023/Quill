@@ -1,4 +1,4 @@
-//go:build !(aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris) && !windows
+//go:build !unix && !windows
 
 package installer
 
@@ -16,6 +16,6 @@ var errRootedCommitUnavailable = errors.New(
 
 // rootedRename is unsupported on these platforms; returning an error keeps the write from silently
 // falling back to a name-based, race-vulnerable rename. See errRootedCommitUnavailable.
-func rootedRename(_ *os.Root, _ string, _ string, _ string) error {
+func rootedRename(_ *os.Root, _ string, _ string, _ string) (err error) {
 	return errRootedCommitUnavailable
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func TestDocumentCompilerBuildsDocumentFromEvents(t *testing.T) {
-	compiler := newTestDocumentCompiler()
+	compiler := newTestCompiler()
 
 	document, err := compiler.compile([]documentEvent{
 		newHeadingEvent(
@@ -40,7 +40,7 @@ func TestDocumentCompilerBuildsDocumentFromEvents(t *testing.T) {
 }
 
 func TestDocumentCompilerRejectsInterruptedMetadata(t *testing.T) {
-	compiler := newTestDocumentCompiler()
+	compiler := newTestCompiler()
 
 	_, err := compiler.compile([]documentEvent{
 		newHeadingEvent(
@@ -61,12 +61,12 @@ func TestDocumentCompilerRejectsInterruptedMetadata(t *testing.T) {
 }
 
 func TestDocumentCompilerRejectsUnknownEvents(t *testing.T) {
-	compiler := newTestDocumentCompiler()
+	compiler := newTestCompiler()
 
 	_, err := compiler.compile([]documentEvent{{kind: eventKind(99)}})
 	requireErrorContains(t, err, "unknown styleguide document event 99")
 }
 
-func newTestDocumentCompiler() (compiler documentCompiler) {
-	return newDocumentCompiler(newSourceFile("STYLE.md", nil))
+func newTestCompiler() (compiler compiler) {
+	return newCompiler(newSourceFile("STYLE.md", nil))
 }

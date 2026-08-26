@@ -23,7 +23,7 @@ func installGitHub(
 	lockfile lockfile.Lockfile,
 ) (err error) {
 	path := filepath.Join(layout.BinaryDirectory(), tool.Command)
-	path, _, exists, err := prepareExecutableDestination(layout.RepositoryRoot, path)
+	path, _, exists, err := prepareExecutableDestination(layout.Root, path)
 	if err != nil {
 		return err
 	}
@@ -94,5 +94,5 @@ func installGitHub(
 		return err
 	}
 
-	return copyExecutable(layout.RepositoryRoot, extracted, path)
+	return copyExecutable(layout.Root, extracted, path)
 }

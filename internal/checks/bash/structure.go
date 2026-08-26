@@ -21,12 +21,12 @@ const (
 
 // CheckStructure check structure.
 func CheckStructure(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		walkConfig(repository),
 		".sh",
 	)
@@ -42,7 +42,7 @@ func CheckStructure(
 			if line.Number == 1 && text != shellShebangLine {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.DisplayPath(repoRoot, path),
+					File:    filewalk.DisplayPath(root, path),
 					Range:   style.Range{Start: style.Position{Line: 1}},
 					Message: fmt.Sprintf("missing %s", shellShebangLine),
 				})
@@ -55,7 +55,7 @@ func CheckStructure(
 			if strings.Contains(text, "\r") {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.DisplayPath(repoRoot, path),
+					File:    filewalk.DisplayPath(root, path),
 					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "contains CRLF line endings",
 				})
@@ -64,7 +64,7 @@ func CheckStructure(
 			if hasTrailingHorizontalWhitespace(text) {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.DisplayPath(repoRoot, path),
+					File:    filewalk.DisplayPath(root, path),
 					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "has trailing whitespace",
 				})
@@ -73,7 +73,7 @@ func CheckStructure(
 			if hasSpaceIndentation(text) {
 				result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 					Code:    "bash/structure/invalid",
-					File:    filewalk.DisplayPath(repoRoot, path),
+					File:    filewalk.DisplayPath(root, path),
 					Range:   style.Range{Start: style.Position{Line: line.Number}},
 					Message: "uses space indentation",
 				})
@@ -88,7 +88,7 @@ func CheckStructure(
 		if !hasStrictMode {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "bash/structure/invalid",
-				File:    filewalk.DisplayPath(repoRoot, path),
+				File:    filewalk.DisplayPath(root, path),
 				Message: fmt.Sprintf("missing %s", strictModeLine),
 			})
 		}

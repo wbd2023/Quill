@@ -9,16 +9,16 @@ import (
 )
 
 func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n// TODO:\nfunc Example() {}\n",
 	)
 
 	result, err := CheckMaintenanceMarkers(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
@@ -41,16 +41,16 @@ func TestCheckMaintenanceMarkersRejectsEmptyTodoText(t *testing.T) {
 }
 
 func TestCheckMaintenanceMarkersAcceptsConcreteTodoText(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"README.md",
 		"# Example\n\nTODO: document the relay retry flow\n",
 	)
 
 	result, err := CheckMaintenanceMarkers(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)

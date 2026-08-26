@@ -20,7 +20,7 @@ const (
 const ruleGroupProject style.RuleGroup = "project"
 
 // Pack returns the Project Shipped Pack definition. toolIDs reference the canonical Tool
-// capabilities owned by the catalogue by global ID.
+// owned by the catalog by global ID.
 func Pack(toolIDs ...string) (definition pack.Definition) {
 	return pack.Definition{
 		ID:      PackID,

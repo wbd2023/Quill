@@ -26,8 +26,8 @@ func checkHTTPTimeouts(
 				return true
 			}
 
-			packageIdentifier, ok := selector.X.(*ast.Ident)
-			if !ok || !httpAliases[packageIdentifier.Name] {
+			ident, ok := selector.X.(*ast.Ident)
+			if !ok || !httpAliases[ident.Name] {
 				return true
 			}
 
@@ -41,8 +41,8 @@ func checkHTTPTimeouts(
 			}
 
 		case *ast.SelectorExpr:
-			packageIdentifier, ok := typedNode.X.(*ast.Ident)
-			if !ok || !httpAliases[packageIdentifier.Name] {
+			ident, ok := typedNode.X.(*ast.Ident)
+			if !ok || !httpAliases[ident.Name] {
 				return true
 			}
 			if typedNode.Sel.Name != "DefaultClient" {
@@ -82,12 +82,12 @@ func isHTTPClientType(expression ast.Expr, httpAliases map[string]bool) (found b
 		return false
 	}
 
-	packageIdentifier, ok := selector.X.(*ast.Ident)
+	ident, ok := selector.X.(*ast.Ident)
 	if !ok {
 		return false
 	}
 
-	return httpAliases[packageIdentifier.Name]
+	return httpAliases[ident.Name]
 }
 
 func httpClientHasTimeoutField(literal *ast.CompositeLit) (found bool) {

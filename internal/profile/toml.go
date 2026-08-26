@@ -8,6 +8,8 @@ import (
 	codec "github.com/BurntSushi/toml"
 )
 
+/* -------------------------------------- Decode and Encode ------------------------------------- */
+
 // decodeTOML decodes style profile TOML source with strict unknown-key detection.
 func decodeTOML(source string) (config Profile, err error) {
 	var schema schemaConfig
@@ -38,6 +40,8 @@ func encodeTOML(config Profile) (contents string, err error) {
 
 	return formatEncodedTables(buffer.String()), nil
 }
+
+/* -------------------------------------- Output Formatting ------------------------------------- */
 
 func formatEncodedTables(contents string) (formatted string) {
 	lines := strings.SplitAfter(contents, "\n")
@@ -84,6 +88,8 @@ func tableHeader(line string) (name string, found bool) {
 
 	return strings.TrimSpace(line[1 : len(line)-1]), true
 }
+
+/* --------------------------------------- Schema Mapping --------------------------------------- */
 
 type schemaConfig struct {
 	SchemaVersion int `toml:"schema_version"`

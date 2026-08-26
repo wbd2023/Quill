@@ -11,12 +11,12 @@ import (
 
 func testContext(
 	t *testing.T,
-	repoRoot string,
+	root string,
 	scope style.Scope,
 ) (context RunContext) {
 	t.Helper()
 
-	config, err := profile.Load(repoRoot)
+	config, err := profile.Load(root)
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -37,7 +37,7 @@ func testContext(
 	}
 
 	return NewRunContext(
-		repoRoot,
+		root,
 		scope,
 		config,
 		compiled,

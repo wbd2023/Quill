@@ -16,21 +16,21 @@ type InstallResult struct {
 // Install loads the repository and lock file, installs configured tools, and inspects the
 // resulting toolchain.
 func (engine *Engine) Install(
-	operationContext context.Context,
-) (result InstallResult, operationError error) {
-	runContext, _, err := engine.prepareRun(operationContext, "")
+	ctx context.Context,
+) (result InstallResult, err error) {
+	runContext, _, err := engine.prepareRun(ctx, "")
 	if err != nil {
 		return InstallResult{}, err
 	}
 
-	layout := workspace.NewLayout(engine.repositoryRoot)
-	loaded, err := lockfile.Load(engine.repositoryRoot)
+	layout := workspace.NewLayout(engine.root)
+	loaded, err := lockfile.Load(engine.root)
 	if err != nil {
 		return InstallResult{}, err
 	}
 
 	if err = installer.Install(
-		operationContext,
+		ctx,
 		layout,
 		engine.progressWriter,
 		sortedTools(runContext.Tools),
@@ -40,7 +40,7 @@ func (engine *Engine) Install(
 	}
 
 	result.Toolchain, err = engine.inspectTools(
-		operationContext,
+		ctx,
 		runContext.Tools,
 		toolIDs(runContext.Tools),
 		runContext.ToolEnvironment,

@@ -8,11 +8,11 @@ import (
 func TestKongImportBoundary(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
-	cliDirectory := filepath.Join(repositoryRoot, "internal", "cli")
+	root := importBoundaryRoot(t)
+	cliDirectory := filepath.Join(root, "internal", "cli")
 	sourceRoots := []string{
-		filepath.Join(repositoryRoot, "cmd"),
-		filepath.Join(repositoryRoot, "internal"),
+		filepath.Join(root, "cmd"),
+		filepath.Join(root, "internal"),
 	}
 
 	for _, sourceRoot := range sourceRoots {

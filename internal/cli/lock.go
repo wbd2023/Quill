@@ -7,8 +7,6 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* ---------------------------------------- Lock Command ---------------------------------------- */
-
 type lockCmd struct {
 	repoFlags
 }
@@ -20,12 +18,14 @@ func (c *lockCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 		progressWriter = runner.stderr
 	}
 
-	engineInstance, err := c.newEngine(engine.WithProgressWriter(progressWriter))
+	option := engine.WithProgressWriter(progressWriter)
+
+	engine, err := c.newEngine(option)
 	if err != nil {
 		return runner.reportCommandError("lock", c.Format, err)
 	}
 
-	result, err := engineInstance.Lock(ctx)
+	result, err := engine.Lock(ctx)
 	if err != nil {
 		return runner.reportCommandError("lock", c.Format, err)
 	}

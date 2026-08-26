@@ -6,7 +6,7 @@ func TestCoverageIncludesEveryStyleHeading(t *testing.T) {
 	document := loadDocument(t)
 	covered := make(map[string]bool)
 
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, entry := range report.Sections {
 		covered[entry.Section] = true
 	}

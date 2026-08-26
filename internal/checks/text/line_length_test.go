@@ -13,17 +13,17 @@ import (
 /* ---------------------------------------- Source files ---------------------------------------- */
 
 func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	longLine := strings.Repeat("a", 101)
 	path := testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\nconst value = \""+longLine+"\"\n",
 	)
 
 	result, err := CheckLineLengths(
-		repoRoot,
+		root,
 		[]string{path},
 	)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestCheckLineLengthsFindsLongGoLines(t *testing.T) {
 }
 
 func TestCheckLineLengthsHonoursShellAllowMarker(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	longLine := strings.Repeat("b", 101)
 	source := strings.Join([]string{
 		"#!/bin/bash",
@@ -49,13 +49,13 @@ func TestCheckLineLengthsHonoursShellAllowMarker(t *testing.T) {
 	}, "\n")
 	path := testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/test.sh",
 		source,
 	)
 
 	result, err := CheckLineLengths(
-		repoRoot,
+		root,
 		[]string{path},
 	)
 	if err != nil {
@@ -71,95 +71,95 @@ func TestCheckLineLengthsHonoursShellAllowMarker(t *testing.T) {
 // non-destination remainder stays within 100 columns. Every other overlong construct must fail.
 
 func TestCheckLineLengthsAcceptsOverlongHTTPSReferenceDefinition(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105) // 105 columns, strictly over the limit
 	source := "[ref]: " + destination + "\n"        // remainder 7 columns, total 112
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", source)
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", source)
+	result := checkLengths(t, root, path)
 	requireNoDiagnostics(t, result)
 }
 
 func TestCheckLineLengthsRejectsReferenceDefinitionWithShortDestination(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 88) // 88 columns, not over the limit
 	label := strings.Repeat("a", 14)               // "[aaaa...]: " remainder is 18 columns
 	line := "[" + label + "]: " + destination      // 18 + 88 = 106; destination not eligible
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsAcceptsTwoLineReferenceDefinition(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105) // eligible destination on its own line
 	// Goldmark permits the optional title on the following line; the overlong line still carries
 	// the destination, and the short title line stays within the limit.
 	source := "[ref]: " + destination + "\n  \"Reference Title\"\n"
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", source)
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", source)
+	result := checkLengths(t, root, path)
 	requireNoDiagnostics(t, result)
 }
 
 func TestCheckLineLengthsRejectsLongBareURL(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	line := linkDestination("https://", 105) // bare URL, not a reference definition
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsRejectsLongInlineLink(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 91)
 	line := "[click here](" + destination + ")" // inline link, not a reference definition
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsRejectsNonHTTPSReferenceDestination(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("ftp://", 105) // non-http(s) scheme, 105 columns
 	line := "[ref]: " + destination               // 7 + 105 = 112 columns
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsRejectsExactHundredReferenceDestination(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 100) // exactly 100, not strictly over the limit
 	line := "[ref]: " + destination                 // 7 + 100 = 107 columns
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsRejectsEligibleDestinationWithExcessLabel(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105) // eligible destination
 	label := strings.Repeat("a", 100)               // "[aaaa...]: " remainder is 104 columns
 	line := "[" + label + "]: " + destination       // 104 + 105 = 209 columns
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 func TestCheckLineLengthsRejectsMalformedDefinitionLikeLine(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105)
 	line := "[ref] " + destination // missing colon, not a valid link reference definition
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
@@ -171,14 +171,14 @@ func TestCheckLineLengthsRejectsMalformedDefinitionLikeLine(t *testing.T) {
 // segment-only search rejects this qualifying destination, so this test fails until the
 // destination is classified from its true segment.
 func TestCheckLineLengthsAcceptsContinuationLineDestination(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105) // eligible destination, strictly over the limit
 	// The post-colon line ending places the destination on the continuation line; Goldmark
 	// records it in a segment other than the first, while the short label line stays legal.
 	source := "[ref]:\n" + destination + "\n"
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", source)
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", source)
+	result := checkLengths(t, root, path)
 	requireNoDiagnostics(t, result)
 }
 
@@ -191,7 +191,7 @@ func TestCheckLineLengthsAcceptsContinuationLineDestination(t *testing.T) {
 // must pass. A span search that compares at the raw opening '<' rejects this qualifying
 // destination, so this test fails until the delimiters are skipped before matching.
 func TestCheckLineLengthsAcceptsAngleBracketedContinuationDestination(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	destination := linkDestination("https://", 105) // eligible destination, strictly over the limit
 	// The destination carries the optional angle delimiters Goldmark strips from its
 	// parsed value, and the post-colon line ending places the real span on the
@@ -199,8 +199,8 @@ func TestCheckLineLengthsAcceptsAngleBracketedContinuationDestination(t *testing
 	// allowance, so the overlong line passes while the short label line stays legal.
 	source := "[ref]:\n<" + destination + ">\n"
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", source)
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", source)
+	result := checkLengths(t, root, path)
 	requireNoDiagnostics(t, result)
 }
 
@@ -209,22 +209,22 @@ func TestCheckLineLengthsAcceptsAngleBracketedContinuationDestination(t *testing
 // URL carried by the label does not qualify the line when the actual destination stays
 // short, so the overlong line still fails.
 func TestCheckLineLengthsRejectsLongURLInLabel(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	longURL := linkDestination("https://", 105) // identical bytes, placed in the label
 	shortDestination := "https://x.example"     // real destination, well within the limit
 	line := "[" + longURL + "]: " + shortDestination
 
-	path := testutil.WriteFile(t, repoRoot, "docs/links.md", line+"\n")
-	result := checkLengths(t, repoRoot, path)
+	path := testutil.WriteFile(t, root, "docs/links.md", line+"\n")
+	result := checkLengths(t, root, path)
 	requireTooLong(t, result, "docs/links.md", 1, len(line))
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */
 
 // checkLengths runs CheckLineLengths and fails the test on any returned error.
-func checkLengths(t *testing.T, repoRoot string, path string) (result style.ExecutionResult) {
+func checkLengths(t *testing.T, root string, path string) (result style.ExecutionResult) {
 	t.Helper()
-	result, err := CheckLineLengths(repoRoot, []string{path})
+	result, err := CheckLineLengths(root, []string{path})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

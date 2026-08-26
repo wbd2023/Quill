@@ -3,7 +3,7 @@ package bash
 import "strings"
 
 func (state *shellSafetyState) checkScriptShape(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 	lineNumber int,
@@ -13,7 +13,7 @@ func (state *shellSafetyState) checkScriptShape(
 	if patterns.which.MatchString(line) {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/script-shape",
-			repoRoot,
+			root,
 			path,
 			lineNumber,
 			"detect dependencies with command -v, not which",
@@ -23,7 +23,7 @@ func (state *shellSafetyState) checkScriptShape(
 	if looksLikeManualTempPath(trimmed) {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/temp-path",
-			repoRoot,
+			root,
 			path,
 			lineNumber,
 			"temporary resources must be created with mktemp",
@@ -33,7 +33,7 @@ func (state *shellSafetyState) checkScriptShape(
 	if patterns.readLoop.MatchString(line) {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/script-shape",
-			repoRoot,
+			root,
 			path,
 			lineNumber,
 			"avoid cmd | while read loops when loop state must survive",
@@ -42,7 +42,7 @@ func (state *shellSafetyState) checkScriptShape(
 }
 
 func (state *shellSafetyState) addScriptShapeDiagnostics(
-	repoRoot string,
+	root string,
 	path string,
 	lines []string,
 ) {
@@ -54,7 +54,7 @@ func (state *shellSafetyState) addScriptShapeDiagnostics(
 	if lastFunction.name != "main" {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/script-shape",
-			repoRoot,
+			root,
 			path,
 			lastFunction.line,
 			"non-trivial Bash scripts must keep main() as the bottom-most function",
@@ -64,7 +64,7 @@ func (state *shellSafetyState) addScriptShapeDiagnostics(
 	if lastLine := lastSignificantShellLine(lines); lastLine != `main "$@"` {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/script-shape",
-			repoRoot,
+			root,
 			path,
 			0,
 			`non-trivial Bash scripts must end with main "$@"`,

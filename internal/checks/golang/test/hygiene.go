@@ -41,46 +41,46 @@ func CheckHygiene(
 	}
 
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
+		call, ok := node.(*ast.CallExpr)
 		if !ok {
 			return true
 		}
 
-		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+		selector, ok := call.Fun.(*ast.SelectorExpr)
 		if !ok {
 			return true
 		}
 
-		packageIdentifier, ok := selector.X.(*ast.Ident)
+		ident, ok := selector.X.(*ast.Ident)
 		if !ok {
 			return true
 		}
 
 		switch {
-		case packageIdentifier.Name == "os" && selector.Sel.Name == "Setenv":
+		case ident.Name == "os" && selector.Sel.Name == "Setenv":
 			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(callExpression.Pos()),
+				Position: fileSet.Position(call.Pos()),
 				Rule:     analysis.DiagnosticTestSetenv,
 				Message:  "tests must use t.Setenv() instead of os.Setenv()",
 			})
 
-		case packageIdentifier.Name == "os" && selector.Sel.Name == "MkdirTemp":
+		case ident.Name == "os" && selector.Sel.Name == "MkdirTemp":
 			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(callExpression.Pos()),
+				Position: fileSet.Position(call.Pos()),
 				Rule:     analysis.DiagnosticTestTempDir,
 				Message:  "tests must use t.TempDir() instead of os.MkdirTemp()",
 			})
 
-		case packageIdentifier.Name == "ioutil" && selector.Sel.Name == "TempDir":
+		case ident.Name == "ioutil" && selector.Sel.Name == "TempDir":
 			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(callExpression.Pos()),
+				Position: fileSet.Position(call.Pos()),
 				Rule:     analysis.DiagnosticTestTempDir,
 				Message:  "tests must use t.TempDir() instead of ioutil.TempDir()",
 			})
 
-		case packageIdentifier.Name == "time" && selector.Sel.Name == "Sleep":
+		case ident.Name == "time" && selector.Sel.Name == "Sleep":
 			violations = append(violations, analysis.Violation{
-				Position: fileSet.Position(callExpression.Pos()),
+				Position: fileSet.Position(call.Pos()),
 				Rule:     analysis.DiagnosticTestAvoidArbitrarySleeps,
 				Message:  "tests must avoid time.Sleep() when a deterministic signal is possible",
 			})
@@ -159,8 +159,8 @@ func isTestingHandle(expression ast.Expr) (found bool) {
 			return false
 		}
 
-		packageIdentifier, ok := selector.X.(*ast.Ident)
-		if !ok || packageIdentifier.Name != "testing" {
+		ident, ok := selector.X.(*ast.Ident)
+		if !ok || ident.Name != "testing" {
 			return false
 		}
 
@@ -172,8 +172,8 @@ func isTestingHandle(expression ast.Expr) (found bool) {
 		}
 
 	case *ast.SelectorExpr:
-		packageIdentifier, ok := typedExpression.X.(*ast.Ident)
-		if !ok || packageIdentifier.Name != "testing" {
+		ident, ok := typedExpression.X.(*ast.Ident)
+		if !ok || ident.Name != "testing" {
 			return false
 		}
 
@@ -188,12 +188,12 @@ func isTestingHandle(expression ast.Expr) (found bool) {
 
 func callsTestingHandleHelper(body *ast.BlockStmt, handleName string) (found bool) {
 	ast.Inspect(body, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
+		call, ok := node.(*ast.CallExpr)
 		if !ok {
 			return true
 		}
 
-		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+		selector, ok := call.Fun.(*ast.SelectorExpr)
 		if !ok || selector.Sel.Name != "Helper" {
 			return true
 		}

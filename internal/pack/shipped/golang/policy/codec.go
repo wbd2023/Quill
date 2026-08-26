@@ -86,14 +86,6 @@ func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
 	return config, ValidateConfig(config)
 }
 
-/* ----------------------------------------- Validation ----------------------------------------- */
-
-// ValidatePackPolicy validates the raw Go Pack Policy subtree.
-func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
-	_, err = DecodeConfig(policy)
-	return err
-}
-
 /* ------------------------------------------ Encoding ------------------------------------------ */
 
 // EncodeConfig encodes config as a raw Go Pack Policy subtree.

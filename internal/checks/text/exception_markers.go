@@ -9,12 +9,12 @@ import (
 
 // CheckExceptionMarkers check exception markers.
 func CheckExceptionMarkers(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -34,7 +34,7 @@ func CheckExceptionMarkers(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:    "text/exception-markers/invalid",
-				File:    filewalk.DisplayPath(repoRoot, path),
+				File:    filewalk.DisplayPath(root, path),
 				Range:   style.Range{Start: style.Position{Line: line.Number}},
 				Message: "invalid exception marker",
 			})

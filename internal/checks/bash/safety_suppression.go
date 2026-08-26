@@ -6,7 +6,7 @@ import (
 )
 
 func (state *shellSafetyState) checkShellcheckSuppression(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 	lineNumber int,
@@ -19,7 +19,7 @@ func (state *shellSafetyState) checkShellcheckSuppression(
 
 	state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 		"bash/safety/suppression",
-		repoRoot,
+		root,
 		path,
 		lineNumber,
 		"shellcheck suppressions must include rule IDs and a short reason",

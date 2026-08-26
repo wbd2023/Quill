@@ -7,7 +7,8 @@ import (
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
 )
 
-// Collector is collector.
+// Collector accumulates interface declarations, mock methods, and implementation methods across
+// the files of one package so their relationships can be resolved afterwards.
 type Collector struct {
 	pathClassifier         analysis.PathClassifier
 	interfaces             map[string]interfaceDeclaration
@@ -16,7 +17,7 @@ type Collector struct {
 	implementationBindings []implementationBinding
 }
 
-// NewCollector new collector.
+// NewCollector returns a Collector that classifies paths with the given classifier.
 func NewCollector(pathClassifier analysis.PathClassifier) (collector *Collector) {
 	return &Collector{
 		pathClassifier:         pathClassifier,

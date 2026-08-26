@@ -2,8 +2,6 @@ package report
 
 import "github.com/wbd2023/quill/internal/style"
 
-/* ------------------------------------------ JSON DTOs ----------------------------------------- */
-
 type fixJSON struct {
 	Scope     string           `json:"scope"`
 	Toolchain fixToolchainJSON `json:"toolchain"`
@@ -26,8 +24,6 @@ type fixRuleJSON struct {
 	Truncated      bool              `json:"truncated"`
 	ExecutionError string            `json:"execution_error,omitempty"`
 }
-
-/* ------------------------------------------ Rendering ----------------------------------------- */
 
 func newFixJSON(view FixView) (payload fixJSON) {
 	return fixJSON{

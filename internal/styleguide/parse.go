@@ -47,6 +47,6 @@ func Parse(source []byte, config Config) (document Document, err error) {
 func parse(file sourceFile) (document Document, err error) {
 	tree := goldmark.DefaultParser().Parse(text.NewReader(file.contents))
 	events := scanMarkdown(tree, file)
-	compiler := newDocumentCompiler(file)
+	compiler := newCompiler(file)
 	return compiler.compile(events)
 }

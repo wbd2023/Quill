@@ -12,7 +12,7 @@ import (
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
-/* ------------------------------------- Schema Contract --------------------------------------- */
+/* --------------------------------------- Schema Contract -------------------------------------- */
 
 // These tests defend the immutable JSON v1 result schemas documented in docs/cli-protocol.md. Each
 // test renders a populated result through the real report renderer and asserts every documented
@@ -21,65 +21,6 @@ import (
 // They never reject additive fields: a field is checked only for presence and type, never for the
 // absence of extras. Additive extensions permitted within the same protocol version keep passing,
 // matching the compatibility rule. A field dropped or retyped by the renderer fails immediately.
-
-// jsonKind reports the JSON type name encoding/json produces when decoding into any.
-func jsonKind(value any) string {
-	switch value.(type) {
-	case string:
-		return "string"
-	case bool:
-		return "bool"
-	case float64:
-		return "number"
-	case []any:
-		return "array"
-	case map[string]any:
-		return "object"
-	default:
-		return fmt.Sprintf("%T", value)
-	}
-}
-
-// requireField asserts obj carries key with the documented JSON type.
-func requireField(t *testing.T, obj map[string]any, key string, want string) {
-	t.Helper()
-	raw, ok := obj[key]
-	if !ok {
-		t.Fatalf("result missing documented field %q", key)
-	}
-	if got := jsonKind(raw); got != want {
-		t.Fatalf("field %q is %s, want %s (value %v)", key, got, want, raw)
-	}
-}
-
-// requireObject asserts key is a JSON object and returns it decoded.
-func requireObject(t *testing.T, obj map[string]any, key string) map[string]any {
-	t.Helper()
-	requireField(t, obj, key, "object")
-	return obj[key].(map[string]any)
-}
-
-// requireArray asserts key is a JSON array and returns it decoded.
-func requireArray(t *testing.T, obj map[string]any, key string) []any {
-	t.Helper()
-	requireField(t, obj, key, "array")
-	return obj[key].([]any)
-}
-
-// decodeResult decodes the result object from one rendered envelope.
-func decodeResult(t *testing.T, output []byte) map[string]any {
-	t.Helper()
-	var envelope struct {
-		Result map[string]any `json:"result"`
-	}
-	if err := json.Unmarshal(output, &envelope); err != nil {
-		t.Fatalf("decode result envelope: %v\n%s", err, output)
-	}
-	if envelope.Result == nil {
-		t.Fatalf("envelope missing result:\n%s", output)
-	}
-	return envelope.Result
-}
 
 func TestCheckResultSchemaContract(t *testing.T) {
 	t.Parallel()
@@ -112,7 +53,9 @@ func TestCheckResultSchemaContract(t *testing.T) {
 	})
 
 	var buffer bytes.Buffer
-	if _, err := WriteCheck(&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false); err != nil {
+	if _, err := WriteCheck(
+		&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
 	payload := decodeResult(t, buffer.Bytes())
@@ -130,7 +73,9 @@ func TestCheckResultSchemaContract(t *testing.T) {
 	}
 
 	entry := requireArray(t, result, "entries")[0].(map[string]any)
-	for _, field := range []string{"rule_id", "name", "group", "enforcement", "scope", "status", "execution_error"} {
+	for _, field := range []string{
+		"rule_id", "name", "group", "enforcement", "scope", "status", "execution_error",
+	} {
 		requireField(t, entry, field, "string")
 	}
 	requireField(t, entry, "requirements", "array")
@@ -176,7 +121,9 @@ func TestCoverageResultSchemaContract(t *testing.T) {
 	})
 
 	var buffer bytes.Buffer
-	if err := WriteCoverage(&buffer, testEnvelopeMetadata("coverage"), FormatJSON, view, false); err != nil {
+	if err := WriteCoverage(
+		&buffer, testEnvelopeMetadata("coverage"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCoverage: %v", err)
 	}
 	result := decodeResult(t, buffer.Bytes())
@@ -258,7 +205,9 @@ func TestFixResultSchemaContract(t *testing.T) {
 	requireField(t, status, "valid", "bool")
 
 	rule := requireArray(t, result, "rules")[0].(map[string]any)
-	for _, field := range []string{"rule_id", "name", "group", "enforcement", "scope", "execution_error"} {
+	for _, field := range []string{
+		"rule_id", "name", "group", "enforcement", "scope", "execution_error",
+	} {
 		requireField(t, rule, field, "string")
 	}
 	requireField(t, rule, "exit_code", "number")
@@ -282,7 +231,9 @@ func TestToolchainResultSchemaContract(t *testing.T) {
 	}
 
 	var buffer bytes.Buffer
-	if _, err := WriteToolchain(&buffer, testEnvelopeMetadata("doctor"), FormatJSON, toolchainResult); err != nil {
+	if _, err := WriteToolchain(
+		&buffer, testEnvelopeMetadata("doctor"), FormatJSON, toolchainResult,
+	); err != nil {
 		t.Fatalf("WriteToolchain: %v", err)
 	}
 	payload := decodeResult(t, buffer.Bytes())
@@ -324,7 +275,12 @@ func TestListResultSchemaContract(t *testing.T) {
 		if err := WriteList(&buffer, testEnvelopeMetadata("list"), FormatJSON, ListResult{
 			Selector: ListPacks,
 			Packs: []ListPack{{
-				ID: "project", Name: "Project", Active: true, Provenance: "shipped", Rules: 2, Tools: 1,
+				ID:         "project",
+				Name:       "Project",
+				Active:     true,
+				Provenance: "shipped",
+				Rules:      2,
+				Tools:      1,
 			}},
 		}); err != nil {
 			t.Fatalf("WriteList: %v", err)
@@ -366,7 +322,11 @@ func TestListResultSchemaContract(t *testing.T) {
 		if err := WriteList(&buffer, testEnvelopeMetadata("list"), FormatJSON, ListResult{
 			Selector: ListTools,
 			Tools: []ListTool{{
-				ID: "gofmt", Name: "gofmt", Command: "gofmt", Pin: "1.24.5", Packs: []string{"project"},
+				ID:      "gofmt",
+				Name:    "gofmt",
+				Command: "gofmt",
+				Pin:     "1.24.5",
+				Packs:   []string{"project"},
 			}},
 		}); err != nil {
 			t.Fatalf("WriteList: %v", err)
@@ -411,13 +371,17 @@ func TestExplainResultSchemaContract(t *testing.T) {
 			ID: "project", Name: "Project", Provenance: "shipped",
 			Policy: map[string]any{"line-limit": float64(100)},
 		},
-		Binding: ExplainBinding{Enforcement: "required", Scope: "all", Requirements: []string{"1.1.format"}},
-		Check:   ExplainExecution{Category: "file_command", Tools: []string{"gofmt"}},
-		Fix:     &fix,
+		Binding: ExplainBinding{
+			Enforcement: "required", Scope: "all", Requirements: []string{"1.1.format"},
+		},
+		Check: ExplainExecution{Category: "file_command", Tools: []string{"gofmt"}},
+		Fix:   &fix,
 	}}
 
 	var buffer bytes.Buffer
-	if err := WriteExplain(&buffer, testEnvelopeMetadata("explain"), FormatJSON, result); err != nil {
+	if err := WriteExplain(
+		&buffer, testEnvelopeMetadata("explain"), FormatJSON, result,
+	); err != nil {
 		t.Fatalf("WriteExplain: %v", err)
 	}
 	rule := requireObject(t, decodeResult(t, buffer.Bytes()), "rule")
@@ -466,7 +430,9 @@ func TestCheckPerRuleExecutionErrorIsEnvelopeOK(t *testing.T) {
 	})
 
 	var buffer bytes.Buffer
-	if _, err := WriteCheck(&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false); err != nil {
+	if _, err := WriteCheck(
+		&buffer, testEnvelopeMetadata("check"), FormatJSON, view, false,
+	); err != nil {
 		t.Fatalf("WriteCheck: %v", err)
 	}
 
@@ -487,7 +453,10 @@ func TestCheckPerRuleExecutionErrorIsEnvelopeOK(t *testing.T) {
 	}
 
 	if envelope.Status != StatusOK {
-		t.Fatalf("per-rule execution error must keep envelope status %q, got %q", StatusOK, envelope.Status)
+		t.Fatalf(
+			"per-rule execution error must keep envelope status %q, got %q",
+			StatusOK, envelope.Status,
+		)
 	}
 	if envelope.Result.Summary.Errored != 1 {
 		t.Fatalf("summary Errored = %d, want 1", envelope.Result.Summary.Errored)
@@ -502,4 +471,68 @@ func TestCheckPerRuleExecutionErrorIsEnvelopeOK(t *testing.T) {
 	if entry.ExecutionError == "" {
 		t.Fatal("an errored entry must carry a non-empty execution_error")
 	}
+}
+
+// jsonKind reports the JSON type name encoding/json produces when decoding into any.
+func jsonKind(value any) (kind string) {
+	switch value.(type) {
+	case string:
+		return "string"
+
+	case bool:
+		return "bool"
+
+	case float64:
+		return "number"
+
+	case []any:
+		return "array"
+
+	case map[string]any:
+		return "object"
+
+	default:
+		return fmt.Sprintf("%T", value)
+	}
+}
+
+// requireField asserts obj carries key with the documented JSON type.
+func requireField(t *testing.T, obj map[string]any, key string, want string) {
+	t.Helper()
+	raw, ok := obj[key]
+	if !ok {
+		t.Fatalf("result missing documented field %q", key)
+	}
+	if got := jsonKind(raw); got != want {
+		t.Fatalf("field %q is %s, want %s (value %v)", key, got, want, raw)
+	}
+}
+
+// requireObject asserts key is a JSON object and returns it decoded.
+func requireObject(t *testing.T, obj map[string]any, key string) (object map[string]any) {
+	t.Helper()
+	requireField(t, obj, key, "object")
+	return obj[key].(map[string]any)
+}
+
+// requireArray asserts key is a JSON array and returns it decoded.
+func requireArray(t *testing.T, obj map[string]any, key string) (items []any) {
+	t.Helper()
+	requireField(t, obj, key, "array")
+	return obj[key].([]any)
+}
+
+// decodeResult decodes the result object from one rendered envelope.
+func decodeResult(t *testing.T, output []byte) (result map[string]any) {
+	t.Helper()
+	var envelope struct {
+		Result map[string]any `json:"result"`
+	}
+	if err := json.Unmarshal(output, &envelope); err != nil {
+		t.Fatalf("decode result envelope: %v\n%s", err, output)
+	}
+	if envelope.Result == nil {
+		t.Fatalf("envelope missing result:\n%s", output)
+	}
+	return envelope.Result
 }

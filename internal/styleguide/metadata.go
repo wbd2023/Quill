@@ -164,8 +164,8 @@ func buildRequirementMetadata(fields metadataFields) (metadata requirementMetada
 	return requirementMetadata{
 		id: id,
 		review: Review{
-			Only:   hasMode,
-			Reason: fields.reason,
+			IsReviewOnly: hasMode,
+			Reason:       fields.reason,
 		},
 	}, nil
 }

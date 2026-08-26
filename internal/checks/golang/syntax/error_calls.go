@@ -19,14 +19,14 @@ func collectErrorCallViolations(
 	errorsImportAliases map[string]bool,
 ) (violations []analysis.Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
-		if !ok || len(callExpression.Args) == 0 {
+		call, ok := node.(*ast.CallExpr)
+		if !ok || len(call.Args) == 0 {
 			return true
 		}
 
 		violations = append(violations, checkErrorCall(
 			fileSet,
-			callExpression,
+			call,
 			isTestFile,
 			parameters,
 			fmtImportAliases,
@@ -42,27 +42,27 @@ func collectErrorCallViolations(
 
 func checkErrorCall(
 	fileSet *token.FileSet,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 	isTestFile bool,
 	parameters gopolicy.ParameterConfig,
 	fmtImportAliases map[string]bool,
 	errorsImportAliases map[string]bool,
 ) (violations []analysis.Violation) {
-	selectorExpression, ok := callExpression.Fun.(*ast.SelectorExpr)
+	selectorExpression, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok {
 		return nil
 	}
 
-	packageIdentifier, ok := selectorExpression.X.(*ast.Ident)
+	ident, ok := selectorExpression.X.(*ast.Ident)
 	if !ok {
 		return nil
 	}
 
 	switch {
-	case selectorExpression.Sel.Name == "Errorf" && fmtImportAliases[packageIdentifier.Name]:
-		return checkFmtErrorfCall(fileSet, callExpression, isTestFile, parameters)
-	case selectorExpression.Sel.Name == "New" && errorsImportAliases[packageIdentifier.Name]:
-		return checkErrorsNewCall(fileSet, callExpression)
+	case selectorExpression.Sel.Name == "Errorf" && fmtImportAliases[ident.Name]:
+		return checkFmtErrorfCall(fileSet, call, isTestFile, parameters)
+	case selectorExpression.Sel.Name == "New" && errorsImportAliases[ident.Name]:
+		return checkErrorsNewCall(fileSet, call)
 	}
 
 	return nil
@@ -70,17 +70,17 @@ func checkErrorCall(
 
 func checkFmtErrorfCall(
 	fileSet *token.FileSet,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 	isTestFile bool,
 	parameters gopolicy.ParameterConfig,
 ) (violations []analysis.Violation) {
-	message, found := literalString(callExpression.Args[0])
+	message, found := literalString(call.Args[0])
 	if found {
 		violations = append(
 			violations,
 			checkErrorMessageLiteralStyle(
 				fileSet,
-				callExpression.Args[0],
+				call.Args[0],
 				message,
 				"fmt.Errorf",
 			)...,
@@ -91,21 +91,21 @@ func checkFmtErrorfCall(
 		return violations
 	}
 
-	return append(violations, checkSecretErrorArguments(fileSet, callExpression, parameters)...)
+	return append(violations, checkSecretErrorArguments(fileSet, call, parameters)...)
 }
 
 func checkErrorsNewCall(
 	fileSet *token.FileSet,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 ) (violations []analysis.Violation) {
-	message, found := literalString(callExpression.Args[0])
+	message, found := literalString(call.Args[0])
 	if !found {
 		return nil
 	}
 
 	return checkErrorMessageLiteralStyle(
 		fileSet,
-		callExpression.Args[0],
+		call.Args[0],
 		message,
 		"errors.New",
 	)

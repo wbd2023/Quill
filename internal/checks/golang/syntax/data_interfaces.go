@@ -56,7 +56,7 @@ func checkPointerToInterfaces(
 func pointerToInterfaceViolation(
 	expression ast.Expr,
 	interfaceNames map[string]bool,
-	inField bool,
+	isFieldOrParam bool,
 ) (ruleID string, message string, found bool) {
 	starExpression, ok := expression.(*ast.StarExpr)
 	if !ok {
@@ -67,7 +67,7 @@ func pointerToInterfaceViolation(
 		return "", "", false
 	}
 
-	if inField {
+	if isFieldOrParam {
 		return analysis.DiagnosticInterfaceValuesDirect,
 			"functions and structs must pass interface values directly, not *interface types",
 			true

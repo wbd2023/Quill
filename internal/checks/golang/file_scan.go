@@ -28,22 +28,22 @@ func (state *analysisState) processFile(path string) {
 		return
 	}
 
-	normalisedPath := normalisePath(path)
-	state.scannedGoFiles = append(state.scannedGoFiles, normalisedPath)
+	normalised := normalisePath(path)
+	state.scannedGoFiles = append(state.scannedGoFiles, normalised)
 	isTestFile := strings.HasSuffix(path, "_test.go")
-	state.addPerFileViolations(file, normalisedPath, splitLines(contents), isTestFile)
+	state.addPerFileViolations(file, normalised, splitLines(contents), isTestFile)
 }
 
 func (state *analysisState) addPerFileViolations(
 	file *ast.File,
-	normalisedPath string,
+	normalised string,
 	lines []string,
 	isTestFile bool,
 ) {
 	scan := fileScan{
 		state:      state,
 		file:       file,
-		path:       normalisedPath,
+		path:       normalised,
 		lines:      lines,
 		isTestFile: isTestFile,
 	}

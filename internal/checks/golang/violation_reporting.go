@@ -42,7 +42,7 @@ func dedupeViolations(violations []analysis.Violation) (deduped []analysis.Viola
 	return deduped
 }
 
-func normalisePath(path string) (normalisedPath string) {
+func normalisePath(path string) (normalised string) {
 	absolute, err := filepath.Abs(path)
 	if err != nil {
 		return filepath.ToSlash(filepath.Clean(path))

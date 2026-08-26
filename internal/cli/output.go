@@ -54,6 +54,7 @@ func errorCode(err error) (code string) {
 	if isArgumentError(err) {
 		return report.ErrorCodeInvalidArgument
 	}
+
 	if errors.Is(err, context.Canceled) {
 		return report.ErrorCodeCancelled
 	}

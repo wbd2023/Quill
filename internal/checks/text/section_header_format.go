@@ -9,13 +9,13 @@ import (
 )
 
 func validateSectionHeader(
-	repoRoot string,
+	root string,
 	path string,
 	line filewalk.Line,
 	body string,
 	bodyPattern *regexp.Regexp,
 ) (diagnostics []style.Diagnostic) {
-	relativePath := filewalk.DisplayPath(repoRoot, path)
+	relativePath := filewalk.DisplayPath(root, path)
 	lineWidth := visualWidth(line.Text)
 	if lineWidth != sectionHeaderLength {
 		diagnostics = append(diagnostics, style.Diagnostic{

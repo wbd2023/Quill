@@ -107,7 +107,7 @@ func validateResolvedPath(root string, value string, field string) (err error) {
 		return fmt.Errorf("%s: resolve path %q: %w", field, value, err)
 	}
 
-	if !isWithinRepoRoot(root, resolved) {
+	if !isWithinRoot(root, resolved) {
 		return fmt.Errorf("%s: path %q resolves outside the repository root", field, value)
 	}
 
@@ -123,6 +123,7 @@ func resolveExistingAncestor(path string) (resolved string, err error) {
 		if err == nil {
 			return resolved, nil
 		}
+
 		if !errors.Is(err, fs.ErrNotExist) {
 			return "", err
 		}
@@ -155,7 +156,10 @@ func resolveExistingAncestor(path string) (resolved string, err error) {
 	}
 }
 
-func isWithinRepoRoot(root string, target string) (within bool) {
+// isWithinRoot reports whether target is root itself or a descendant of root. It cleans only
+// target: root must already be canonical (symlink-resolved and cleaned by validateRepositoryPaths),
+// unlike workspace.isWithinRoot, which cleans both arguments.
+func isWithinRoot(root string, target string) (within bool) {
 	rel, err := filepath.Rel(root, filepath.Clean(target))
 	if err != nil {
 		return false

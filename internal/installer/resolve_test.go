@@ -14,8 +14,8 @@ import (
 
 func testGitHubInstall(platforms ...string) (install toolchain.GitHubInstall) {
 	platformMap := make(map[string]string, len(platforms))
-	for _, p := range platforms {
-		platformMap[p] = p + "-asset"
+	for _, platform := range platforms {
+		platformMap[platform] = platform + "-asset"
 	}
 
 	return toolchain.GitHubInstall{
@@ -82,8 +82,8 @@ func TestResolveArchiveCollectsAllPlatformHashes(t *testing.T) {
 	}
 
 	gotPlatforms := make([]string, 0, len(archive.Hashes))
-	for p := range archive.Hashes {
-		gotPlatforms = append(gotPlatforms, p)
+	for platform := range archive.Hashes {
+		gotPlatforms = append(gotPlatforms, platform)
 	}
 
 	sort.Strings(gotPlatforms)

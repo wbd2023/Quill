@@ -21,7 +21,7 @@ func scanArchitecture(
 		return style.ExecutionResult{}, fmt.Errorf("go list module path: %w", err)
 	}
 
-	packageList, err := runGoList(ctx, run, "-json", "./...")
+	packagesJSON, err := runGoList(ctx, run, "-json", "./...")
 	if err != nil {
 		return style.ExecutionResult{}, fmt.Errorf("go list packages: %w", err)
 	}
@@ -31,7 +31,7 @@ func scanArchitecture(
 		return style.ExecutionResult{}, err
 	}
 
-	return architecture.CheckImports(modulePath, packageList, goConfig.Architecture)
+	return architecture.CheckImports(modulePath, packagesJSON, goConfig.Architecture)
 }
 
 func runGoList(
@@ -42,7 +42,7 @@ func runGoList(
 	result, err := runGo(
 		ctx,
 		run,
-		run.RepoRoot,
+		run.Root,
 		"go",
 		append([]string{"list"}, arguments...)...,
 	)

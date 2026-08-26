@@ -201,13 +201,16 @@ func classifyError(
 	switch {
 	case result.Canceled:
 		err = context.Canceled
+
 	case result.TimedOut:
 		err = context.DeadlineExceeded
+
 	case parentErr != nil:
 		// The caller's context expired on its own (for example a parent deadline) and terminated
 		// the child before Quill's request timer. Surface that cause rather than
 		// the injected error.
 		err = parentErr
+
 	default:
 		err = runErr
 	}
@@ -287,12 +290,12 @@ func resolveDirectPath(command string, extensions []string) (resolved string, er
 // executableExtensions parses PATHEXT into a list of extensions, each normalised to carry a leading
 // dot so that malformed entries such as EXE or cmd resolve go.exe and tool.cmd instead of the
 // concatenation goEXE.
-func executableExtensions(pathext string) (extensions []string) {
-	if pathext == "" {
+func executableExtensions(pathExt string) (extensions []string) {
+	if pathExt == "" {
 		return nil
 	}
 
-	for _, extension := range strings.Split(pathext, ";") {
+	for _, extension := range strings.Split(pathExt, ";") {
 		if extension = strings.TrimSpace(extension); extension != "" {
 			if !strings.HasPrefix(extension, ".") {
 				extension = "." + extension
@@ -307,9 +310,9 @@ func executableExtensions(pathext string) (extensions []string) {
 // resolvePathExt returns the PATHEXT value to search with. An explicit value is honoured as-is;
 // an empty value falls back to the Windows default so resolution does not silently degrade, and to
 // the empty string on POSIX where PATHEXT is meaningless.
-func resolvePathExt(pathext string) (resolved string) {
-	if pathext != "" {
-		return pathext
+func resolvePathExt(pathExt string) (resolved string) {
+	if pathExt != "" {
+		return pathExt
 	}
 
 	if runtime.GOOS == "windows" {

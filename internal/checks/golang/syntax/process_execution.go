@@ -18,38 +18,38 @@ func CheckProcessExecutionSafety(
 	}
 
 	ast.Inspect(file, func(node ast.Node) bool {
-		callExpression, ok := node.(*ast.CallExpr)
+		call, ok := node.(*ast.CallExpr)
 		if !ok {
 			return true
 		}
 
-		selector, ok := callExpression.Fun.(*ast.SelectorExpr)
+		selector, ok := call.Fun.(*ast.SelectorExpr)
 		if !ok {
 			return true
 		}
 
-		packageIdentifier, ok := selector.X.(*ast.Ident)
-		if !ok || !execAliases[packageIdentifier.Name] {
+		ident, ok := selector.X.(*ast.Ident)
+		if !ok || !execAliases[ident.Name] {
 			return true
 		}
 
 		commandIndex := shellCommandIndex(selector.Sel.Name)
-		if commandIndex < 0 || len(callExpression.Args) <= commandIndex+1 {
+		if commandIndex < 0 || len(call.Args) <= commandIndex+1 {
 			return true
 		}
 
-		commandName, found := literalString(callExpression.Args[commandIndex])
+		commandName, found := literalString(call.Args[commandIndex])
 		if !found || !isShellCommand(commandName) {
 			return true
 		}
 
-		shellFlag, found := literalString(callExpression.Args[commandIndex+1])
+		shellFlag, found := literalString(call.Args[commandIndex+1])
 		if !found || !isShellInterpolationFlag(shellFlag) {
 			return true
 		}
 
 		violations = append(violations, analysis.Violation{
-			Position: fileSet.Position(callExpression.Pos()),
+			Position: fileSet.Position(call.Pos()),
 			Rule:     analysis.DiagnosticNoShellInterpolation,
 			Message: "process execution must avoid shell interpolation; pass command " +
 				"arguments directly",

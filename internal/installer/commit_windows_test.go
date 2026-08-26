@@ -9,7 +9,8 @@ import (
 )
 
 // TestWriteExecutableResistsParentSwapDuringWrite proves the rooted Windows commit cannot be
-// redirected outside the repository when the destination's parent is swapped to a symlink mid-write.
+// redirected outside the repository when the destination's parent is swapped to a symlink
+// mid-write.
 //
 // The NT handle-relative rename resolves the staged file and its destination against the anchored
 // directory descriptor, so the displaced parent path (and the symlink that replaces it) cannot move

@@ -11,6 +11,8 @@ import (
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
+/* ----------------------------- Installation Directory Preparation ----------------------------- */
+
 // prepareInstallDirectory ensures dir exists as a real directory beneath root, creating missing
 // components and rejecting any component that is a symlink or non-directory entry. A destination
 // that escapes the repository root (for example a custom state directory configured outside the
@@ -55,7 +57,8 @@ func prepareInstallDirectory(root string, dir string) (err error) {
 		current = filepath.Join(current, component)
 		info, statErr := os.Lstat(current)
 		if os.IsNotExist(statErr) {
-			if mkdirErr := os.Mkdir(current, standardPermissions); mkdirErr != nil && !os.IsExist(mkdirErr) {
+			mkdirErr := os.Mkdir(current, standardPermissions)
+			if mkdirErr != nil && !os.IsExist(mkdirErr) {
 				return fmt.Errorf("create installation directory %q: %w", current, mkdirErr)
 			}
 			info, statErr = os.Lstat(current)
@@ -76,12 +79,14 @@ func prepareInstallDirectory(root string, dir string) (err error) {
 	return nil
 }
 
+/* ------------------------------- Ecosystem Bootstrap Preparation ------------------------------ */
+
 // prepareGoInstall prepares every directory the Go toolchain writes to during bootstrap,
 // rejecting symlinked or out-of-repository components before go install runs. The directory list
 // is sourced from the golang package so the installer stays the single owner of preparation
 // policy while the ecosystem package remains the source of its own layout.
 func prepareGoInstall(layout workspace.Layout) (err error) {
-	return prepareInstallDirectories(layout.RepositoryRoot, []string{
+	return prepareInstallDirectories(layout.Root, []string{
 		layout.StateDirectory,
 		layout.BinaryDirectory(),
 		layout.CacheDirectory(),
@@ -94,7 +99,7 @@ func prepareGoInstall(layout workspace.Layout) (err error) {
 // prepareNpmInstall prepares every directory and manifest leaf npm uses during bootstrap,
 // rejecting symlinked or out-of-repository components before npm install runs.
 func prepareNpmInstall(layout workspace.Layout) (err error) {
-	if err = prepareInstallDirectories(layout.RepositoryRoot, []string{
+	if err = prepareInstallDirectories(layout.Root, []string{
 		layout.StateDirectory,
 		layout.CacheDirectory(),
 		node.CacheDirectory(layout),
@@ -120,7 +125,7 @@ func prepareInstallDirectories(root string, directories []string) (err error) {
 // prepareNpmManifests rejects manifest leaves npm can read or rewrite. npm runs with --no-save and
 // --package-lock=false, but an existing package file still affects its install plan; following one
 // through a symlink would cross the repository-local state boundary.
-func prepareNpmManifests(directory string) error {
+func prepareNpmManifests(directory string) (err error) {
 	for _, name := range []string{"package.json", "package-lock.json", "npm-shrinkwrap.json"} {
 		path := filepath.Join(directory, name)
 		info, err := os.Lstat(path)
@@ -131,6 +136,7 @@ func prepareNpmManifests(directory string) error {
 		if err != nil {
 			return fmt.Errorf("inspect npm manifest %q: %w", path, err)
 		}
+
 		if !info.Mode().IsRegular() {
 			return fmt.Errorf("npm manifest %q is not a regular file", path)
 		}

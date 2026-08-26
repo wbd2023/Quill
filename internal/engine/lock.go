@@ -18,37 +18,39 @@ type LockResult struct {
 // Lock loads the repository profile, resolves every tool's platform archive,
 // writes quill.lock atomically, and returns the written path and archive count.
 func (engine *Engine) Lock(
-	operationContext context.Context,
-) (result LockResult, operationError error) {
-	runContext, _, err := engine.prepareRun(operationContext, "")
+	ctx context.Context,
+) (result LockResult, err error) {
+	runContext, _, err := engine.prepareRun(ctx, "")
 	if err != nil {
 		return LockResult{}, err
 	}
 
 	tools := sortedTools(runContext.Tools)
-	archives, err := installer.Resolve(operationContext, engine.progressWriter, tools)
+	archives, err := installer.Resolve(ctx, engine.progressWriter, tools)
 	if err != nil {
 		return LockResult{}, err
 	}
 
-	return writeResolvedLock(operationContext, engine.repositoryRoot, archives)
+	return writeResolvedLock(ctx, engine.root, archives)
 }
 
 func writeResolvedLock(
-	operationContext context.Context,
-	repositoryRoot string,
+	ctx context.Context,
+	root string,
 	archives []lockfile.Archive,
-) (result LockResult, operationError error) {
+) (result LockResult, err error) {
 	archiveByID := make(map[string]lockfile.Archive, len(archives))
 	for _, archive := range archives {
 		archiveByID[archive.Tool] = archive
 	}
 
-	if err := operationContext.Err(); err != nil {
+	if err := ctx.Err(); err != nil {
 		return LockResult{}, err
 	}
 
-	path, err := lockfile.Write(operationContext, repositoryRoot, lockfile.Lockfile{Archives: archiveByID})
+	path, err := lockfile.Write(ctx, root, lockfile.Lockfile{
+		Archives: archiveByID,
+	})
 	if err != nil {
 		return LockResult{}, err
 	}

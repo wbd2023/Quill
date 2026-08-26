@@ -36,12 +36,16 @@ func writeListText(writer io.Writer, result ListResult) (err error) {
 	switch result.Selector {
 	case ListPacks:
 		return writePacksText(writer, result.Packs)
+
 	case ListRules:
 		return writeRulesText(writer, result.Rules)
+
 	case ListTools:
 		return writeToolsText(writer, result.Tools)
+
 	case ListScopes:
 		return writeScopesText(writer, result.Scopes)
+
 	default:
 		return fmt.Errorf("unsupported list selector %q", result.Selector)
 	}

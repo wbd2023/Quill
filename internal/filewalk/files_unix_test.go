@@ -16,17 +16,17 @@ import (
 // extension must be excluded before any probe opens it; the old extension-only matcher
 // would have collected it.
 func TestCollectFilesExcludesSpecialFileLeafMatchingExtension(t *testing.T) {
-	repoRoot := t.TempDir()
-	regular := testutil.WriteFile(t, repoRoot, "kept.sh", "#!/bin/sh\necho hi\n")
+	root := t.TempDir()
+	regular := testutil.WriteFile(t, root, "kept.sh", "#!/bin/sh\necho hi\n")
 
-	socket := filepath.Join(repoRoot, "blocked.sh")
+	socket := filepath.Join(root, "blocked.sh")
 	listener, err := net.Listen("unix", socket)
 	if err != nil {
 		t.Skipf("unix socket unsupported: %v", err)
 	}
-	t.Cleanup(func() { _ = listener.Close() })
+	t.Cleanup(func() { _ = listener.Close() }) // the listener exists only to create the socket path
 
-	files, err := CollectFiles([]string{repoRoot}, walkConfig(profiles.RepositoryConfig()), ".sh")
+	files, err := CollectFiles([]string{root}, walkConfig(profiles.RepositoryConfig()), ".sh")
 	if err != nil {
 		t.Fatalf("CollectFiles: %v", err)
 	}

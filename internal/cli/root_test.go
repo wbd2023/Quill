@@ -7,13 +7,13 @@ import (
 )
 
 func TestResolveRepositoryRootAutoDetectsRepository(t *testing.T) {
-	repositoryRoot, err := resolveRepositoryRoot("")
+	root, err := resolveRepositoryRoot("")
 	if err != nil {
 		t.Fatalf("resolveRepositoryRoot: %v", err)
 	}
 
-	if repositoryRoot != testutil.RepositoryRoot(t) {
-		t.Fatalf("unexpected repo root %q", repositoryRoot)
+	if root != testutil.RepositoryRoot(t) {
+		t.Fatalf("unexpected repo root %q", root)
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 
 // RunContext carries loaded profile and toolchain state through a check or install run.
 type RunContext struct {
-	RepoRoot        string
+	Root            string
 	Scope           style.Scope
 	Profile         profile.Profile
 	Plan            style.Plan
@@ -20,7 +20,7 @@ type RunContext struct {
 // NewRunContext constructs a RunContext from loaded profile and toolchain state. It joins each
 // capability with its pinned version and execution limits into a toolchain.Tool.
 func NewRunContext(
-	repoRoot string,
+	root string,
 	scope style.Scope,
 	config profile.Profile,
 	plan style.Plan,
@@ -44,7 +44,7 @@ func NewRunContext(
 	}
 
 	return RunContext{
-		RepoRoot:        repoRoot,
+		Root:            root,
 		Scope:           scope,
 		Profile:         config,
 		Plan:            plan,

@@ -11,14 +11,14 @@ import (
 
 // CheckSectionHeaderDensity check section header density.
 func CheckSectionHeaderDensity(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
-	sectionHeaders textpolicy.SectionHeaderConfig,
+	config textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -30,13 +30,13 @@ func CheckSectionHeaderDensity(
 	}
 
 	for _, path := range files {
-		lineCount, headers, _, err := scanSectionHeaders(repoRoot, path, patterns)
+		lineCount, headers, _, err := scanSectionHeaders(root, path, patterns)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 
-		relativePath := filewalk.DisplayPath(repoRoot, path)
-		if lineCount <= sectionHeaders.ShortMaxLines && len(headers) > 0 {
+		relativePath := filewalk.DisplayPath(root, path)
+		if lineCount <= config.ShortMaxLines && len(headers) > 0 {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code: "text/section-header-density/short-file",
 				File: relativePath,
@@ -48,7 +48,7 @@ func CheckSectionHeaderDensity(
 			})
 		}
 
-		if len(headers) > sectionHeaders.MaxHeaderCount {
+		if len(headers) > config.MaxHeaderCount {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code: "text/section-header-density/too-many",
 				File: relativePath,

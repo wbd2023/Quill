@@ -12,7 +12,8 @@ type Bindings struct {
 	fileInterpreters   FileInterpreters
 }
 
-// NewBindings new bindings.
+// NewBindings returns an empty Bindings aggregate with every runtime registry initialised and
+// ready for Register calls.
 func NewBindings() (bindings Bindings) {
 	return Bindings{
 		repositoryScanners: NewRepositoryScanners(),

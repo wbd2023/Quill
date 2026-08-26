@@ -10,10 +10,9 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* ---------------------------------------- Init Command ---------------------------------------- */
-
 type initCmd struct {
-	Root   string `kong:"name=repository-root,help=target directory (current directory when omitted)"`
+	Root string `kong:"name=repository-root,help=target directory (current directory when omitted)"`
+
 	Preset string `kong:"default=minimal,enum='minimal',help=preset: minimal"`
 }
 
@@ -27,6 +26,7 @@ func (c *initCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 	if err != nil {
 		return runner.reportCommandError("init", report.FormatText, err)
 	}
+
 	if err := report.WriteInit(runner.stdout, result); err != nil {
 		return runner.reportCommandError("init", report.FormatText, err)
 	}

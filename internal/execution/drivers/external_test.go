@@ -29,9 +29,9 @@ func TestExternalCheckDriver(t *testing.T) {
 	packDir := stagePackBinary(t, helper)
 
 	run := execution.RunContext{
-		RepoRoot: t.TempDir(),
-		Scope:    "all",
-		Profile:  profile.Profile{},
+		Root:    t.TempDir(),
+		Scope:   "all",
+		Profile: profile.Profile{},
 	}
 	driver := externalCheckDriver()
 	ctx := context.Background()
@@ -54,81 +54,71 @@ func TestExternalCheckDriver(t *testing.T) {
 		}
 	})
 
-	t.Run("completion failure becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		_, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "fail-completion", 5*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected completion failure error")
-		}
-	})
+	tests := []struct {
+		name          string
+		mode          string
+		timeout       time.Duration
+		wantTimedOut  bool
+		wantTruncated bool
+	}{
+		{
+			name:    "completion failure becomes an execution error",
+			mode:    "fail-completion",
+			timeout: 5 * time.Second,
+		},
+		{
+			name:    "malformed output becomes an execution error",
+			mode:    "malformed",
+			timeout: 5 * time.Second,
+		},
+		{
+			name:    "missing completion becomes an execution error",
+			mode:    "no-completion",
+			timeout: 5 * time.Second,
+		},
+		{
+			name:    "invalid range becomes an execution error",
+			mode:    "bad-range",
+			timeout: 5 * time.Second,
+		},
+		{
+			name:    "nonzero exit becomes an execution error",
+			mode:    "nonzero",
+			timeout: 5 * time.Second,
+		},
+		{
+			name:         "timeout becomes an execution error",
+			mode:         "timeout",
+			timeout:      200 * time.Millisecond,
+			wantTimedOut: true,
+		},
+		{
+			name:          "output truncation becomes an execution error",
+			mode:          "truncate",
+			timeout:       10 * time.Second,
+			wantTruncated: true,
+		},
+	}
 
-	t.Run("malformed output becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		_, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "malformed", 5*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected malformed output error")
-		}
-	})
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("missing completion becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		_, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "no-completion", 5*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected missing completion error")
-		}
-	})
-
-	t.Run("invalid range becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		_, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "bad-range", 5*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected invalid range error")
-		}
-	})
-
-	t.Run("nonzero exit becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		_, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "nonzero", 5*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected nonzero exit error")
-		}
-	})
-
-	t.Run("timeout becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		result, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "timeout", 200*time.Millisecond), nil,
-		)
-		if err == nil {
-			t.Fatal("expected timeout error")
-		}
-		if !result.TimedOut {
-			t.Fatal("expected TimedOut to be set on the result")
-		}
-	})
-
-	t.Run("output truncation becomes an execution error", func(t *testing.T) {
-		t.Parallel()
-		result, err := driver(
-			ctx, run, externalRule(), externalJob(packDir, "truncate", 10*time.Second), nil,
-		)
-		if err == nil {
-			t.Fatal("expected truncation error")
-		}
-		if !result.Truncated {
-			t.Fatal("expected Truncated to be set on the result")
-		}
-	})
+			result, err := driver(
+				ctx, run, externalRule(), externalJob(packDir, test.mode, test.timeout), nil,
+			)
+			if err == nil {
+				t.Fatalf("expected execution error for %q mode, got none (result: %+v)",
+					test.mode, result)
+			}
+			if test.wantTimedOut && !result.TimedOut {
+				t.Fatalf("expected TimedOut to be set on the result: %+v", result)
+			}
+			if test.wantTruncated && !result.Truncated {
+				t.Fatalf("expected Truncated to be set on the result: %+v", result)
+			}
+		})
+	}
 
 	t.Run("stderr is captured but does not fail a clean run", func(t *testing.T) {
 		t.Parallel()
@@ -150,8 +140,8 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	helper := compilePackHelper(t)
 	packDir := stagePackBinary(t, helper)
 
-	repoRoot := t.TempDir()
-	srcDir := filepath.Join(repoRoot, "src")
+	root := t.TempDir()
+	srcDir := filepath.Join(root, "src")
 	if err := os.MkdirAll(srcDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -161,8 +151,8 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	}
 
 	run := execution.RunContext{
-		RepoRoot: repoRoot,
-		Scope:    "all",
+		Root:  root,
+		Scope: "all",
 		Profile: profile.Profile{
 			Repository: profile.RepositoryConfig{
 				ScopeRoots: map[style.Scope][]string{"all": {"."}},
@@ -198,7 +188,7 @@ func TestExternalCheckRequestShape(t *testing.T) {
 	if !strings.Contains(message, "files=src/file.go") {
 		t.Fatalf("expected repository-relative file path, got %q", message)
 	}
-	if strings.Contains(message, repoRoot) {
+	if strings.Contains(message, root) {
 		t.Fatalf("request leaked an absolute repository path: %q", message)
 	}
 

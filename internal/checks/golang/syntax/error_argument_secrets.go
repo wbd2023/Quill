@@ -10,10 +10,10 @@ import (
 
 func checkSecretErrorArguments(
 	fileSet *token.FileSet,
-	callExpression *ast.CallExpr,
+	call *ast.CallExpr,
 	parameters gopolicy.ParameterConfig,
 ) (violations []analysis.Violation) {
-	for _, argument := range callExpression.Args[1:] {
+	for _, argument := range call.Args[1:] {
 		if !expressionContainsSecretLikeIdentifier(argument, parameters.SecretNames) {
 			continue
 		}

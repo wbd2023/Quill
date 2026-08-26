@@ -10,15 +10,15 @@ import (
 )
 
 func TestRunRuleUsesInjectedDriver(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	rule := style.Rule{
 		ID: "test/rule",
 		Check: style.RepositoryScan{
 			Scanner: "test",
 		},
 	}
-	runCtx := NewRunContext(
-		repoRoot,
+	run := NewRunContext(
+		root,
 		style.Scope("all"),
 		profile.Profile{},
 		style.Plan{},
@@ -38,7 +38,7 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 		},
 	}
 
-	result, err := RunRule(context.Background(), rule, runCtx, nil, drivers)
+	result, err := RunRule(context.Background(), rule, run, nil, drivers)
 	if err != nil {
 		t.Fatalf("RunRule: %v", err)
 	}
@@ -49,15 +49,15 @@ func TestRunRuleUsesInjectedDriver(t *testing.T) {
 }
 
 func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	rule := style.Rule{
 		ID: "test/unsupported",
 		Check: style.ToolchainCheck{
 			ToolIDs: []string{"go"},
 		},
 	}
-	runCtx := NewRunContext(
-		repoRoot,
+	run := NewRunContext(
+		root,
 		style.Scope("all"),
 		profile.Profile{},
 		style.Plan{},
@@ -67,7 +67,7 @@ func TestRunRuleErrorsOnMissingDriver(t *testing.T) {
 	)
 	drivers := DriverSet{}
 
-	_, err := RunRule(context.Background(), rule, runCtx, nil, drivers)
+	_, err := RunRule(context.Background(), rule, run, nil, drivers)
 	if err == nil {
 		t.Fatal("expected error for execution with no registered driver, got nil")
 	}

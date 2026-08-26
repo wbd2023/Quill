@@ -25,7 +25,7 @@ func (r RepositoryConfig) HasScope(scope style.Scope) (found bool) {
 
 // ResolveScopeRoots returns the filesystem roots for a scope under the repository root.
 func (r RepositoryConfig) ResolveScopeRoots(
-	repositoryRoot string,
+	root string,
 	scope style.Scope,
 ) (roots []string) {
 	scopeRoots := r.ScopeRoots[scope]
@@ -33,11 +33,11 @@ func (r RepositoryConfig) ResolveScopeRoots(
 	for _, scopeRoot := range scopeRoots {
 		scopeRoot = cleanScopeRoot(scopeRoot)
 		if scopeRoot == "." {
-			roots = append(roots, repositoryRoot)
+			roots = append(roots, root)
 			continue
 		}
 
-		roots = append(roots, filepath.Join(repositoryRoot, scopeRoot))
+		roots = append(roots, filepath.Join(root, scopeRoot))
 	}
 
 	return roots

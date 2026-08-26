@@ -9,6 +9,8 @@ import (
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
+/* ---------------------------------- State Boundary Rejections --------------------------------- */
+
 // TestPrepareInstallDirectoryRejectsSymlinkedCacheComponent is the QUILL-TRUST-001 regression: a
 // cache or state component that is a symlink is rejected before Go or npm writes follow it outside
 // the repository.
@@ -105,6 +107,8 @@ func TestPrepareInstallDirectoryRejectsSymlinkedGoCache(t *testing.T) {
 		t.Fatalf("prepareGoInstall error = %v, want a symlink rejection", err)
 	}
 }
+
+/* ---------------------------------- Preparation Success Path ---------------------------------- */
 
 // TestPrepareGoInstallCreatesRealDirectories confirms the positive path: ordinary missing
 // directories are created as real directories so normal installation is unaffected.

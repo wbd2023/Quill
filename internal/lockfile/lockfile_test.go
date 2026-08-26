@@ -252,7 +252,7 @@ func TestLoadRejectsLockfileOverByteLimit(t *testing.T) {
 
 // validLockfileOfSize returns valid lockfile TOML of exactly size bytes by padding a minimal
 // schema with short comment lines, letting the byte-limit tests hit the exact boundary.
-func validLockfileOfSize(size int) string {
+func validLockfileOfSize(size int) (toml string) {
 	const header = "schema_version = 1\n"
 	if size <= len(header) {
 		return header

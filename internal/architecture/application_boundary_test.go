@@ -6,15 +6,18 @@ import (
 	"testing"
 )
 
+/* ----------------------------------- Application Boundaries ----------------------------------- */
+
 func TestEngineDoesNotImportInboundOrPresentationAdapters(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
-	modulePath := moduleImportPath(t, repositoryRoot)
-	engineDirectory := filepath.Join(repositoryRoot, "internal", "engine")
+	root := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, root)
+	engineDirectory := filepath.Join(root, "internal", "engine")
 	for _, file := range productionGoFiles(t, engineDirectory, false, nil) {
 		for _, imported := range fileImports(t, file) {
-			if forbiddenImport(imported, modulePath, []string{"internal/cli", "internal/report"}) {
+			if hasForbiddenImport(imported, modulePath,
+				[]string{"internal/cli", "internal/report"}) {
 				t.Fatalf("%s imports an adapter package %q", file, imported)
 			}
 		}
@@ -24,9 +27,9 @@ func TestEngineDoesNotImportInboundOrPresentationAdapters(t *testing.T) {
 func TestCommandEntrypointImportsOnlyCLIInternally(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
-	modulePath := moduleImportPath(t, repositoryRoot)
-	commandDirectory := filepath.Join(repositoryRoot, "cmd", "quill")
+	root := importBoundaryRoot(t)
+	modulePath := moduleImportPath(t, root)
+	commandDirectory := filepath.Join(root, "cmd", "quill")
 	internalPrefix := modulePath + "/internal/"
 	cliImport := modulePath + "/internal/cli"
 
@@ -42,11 +45,11 @@ func TestCommandEntrypointImportsOnlyCLIInternally(t *testing.T) {
 func TestCLIImportsOnlyApplicationAndPresentationPackages(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
+	root := importBoundaryRoot(t)
 	assertLocalImportsAreAllowed(
 		t,
-		filepath.Join(repositoryRoot, "internal", "cli"),
-		moduleImportPath(t, repositoryRoot),
+		filepath.Join(root, "internal", "cli"),
+		moduleImportPath(t, root),
 		[]string{
 			"internal/engine",
 			"internal/report",
@@ -58,11 +61,11 @@ func TestCLIImportsOnlyApplicationAndPresentationPackages(t *testing.T) {
 func TestReportImportsOnlyApplicationAndPresentationPackages(t *testing.T) {
 	t.Parallel()
 
-	repositoryRoot := importBoundaryRoot(t)
+	root := importBoundaryRoot(t)
 	assertLocalImportsAreAllowed(
 		t,
-		filepath.Join(repositoryRoot, "internal", "report"),
-		moduleImportPath(t, repositoryRoot),
+		filepath.Join(root, "internal", "report"),
+		moduleImportPath(t, root),
 		[]string{
 			"internal/coverage",
 			"internal/engine",
@@ -71,6 +74,8 @@ func TestReportImportsOnlyApplicationAndPresentationPackages(t *testing.T) {
 		},
 	)
 }
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
 
 func assertLocalImportsAreAllowed(
 	t *testing.T,

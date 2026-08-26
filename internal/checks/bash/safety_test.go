@@ -9,10 +9,10 @@ import (
 )
 
 func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/sample.sh",
 		"#!/bin/bash\n"+
 			"set -euo pipefail\n\n"+
@@ -32,7 +32,7 @@ func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
 			"worker\n",
 	)
 
-	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
+	result, err := CheckSafety(root, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -67,10 +67,10 @@ func TestCheckSafetyFindsConventionAndSafetyViolations(t *testing.T) {
 }
 
 func TestCheckSafetyPassesCleanScript(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/sample.sh",
 		"#!/bin/bash\n"+
 			"set -euo pipefail\n\n"+
@@ -87,7 +87,7 @@ func TestCheckSafetyPassesCleanScript(t *testing.T) {
 			"main \"$@\"\n",
 	)
 
-	result, err := CheckSafety(repoRoot, profiles.RepositoryConfig(), style.Scope("all"))
+	result, err := CheckSafety(root, profiles.RepositoryConfig(), style.Scope("all"))
 	if err != nil {
 		t.Fatalf("expected bash safety check to pass, diagnostics: %#v", result.Diagnostics)
 	}

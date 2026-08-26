@@ -29,9 +29,9 @@ func Register(bindings *drivers.Bindings) {
 	bindings.AddProfileCheck(project.PackID, project.CheckCommands, checkCommands)
 }
 
-// enforcementResult converts a profile-check message into an ExecutionResult. A non-empty message
-// is a finding; an empty message means the check passed.
-func enforcementResult(message string) (result style.ExecutionResult) {
+// resultFromEnforcementMessage converts a profile-check message into an ExecutionResult. A
+// non-empty message is a finding; an empty message means the check passed.
+func resultFromEnforcementMessage(message string) (result style.ExecutionResult) {
 	if message == "" {
 		return style.ExecutionResult{}
 	}
@@ -45,42 +45,42 @@ func enforcementResult(message string) (result style.ExecutionResult) {
 }
 
 func checkEnforcementLevels(
-	_ context.Context,
+	ctx context.Context,
 	_ execution.RunContext,
 	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
 	message, err := checks.CheckEnforcementLevels()
-	return enforcementResult(message), err
+	return resultFromEnforcementMessage(message), err
 }
 
 func checkExcludedDirectories(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
-	message, err := checks.CheckExcludedDirectories(context.Profile.Repository)
-	return enforcementResult(message), err
+	message, err := checks.CheckExcludedDirectories(run.Profile.Repository)
+	return resultFromEnforcementMessage(message), err
 }
 
 func checkCommands(
-	_ context.Context,
-	context execution.RunContext,
+	ctx context.Context,
+	run execution.RunContext,
 	_ style.ProfileCheck,
 ) (result style.ExecutionResult, err error) {
-	projectConfig, err := decodeProjectConfig(context, project.PackID)
+	projectConfig, err := decodeProjectConfig(run, project.PackID)
 	if err != nil {
 		return style.ExecutionResult{}, err
 	}
 
-	message, err := checks.CheckCommands(context.RepoRoot, projectConfig.Commands)
-	return enforcementResult(message), err
+	message, err := checks.CheckCommands(run.Root, projectConfig.Commands)
+	return resultFromEnforcementMessage(message), err
 }
 
 func decodeProjectConfig(
-	context execution.RunContext,
+	run execution.RunContext,
 	packID string,
 ) (config projectpolicy.Config, err error) {
-	pack, found := context.Profile.PackPolicies.Lookup(packID)
+	pack, found := run.Profile.PackPolicies.Lookup(packID)
 	if !found {
 		return projectpolicy.Config{}, errMissingPackPolicy(packID)
 	}

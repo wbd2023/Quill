@@ -32,7 +32,7 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 		},
 	}
 
-	context := execution.RunContext{
+	runContext := execution.RunContext{
 		Scope: style.Scope("tools"),
 		Profile: profile.Profile{
 			Repository: profile.RepositoryConfig{
@@ -44,7 +44,7 @@ func TestSelectRulesForFixFiltersByScopeAndFixPresence(t *testing.T) {
 		},
 	}
 
-	selected := selectRulesForFix(rules, context)
+	selected := selectRulesForFix(rules, runContext)
 	if len(selected) != 1 || selected[0].ID != "go/lint" {
 		t.Fatalf("selectRulesForFix = %v", selected)
 	}
@@ -56,10 +56,10 @@ func TestCheckRejectsCancelledContext(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err = engine.Check(operationContext, CheckOptions{})
+	_, err = engine.Check(ctx, CheckOptions{})
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("Check error = %v, want context.Canceled", err)
 	}

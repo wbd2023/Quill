@@ -9,7 +9,7 @@ import (
 )
 
 func scanSectionHeaders(
-	repoRoot string,
+	root string,
 	path string,
 	patterns sectionHeaderPatterns,
 ) (lineCount int, headers []sectionHeader, diagnostics []style.Diagnostic, err error) {
@@ -27,7 +27,7 @@ func scanSectionHeaders(
 
 		diagnostics = append(
 			diagnostics,
-			validateSectionHeader(repoRoot, path, line, body, patterns.Body)...,
+			validateSectionHeader(root, path, line, body, patterns.Body)...,
 		)
 		return nil
 	})

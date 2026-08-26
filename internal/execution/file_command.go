@@ -9,7 +9,7 @@ import (
 // FileCommandArguments extracts the command arguments from a file-command Job, resolves its
 // config file path against the repository root, and appends the selected files.
 func FileCommandArguments(
-	repoRoot string,
+	root string,
 	command style.FileCommand,
 	files []string,
 ) (arguments []string) {
@@ -18,7 +18,7 @@ func FileCommandArguments(
 		arguments = append(
 			arguments,
 			command.ConfigArgument,
-			filepath.Join(repoRoot, command.ConfigFile),
+			filepath.Join(root, command.ConfigFile),
 		)
 	}
 

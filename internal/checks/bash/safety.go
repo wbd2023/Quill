@@ -42,12 +42,12 @@ type shellSafetyState struct {
 
 // CheckSafety check safety.
 func CheckSafety(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		walkConfig(repository),
 		".sh",
 	)
@@ -57,7 +57,7 @@ func CheckSafety(
 
 	patterns := newSafetyPatterns()
 	for _, path := range files {
-		diagnostics, err := checkShellSafetyFile(repoRoot, path, patterns)
+		diagnostics, err := checkShellSafetyFile(root, path, patterns)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
@@ -89,7 +89,7 @@ func newSafetyPatterns() (patterns safetyPatterns) {
 }
 
 func checkShellSafetyFile(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 ) (diagnostics []style.Diagnostic, err error) {
@@ -104,16 +104,16 @@ func checkShellSafetyFile(
 	}
 
 	for index, line := range lines {
-		scanShellSafetyLine(repoRoot, path, patterns, index+1, line, &state)
+		scanShellSafetyLine(root, path, patterns, index+1, line, &state)
 	}
 
-	state.addCleanupDiagnostics(repoRoot, path)
-	state.addScriptShapeDiagnostics(repoRoot, path, lines)
+	state.addCleanupDiagnostics(root, path)
+	state.addScriptShapeDiagnostics(root, path, lines)
 	return state.diagnostics, nil
 }
 
 func scanShellSafetyLine(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 	lineNumber int,
@@ -129,8 +129,8 @@ func scanShellSafetyLine(
 		state.foundTrap = true
 	}
 
-	state.checkFunctionName(repoRoot, path, patterns, lineNumber, line)
-	state.checkVariableName(repoRoot, path, patterns, lineNumber, line)
-	state.checkScriptShape(repoRoot, path, patterns, lineNumber, line, trimmed)
-	state.checkShellcheckSuppression(repoRoot, path, patterns, lineNumber, trimmed)
+	state.checkFunctionName(root, path, patterns, lineNumber, line)
+	state.checkVariableName(root, path, patterns, lineNumber, line)
+	state.checkScriptShape(root, path, patterns, lineNumber, line, trimmed)
+	state.checkShellcheckSuppression(root, path, patterns, lineNumber, trimmed)
 }

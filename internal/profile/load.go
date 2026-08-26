@@ -33,6 +33,7 @@ func Load(root string) (config Profile, err error) {
 			readErr,
 		)
 	}
+
 	if closeErr != nil {
 		return Profile{}, fmt.Errorf(
 			"close repository root %q: %w",

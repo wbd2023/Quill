@@ -7,7 +7,7 @@ import (
 
 /* --------------------------------------- Compiler State --------------------------------------- */
 
-type documentCompiler struct {
+type compiler struct {
 	file             sourceFile
 	document         Document
 	activeSection    string
@@ -16,8 +16,8 @@ type documentCompiler struct {
 	seenRequirements map[string]bool
 }
 
-func newDocumentCompiler(file sourceFile) (compiler documentCompiler) {
-	return documentCompiler{
+func newCompiler(file sourceFile) (comp compiler) {
+	comp = compiler{
 		file: file,
 		document: Document{
 			Headings:     make([]Heading, 0),
@@ -26,11 +26,13 @@ func newDocumentCompiler(file sourceFile) (compiler documentCompiler) {
 		seenHeadings:     make(map[string]bool),
 		seenRequirements: make(map[string]bool),
 	}
+
+	return comp
 }
 
 /* ----------------------------------------- Compilation ---------------------------------------- */
 
-func (c *documentCompiler) compile(events []documentEvent) (document Document, err error) {
+func (c *compiler) compile(events []documentEvent) (document Document, err error) {
 	for _, event := range events {
 		if err := c.enterEvent(event); err != nil {
 			return Document{}, err
@@ -40,7 +42,7 @@ func (c *documentCompiler) compile(events []documentEvent) (document Document, e
 	return c.finish()
 }
 
-func (c *documentCompiler) enterEvent(event documentEvent) (err error) {
+func (c *compiler) enterEvent(event documentEvent) (err error) {
 	switch event.kind {
 	case eventHeading:
 		return c.enterHeading(event.heading, event.location)
@@ -59,7 +61,7 @@ func (c *documentCompiler) enterEvent(event documentEvent) (err error) {
 	}
 }
 
-func (c *documentCompiler) finish() (document Document, err error) {
+func (c *compiler) finish() (document Document, err error) {
 	if err := c.enterBoundary(); err != nil {
 		return Document{}, err
 	}
@@ -69,7 +71,7 @@ func (c *documentCompiler) finish() (document Document, err error) {
 
 /* --------------------------------------- Event Handling --------------------------------------- */
 
-func (c *documentCompiler) enterHeading(heading Heading, location position) (err error) {
+func (c *compiler) enterHeading(heading Heading, location position) (err error) {
 	if err := c.enterBoundary(); err != nil {
 		return err
 	}
@@ -77,7 +79,7 @@ func (c *documentCompiler) enterHeading(heading Heading, location position) (err
 	return c.recordHeading(heading, location)
 }
 
-func (c *documentCompiler) enterHTMLBlock(text string, location position) (err error) {
+func (c *compiler) enterHTMLBlock(text string, location position) (err error) {
 	fields, found, err := parseMetadataComment(text)
 	if err != nil {
 		return c.file.errorf(location, "%v", err)
@@ -96,7 +98,7 @@ func (c *documentCompiler) enterHTMLBlock(text string, location position) (err e
 	return c.recordMetadata(metadata)
 }
 
-func (c *documentCompiler) enterListItem(text string) (err error) {
+func (c *compiler) enterListItem(text string) (err error) {
 	metadata := c.pendingMetadata
 	if metadata == nil {
 		return nil
@@ -105,7 +107,7 @@ func (c *documentCompiler) enterListItem(text string) (err error) {
 	return c.recordRequirement(*metadata, text)
 }
 
-func (c *documentCompiler) enterBoundary() (err error) {
+func (c *compiler) enterBoundary() (err error) {
 	if c.pendingMetadata != nil {
 		return c.unmatchedMetadataError(*c.pendingMetadata)
 	}
@@ -115,7 +117,7 @@ func (c *documentCompiler) enterBoundary() (err error) {
 
 /* -------------------------------------- Document Assembly ------------------------------------- */
 
-func (c *documentCompiler) recordHeading(heading Heading, location position) (err error) {
+func (c *compiler) recordHeading(heading Heading, location position) (err error) {
 	section := heading.Section
 	if c.seenHeadings[section] {
 		return c.file.errorf(
@@ -132,7 +134,7 @@ func (c *documentCompiler) recordHeading(heading Heading, location position) (er
 	return nil
 }
 
-func (c *documentCompiler) recordMetadata(metadata requirementMetadata) (err error) {
+func (c *compiler) recordMetadata(metadata requirementMetadata) (err error) {
 	if c.pendingMetadata != nil {
 		return c.file.errorf(
 			metadata.source,
@@ -146,7 +148,7 @@ func (c *documentCompiler) recordMetadata(metadata requirementMetadata) (err err
 	return nil
 }
 
-func (c *documentCompiler) recordRequirement(
+func (c *compiler) recordRequirement(
 	metadata requirementMetadata,
 	text string,
 ) (err error) {
@@ -201,7 +203,7 @@ func (c *documentCompiler) recordRequirement(
 
 /* ------------------------------------------- Errors ------------------------------------------- */
 
-func (c *documentCompiler) unmatchedMetadataError(metadata requirementMetadata) (err error) {
+func (c *compiler) unmatchedMetadataError(metadata requirementMetadata) (err error) {
 	return c.file.errorf(
 		metadata.source,
 		"STYLE.md metadata for %q must be followed by a requirement list item",

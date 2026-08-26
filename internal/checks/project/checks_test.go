@@ -16,10 +16,10 @@ func TestCheckExcludedDirectoriesPassesCurrentCollectorPolicy(t *testing.T) {
 }
 
 func TestCheckCommandsAcceptsExpectedShape(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"Makefile",
 		`LINT_REQUIRED_ARGS = --mode required
 LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
@@ -44,16 +44,16 @@ style-coverage:
 	`,
 	)
 
-	if _, err := CheckCommands(repoRoot, currentCommands(t)); err != nil {
+	if _, err := CheckCommands(root, currentCommands(t)); err != nil {
 		t.Fatalf("CheckCommands: %v", err)
 	}
 }
 
 func TestCheckCommandsRejectsMissingRequiredRecipe(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"Makefile",
 		`LINT_REQUIRED_ARGS = --mode required
 LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
@@ -62,7 +62,7 @@ lint:
 	`,
 	)
 
-	if output, _ := CheckCommands(repoRoot, currentCommands(t)); output == "" {
+	if output, _ := CheckCommands(root, currentCommands(t)); output == "" {
 		t.Fatal("expected missing lint-required recipe to fail")
 	}
 }

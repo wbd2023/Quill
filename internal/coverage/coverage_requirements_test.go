@@ -6,7 +6,7 @@ func TestRequirementsCoverEveryStyleRequirement(t *testing.T) {
 	document := loadDocument(t)
 	covered := make(map[string]bool)
 
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, requirement := range report.Requirements {
 		covered[requirement.ID] = true
 	}
@@ -24,7 +24,7 @@ func TestReviewOnlyRequirementsAreNotAlsoAutomated(t *testing.T) {
 	plan := loadPlan(t)
 	automated := ruleIDsByRequirement(plan.Rules)
 
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, requirement := range report.Requirements {
 		if requirement.Mode != ModeReviewOnly ||
 			len(automated[requirement.ID]) == 0 {
@@ -36,7 +36,7 @@ func TestReviewOnlyRequirementsAreNotAlsoAutomated(t *testing.T) {
 }
 
 func TestUnannotatedOutstandingRequirementsDefaultToDeferredManual(t *testing.T) {
-	report := loadCoverageReport(t)
+	report := loadReport(t)
 	for _, requirement := range report.Requirements {
 		if requirement.Mode != ModeManualDeferred {
 			continue

@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-/* --------------------------------- Repository Path Containment -------------------------------- */
-
 // validateRepoPath enforces lexical repository containment for one Profile path value. It is the
 // Profile-boundary mirror of workspace.ValidateRepoRelative: absolute paths, Windows drive
 // roots, NUL bytes, and parent-traversal escapes are rejected using only the standard library.

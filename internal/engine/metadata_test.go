@@ -12,7 +12,7 @@ import (
 /* -------------------------------------------- Tests ------------------------------------------- */
 
 // TestMetadataInspectsNoTools asserts the observable side effect of Metadata being metadata-only:
-// it shares the prepared snapshot and the catalogue, never spawning a process or inspecting a tool.
+// it shares the prepared snapshot and the catalog, never spawning a process or inspecting a tool.
 func TestMetadataInspectsNoTools(t *testing.T) {
 	t.Parallel()
 
@@ -37,10 +37,10 @@ func TestMetadataRejectsCancelledContext(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	if _, err = engine.Metadata(operationContext); !errors.Is(err, context.Canceled) {
+	if _, err = engine.Metadata(ctx); !errors.Is(err, context.Canceled) {
 		t.Fatalf("Metadata error = %v, want context.Canceled", err)
 	}
 }
@@ -68,7 +68,7 @@ func TestMetadataReportsAvailableAndActive(t *testing.T) {
 		if pack.Provenance != PackProvenanceShipped {
 			t.Fatalf("Shipped Pack %q has provenance %q", pack.ID, pack.Provenance)
 		}
-		if pack.Active {
+		if pack.Enabled {
 			sawActivePack = true
 		}
 	}
@@ -77,7 +77,7 @@ func TestMetadataReportsAvailableAndActive(t *testing.T) {
 		if rule.Check.Category == "" {
 			t.Fatalf("rule %q missing check execution category", rule.ID)
 		}
-		if rule.Active {
+		if rule.Enabled {
 			sawActiveRule = true
 			if rule.Enforcement == "" || rule.Scope == "" || len(rule.RequirementIDs) == 0 {
 				t.Fatalf("active rule %q missing binding: %+v", rule.ID, rule)
@@ -86,19 +86,19 @@ func TestMetadataReportsAvailableAndActive(t *testing.T) {
 	}
 
 	for _, scope := range snapshot.Scopes {
-		if scope.Default {
+		if scope.IsDefault {
 			sawDefaultScope = true
 		}
 	}
 
 	if !sawActivePack {
-		t.Fatal("expected at least one active pack")
+		t.Fatalf("expected at least one active pack, got packs: %+v", snapshot.Packs)
 	}
 	if !sawActiveRule {
-		t.Fatal("expected at least one active rule")
+		t.Fatalf("expected at least one active rule, got rules: %+v", snapshot.Rules)
 	}
 	if !sawDefaultScope {
-		t.Fatal("expected a default scope")
+		t.Fatalf("expected a default scope, got scopes: %+v", snapshot.Scopes)
 	}
 }
 

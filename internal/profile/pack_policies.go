@@ -2,6 +2,8 @@ package profile
 
 import "fmt"
 
+/* ---------------------------------------- Pack Policies --------------------------------------- */
+
 // PackPolicies stores raw profile policy owned by Packs.
 type PackPolicies map[string]PackPolicy
 
@@ -41,6 +43,8 @@ func (policy PackPolicy) Clone() (clone PackPolicy) {
 
 	return clone
 }
+
+/* --------------------------------------- Policy Cloning --------------------------------------- */
 
 func clonePackPolicyValue(value any) (clone any) {
 	switch value := value.(type) {
@@ -87,6 +91,8 @@ func clonePackPolicyValue(value any) (clone any) {
 		return value
 	}
 }
+
+/* ----------------------------------------- Validation ----------------------------------------- */
 
 func validatePackPolicies(
 	enabledPacks []string,

@@ -28,7 +28,7 @@ func scanSecrets(
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckSecrets(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		context.Scope,
 	)

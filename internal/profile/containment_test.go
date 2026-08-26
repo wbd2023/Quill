@@ -166,77 +166,87 @@ func TestLoadRejectsProfileSymlinkEscapingRepository(t *testing.T) {
 	requireErrorContains(t, err, profile.DefaultFilename)
 }
 
-func TestLoadRejectsSymlinkEscapingScopeRoot(t *testing.T) {
+func TestLoadRejectsSymlinkEscapingConfiguredPath(t *testing.T) {
 	t.Parallel()
 
-	root := t.TempDir()
-	config := profiles.Self(t)
-	config.Repository.ScopeRoots = map[style.Scope][]string{
-		style.Scope("all"): {"escape"},
-	}
-	config.Repository.DefaultScope = style.Scope("all")
-	profiles.Write(t, root, config)
-
-	outside := t.TempDir()
-	if err := os.Symlink(outside, filepath.Join(root, "escape")); err != nil {
-		t.Skipf("symlink unsupported: %v", err)
-	}
-
-	_, err := profile.Load(root)
-	requireErrorContains(t, err, "scope_roots.all")
-	requireErrorContains(t, err, "outside the repository root")
-}
-
-func TestLoadRejectsSymlinkEscapingTargetCheckPath(t *testing.T) {
-	t.Parallel()
-
-	root := t.TempDir()
-	config := profiles.Self(t)
-	if len(config.Targets) == 0 {
-		t.Fatal("self profile must define at least one target")
-	}
-	config.Targets[0].CheckPaths = []string{"escape"}
-	profiles.Write(t, root, config)
-
-	outside := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(outside, "sneaked"), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Symlink(
-		filepath.Join(outside, "sneaked"), filepath.Join(root, "escape"),
-	); err != nil {
-		t.Skipf("symlink unsupported: %v", err)
-	}
-
-	_, err := profile.Load(root)
-	requireErrorContains(t, err, "check_paths")
-	requireErrorContains(t, err, "outside the repository root")
-}
-
-func TestLoadRejectsSymlinkEscapingStyleGuidePath(t *testing.T) {
-	t.Parallel()
-
-	root := t.TempDir()
-	config := profiles.Self(t)
-	config.StyleGuide.Path = "alias.md"
-	profiles.Write(t, root, config)
-
-	outside := t.TempDir()
-	target := filepath.Join(outside, "foreign.md")
-	if err := os.WriteFile(target, []byte("# foreign\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	link := filepath.Join(root, "alias.md")
-	if err := os.Remove(link); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Symlink(target, link); err != nil {
-		t.Skipf("symlink unsupported: %v", err)
+	tests := []struct {
+		name      string
+		config    func(*profile.Profile)
+		stage     func(t *testing.T, root string, outside string)
+		wantField string
+	}{
+		{
+			name: "scope root",
+			config: func(config *profile.Profile) {
+				config.Repository.ScopeRoots = map[style.Scope][]string{
+					style.Scope("all"): {"escape"},
+				}
+				config.Repository.DefaultScope = style.Scope("all")
+			},
+			stage: func(t *testing.T, root string, outside string) {
+				if err := os.Symlink(outside, filepath.Join(root, "escape")); err != nil {
+					t.Skipf("symlink unsupported: %v", err)
+				}
+			},
+			wantField: "scope_roots.all",
+		},
+		{
+			name: "target check path",
+			config: func(config *profile.Profile) {
+				if len(config.Targets) == 0 {
+					t.Fatal("self profile must define at least one target")
+				}
+				config.Targets[0].CheckPaths = []string{"escape"}
+			},
+			stage: func(t *testing.T, root string, outside string) {
+				if err := os.MkdirAll(filepath.Join(outside, "sneaked"), 0o755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(
+					filepath.Join(outside, "sneaked"), filepath.Join(root, "escape"),
+				); err != nil {
+					t.Skipf("symlink unsupported: %v", err)
+				}
+			},
+			wantField: "check_paths",
+		},
+		{
+			name: "style guide path",
+			config: func(config *profile.Profile) {
+				config.StyleGuide.Path = "alias.md"
+			},
+			stage: func(t *testing.T, root string, outside string) {
+				target := filepath.Join(outside, "foreign.md")
+				if err := os.WriteFile(target, []byte("# foreign\n"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+				link := filepath.Join(root, "alias.md")
+				if err := os.Remove(link); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(target, link); err != nil {
+					t.Skipf("symlink unsupported: %v", err)
+				}
+			},
+			wantField: "style_guide.path",
+		},
 	}
 
-	_, err := profile.Load(root)
-	requireErrorContains(t, err, "style_guide.path")
-	requireErrorContains(t, err, "outside the repository root")
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			root := t.TempDir()
+			config := profiles.Self(t)
+			test.config(&config)
+			profiles.Write(t, root, config)
+			test.stage(t, root, t.TempDir())
+
+			_, err := profile.Load(root)
+			requireErrorContains(t, err, test.wantField)
+			requireErrorContains(t, err, "outside the repository root")
+		})
+	}
 }
 
 func TestLoadRejectsMissingPathBeneathEscapingSymlink(t *testing.T) {

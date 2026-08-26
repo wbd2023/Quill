@@ -11,7 +11,8 @@ import (
 
 /* ----------------------------------------- Registries ----------------------------------------- */
 
-// RepositoryScanner is repository scanner.
+// RepositoryScanner runs one repository scan for a run context and returns its diagnostics as an
+// ExecutionResult.
 type RepositoryScanner func(
 	ctx context.Context,
 	run execution.RunContext,
@@ -34,7 +35,8 @@ type TargetCheck func(
 	job style.TargetCheckJob,
 ) (result style.ExecutionResult, err error)
 
-// ProfileCheck is a Profile check.
+// ProfileCheck runs one Profile check for a run context and returns its diagnostics as an
+// ExecutionResult.
 type ProfileCheck func(
 	ctx context.Context,
 	run execution.RunContext,
@@ -91,17 +93,20 @@ type FileInterpreters struct {
 	entries map[string]FileInterpreter
 }
 
-// NewRepositoryScanners new repository scanners.
+// NewRepositoryScanners returns an empty repository scanner registry keyed by Pack-qualified
+// scanner identity.
 func NewRepositoryScanners() (registry RepositoryScanners) {
 	return RepositoryScanners{entries: map[scannerKey]RepositoryScanner{}}
 }
 
-// NewTargetCommands new target commands.
+// NewTargetCommands returns an empty target command registry keyed by Pack-qualified
+// (language, action) identity.
 func NewTargetCommands() (registry TargetCommands) {
 	return TargetCommands{entries: map[targetKey]TargetCommand{}}
 }
 
-// NewTargetChecks new target checks.
+// NewTargetChecks returns an empty target check registry keyed by Pack-qualified
+// (language, local id) identity.
 func NewTargetChecks() (registry TargetChecks) {
 	return TargetChecks{entries: map[targetKey]TargetCheck{}}
 }
@@ -111,7 +116,7 @@ func NewProfileChecks() (registry ProfileChecks) {
 	return ProfileChecks{entries: map[checkKey]ProfileCheck{}}
 }
 
-// NewFileInterpreters new file interpreters.
+// NewFileInterpreters returns an empty file interpreter registry keyed by global Tool ID.
 func NewFileInterpreters() (registry FileInterpreters) {
 	return FileInterpreters{entries: map[string]FileInterpreter{}}
 }

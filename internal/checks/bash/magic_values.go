@@ -25,7 +25,7 @@ const (
 
 // CheckMagicValues check magic values.
 func CheckMagicValues(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
@@ -34,7 +34,7 @@ func CheckMagicValues(
 	headLimitPattern := regexp.MustCompile(`\bhead\s+-([0-9]+)\b`)
 
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		walkConfig(repository),
 		".sh",
 	)
@@ -51,7 +51,7 @@ func CheckMagicValues(
 			if value := matchSingleLiteral(exitLiteralPattern, line.Text); value != "" &&
 				isNonTrivialShellLiteral(value) {
 				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
-					repoRoot,
+					root,
 					path,
 					line.Number,
 					fmt.Sprintf("uses non-trivial exit code literal %s", value),
@@ -68,7 +68,7 @@ func CheckMagicValues(
 				secondCaptureIndex,
 			); value != "" && isNonTrivialShellLiteral(value) {
 				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
-					repoRoot,
+					root,
 					path,
 					line.Number,
 					fmt.Sprintf("uses non-trivial comparison literal %s", value),
@@ -81,7 +81,7 @@ func CheckMagicValues(
 				firstCaptureIndex,
 			); value != "" && value != trivialZero && value != trivialOne {
 				result.Diagnostics = append(result.Diagnostics, bashMagicDiagnostic(
-					repoRoot,
+					root,
 					path,
 					line.Number,
 					fmt.Sprintf("uses non-trivial head limit literal %s", value),
@@ -103,14 +103,14 @@ func CheckMagicValues(
 }
 
 func bashMagicDiagnostic(
-	repoRoot string,
+	root string,
 	path string,
 	line int,
 	message string,
 ) (diagnostic style.Diagnostic) {
 	return style.Diagnostic{
 		Code:    "bash/magic-values/non-trivial",
-		File:    filewalk.DisplayPath(repoRoot, path),
+		File:    filewalk.DisplayPath(root, path),
 		Range:   style.Range{Start: style.Position{Line: line}},
 		Message: message,
 	}

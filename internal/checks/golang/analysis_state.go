@@ -26,13 +26,13 @@ type analysisState struct {
 }
 
 func newAnalysisState(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	paths profile.PathRoles,
 	goConfig gopolicy.Config,
 	checks []Check,
 ) (state *analysisState) {
-	pathClassifier := analysis.NewPathClassifier(repoRoot, paths)
+	pathClassifier := analysis.NewPathClassifier(root, paths)
 
 	return &analysisState{
 		repository:              repository,

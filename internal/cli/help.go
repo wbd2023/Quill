@@ -123,12 +123,16 @@ func flagPlaceholder(flag *kong.Flag) (placeholder string) {
 	switch flag.Target.Type().Kind() {
 	case reflect.String:
 		return "string"
+
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return "int"
+
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return "uint"
+
 	case reflect.Float32, reflect.Float64:
 		return "float"
+
 	default:
 		return strings.ToLower(flag.Target.Type().String())
 	}
@@ -142,6 +146,7 @@ func flagDefault(flag *kong.Flag) (value string, ok bool) {
 	if flag.IsBool() || flag.IsCounter() || !flag.HasDefault {
 		return "", false
 	}
+
 	if value = flag.Default; value == "" {
 		return "", false
 	}

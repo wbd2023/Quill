@@ -132,6 +132,7 @@ func DecodeManifest(source string) (manifest Manifest, err error) {
 				schema.Runtime.Timeout, err,
 			)
 		}
+
 		if timeout <= 0 {
 			return Manifest{}, fmt.Errorf(
 				"pack.toml runtime timeout %q must be positive",
@@ -173,12 +174,15 @@ func (manifest Manifest) Validate() (err error) {
 	if strings.TrimSpace(manifest.Pack.ID) == "" {
 		return errManifestField("pack.id")
 	}
+
 	if manifest.Pack.ID == profile.EnabledPacksKey {
 		return fmt.Errorf("pack.toml pack.id %q is reserved", manifest.Pack.ID)
 	}
+
 	if strings.TrimSpace(manifest.Pack.Name) == "" {
 		return errManifestField("pack.name")
 	}
+
 	if strings.TrimSpace(manifest.Runtime.Command) == "" {
 		return errManifestField("runtime.command")
 	}
@@ -188,15 +192,18 @@ func (manifest Manifest) Validate() (err error) {
 		if strings.TrimSpace(rule.ID) == "" {
 			return fmt.Errorf("pack.toml rule at index %d is missing id", index)
 		}
+
 		if strings.TrimSpace(rule.Check) == "" {
 			return fmt.Errorf("pack.toml rule %q is missing check", rule.ID)
 		}
+
 		if rule.SupportsFix {
 			return fmt.Errorf(
 				"pack.toml rule %q declares supports_fix, but external fixes are not supported",
 				rule.ID,
 			)
 		}
+
 		if _, duplicate := seen[rule.ID]; duplicate {
 			return fmt.Errorf("pack.toml rule %q is declared more than once", rule.ID)
 		}

@@ -19,14 +19,14 @@ import (
 func TestLoadSourcesProducesDefinition(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
-	packDir := filepath.Join(repoRoot, ".quill", "packs", "company")
+	root := t.TempDir()
+	packDir := filepath.Join(root, ".quill", "packs", "company")
 	binDir := filepath.Join(packDir, "bin")
 	mkdirAll(t, binDir)
 	writeFile(t, filepath.Join(packDir, "pack.toml"), validManifest)
 	writeExecutable(t, filepath.Join(binDir, "company-quill"))
 
-	definitions, err := external.LoadSources(repoRoot, []profile.PackSource{
+	definitions, err := external.LoadSources(root, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	})
 	if err != nil {
@@ -59,8 +59,8 @@ func TestLoadSourcesProducesDefinition(t *testing.T) {
 func TestLoadSourcesDefaultsOmittedRuleNameToRuleID(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
-	packDir := filepath.Join(repoRoot, ".quill", "packs", "company")
+	root := t.TempDir()
+	packDir := filepath.Join(root, ".quill", "packs", "company")
 	binDir := filepath.Join(packDir, "bin")
 	mkdirAll(t, binDir)
 	manifest := strings.Replace(
@@ -72,7 +72,7 @@ func TestLoadSourcesDefaultsOmittedRuleNameToRuleID(t *testing.T) {
 	writeFile(t, filepath.Join(packDir, "pack.toml"), manifest)
 	writeExecutable(t, filepath.Join(binDir, "company-quill"))
 
-	definitions, err := external.LoadSources(repoRoot, []profile.PackSource{
+	definitions, err := external.LoadSources(root, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	})
 	if err != nil {
@@ -86,10 +86,10 @@ func TestLoadSourcesDefaultsOmittedRuleNameToRuleID(t *testing.T) {
 func TestLoadSourcesRejectsMissingManifest(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
-	mkdirAll(t, filepath.Join(repoRoot, "empty"))
+	root := t.TempDir()
+	mkdirAll(t, filepath.Join(root, "empty"))
 
-	if _, err := external.LoadSources(repoRoot, []profile.PackSource{{Path: "empty"}}); err == nil {
+	if _, err := external.LoadSources(root, []profile.PackSource{{Path: "empty"}}); err == nil {
 		t.Fatal("expected missing manifest error")
 	}
 }
@@ -97,12 +97,12 @@ func TestLoadSourcesRejectsMissingManifest(t *testing.T) {
 func TestLoadSourcesRejectsUnresolvableExecutable(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
-	packDir := filepath.Join(repoRoot, ".quill", "packs", "company")
+	root := t.TempDir()
+	packDir := filepath.Join(root, ".quill", "packs", "company")
 	mkdirAll(t, packDir)
 	writeFile(t, filepath.Join(packDir, "pack.toml"), validManifest)
 
-	if _, err := external.LoadSources(repoRoot, []profile.PackSource{
+	if _, err := external.LoadSources(root, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	}); err == nil {
 		t.Fatal("expected missing executable error before any launch")
@@ -112,7 +112,7 @@ func TestLoadSourcesRejectsUnresolvableExecutable(t *testing.T) {
 func TestLoadSourcesRejectsEscapingPath(t *testing.T) {
 	t.Parallel()
 
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	outside := t.TempDir()
 	packDir := filepath.Join(outside, "escaped")
 	mkdirAll(t, packDir)
@@ -120,12 +120,13 @@ func TestLoadSourcesRejectsEscapingPath(t *testing.T) {
 	mkdirAll(t, filepath.Join(packDir, "bin"))
 	writeExecutable(t, filepath.Join(packDir, "bin", "company-quill"))
 
-	relative, err := filepath.Rel(repoRoot, packDir)
+	relative, err := filepath.Rel(root, packDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := external.LoadSources(repoRoot, []profile.PackSource{{Path: relative}}); err == nil {
+	_, err = external.LoadSources(root, []profile.PackSource{{Path: relative}})
+	if err == nil {
 		t.Fatal("expected repository escape rejection")
 	}
 }
@@ -136,8 +137,8 @@ func TestLoadSourcesRejectsSymlinkedManifestEscape(t *testing.T) {
 		t.Skip("symlink semantics differ on Windows")
 	}
 
-	repoRoot := t.TempDir()
-	packDir := filepath.Join(repoRoot, ".quill", "packs", "company")
+	root := t.TempDir()
+	packDir := filepath.Join(root, ".quill", "packs", "company")
 	mkdirAll(t, packDir)
 	mkdirAll(t, filepath.Join(packDir, "bin"))
 	writeExecutable(t, filepath.Join(packDir, "bin", "company-quill"))
@@ -149,17 +150,17 @@ func TestLoadSourcesRejectsSymlinkedManifestEscape(t *testing.T) {
 		t.Skipf("symlink unsupported: %v", err)
 	}
 
-	if _, err := external.LoadSources(repoRoot, []profile.PackSource{
+	if _, err := external.LoadSources(root, []profile.PackSource{
 		{Path: ".quill/packs/company"},
 	}); err == nil {
 		t.Fatal("expected symlinked manifest escape rejection")
 	}
 }
 
-/* ------------------------------------ Catalogue Composition ----------------------------------- */
+/* ------------------------------------- Catalog Composition ------------------------------------ */
 
 // TestDuplicateExternalPackIDConflicts proves that two external Packs sharing an ID fail at
-// catalogue assembly, the same boundary Shipped Packs use, so no external process runs.
+// catalog assembly, the same boundary Shipped Packs use, so no external process runs.
 func TestDuplicateExternalPackIDConflicts(t *testing.T) {
 	t.Parallel()
 
@@ -174,9 +175,9 @@ func TestDuplicateExternalPackIDConflicts(t *testing.T) {
 }
 
 // TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled proves rule IDs are validated globally
-// across every catalogue Pack before selection: two external Packs sharing a Rule ID conflict
+// across every catalog Pack before selection: two external Packs sharing a Rule ID conflict
 // even when only one is enabled, so a disabled Pack cannot smuggle a colliding Rule ID into the
-// catalogue.
+// catalog.
 func TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled(t *testing.T) {
 	t.Parallel()
 
@@ -205,7 +206,7 @@ func TestDuplicateRuleIDAcrossSourcesRejectedEvenWhenDisabled(t *testing.T) {
 }
 
 // TestExternalPackComposesWithShipped proves an external Pack with a unique ID composes into one
-// catalogue alongside the Shipped Packs and participates in normal selection.
+// catalog alongside the Shipped Packs and participates in normal selection.
 func TestExternalPackComposesWithShipped(t *testing.T) {
 	t.Parallel()
 
@@ -221,7 +222,7 @@ func TestExternalPackComposesWithShipped(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Fatal("expected external pack to compose into the catalogue")
+		t.Fatal("expected external pack to compose into the catalog")
 	}
 
 	if _, err := catalog.Registry([]string{"ext"}); err != nil {

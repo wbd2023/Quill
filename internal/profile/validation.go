@@ -38,6 +38,7 @@ func Validate(config Profile) (err error) {
 	if err = validateEnabledPacks(config.EnabledPacks); err != nil {
 		return err
 	}
+
 	if err = validatePackPolicies(config.EnabledPacks, config.PackPolicies); err != nil {
 		return err
 	}

@@ -8,7 +8,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// rootedRename atomically renames oldName to newName within the directory anchored by directoryRoot.
+// rootedRename atomically renames oldName to newName within the directory anchored by
+// directoryRoot.
 //
 // Go 1.24 os.Root does not yet expose Rename, so the rename is issued relative to the anchored
 // directory handle via renameat(2). Because both names resolve against the pinned directory
@@ -19,7 +20,7 @@ func rootedRename(
 	_ string,
 	oldName string,
 	newName string,
-) error {
+) (err error) {
 	dir, err := directoryRoot.Open(".")
 	if err != nil {
 		return err

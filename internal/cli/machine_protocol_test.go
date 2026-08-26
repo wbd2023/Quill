@@ -30,7 +30,7 @@ type decodedError struct {
 	Message string `json:"message"`
 }
 
-/* -------------------------------------- Success Envelopes ------------------------------------- */
+/* ------------------------------------- Response Envelopes ------------------------------------- */
 
 func TestMachineCoverageEmitsDecodedEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
@@ -81,8 +81,6 @@ func TestMachineDoctorEmitsDecodedEnvelope(t *testing.T) {
 		t.Fatalf("decode doctor result: %v", err)
 	}
 }
-
-/* -------------------------------------- Failure Envelopes ------------------------------------- */
 
 func TestMachineCheckInvalidArgumentEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
@@ -213,10 +211,10 @@ func TestMachineCommandErrorUsesReturnedCancellation(t *testing.T) {
 func TestMachineCoverageCancelledEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	exitCode := tool.Run(operationContext, machineCoverageArgs(t))
+	exitCode := tool.Run(ctx, machineCoverageArgs(t))
 	if exitCode != 1 {
 		t.Fatalf("expected exit 1 for cancelled operation, got %d", exitCode)
 	}
@@ -227,10 +225,10 @@ func TestMachineCoverageCancelledEnvelope(t *testing.T) {
 func TestMachineCheckCancelledEnvelope(t *testing.T) {
 	tool, stdout, _ := newMachineCLI()
 
-	operationContext, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	exitCode := tool.Run(operationContext, []string{
+	exitCode := tool.Run(ctx, []string{
 		"check", "--format", "json", "--repository-root", testutil.RepositoryRoot(t),
 	})
 	if exitCode != 1 {

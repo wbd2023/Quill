@@ -28,7 +28,7 @@ func TestInstallGitHubRejectsSymlinkBeforeVersionProbe(t *testing.T) {
 		t.Fatalf("create tool symlink: %v", err)
 	}
 
-	probeMarker := filepath.Join(layout.RepositoryRoot, "probe-called")
+	probeMarker := filepath.Join(layout.Root, "probe-called")
 	tool := toolchain.Tool{
 		ID:            "tool",
 		Name:          "Tool",

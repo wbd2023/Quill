@@ -59,12 +59,12 @@ func goTarget(
 
 // targetWorkDir resolves a target's working directory against the repository root, treating an
 // empty or current-directory path as the root itself.
-func targetWorkDir(repoRoot string, target profile.TargetConfig) (workDir string) {
+func targetWorkDir(root string, target profile.TargetConfig) (workDir string) {
 	if target.WorkingDirectory == "" || target.WorkingDirectory == "." {
-		return repoRoot
+		return root
 	}
 
-	return filepath.Join(repoRoot, target.WorkingDirectory)
+	return filepath.Join(root, target.WorkingDirectory)
 }
 
 /* ------------------------------------------- Helpers ------------------------------------------ */

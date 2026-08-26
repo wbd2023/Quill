@@ -11,11 +11,21 @@ import (
 	"path/filepath"
 )
 
+/* ------------------------------------------ Constants ----------------------------------------- */
+
 // DefaultFilename is the lockfile filename loaded from repository roots.
 const DefaultFilename = "quill.lock"
 
+// maxLockfileBytes caps how much of quill.lock Load reads into memory. A lockfile is a small
+// TOML manifest of resolved archive hashes (a few KiB at most); the cap bounds memory when a
+// hostile or corrupt root presents an outsized regular file and pairs with the rooted open and
+// regular-file check to make Load refuse unbounded input.
+const maxLockfileBytes int64 = 1 << 20 // 1 MiB
+
+/* -------------------------------------------- Types ------------------------------------------- */
+
 // Lockfile is the parsed content of quill.lock.
-type Lockfile struct {
+type Lockfile struct { // style: allow-package-stutter because: foundational package type
 	// Loaded reports whether a lockfile was present on disk. False means the
 	// file was absent; the caller should direct the user to run 'quill lock'.
 	Loaded bool
@@ -30,11 +40,7 @@ type Archive struct {
 	Hashes  map[string]string
 }
 
-// maxLockfileBytes caps how much of quill.lock Load reads into memory. A lockfile is a small
-// TOML manifest of resolved archive hashes (a few KiB at most); the cap bounds memory when a
-// hostile or corrupt root presents an outsized regular file and pairs with the rooted open and
-// regular-file check to make Load refuse unbounded input.
-const maxLockfileBytes int64 = 1 << 20 // 1 MiB
+/* ------------------------------------------- Loading ------------------------------------------ */
 
 // Load reads the lockfile from a repository root. The root is opened as a Go 1.24 rooted
 // filesystem so a symlinked or escaping quill.lock cannot redirect the read outside the
@@ -56,7 +62,7 @@ func Load(root string) (lockfile Lockfile, err error) {
 
 		return Lockfile{}, fmt.Errorf("open repository root %q: %w", root, err)
 	}
-	defer func() { _ = rooted.Close() }()
+	defer func() { _ = rooted.Close() }() // read-only handle: closing cannot fail meaningfully
 
 	info, err := rooted.Lstat(DefaultFilename)
 	if err != nil {
@@ -106,7 +112,7 @@ func readBounded(root *os.Root, name string) (contents []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = file.Close() }()
+	defer func() { _ = file.Close() }() // read-only handle: closing cannot fail meaningfully
 
 	contents, err = io.ReadAll(io.LimitReader(file, maxLockfileBytes+1))
 	if err != nil {
@@ -119,6 +125,8 @@ func readBounded(root *os.Root, name string) (contents []byte, err error) {
 
 	return contents, nil
 }
+
+/* ----------------------------------------- Hash Lookup ---------------------------------------- */
 
 // HashFor looks up the recorded SHA-256 hash for a tool, version, and platform.
 // The distinct error cases give the caller actionable messages.

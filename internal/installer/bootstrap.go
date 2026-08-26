@@ -10,6 +10,8 @@ import (
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
+/* ----------------------------------- Trusted Bootstrap Path ----------------------------------- */
+
 // bootstrapPath builds the PATH used to resolve the trusted host Go and npm toolchain that
 // bootstrap installation. It starts from the ambient host PATH and removes any entry that is
 // equal to or beneath the repository root or the Quill state directory, comparing both the
@@ -30,7 +32,7 @@ func bootstrapPath(layout workspace.Layout) (path string, err error) {
 	if filtered == "" {
 		return "", fmt.Errorf(
 			"bootstrap PATH has no trusted host directories after excluding %s and %s",
-			layout.RepositoryRoot,
+			layout.Root,
 			layout.StateDirectory,
 		)
 	}
@@ -46,7 +48,7 @@ const bootstrapExclusionCount = 2
 
 func bootstrapExclusions(layout workspace.Layout) (roots []string) {
 	roots = make([]string, 0, bootstrapExclusionCount)
-	if root, err := filepath.Abs(layout.RepositoryRoot); err == nil {
+	if root, err := filepath.Abs(layout.Root); err == nil {
 		roots = append(roots, filepath.Clean(root))
 	}
 	if state, err := filepath.Abs(layout.StateDirectory); err == nil {
@@ -56,16 +58,18 @@ func bootstrapExclusions(layout workspace.Layout) (roots []string) {
 	return roots
 }
 
-// filterBootstrapPath returns canonical physical entries from pathValue that are not equal to or
+/* ------------------------------------ Path Entry Filtering ------------------------------------ */
+
+// filterBootstrapPath returns canonical physical entries from path that are not equal to or
 // beneath any root, in their original order. Every retained entry is absolute and symlink-resolved:
 // a relative entry cannot be reinterpreted from the child working directory, and a later executable
 // lookup cannot follow a retained directory link into repository or state. An entry whose physical
 // location cannot be resolved is rejected rather than passed through ambiguously.
-func filterBootstrapPath(pathValue string, roots []string) (filtered string, err error) {
+func filterBootstrapPath(path string, roots []string) (filtered string, err error) {
 	resolvedRoots := resolveSymlinkRoots(roots)
 
 	var kept []string
-	for _, directory := range filepath.SplitList(pathValue) {
+	for _, directory := range filepath.SplitList(path) {
 		if directory == "" {
 			continue
 		}
@@ -116,7 +120,7 @@ func canonicalBootstrapEntry(
 	}
 	lexical = filepath.Clean(lexical)
 
-	if pathWithinRoots(lexical, roots) {
+	if isWithinAnyRoot(lexical, roots) {
 		return "", true, nil
 	}
 
@@ -126,8 +130,10 @@ func canonicalBootstrapEntry(
 	}
 	canonical = filepath.Clean(canonical)
 
-	return canonical, pathWithinRoots(canonical, resolvedRoots), nil
+	return canonical, isWithinAnyRoot(canonical, resolvedRoots), nil
 }
+
+/* ------------------------------------ Executable Resolution ----------------------------------- */
 
 // resolveBootstrap resolves command from the canonical bootstrap PATH and rejects an executable
 // whose physical target is inside the repository or Quill state. Resolving the final link closes
@@ -152,7 +158,7 @@ func resolveBootstrap(
 	}
 	executable = filepath.Clean(executable)
 
-	if pathWithinRoots(executable, resolveSymlinkRoots(bootstrapExclusions(layout))) {
+	if isWithinAnyRoot(executable, resolveSymlinkRoots(bootstrapExclusions(layout))) {
 		return "", fmt.Errorf(
 			"bootstrap %s target %q is within repository or state directories",
 			command,
@@ -163,10 +169,10 @@ func resolveBootstrap(
 	return executable, nil
 }
 
-// pathWithinRoots reports whether candidate is equal to or beneath any of roots. Containment is
+// isWithinAnyRoot reports whether candidate is equal to or beneath any of roots. Containment is
 // component-aware through filepath.Rel, so a sibling directory whose name prefixes a root (for
 // example "/repo-other" beside "/repo") is not mistaken for a child.
-func pathWithinRoots(candidate string, roots []string) (within bool) {
+func isWithinAnyRoot(candidate string, roots []string) (within bool) {
 	separator := string(os.PathSeparator)
 	for _, root := range roots {
 		rel, err := filepath.Rel(root, candidate)

@@ -10,17 +10,17 @@ import (
 )
 
 func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + " Checks " + strings.Repeat("-", 42) + " */"
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
 	result, _ := CheckSectionHeaderNames(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -41,17 +41,17 @@ func TestCheckSectionHeaderNamesFindsGenericHeadings(t *testing.T) {
 }
 
 func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 42) + " Helpers " + strings.Repeat("-", 42) + " */"
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
 	result, err := CheckSectionHeaderNames(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		currentSectionHeaders(t),
 		style.Scope("all"),
@@ -62,19 +62,19 @@ func TestCheckSectionHeaderNamesAllowsStructuralHeadings(t *testing.T) {
 }
 
 func TestCheckSectionHeaderNamesUsesProfileGenericNames(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	header := "/* " + strings.Repeat("-", 43) + " Local " + strings.Repeat("-", 43) + " */"
 	headers := currentSectionHeaders(t)
 	headers.GenericNames = []string{"Local"}
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"internal/example/example.go",
 		"package example\n\n"+header+"\n\nfunc run() {}\n",
 	)
 
 	result, _ := CheckSectionHeaderNames(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		headers,
 		style.Scope("all"),

@@ -67,6 +67,7 @@ func (result CheckResult) Summary() (summary CheckSummary) {
 
 		case style.CheckStatusBlocked:
 			summary.Blocked++
+
 		case style.CheckStatusSkip:
 			summary.Skipped++
 

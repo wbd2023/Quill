@@ -107,7 +107,7 @@ func writeFixText(
 	writer io.Writer,
 	view FixView,
 	summary FixSummary,
-) (FixSummary, error) {
+) (result FixSummary, err error) {
 	if len(view.Entries) == 0 {
 		return summary, nil
 	}
@@ -118,6 +118,7 @@ func writeFixText(
 	}); err != nil {
 		return FixSummary{}, err
 	}
+
 	if !summary.AllValid {
 		return summary, nil
 	}

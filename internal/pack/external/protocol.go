@@ -38,8 +38,8 @@ func EncodeRequest(request Request) (payload []byte, err error) {
 // terminal completion, and the completion status.
 type Outcome struct {
 	Diagnostics []style.Diagnostic
-	Success     bool
-	// Error carries the Pack-reported failure message when Success is false.
+	Succeeded   bool
+	// Error carries the Pack-reported failure message when Succeeded is false.
 	Error string
 }
 
@@ -52,8 +52,8 @@ type envelope struct {
 	End     *pos   `json:"end"`
 	HelpURL string `json:"help_url"`
 
-	Success bool   `json:"success"`
-	ErrText string `json:"error"`
+	Succeeded bool   `json:"success"`
+	ErrText   string `json:"error"`
 }
 
 type pos struct {
@@ -95,7 +95,7 @@ func ParseResponse(stdout string) (outcome Outcome, err error) {
 					"external pack emitted more than one completion (line %d)", line)
 			}
 			completed = true
-			outcome.Success = record.Success
+			outcome.Succeeded = record.Succeeded
 			outcome.Error = record.ErrText
 
 		default:

@@ -20,7 +20,7 @@ import (
 // Register wires every Vocabulary execution identity into the aggregate driver Bindings.
 // It is called only by the central shipped aggregate builder.
 func Register(bindings *drivers.Bindings) {
-	bindings.AddRepositoryScanner(vocabulary.PackID, vocabulary.ScannerVocabulary, scanVocabulary)
+	bindings.AddRepositoryScanner(vocabulary.PackID, vocabulary.Scanner, scanVocabulary)
 }
 
 // scanVocabulary applies the configured vocabulary policy to the repository scope.
@@ -35,7 +35,7 @@ func scanVocabulary(
 	}
 
 	return checks.CheckVocabulary(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		config,
 		context.Scope,

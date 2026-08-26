@@ -21,7 +21,7 @@ func TestLoadRejectsNonRegularLockfile(t *testing.T) {
 	if err != nil {
 		t.Skipf("unix socket unsupported: %v", err)
 	}
-	t.Cleanup(func() { _ = listener.Close() })
+	t.Cleanup(func() { _ = listener.Close() }) // the listener exists only to create the socket path
 
 	lockfile, err := Load(root)
 	if err == nil {

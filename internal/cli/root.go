@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func resolveRepositoryRoot(path string) (repositoryRoot string, err error) {
+func resolveRepositoryRoot(path string) (root string, err error) {
 	if path != "" {
 		return filepath.Abs(path)
 	}
@@ -19,7 +19,7 @@ func resolveRepositoryRoot(path string) (repositoryRoot string, err error) {
 	return findRepositoryRoot(workingDirectory)
 }
 
-func findRepositoryRoot(start string) (repositoryRoot string, err error) {
+func findRepositoryRoot(start string) (root string, err error) {
 	directory, err := filepath.Abs(start)
 	if err != nil {
 		return "", err

@@ -36,10 +36,10 @@ type RuleFixResult struct {
 // No fixer is run if the required toolchain is invalid. Toolchain invalidity is represented in the
 // result rather than as a preparation error.
 func (engine *Engine) Fix(
-	operationContext context.Context,
+	ctx context.Context,
 	options FixOptions,
-) (result FixResult, operationError error) {
-	runContext, driverSets, err := engine.prepareRun(operationContext, options.Scope)
+) (result FixResult, err error) {
+	runContext, driverSets, err := engine.prepareRun(ctx, options.Scope)
 	if err != nil {
 		return FixResult{}, err
 	}
@@ -49,7 +49,7 @@ func (engine *Engine) Fix(
 	rules := selectRulesForFix(runContext.Plan.Rules, runContext)
 	toolIDs := execution.ToolIDsForFixes(rules)
 	result.Toolchain, err = engine.inspectTools(
-		operationContext,
+		ctx,
 		runContext.Tools,
 		toolIDs,
 		runContext.ToolEnvironment,
@@ -57,7 +57,8 @@ func (engine *Engine) Fix(
 	if err != nil {
 		return result, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return result, err
 	}
 
@@ -69,7 +70,7 @@ func (engine *Engine) Fix(
 	result.Rules = make([]RuleFixResult, 0, len(rules))
 	for _, rule := range rules {
 		executionResult, executionError := execution.RunFix(
-			operationContext,
+			ctx,
 			rule,
 			runContext,
 			toolStatuses,
@@ -81,9 +82,10 @@ func (engine *Engine) Fix(
 			ExecutionError: executionError,
 		})
 
-		if err := operationContext.Err(); err != nil {
+		if err := ctx.Err(); err != nil {
 			return result, err
 		}
+
 		if executionError != nil {
 			return result, nil
 		}

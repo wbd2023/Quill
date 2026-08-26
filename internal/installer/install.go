@@ -17,6 +17,8 @@ import (
 
 const standardPermissions os.FileMode = 0o755
 
+/* -------------------------------------- Tool Installation ------------------------------------- */
+
 // Install downloads and installs the pinned external tools declared in the profile. Independent
 // tool failures are collected, but cancellation stops the operation before another tool starts.
 func Install(
@@ -58,6 +60,8 @@ func installWith(
 
 	return errors.Join(errs...)
 }
+
+/* ------------------------------------- Install Strategies ------------------------------------- */
 
 func installTool(
 	ctx context.Context,

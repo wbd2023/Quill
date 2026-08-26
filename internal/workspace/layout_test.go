@@ -3,8 +3,6 @@ package workspace
 import "testing"
 
 func TestLayoutDerivesPathsFromRepositoryRoot(t *testing.T) {
-	t.Setenv("PATH", "/usr/bin")
-
 	layout := NewLayout("/repo")
 
 	if layout.StateDirectory != "/repo/.cache/quill" {
@@ -18,11 +16,9 @@ func TestLayoutDerivesPathsFromRepositoryRoot(t *testing.T) {
 }
 
 func TestLayoutBuildPathIncludesBinaryDirectoryAndExtras(t *testing.T) {
-	t.Setenv("PATH", "/usr/bin")
-
 	layout := NewLayout("/repo")
 
-	actual := layout.BuildPath("/node/bin")
+	actual := layout.BuildPath("/usr/bin", "/node/bin")
 	expected := "/repo/.cache/quill/bin:/node/bin:/usr/bin"
 	if actual != expected {
 		t.Fatalf("BuildPath = %q, want %q", actual, expected)
@@ -31,7 +27,7 @@ func TestLayoutBuildPathIncludesBinaryDirectoryAndExtras(t *testing.T) {
 
 func TestLayoutStateDirectoryCanBeOverridden(t *testing.T) {
 	layout := Layout{
-		RepositoryRoot: "/repo",
+		Root:           "/repo",
 		StateDirectory: "/custom/state",
 	}
 

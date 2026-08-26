@@ -12,6 +12,8 @@ import (
 	"github.com/wbd2023/quill/internal/profile"
 )
 
+/* ------------------------------------------ Constants ----------------------------------------- */
+
 const (
 	defaultPreset   = "minimal"
 	styleFileName   = "STYLE.md"
@@ -23,145 +25,11 @@ const (
 	configFilePermission      os.FileMode = 0o644
 )
 
-// InitResult describes the repository initialized by Init.
-type InitResult struct {
-	Root   string
-	Preset string
-}
-
-// Init creates a new Quill policy in root from preset. It never overwrites either policy file,
-// refuses symlinked destinations, and rolls back STYLE.md when quill.toml cannot be created.
-func Init(
-	operationContext context.Context,
-	root string,
-	presetName string,
-) (result InitResult, operationError error) {
-	if err := operationContext.Err(); err != nil {
-		return InitResult{}, err
-	}
-
-	preset, ok := initPreset(presetName)
-	if !ok {
-		return InitResult{}, newArgumentError("unsupported preset %q", presetName)
-	}
-
-	stylePath := filepath.Join(root, styleFileName)
-	profilePath := filepath.Join(root, profileFileName)
-	occupied, err := occupiedPolicyFiles(stylePath, profilePath)
-	if err != nil {
-		return InitResult{}, fmt.Errorf("check target directory %q: %w", root, err)
-	}
-	if len(occupied) > 0 {
-		return InitResult{}, fmt.Errorf(
-			"refusing to overwrite existing policy files in %q: %s already present",
-			root,
-			strings.Join(occupied, " and "),
-		)
-	}
-
-	if err := operationContext.Err(); err != nil {
-		return InitResult{}, err
-	}
-	if err := os.MkdirAll(root, configDirectoryPermission); err != nil {
-		return InitResult{}, fmt.Errorf("create target directory %q: %w", root, err)
-	}
-	if err := writePolicyFiles(operationContext, stylePath, profilePath, preset.styleGuide, preset.profile); err != nil {
-		return InitResult{}, fmt.Errorf("write policy files in %q: %w", root, err)
-	}
-
-	return InitResult{Root: root, Preset: presetName}, nil
-}
-
-// occupiedPolicyFiles returns the base names of any policy file paths that already name an entry.
-// It uses Lstat so it does not follow symlinks: a dangling or valid symlink at a policy path
-// counts as occupied and is refused, preventing Init from writing through an attacker-controlled
-// link. The returned names let Init report exactly which file prevented creation.
-func occupiedPolicyFiles(paths ...string) (occupied []string, err error) {
-	for _, path := range paths {
-		switch _, statErr := os.Lstat(path); {
-		case statErr == nil:
-			occupied = append(occupied, filepath.Base(path))
-		case errors.Is(statErr, fs.ErrNotExist):
-			continue
-		default:
-			return nil, statErr
-		}
-	}
-
-	return occupied, nil
-}
-
-// writePolicyFiles writes STYLE.md then quill.toml. Each file is created with an exclusive,
-// non-clobbering open, so a file that appears between the occupancy check and the write fails
-// instead of being truncated. If quill.toml cannot be written, STYLE.md is removed so Init never
-// leaves a half-initialized repository.
-func writePolicyFiles(
-	operationContext context.Context,
-	stylePath string,
-	profilePath string,
-	styleGuide string,
-	profileContents string,
-) (err error) {
-	if err := operationContext.Err(); err != nil {
-		return err
-	}
-	if err := writeExclusive(stylePath, styleGuide); err != nil {
-		return fmt.Errorf("write %s: %w", styleFileName, err)
-	}
-	if err := operationContext.Err(); err != nil {
-		_ = os.Remove(stylePath)
-		return err
-	}
-	if err := writeExclusive(profilePath, profileContents); err != nil {
-		_ = os.Remove(stylePath)
-		return fmt.Errorf("write %s: %w", profileFileName, err)
-	}
-
-	return nil
-}
-
-// writeExclusive atomically creates path containing contents with an exclusive open. It fails if
-// path already exists and never truncates an existing file.
-func writeExclusive(path string, contents string) (err error) {
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, configFilePermission)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if closeErr := file.Close(); err == nil {
-			err = closeErr
-		}
-	}()
-
-	if _, err = file.WriteString(contents); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 const (
 	minimalRequirementSection = "1.1"
 	minimalRequirementSlug    = "enforcement-levels"
 	requirementIDToken        = "__REQUIREMENT_ID__"
 )
-
-func minimalRequirementID() (id string) {
-	return minimalRequirementSection + "." + minimalRequirementSlug
-}
-
-func initPreset(name string) (content initPresetContent, ok bool) {
-	if name != defaultPreset {
-		return initPresetContent{}, false
-	}
-
-	requirementID := minimalRequirementID()
-	return initPresetContent{
-		styleGuide: strings.ReplaceAll(minimalStyleGuide, requirementIDToken, requirementID),
-		profile:    strings.ReplaceAll(minimalProfile, requirementIDToken, requirementID),
-	}, true
-}
 
 const minimalStyleGuide = `# Style
 
@@ -240,7 +108,156 @@ scope = "all"
 requirement_ids = ["__REQUIREMENT_ID__"]
 `
 
+/* -------------------------------------------- Types ------------------------------------------- */
+
+// InitResult describes the repository initialised by Init.
+type InitResult struct {
+	Root   string
+	Preset string
+}
+
 type initPresetContent struct {
 	styleGuide string
 	profile    string
+}
+
+/* --------------------------------------- Initialisation --------------------------------------- */
+
+// Init creates a new Quill policy in root from preset. It never overwrites either policy file,
+// refuses symlinked destinations, and rolls back STYLE.md when quill.toml cannot be created.
+func Init(
+	ctx context.Context,
+	root string,
+	presetName string,
+) (result InitResult, err error) {
+	if err := ctx.Err(); err != nil {
+		return InitResult{}, err
+	}
+
+	preset, ok := initPreset(presetName)
+	if !ok {
+		return InitResult{}, newArgumentError("unsupported preset %q", presetName)
+	}
+
+	stylePath := filepath.Join(root, styleFileName)
+	profilePath := filepath.Join(root, profileFileName)
+	occupied, err := occupiedPolicyFiles(stylePath, profilePath)
+	if err != nil {
+		return InitResult{}, fmt.Errorf("check target directory %q: %w", root, err)
+	}
+
+	if len(occupied) > 0 {
+		return InitResult{}, fmt.Errorf(
+			"refusing to overwrite existing policy files in %q: %s already present",
+			root,
+			strings.Join(occupied, " and "),
+		)
+	}
+
+	if err := ctx.Err(); err != nil {
+		return InitResult{}, err
+	}
+
+	if err := os.MkdirAll(root, configDirectoryPermission); err != nil {
+		return InitResult{}, fmt.Errorf("create target directory %q: %w", root, err)
+	}
+
+	if err := writePolicyFiles(
+		ctx, stylePath, profilePath,
+		preset.styleGuide, preset.profile,
+	); err != nil {
+		return InitResult{}, fmt.Errorf("write policy files in %q: %w", root, err)
+	}
+
+	return InitResult{Root: root, Preset: presetName}, nil
+}
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
+
+// occupiedPolicyFiles returns the base names of any policy file paths that already name an entry.
+// It uses Lstat so it does not follow symlinks: a dangling or valid symlink at a policy path
+// counts as occupied and is refused, preventing Init from writing through an attacker-controlled
+// link. The returned names let Init report exactly which file prevented creation.
+func occupiedPolicyFiles(paths ...string) (occupied []string, err error) {
+	for _, path := range paths {
+		switch _, statErr := os.Lstat(path); {
+		case statErr == nil:
+			occupied = append(occupied, filepath.Base(path))
+		case errors.Is(statErr, fs.ErrNotExist):
+			continue
+		default:
+			return nil, statErr
+		}
+	}
+
+	return occupied, nil
+}
+
+// writePolicyFiles writes STYLE.md then quill.toml. Each file is created with an exclusive,
+// non-clobbering open, so a file that appears between the occupancy check and the write fails
+// instead of being truncated. If quill.toml cannot be written, STYLE.md is removed so Init never
+// leaves a half-initialised repository.
+func writePolicyFiles(
+	ctx context.Context,
+	stylePath string,
+	profilePath string,
+	styleGuide string,
+	profileContents string,
+) (err error) {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	if err := writeExclusive(stylePath, styleGuide); err != nil {
+		return fmt.Errorf("write %s: %w", styleFileName, err)
+	}
+
+	if err := ctx.Err(); err != nil {
+		_ = os.Remove(stylePath)
+		return err
+	}
+
+	if err := writeExclusive(profilePath, profileContents); err != nil {
+		_ = os.Remove(stylePath)
+		return fmt.Errorf("write %s: %w", profileFileName, err)
+	}
+
+	return nil
+}
+
+// writeExclusive atomically creates path containing contents with an exclusive open. It fails if
+// path already exists and never truncates an existing file.
+func writeExclusive(path string, contents string) (err error) {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, configFilePermission)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if closeErr := file.Close(); err == nil {
+			err = closeErr
+		}
+	}()
+
+	if _, err = file.WriteString(contents); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func minimalRequirementID() (id string) {
+	return minimalRequirementSection + "." + minimalRequirementSlug
+}
+
+func initPreset(name string) (content initPresetContent, ok bool) {
+	if name != defaultPreset {
+		return initPresetContent{}, false
+	}
+
+	requirementID := minimalRequirementID()
+	return initPresetContent{
+		styleGuide: strings.ReplaceAll(minimalStyleGuide, requirementIDToken, requirementID),
+		profile:    strings.ReplaceAll(minimalProfile, requirementIDToken, requirementID),
+	}, true
 }

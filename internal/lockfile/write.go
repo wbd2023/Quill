@@ -60,13 +60,16 @@ func writeAtomically(ctx context.Context, path string, contents string) (err err
 		_ = temp.Close() // preserve the original write error
 		return err
 	}
+
 	if err = temp.Chmod(standardLockfilePermissions); err != nil {
 		_ = temp.Close() // preserve the original permission error
 		return err
 	}
+
 	if err = temp.Close(); err != nil {
 		return err
 	}
+
 	if err = ctx.Err(); err != nil {
 		return err
 	}

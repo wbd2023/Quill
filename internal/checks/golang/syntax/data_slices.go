@@ -102,10 +102,10 @@ func containsSliceLenCheck(expression ast.Expr, name string) (found bool) {
 		return false
 	}
 
-	callExpression, ok := binaryExpression.X.(*ast.CallExpr)
-	if !ok || !isLenCallForName(callExpression, name) {
-		callExpression, ok = binaryExpression.Y.(*ast.CallExpr)
-		if !ok || !isLenCallForName(callExpression, name) {
+	call, ok := binaryExpression.X.(*ast.CallExpr)
+	if !ok || !isLenCallForName(call, name) {
+		call, ok = binaryExpression.Y.(*ast.CallExpr)
+		if !ok || !isLenCallForName(call, name) {
 			return false
 		}
 	}
@@ -113,13 +113,13 @@ func containsSliceLenCheck(expression ast.Expr, name string) (found bool) {
 	return true
 }
 
-func isLenCallForName(callExpression *ast.CallExpr, name string) (found bool) {
-	functionName, ok := callExpression.Fun.(*ast.Ident)
-	if !ok || functionName.Name != "len" || len(callExpression.Args) != 1 {
+func isLenCallForName(call *ast.CallExpr, name string) (found bool) {
+	functionName, ok := call.Fun.(*ast.Ident)
+	if !ok || functionName.Name != "len" || len(call.Args) != 1 {
 		return false
 	}
 
-	identifier, ok := callExpression.Args[0].(*ast.Ident)
+	identifier, ok := call.Args[0].(*ast.Ident)
 	return ok && identifier.Name == name
 }
 

@@ -18,7 +18,7 @@ const (
 
 // CheckLineLengths check line lengths.
 func CheckLineLengths(
-	repoRoot string,
+	root string,
 	files []string,
 ) (result style.ExecutionResult, err error) {
 	for _, path := range files {
@@ -40,7 +40,7 @@ func CheckLineLengths(
 
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code:  "text/line-length/too-long",
-				File:  filewalk.DisplayPath(repoRoot, path),
+				File:  filewalk.DisplayPath(root, path),
 				Range: style.Range{Start: style.Position{Line: line.Number}},
 				Message: fmt.Sprintf(
 					"%d columns, tab width %d",

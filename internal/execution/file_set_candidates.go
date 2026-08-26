@@ -28,7 +28,7 @@ func collectFileSetCandidates(
 		}
 	}
 
-	roots := resolveScopeRoots(context.RepoRoot, context.Profile.Repository, scopes)
+	roots := resolveScopeRoots(context.Root, context.Profile.Repository, scopes)
 	files, err = filewalk.CollectFiles(
 		roots,
 		filewalk.WalkConfig{
@@ -76,7 +76,7 @@ func explicitFileCandidates(
 ) (files []string) {
 	for _, scope := range scopes {
 		for _, file := range fileSet.Include.Files[scope] {
-			path := filepath.Join(context.RepoRoot, file)
+			path := filepath.Join(context.Root, file)
 			if !filewalk.IsRegularLeaf(path) {
 				continue
 			}
@@ -105,14 +105,14 @@ func dedupeCandidatePaths(paths []string) (deduped []string) {
 }
 
 func resolveScopeRoots(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
 	scopes []style.Scope,
 ) (roots []string) {
 	seen := make(map[string]bool)
 	for _, scope := range scopes {
-		for _, root := range repository.ResolveScopeRoots(repoRoot, scope) {
-			clean := filepath.Clean(root)
+		for _, scopeRoot := range repository.ResolveScopeRoots(root, scope) {
+			clean := filepath.Clean(scopeRoot)
 			if seen[clean] {
 				continue
 			}

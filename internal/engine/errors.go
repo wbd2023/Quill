@@ -13,11 +13,11 @@ type ArgumentError struct {
 	cause error
 }
 
-func (err *ArgumentError) Error() string {
+func (err *ArgumentError) Error() (message string) {
 	return err.cause.Error()
 }
 
-func (err *ArgumentError) Unwrap() error {
+func (err *ArgumentError) Unwrap() (cause error) {
 	return err.cause
 }
 

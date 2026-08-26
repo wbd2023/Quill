@@ -52,14 +52,14 @@ func runStyleCheck(
 			continue
 		}
 
-		workDir := targetWorkDir(run.RepoRoot, target)
+		workDir := targetWorkDir(run.Root, target)
 		roots := make([]string, 0, len(target.CheckPaths))
 		for _, checkPath := range target.CheckPaths {
 			roots = append(roots, filepath.Join(workDir, checkPath))
 		}
 
 		styleResult, err := checks.CheckDirectories(
-			run.RepoRoot,
+			run.Root,
 			roots,
 			run.Profile.Repository,
 			run.Profile.PathRoles,

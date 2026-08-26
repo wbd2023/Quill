@@ -11,21 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-func requireTOMLEqual[T any](t *testing.T, name string, expected T, actual T) {
-	t.Helper()
-
-	if diff := cmp.Diff(expected, actual); diff != "" {
-		t.Fatalf("%s mismatch (-expected +actual):\n%s", name, diff)
-	}
-}
-
-func requireConfigEqual(t *testing.T, expected Profile, actual Profile) {
-	t.Helper()
-
-	if diff := cmp.Diff(expected, actual, cmpopts.EquateEmpty()); diff != "" {
-		t.Fatalf("config mismatch (-expected +actual):\n%s", diff)
-	}
-}
+/* ------------------------------------------ Decoding ------------------------------------------ */
 
 func TestDecodeReadsMultilineArrays(t *testing.T) {
 	t.Parallel()
@@ -230,6 +216,8 @@ go = "invalid"
 	}
 }
 
+/* ------------------------------------ Encoding Round Trips ------------------------------------ */
+
 func TestEncodeRoundTripsLocalProfile(t *testing.T) {
 	t.Parallel()
 
@@ -308,4 +296,22 @@ func TestEncodeRoundTripsCurrentProfile(t *testing.T) {
 	}
 
 	requireConfigEqual(t, config, got)
+}
+
+/* ------------------------------------------- Helpers ------------------------------------------ */
+
+func requireTOMLEqual[T any](t *testing.T, name string, expected T, actual T) {
+	t.Helper()
+
+	if diff := cmp.Diff(expected, actual); diff != "" {
+		t.Fatalf("%s mismatch (-expected +actual):\n%s", name, diff)
+	}
+}
+
+func requireConfigEqual(t *testing.T, expected Profile, actual Profile) {
+	t.Helper()
+
+	if diff := cmp.Diff(expected, actual, cmpopts.EquateEmpty()); diff != "" {
+		t.Fatalf("config mismatch (-expected +actual):\n%s", diff)
+	}
 }

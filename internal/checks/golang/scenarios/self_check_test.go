@@ -10,14 +10,14 @@ import (
 )
 
 func TestQuillPassesGoStyleChecks(t *testing.T) {
-	repositoryRoot := testutil.RepositoryRoot(t)
+	root := testutil.RepositoryRoot(t)
 	config := profiles.Self(t)
 
 	result, err := golang.CheckDirectories(
-		repositoryRoot,
+		root,
 		[]string{
-			filepath.Join(repositoryRoot, "cmd"),
-			filepath.Join(repositoryRoot, "internal"),
+			filepath.Join(root, "cmd"),
+			filepath.Join(root, "internal"),
 		},
 		config.Repository,
 		config.PathRoles,

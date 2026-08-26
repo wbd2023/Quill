@@ -65,7 +65,7 @@ func externalCheckDriver() (driver execution.Driver) {
 		payload, err := external.EncodeRequest(external.Request{
 			Protocol:       external.ProtocolVersion,
 			Operation:      "check",
-			RepositoryRoot: run.RepoRoot,
+			RepositoryRoot: run.Root,
 			PackID:         rule.PackID,
 			RuleID:         rule.ID,
 			CheckID:        check.CheckID,
@@ -85,7 +85,7 @@ func externalCheckDriver() (driver execution.Driver) {
 		commandResult, runErr := process.RunCommand(ctx, process.CommandRequest{
 			Name:             executable,
 			Environment:      process.EnvironmentIsolated,
-			Directory:        run.RepoRoot,
+			Directory:        run.Root,
 			Stdin:            payload,
 			Timeout:          timeout,
 			OutputLimitBytes: externalOutputLimit,
@@ -117,7 +117,7 @@ func externalCheckDriver() (driver execution.Driver) {
 			)
 		}
 
-		if !outcome.Success {
+		if !outcome.Succeeded {
 			return result, fmt.Errorf(
 				"external pack %q rule %q reported failure: %s%s",
 				rule.PackID, rule.ID, outcome.Error,
@@ -145,7 +145,7 @@ func collectExternalFiles(run execution.RunContext, fileSet string) (files []str
 
 	files = make([]string, 0, len(candidates))
 	for _, candidate := range candidates {
-		relative, relErr := filewalk.RelativePath(run.RepoRoot, candidate)
+		relative, relErr := filewalk.RelativePath(run.Root, candidate)
 		if relErr != nil {
 			return nil, relErr
 		}

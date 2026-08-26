@@ -23,22 +23,22 @@ const (
 	ExecutionExternal       = "external"
 )
 
-/* ------------------------------------------ Overview ------------------------------------------ */
-
-// PackProvenance identifies whether a Pack ships with Quill or is repository-provided.
-type PackProvenance string
-
 const (
 	PackProvenanceShipped  PackProvenance = "shipped"
 	PackProvenanceExternal PackProvenance = "external"
 )
 
+/* ------------------------------------------ Overview ------------------------------------------ */
+
+// PackProvenance identifies whether a Pack ships with Quill or is repository-provided.
+type PackProvenance string
+
 // MetadataSnapshot is the complete non-presentation metadata view of one prepared repository.
 // It is the single read-only query shared by the discoverability commands (list and explain).
 //
 // Metadata is metadata-only: it shares the prepare pipeline (Profile, STYLE.md
-// document, Pack catalogue, and compiled Plan) and never constructs a runner
-// context, resolves driver bindings, or inspects tools. The full catalogue is
+// document, Pack catalog, and compiled Plan) and never constructs a runner
+// context, resolves driver bindings, or inspects tools. The full catalog is
 // assembled independently to enumerate available inventory; the prepared
 // Profile selects the active subset.
 type MetadataSnapshot struct {
@@ -49,23 +49,23 @@ type MetadataSnapshot struct {
 	PackPolicies profile.PackPolicies
 }
 
-// PackMetadata describes one catalogue Pack and whether the prepared profile activates it.
+// PackMetadata describes one catalog Pack and whether the prepared profile activates it.
 type PackMetadata struct {
 	ID         string
 	Name       string
-	Active     bool
+	Enabled    bool
 	Provenance PackProvenance
 	ToolIDs    []string
 	RuleIDs    []string
 }
 
-// RuleMetadata describes one catalogue Rule and, when active, its compiled binding.
+// RuleMetadata describes one catalog Rule and, when active, its compiled binding.
 type RuleMetadata struct {
 	ID             string
 	PackID         string
 	Name           string
 	Group          style.RuleGroup
-	Active         bool
+	Enabled        bool
 	Enforcement    style.Enforcement
 	Scope          style.Scope
 	RequirementIDs []string
@@ -74,7 +74,7 @@ type RuleMetadata struct {
 	Fix            ExecutionDetail
 }
 
-// ToolMetadata describes one catalogue Tool capability and the Packs that reference it.
+// ToolMetadata describes one catalog Tool capability and the Packs that reference it.
 type ToolMetadata struct {
 	ID            string
 	Name          string
@@ -85,9 +85,9 @@ type ToolMetadata struct {
 
 // ScopeMetadata describes one repository scope.
 type ScopeMetadata struct {
-	Name    style.Scope
-	Roots   []string
-	Default bool
+	Name      style.Scope
+	Roots     []string
+	IsDefault bool
 }
 
 // ExecutionDetail is the structured, presentation-free description of one rule execution. Category
@@ -102,17 +102,18 @@ type ExecutionDetail struct {
 // Metadata loads the prepared repository snapshot and assembles its discoverability metadata. It
 // performs no tool inspection and launches no process.
 func (engine *Engine) Metadata(
-	operationContext context.Context,
-) (snapshot MetadataSnapshot, operationError error) {
-	if err := operationContext.Err(); err != nil {
+	ctx context.Context,
+) (snapshot MetadataSnapshot, err error) {
+	if err := ctx.Err(); err != nil {
 		return MetadataSnapshot{}, err
 	}
 
-	prepared, err := engine.prepare(operationContext)
+	prepared, err := engine.prepare(ctx)
 	if err != nil {
 		return MetadataSnapshot{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return MetadataSnapshot{}, err
 	}
 
@@ -124,7 +125,7 @@ func (engine *Engine) Metadata(
 		packIDs[index] = definition.ID
 	}
 
-	// The full catalogue registry enumerates every available Pack's resolved rules and tool
+	// The full catalog registry enumerates every available Pack's resolved rules and tool
 	// capabilities with Pack provenance stamped on each rule. It is pure declaration assembly:
 	// no driver binding and no tool inspection.
 	available, err := catalog.Registry(packIDs)
@@ -188,7 +189,7 @@ func buildPackMetadata(
 		packs = append(packs, PackMetadata{
 			ID:         definition.ID,
 			Name:       definition.Name,
-			Active:     enabled[definition.ID],
+			Enabled:    enabled[definition.ID],
 			Provenance: provenance,
 			ToolIDs:    sortedClone(definition.ToolIDs),
 			RuleIDs:    ruleIDs,
@@ -211,12 +212,12 @@ func buildRuleMetadata(
 			Name:   definition.Name,
 			Group:  definition.Group,
 			HasFix: definition.Fix != nil,
-			Check:  executionDetail(definition.Check),
-			Fix:    executionDetail(definition.Fix),
+			Check:  classifyExecutionDetail(definition.Check),
+			Fix:    classifyExecutionDetail(definition.Fix),
 		}
 
 		if bound, found := active[definition.ID]; found {
-			metadata.Active = true
+			metadata.Enabled = true
 			metadata.Enforcement = bound.Enforcement
 			metadata.Scope = bound.Scope
 			metadata.RequirementIDs = sortedClone(bound.RequirementIDs)
@@ -267,9 +268,9 @@ func buildScopeMetadata(repository profile.RepositoryConfig) (scopes []ScopeMeta
 	scopes = make([]ScopeMetadata, 0, len(repository.ScopeRoots))
 	for name, roots := range repository.ScopeRoots {
 		scopes = append(scopes, ScopeMetadata{
-			Name:    name,
-			Roots:   sortedClone(roots),
-			Default: name == repository.DefaultScope,
+			Name:      name,
+			Roots:     sortedClone(roots),
+			IsDefault: name == repository.DefaultScope,
 		})
 	}
 
@@ -277,9 +278,9 @@ func buildScopeMetadata(repository profile.RepositoryConfig) (scopes []ScopeMeta
 	return scopes
 }
 
-// executionDetail classifies one declared Template into structured metadata. It reads only the
-// Template's own fields; it never binds targets or runs anything.
-func executionDetail(template style.Template) (detail ExecutionDetail) {
+// classifyExecutionDetail classifies one declared Template into structured metadata. It reads
+// only the Template's own fields; it never binds targets or runs anything.
+func classifyExecutionDetail(template style.Template) (detail ExecutionDetail) {
 	if template == nil {
 		return ExecutionDetail{}
 	}

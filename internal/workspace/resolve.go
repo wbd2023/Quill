@@ -79,6 +79,7 @@ func ResolveRepoRelative(root string, value string) (absolute string, err error)
 		}
 		return resolved, nil
 	}
+
 	if !errors.Is(err, fs.ErrNotExist) {
 		return "", fmt.Errorf("resolve repository path %q: %w", value, err)
 	}
@@ -87,6 +88,7 @@ func ResolveRepoRelative(root string, value string) (absolute string, err error)
 	if err != nil {
 		return "", fmt.Errorf("resolve repository path %q: %w", value, err)
 	}
+
 	if !isWithinRoot(root, ancestor) {
 		return "", fmt.Errorf("path %q resolves outside the repository root", value)
 	}
@@ -100,6 +102,7 @@ func resolveExistingAncestor(path string) (resolved string, err error) {
 		if err == nil {
 			return resolved, nil
 		}
+
 		if !errors.Is(err, fs.ErrNotExist) {
 			return "", err
 		}

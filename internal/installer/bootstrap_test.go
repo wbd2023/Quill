@@ -12,15 +12,19 @@ import (
 	"github.com/wbd2023/quill/internal/workspace"
 )
 
+/* ----------------------------------------- Test Helper ---------------------------------------- */
+
 // bootstrapExecutableName returns the executable name suffix the process resolver expects on the
 // current platform, so the hostile resolution tests are deterministic on POSIX and Windows.
-func bootstrapExecutableName(name string) string {
+func bootstrapExecutableName(name string) (executableName string) {
 	if runtime.GOOS == "windows" {
 		return name + ".exe"
 	}
 
 	return name
 }
+
+/* ---------------------------------- Bootstrap Path Filtering ---------------------------------- */
 
 // TestBootstrapPathExcludesRepositoryAndStateEntries is the QUILL-TRUST-006 regression: the
 // bootstrap PATH is the ambient host PATH with repository and state entries removed, preserving
@@ -108,6 +112,8 @@ func TestFilterBootstrapPathDropsSymlinkedHostEntry(t *testing.T) {
 	}
 }
 
+/* ---------------------------------- Hostile Resolution Proofs --------------------------------- */
+
 // TestBootstrapResolutionSelectsHostExecutableOverCache is the combined QUILL-TRUST-006 hostile
 // proof: with a malicious go (or npm) placed in the state cache and a valid go on the host, the
 // bootstrap PATH excludes the cache entry and resolution selects the host executable. The cached
@@ -189,6 +195,8 @@ func TestResolveBootstrapRejectsExecutableSymlinkIntoState(t *testing.T) {
 		t.Fatal("resolveBootstrap = nil, want state-target rejection")
 	}
 }
+
+/* ---------------------------------- Cache Only Path Exclusion --------------------------------- */
 
 // TestFilterBootstrapPathDropsStateOnlyEntries proves the cached-executable half of
 // QUILL-TRUST-006 deterministically: when the ambient PATH contains only repository or state

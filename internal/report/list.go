@@ -91,10 +91,13 @@ func NewListResult(snapshot engine.MetadataSnapshot, selector string) (result Li
 	switch selector {
 	case ListPacks:
 		result.Packs = newListPacks(snapshot.Packs)
+
 	case ListRules:
 		result.Rules = newListRules(snapshot.Rules, snapshot.Packs)
+
 	case ListTools:
 		result.Tools = newListTools(snapshot.Tools)
+
 	case ListScopes:
 		result.Scopes = newListScopes(snapshot.Scopes)
 	}
@@ -108,7 +111,7 @@ func newListPacks(packs []engine.PackMetadata) (rows []ListPack) {
 		rows = append(rows, ListPack{
 			ID:         pack.ID,
 			Name:       pack.Name,
-			Active:     pack.Active,
+			Active:     pack.Enabled,
 			Provenance: string(pack.Provenance),
 			Rules:      len(pack.RuleIDs),
 			Tools:      len(pack.ToolIDs),
@@ -134,10 +137,10 @@ func newListRules(
 			Pack:       rule.PackID,
 			Provenance: provenance[rule.PackID],
 			Name:       rule.Name,
-			Active:     rule.Active,
+			Active:     rule.Enabled,
 			Fix:        rule.HasFix,
 		}
-		if rule.Active {
+		if rule.Enabled {
 			row.Enforcement = string(rule.Enforcement)
 			row.Scope = string(rule.Scope)
 		}
@@ -168,7 +171,7 @@ func newListScopes(scopes []engine.ScopeMetadata) (rows []ListScope) {
 		rows = append(rows, ListScope{
 			Name:    string(scope.Name),
 			Roots:   scope.Roots,
-			Default: scope.Default,
+			Default: scope.IsDefault,
 		})
 	}
 

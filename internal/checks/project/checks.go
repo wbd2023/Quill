@@ -63,12 +63,12 @@ func CheckExcludedDirectories(
 
 // CheckCommands checks the configured repository quality-command surface.
 func CheckCommands(
-	repositoryRoot string,
+	root string,
 	commands projectpolicy.CommandsConfig,
 ) (message string, err error) {
 	switch commands.Runner {
 	case projectpolicy.CommandsRunnerMake:
-		return checkMakeCommands(repositoryRoot, commands)
+		return checkMakeCommands(root, commands)
 	default:
 		return "", fmt.Errorf("unsupported quality commands runner %q", commands.Runner)
 	}
@@ -77,10 +77,10 @@ func CheckCommands(
 /* --------------------------------------- Makefile Checks -------------------------------------- */
 
 func checkMakeCommands(
-	repositoryRoot string,
+	root string,
 	commands projectpolicy.CommandsConfig,
 ) (message string, err error) {
-	contents, err := os.ReadFile(filepath.Join(repositoryRoot, commands.Make.Path))
+	contents, err := os.ReadFile(filepath.Join(root, commands.Make.Path))
 	if err != nil {
 		return "", err
 	}

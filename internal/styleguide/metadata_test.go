@@ -167,8 +167,8 @@ func TestBuildRequirementMetadataAcceptsSupportedFields(t *testing.T) {
 			expected: metadataView{
 				ID: "1.1.example",
 				Review: Review{
-					Only:   true,
-					Reason: "Review this manually.",
+					IsReviewOnly: true,
+					Reason:       "Review this manually.",
 				},
 			},
 		},

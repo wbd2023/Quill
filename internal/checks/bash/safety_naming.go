@@ -3,7 +3,7 @@ package bash
 /* ------------------------------------- Safety Diagnostics ------------------------------------- */
 
 func (state *shellSafetyState) checkFunctionName(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 	lineNumber int,
@@ -22,7 +22,7 @@ func (state *shellSafetyState) checkFunctionName(
 
 	state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 		"bash/safety/naming",
-		repoRoot,
+		root,
 		path,
 		lineNumber,
 		"Bash function names should use lower-case with underscores",
@@ -30,7 +30,7 @@ func (state *shellSafetyState) checkFunctionName(
 }
 
 func (state *shellSafetyState) checkVariableName(
-	repoRoot string,
+	root string,
 	path string,
 	patterns safetyPatterns,
 	lineNumber int,
@@ -40,7 +40,7 @@ func (state *shellSafetyState) checkVariableName(
 		!isUpperSnakeCase(matches[1]) {
 		state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 			"bash/safety/naming",
-			repoRoot,
+			root,
 			path,
 			lineNumber,
 			"Bash constants and exported variables should use upper-case with underscores",
@@ -59,7 +59,7 @@ func (state *shellSafetyState) checkVariableName(
 
 	state.diagnostics = append(state.diagnostics, bashSafetyDiagnostic(
 		"bash/safety/naming",
-		repoRoot,
+		root,
 		path,
 		lineNumber,
 		"Bash non-exported variable names should use lower-case with underscores",

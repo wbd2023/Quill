@@ -63,7 +63,7 @@ func scanASCII(
 	context execution.RunContext,
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
-	return checks.CheckASCII(context.RepoRoot, context.Profile.Repository, context.Scope)
+	return checks.CheckASCII(context.Root, context.Profile.Repository, context.Scope)
 }
 
 func scanExceptionMarkers(
@@ -72,7 +72,7 @@ func scanExceptionMarkers(
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckExceptionMarkers(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		context.Scope,
 	)
@@ -88,7 +88,7 @@ func scanLineLengths(
 		return style.ExecutionResult{}, err
 	}
 
-	return checks.CheckLineLengths(context.RepoRoot, files)
+	return checks.CheckLineLengths(context.Root, files)
 }
 
 func scanMaintenanceMarkers(
@@ -97,7 +97,7 @@ func scanMaintenanceMarkers(
 	_ style.RepositoryScan,
 ) (result style.ExecutionResult, err error) {
 	return checks.CheckMaintenanceMarkers(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		context.Scope,
 	)
@@ -114,7 +114,7 @@ func scanSectionHeaderNames(
 	}
 
 	return checks.CheckSectionHeaderNames(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,
@@ -132,7 +132,7 @@ func scanSectionHeaderDensity(
 	}
 
 	return checks.CheckSectionHeaderDensity(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,
@@ -150,7 +150,7 @@ func scanSectionHeaders(
 	}
 
 	return checks.CheckSectionHeaders(
-		context.RepoRoot,
+		context.Root,
 		context.Profile.Repository,
 		config.SectionHeaders,
 		context.Scope,

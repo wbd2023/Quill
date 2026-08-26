@@ -46,18 +46,19 @@ type RuleCheckResult struct {
 // preparation, cancellation, or a fatal orchestration failure. A partial result may accompany a
 // non-nil error.
 func (engine *Engine) Check(
-	operationContext context.Context,
+	ctx context.Context,
 	options CheckOptions,
-) (result CheckResult, operationError error) {
-	if err := operationContext.Err(); err != nil {
+) (result CheckResult, err error) {
+	if err := ctx.Err(); err != nil {
 		return result, err
 	}
 
-	runContext, driverSets, err := engine.prepareRun(operationContext, options.Scope)
+	runContext, driverSets, err := engine.prepareRun(ctx, options.Scope)
 	if err != nil {
 		return CheckResult{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return result, err
 	}
 
@@ -66,7 +67,7 @@ func (engine *Engine) Check(
 	selected := selectRulesForCheck(runContext.Plan.Rules, runContext, options.Mode)
 	toolIDs := execution.ToolIDsForRules(selected)
 	result.Toolchain, err = engine.inspectTools(
-		operationContext,
+		ctx,
 		runContext.Tools,
 		toolIDs,
 		runContext.ToolEnvironment,
@@ -75,14 +76,14 @@ func (engine *Engine) Check(
 		return result, err
 	}
 	toolStatuses := toolchain.NewStatusMap(result.Toolchain.Statuses)
-	if err := operationContext.Err(); err != nil {
+	if err := ctx.Err(); err != nil {
 		return result, err
 	}
 
 	result.Rules = make([]RuleCheckResult, 0, len(selected))
 	for _, rule := range selected {
 		executionResult, executionError := execution.RunRule(
-			operationContext,
+			ctx,
 			rule,
 			runContext,
 			toolStatuses,
@@ -96,7 +97,7 @@ func (engine *Engine) Check(
 			Execution:      executionResult,
 			ExecutionError: executionError,
 		})
-		if err := operationContext.Err(); err != nil {
+		if err := ctx.Err(); err != nil {
 			return result, err
 		}
 

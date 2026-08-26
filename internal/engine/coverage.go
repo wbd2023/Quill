@@ -11,17 +11,18 @@ import (
 // Coverage is metadata-only: it shares the document loaded during operation preparation and never
 // constructs a runner context, resolves drivers, or inspects tools.
 func (engine *Engine) Coverage(
-	operationContext context.Context,
-) (coverageReport coverage.Report, operationError error) {
-	if err := operationContext.Err(); err != nil {
+	ctx context.Context,
+) (report coverage.Report, err error) {
+	if err := ctx.Err(); err != nil {
 		return coverage.Report{}, err
 	}
 
-	prepared, err := engine.prepare(operationContext)
+	prepared, err := engine.prepare(ctx)
 	if err != nil {
 		return coverage.Report{}, err
 	}
-	if err := operationContext.Err(); err != nil {
+
+	if err := ctx.Err(); err != nil {
 		return coverage.Report{}, err
 	}
 

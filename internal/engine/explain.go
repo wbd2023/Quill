@@ -19,10 +19,10 @@ type ExplainResult struct {
 // rule identifier that is unknown or inactive is an ArgumentError because it cannot name a rule in
 // the selected profile.
 func (engine *Engine) Explain(
-	operationContext context.Context,
+	ctx context.Context,
 	ruleID string,
-) (result ExplainResult, operationError error) {
-	snapshot, err := engine.Metadata(operationContext)
+) (result ExplainResult, err error) {
+	snapshot, err := engine.Metadata(ctx)
 	if err != nil {
 		return ExplainResult{}, err
 	}
@@ -31,7 +31,7 @@ func (engine *Engine) Explain(
 		if rule.ID != ruleID {
 			continue
 		}
-		if !rule.Active {
+		if !rule.Enabled {
 			return ExplainResult{}, newArgumentError(
 				"rule %q is declared by pack %q but is not active in this profile",
 				ruleID,
@@ -56,7 +56,10 @@ func (engine *Engine) Explain(
 		}, nil
 	}
 
-	return ExplainResult{}, newArgumentError("unknown rule %q: no matching rule is declared", ruleID)
+	return ExplainResult{}, newArgumentError(
+		"unknown rule %q: no matching rule is declared",
+		ruleID,
+	)
 }
 
 func findPack(packID string, packs []PackMetadata) (pack PackMetadata, found bool) {

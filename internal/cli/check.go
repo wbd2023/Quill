@@ -8,8 +8,6 @@ import (
 	"github.com/wbd2023/quill/internal/style"
 )
 
-/* ---------------------------------------- Check Command --------------------------------------- */
-
 type checkCmd struct {
 	repoFlags
 
@@ -23,16 +21,18 @@ type checkCmd struct {
 }
 
 func (c *checkCmd) run(ctx context.Context, runner Runner) (exitCode int) {
-	engineInstance, err := c.newEngine()
+	options := engine.CheckOptions{
+		Scope:                 c.Scope,
+		Mode:                  c.Mode,
+		StrictRecommendations: c.Strict,
+	}
+
+	engine, err := c.newEngine()
 	if err != nil {
 		return runner.reportCommandError("check", c.Format, err)
 	}
 
-	result, err := engineInstance.Check(ctx, engine.CheckOptions{
-		Scope:                 c.Scope,
-		Mode:                  c.Mode,
-		StrictRecommendations: c.Strict,
-	})
+	result, err := engine.Check(ctx, options)
 	if err != nil {
 		return runner.reportCommandError("check", c.Format, err)
 	}

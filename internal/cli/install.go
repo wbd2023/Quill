@@ -7,8 +7,6 @@ import (
 	"github.com/wbd2023/quill/internal/report"
 )
 
-/* --------------------------------------- Install Command -------------------------------------- */
-
 type installCmd struct {
 	repoFlags
 }
@@ -20,12 +18,14 @@ func (c *installCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 		progressWriter = runner.stderr
 	}
 
-	engineInstance, err := c.newEngine(engine.WithProgressWriter(progressWriter))
+	option := engine.WithProgressWriter(progressWriter)
+
+	engine, err := c.newEngine(option)
 	if err != nil {
 		return runner.reportCommandError("install", c.Format, err)
 	}
 
-	result, err := engineInstance.Install(ctx)
+	result, err := engine.Install(ctx)
 	if err != nil {
 		return runner.reportCommandError("install", c.Format, err)
 	}
@@ -39,6 +39,7 @@ func (c *installCmd) run(ctx context.Context, runner Runner) (exitCode int) {
 	if err != nil {
 		return runner.reportCommandError("install", c.Format, err)
 	}
+
 	if !allValid {
 		return 1
 	}

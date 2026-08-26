@@ -12,7 +12,7 @@ import (
 
 // Registry stores selected Pack definitions as runtime rule and tool definitions. Rules carry the
 // PackID of their declaring Pack (provenance), and capabilities are resolved copies of the
-// catalogue's canonical Tools.
+// catalog's canonical Tools.
 type Registry struct {
 	packs        []Definition
 	capabilities []toolchain.Capability
@@ -143,7 +143,7 @@ func stampPackRules(pack Definition) (rules []style.RuleDefinition) {
 // validatePackRuleToolScope ensures every rule a Pack declares only references Tools the Pack
 // itself declares. A rule may not rely on a Tool brought in by another Pack: Tool IDs are global,
 // but each Pack owns the Tools its own rules exercise, so a cross-Pack Tool reference is rejected
-// at assembly even when the Tool is present in the aggregate catalogue.
+// at assembly even when the Tool is present in the aggregate catalog.
 func validatePackRuleToolScope(pack Definition) (err error) {
 	declared := make(map[string]bool, len(pack.ToolIDs))
 	for _, toolID := range pack.ToolIDs {

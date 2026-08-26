@@ -10,7 +10,7 @@ import (
 // Layout represents the repository root and state directory from which the engine derives its
 // filesystem paths.
 type Layout struct {
-	RepositoryRoot string
+	Root           string
 	StateDirectory string
 }
 
@@ -18,7 +18,7 @@ type Layout struct {
 // root.
 func NewLayout(root string) (layout Layout) {
 	return Layout{
-		RepositoryRoot: root,
+		Root:           root,
 		StateDirectory: filepath.Join(root, ".cache", "quill"),
 	}
 }
@@ -34,13 +34,12 @@ func (layout Layout) BinaryDirectory() (directory string) {
 }
 
 // BuildPath produces a PATH environment variable value from the layout's binary directory, the
-// given directories, and the system PATH. The layout's binaries take priority over system
-// equivalents.
-func (layout Layout) BuildPath(directories ...string) (path string) {
+// given directories, and systemPath. The layout's binaries take priority over system equivalents.
+func (layout Layout) BuildPath(systemPath string, directories ...string) (path string) {
 	combined := slices.Concat(
 		[]string{layout.BinaryDirectory()},
 		directories,
-		[]string{os.Getenv("PATH")},
+		[]string{systemPath},
 	)
 	return strings.Join(combined, string(os.PathListSeparator))
 }

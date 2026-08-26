@@ -14,17 +14,18 @@ type swappingReader struct {
 	offset  int
 }
 
-func (r *swappingReader) Read(p []byte) (int, error) {
+func (r *swappingReader) Read(p []byte) (n int, err error) {
 	if !r.swapped {
 		r.swapped = true
-		if err := r.swap(); err != nil {
+		if err = r.swap(); err != nil {
 			return 0, err
 		}
 	}
 	if r.offset >= len(r.data) {
 		return 0, io.EOF
 	}
-	n := copy(p, r.data[r.offset:])
+	n = copy(p, r.data[r.offset:])
 	r.offset += n
+
 	return n, nil
 }

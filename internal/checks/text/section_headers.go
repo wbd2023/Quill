@@ -29,14 +29,14 @@ type sectionHeaderPatterns struct {
 
 // CheckSectionHeaders check section headers.
 func CheckSectionHeaders(
-	repoRoot string,
+	root string,
 	repository profile.RepositoryConfig,
-	sectionHeaders textpolicy.SectionHeaderConfig,
+	config textpolicy.SectionHeaderConfig,
 	scope style.Scope,
 ) (result style.ExecutionResult, err error) {
 	patterns := newSectionHeaderPatterns()
 	files, err := filewalk.CollectFiles(
-		repository.ResolveScopeRoots(repoRoot, scope),
+		repository.ResolveScopeRoots(root, scope),
 		filewalk.WalkConfig{
 			ExcludedDirectories: repository.ExcludedDirectories,
 			GeneratedMarker:     repository.GeneratedMarker,
@@ -48,19 +48,19 @@ func CheckSectionHeaders(
 	}
 
 	for _, path := range files {
-		lineCount, headers, diagnostics, err := scanSectionHeaders(repoRoot, path, patterns)
+		lineCount, headers, diagnostics, err := scanSectionHeaders(root, path, patterns)
 		if err != nil {
 			return style.ExecutionResult{}, err
 		}
 
 		result.Diagnostics = append(result.Diagnostics, diagnostics...)
-		if lineCount >= sectionHeaders.LargeMinLines && len(headers) == 0 {
+		if lineCount >= config.LargeMinLines && len(headers) == 0 {
 			result.Diagnostics = append(result.Diagnostics, style.Diagnostic{
 				Code: "text/section-headers/missing",
-				File: filewalk.DisplayPath(repoRoot, path),
+				File: filewalk.DisplayPath(root, path),
 				Message: fmt.Sprintf(
 					"missing section headers in %d+ line file",
-					sectionHeaders.LargeMinLines,
+					config.LargeMinLines,
 				),
 			})
 		}

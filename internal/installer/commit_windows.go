@@ -9,6 +9,8 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+/* ----------------------------------- File Rename Information ---------------------------------- */
+
 // fileRenameInformation mirrors the NT FILE_RENAME_INFORMATION layout consumed by
 // NtSetInformationFile. Its leading field carries either the BOOLEAN replace flag or, on Windows 10
 // and later, the FILE_RENAME_* flag set. Go aligns RootDirectory (a pointer-sized handle) to its
@@ -20,7 +22,10 @@ type fileRenameInformation struct {
 	FileName        [1]uint16
 }
 
-// rootedRename atomically renames oldName to newName within the directory anchored by directoryRoot.
+/* ---------------------------------------- Rooted Commit --------------------------------------- */
+
+// rootedRename atomically renames oldName to newName within the directory anchored by
+// directoryRoot.
 //
 // Windows has no directory-handle-relative rename in the Win32 surface, so the rename uses NT
 // native APIs. The staged file is reopened relative to the anchored directory handle with DELETE
@@ -33,7 +38,7 @@ func rootedRename(
 	_ string,
 	oldName string,
 	newName string,
-) error {
+) (err error) {
 	dir, err := directoryRoot.Open(".")
 	if err != nil {
 		return err
@@ -85,10 +90,8 @@ func rootedRename(
 	header.ReplaceIfExists = windows.FILE_RENAME_REPLACE_IF_EXISTS
 	header.RootDirectory = dirHandle
 	header.FileNameLength = uint32(nameBytes)
-	copy(
-		(*[windows.MAX_LONG_PATH]uint16)(unsafe.Pointer(&header.FileName[0]))[:nameBytes/2:nameBytes/2],
-		newNameUTF16,
-	)
+	target := (*[windows.MAX_LONG_PATH]uint16)(unsafe.Pointer(&header.FileName[0]))
+	copy(target[:nameBytes/2:nameBytes/2], newNameUTF16)
 
 	return windows.NtSetInformationFile(
 		staged,

@@ -4,7 +4,7 @@ package profile
 const SchemaVersion = 1
 
 // Profile is a typed style profile.
-type Profile struct {
+type Profile struct { // style: allow-package-stutter because: foundational package type
 	SchemaVersion int
 
 	Repository RepositoryConfig

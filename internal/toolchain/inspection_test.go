@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+/* ----------------------------------- Inspection Test Doubles ---------------------------------- */
+
 type blockingInspectionRunner struct {
 	started chan struct{}
 	calls   []string
@@ -34,6 +36,8 @@ func (*blockingInspectionRunner) Run(
 ) (output string, err error) {
 	return "", nil
 }
+
+/* -------------------------------- Cancellation Behaviour Tests -------------------------------- */
 
 func TestInspectToolsReturnsParentCancellationAndStops(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -100,6 +104,8 @@ func TestInspectToolsObservesCancellationFromFinalProbe(t *testing.T) {
 		t.Fatalf("InspectTools error = %v, want context.Canceled", err)
 	}
 }
+
+/* ------------------------------------ Immediate Test Double ----------------------------------- */
 
 type immediateInspectionRunner struct{}
 

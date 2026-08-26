@@ -1,6 +1,6 @@
 package golang
 
-// Check selectors.
+// Check selectors enumerate the concrete Go repository observations a rule can bind to.
 const (
 	CheckComments Check = iota
 	CheckData

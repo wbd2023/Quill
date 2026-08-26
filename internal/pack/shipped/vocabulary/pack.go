@@ -9,8 +9,8 @@ import (
 // PackID is the canonical identifier for this Pack.
 const PackID = "vocabulary"
 
-// ScannerVocabulary is scanner vocabulary.
-const ScannerVocabulary = "vocabulary"
+// Scanner is scanner vocabulary.
+const Scanner = "vocabulary"
 
 const ruleGroupVocabulary style.RuleGroup = "vocabulary_scanners"
 
@@ -29,7 +29,7 @@ func Pack() (definition pack.Definition) {
 				Name:  "Project vocabulary",
 				Group: ruleGroupVocabulary,
 				Check: style.RepositoryScan{
-					Scanner: ScannerVocabulary,
+					Scanner: Scanner,
 				},
 			},
 		},

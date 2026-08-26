@@ -8,9 +8,11 @@ import (
 	"slices"
 )
 
+/* --------------------------------------- Tool Inspection -------------------------------------- */
+
 // InspectTools reports the status of each tool in tools, sorted by tool ID.
-// Parent-context cancellation aborts inspection and is returned as an operation
-// error; ordinary tool probe failures remain individual invalid statuses.
+// Parent-context cancellation aborts inspection and is returned as an operation error; ordinary
+// tool probe failures remain individual invalid statuses.
 func InspectTools(
 	ctx context.Context,
 	runner CommandRunner,
@@ -42,6 +44,8 @@ func InspectTools(
 
 	return statuses, nil
 }
+
+/* ------------------------------------ Individual Tool Probe ----------------------------------- */
 
 func inspectTool(
 	ctx context.Context,
@@ -80,6 +84,8 @@ func inspectTool(
 	return status, nil
 }
 
+/* -------------------------------------- Install Detection ------------------------------------- */
+
 // IsInstalled reports whether a tool matching the pinned version is already installed at the given
 // path.
 func IsInstalled(
@@ -107,6 +113,7 @@ func IsInstalled(
 	if err != nil {
 		return false, err
 	}
+
 	if len(statuses) != 1 {
 		return false, fmt.Errorf("inspect local tool %s: missing status", tool.ID)
 	}

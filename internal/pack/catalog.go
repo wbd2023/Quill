@@ -8,10 +8,10 @@ import (
 	"github.com/wbd2023/quill/internal/toolchain"
 )
 
-/* ------------------------------------------ Catalogue ----------------------------------------- */
+/* ------------------------------------------- Catalog ------------------------------------------ */
 
 // Catalog stores the canonical Tool capabilities and the Packs available to a style checker build.
-// The catalogue owns each Tool capability exactly once by global ID; Packs reference Tools by ID
+// The catalog owns each Tool capability exactly once by global ID; Packs reference Tools by ID
 // instead of carrying copies, so a Tool is never defined twice and a Pack can never silently
 // override another Pack's Tool declaration.
 type Catalog struct {
@@ -19,7 +19,7 @@ type Catalog struct {
 	packs []Definition
 }
 
-// NewCatalog returns a catalogue owning defensive deep copies of the canonical tools and the
+// NewCatalog returns a catalog owning defensive deep copies of the canonical tools and the
 // supplied packs. The capabilities are the single source of Tool definitions; packs reference them
 // by ID.
 func NewCatalog(tools []toolchain.Capability, packs ...Definition) (catalog Catalog) {
@@ -76,9 +76,11 @@ func validateCatalog(catalog Catalog) (err error) {
 		if strings.TrimSpace(pack.ID) == "" {
 			return fmt.Errorf("catalog contains an empty pack id")
 		}
+
 		if pack.ID == profile.EnabledPacksKey {
 			return fmt.Errorf("catalog contains reserved pack id %q", pack.ID)
 		}
+
 		if strings.TrimSpace(pack.Name) == "" {
 			return fmt.Errorf("catalog contains pack %q with an empty name", pack.ID)
 		}
@@ -96,6 +98,7 @@ func validateCatalog(catalog Catalog) (err error) {
 			if strings.TrimSpace(rule.ID) == "" {
 				return fmt.Errorf("catalog contains an empty rule id in pack %q", pack.ID)
 			}
+
 			if owner := seenRules[rule.ID]; owner != "" {
 				return fmt.Errorf(
 					"catalog contains duplicate rule id %q (declared by packs %q and %q)",

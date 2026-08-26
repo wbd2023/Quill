@@ -12,8 +12,8 @@ import (
 
 func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 	requirementIDPattern := regexp.MustCompile(`\b[0-9]+\.[0-9]+\.[a-z][a-z0-9-]*\b`)
-	repoRoot := testutil.RepositoryRoot(t)
-	internalRoot := filepath.Join(repoRoot, "internal")
+	root := testutil.RepositoryRoot(t)
+	internalRoot := filepath.Join(root, "internal")
 
 	err := filepath.WalkDir(
 		internalRoot,
@@ -40,7 +40,7 @@ func TestRequirementIDsStayOutOfImplementationCode(t *testing.T) {
 			}
 
 			if match := requirementIDPattern.Find(contents); len(match) > 0 {
-				relativePath, _ := filepath.Rel(repoRoot, path)
+				relativePath, _ := filepath.Rel(root, path)
 				t.Fatalf(
 					"%s hardcodes requirement ID %q; bind requirements in quill.toml instead",
 					filepath.ToSlash(relativePath),

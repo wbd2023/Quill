@@ -36,7 +36,7 @@ func formatTargets(
 			continue
 		}
 
-		workDir := targetWorkDir(run.RepoRoot, target)
+		workDir := targetWorkDir(run.Root, target)
 		commandResult, err := runGo(
 			ctx,
 			run,

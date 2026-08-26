@@ -10,7 +10,7 @@ import (
 )
 
 func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	source := strings.Join([]string{
 		"#!/bin/bash",
 		"set -euo pipefail",
@@ -22,13 +22,13 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 	}, "\n")
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/example.sh",
 		source,
 	)
 
 	result, err := CheckMagicValues(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)
@@ -46,7 +46,7 @@ func TestCheckMagicValuesFindsNonTrivialLiterals(t *testing.T) {
 }
 
 func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
-	repoRoot := t.TempDir()
+	root := t.TempDir()
 	source := strings.Join([]string{
 		"#!/bin/bash",
 		"set -euo pipefail",
@@ -58,13 +58,13 @@ func TestCheckMagicValuesAllowsTrivialLiterals(t *testing.T) {
 	}, "\n")
 	testutil.WriteFile(
 		t,
-		repoRoot,
+		root,
 		"tools/example.sh",
 		source,
 	)
 
 	result, err := CheckMagicValues(
-		repoRoot,
+		root,
 		profiles.RepositoryConfig(),
 		style.Scope("all"),
 	)

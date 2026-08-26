@@ -79,13 +79,13 @@ func runFileCommand(
 		return style.ExecutionResult{}, errUnknownTool(command.ToolID)
 	}
 
-	arguments := execution.FileCommandArguments(context.RepoRoot, command, files)
+	arguments := execution.FileCommandArguments(context.Root, command, files)
 	commandResult, runErr := process.RunCommand(ctx, process.CommandRequest{
 		Name:             tool.Command,
 		Arguments:        arguments,
 		Environment:      process.EnvironmentInherit,
 		Variables:        context.ToolEnvironment,
-		Directory:        context.RepoRoot,
+		Directory:        context.Root,
 		Timeout:          time.Duration(tool.TimeoutSeconds) * time.Second,
 		OutputLimitBytes: tool.OutputLimitBytes,
 	})
