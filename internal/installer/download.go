@@ -3,6 +3,8 @@ package installer
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -110,14 +112,24 @@ func hashFile(path string) (digest string, err error) {
 }
 
 // verifyChecksum reports whether the SHA-256 hash of the file at path matches the expected hex
-// digest.
+// digest. The comparison is constant time, and an undecodable digest on either side is treated as
+// a mismatch (fail closed).
 func verifyChecksum(path string, expected string) (err error) {
 	actual, err := hashFile(path)
 	if err != nil {
 		return err
 	}
 
-	if actual != expected {
+	actualDigest, err := hex.DecodeString(actual)
+	if err != nil {
+		return fmt.Errorf("checksum mismatch for %s", path)
+	}
+	expectedDigest, err := hex.DecodeString(expected)
+	if err != nil {
+		return fmt.Errorf("checksum mismatch for %s", path)
+	}
+
+	if subtle.ConstantTimeCompare(actualDigest, expectedDigest) != 1 {
 		return fmt.Errorf("checksum mismatch for %s", path)
 	}
 
