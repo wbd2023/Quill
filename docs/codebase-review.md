@@ -504,7 +504,7 @@ no correctness defect or evidence-backed change to make.
 
 **Re-review trigger:** a new Pack/Check/fixer; a policy field that crosses
 Pack ownership; changed diagnostic schema or ordering; new generated-file or
-exception semantics; or a fix with partial-write behavior.
+exception semantics; or a fix with partial-write behaviour.
 
 **Why after the core model:** individual rules should be judged against an
 accepted model of Pack ownership, execution semantics, and diagnostics. They

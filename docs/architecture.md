@@ -1,6 +1,7 @@
 # Quill architecture
 
-Quill is a modular monolith with explicit ownership and one-way dependencies.
+Quill is a modular monolith: one deployable program whose internals are split into
+strictly layered packages. It has explicit ownership and one-way dependencies.
 Its supported product interfaces are the `quill` command, repository formats,
 local External Pack manifest and subprocess protocol, and release artefacts.
 All production implementation packages belong under `internal/`.
@@ -31,6 +32,9 @@ Runtime values return through the presentation and process layers:
 ```text
 engine result -> report DTO or view -> CLI stream and exit policy -> process status
 ```
+
+Here, DTO (data transfer object) means a plain struct that exists only to carry data
+across a boundary; it carries no behaviour of its own.
 
 A `check` operation follows this order:
 
