@@ -4,7 +4,8 @@ QUILL_CMD = go run ./cmd/quill
 LINT_REQUIRED_ARGS = --mode required
 LINT_FULL_ARGS = --mode all --strict-recommendations --verbose
 
-.PHONY: all build clean lint lint-required lint-fix style-install style-doctor style-coverage test test-race
+.PHONY: all build clean lint lint-required lint-fix style-install style-doctor
+.PHONY: style-coverage test test-race
 
 all: lint test
 build:

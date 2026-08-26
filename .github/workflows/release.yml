@@ -189,10 +189,10 @@ jobs:
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
-          $archive = "${{ steps.build.outputs.archive }}"
-          $binary = "staging\${{ steps.build.outputs.bin_name }}"
-          Compress-Archive -Path $binary -DestinationPath "${archive}"
-          Get-Item -Path "${archive}" | Format-List Name, Length
+          $archive_name = "${{ steps.build.outputs.archive }}"
+          $binary_path = "staging\${{ steps.build.outputs.bin_name }}"
+          Compress-Archive -Path $binary_path -DestinationPath "${archive_name}"
+          Get-Item -Path "${archive_name}" | Format-List Name, Length
 
       - name: Upload archive
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

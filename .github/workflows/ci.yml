@@ -79,7 +79,8 @@ jobs:
           version="0.10.0"
           checksum="6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87"
           archive="shellcheck-v${version}.linux.x86_64.tar.xz"
-          curl -fsSL "https://github.com/koalaman/shellcheck/releases/download/v${version}/${archive}" -o "${archive}"
+          url="https://github.com/koalaman/shellcheck/releases/download/v${version}"
+          curl -fsSL "${url}/${archive}" -o "${archive}"
           echo "${checksum}  ${archive}" | sha256sum -c -
           tar -xf "${archive}"
           install -D -m 0755 "shellcheck-v${version}/shellcheck" "${HOME}/.local/bin/shellcheck"
@@ -91,7 +92,7 @@ jobs:
         # vars that shellcheck cannot see; they are external to each script.
         env:
           SHELLCHECK_OPTS: "-e SC2154"
-        run: actionlint -color
+        run: actionlint
 
   race:
     name: Race detector
