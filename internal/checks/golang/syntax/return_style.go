@@ -11,7 +11,7 @@ import (
 
 /* ---------------------------------------- Return Rules ---------------------------------------- */
 
-// CheckNamedReturns ensures all functions, methods, and interface methods use named,. descriptive
+// CheckNamedReturns ensures all functions, methods, and interface methods use named, descriptive
 // return values.
 func CheckNamedReturns(fileSet *token.FileSet, file *ast.File) (violations []analysis.Violation) {
 	ast.Inspect(file, func(node ast.Node) bool {
@@ -134,10 +134,13 @@ func funcHasNamedReturns(functionType *ast.FuncType) (found bool) {
 }
 
 func isPlaceholderReturnName(name string) (placeholder bool) {
+	if name == "_" {
+		return true
+	}
+
 	if !strings.HasPrefix(name, "result") {
 		return false
 	}
-
 	suffix := strings.TrimPrefix(name, "result")
 	if suffix == "" {
 		return false

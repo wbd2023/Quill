@@ -66,6 +66,10 @@ func TestGoStyleReportsPlaceholderReturnNames(t *testing.T) {
 func Bad() (result0 string) {
 	return "bad"
 }
+
+func Blank() (_ error) {
+	return nil
+}
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
@@ -73,14 +77,15 @@ func Bad() (result0 string) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result.Diagnostics) == 0 {
-		t.Fatalf("expected custom Go check to fail, diagnostics: %#v", result.Diagnostics)
-	}
-
 	expectDiagnosticMessage(
 		t,
 		result,
 		`[go/returns/no-placeholder-names] function "Bad" uses placeholder return name "result0"`,
+	)
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/returns/no-placeholder-names] function "Blank" uses placeholder return name "_"`,
 	)
 }
 
