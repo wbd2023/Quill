@@ -17,7 +17,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-/* --------------------------------------- Re-exec dispatch -------------------------------------- */
+/* -------------------------------------- Re-exec dispatch -------------------------------------- */
 
 // TestMain turns the test binary into a cooperating fixture for the Windows job-object regression.
 // When QUILL_PROCESS_ROLE is set, the binary does not run the suite: it acts as the managed child
@@ -28,6 +28,7 @@ func TestMain(m *testing.M) {
 	case "spawner":
 		runSpawner(os.Getenv(processDirEnv))
 		os.Exit(0)
+
 	case "grandchild":
 		runGrandchild(os.Getenv(processDirEnv))
 		os.Exit(0)
@@ -43,9 +44,13 @@ const (
 	// survivalTickInterval paces the grandchild's survival markers so a survivor is unambiguous
 	// within the sampling window while keeping the test fast.
 	survivalTickInterval = 25 * time.Millisecond
-	// descendantLinger lets any in-flight tick and the job termination settle before the test
-	// samples the survival marker, then samples again to detect a survivor.
-	descendantLinger = 600 * time.Millisecond
+	// descendantPollInterval paces the survival-marker stability probe.
+	descendantPollInterval = 10 * time.Millisecond
+	// descendantSettleWindow is how long the survival marker must stay unchanged before the
+	// descendant is treated as dead; it matches the fixed settle window the probe replaces.
+	descendantSettleWindow = 600 * time.Millisecond
+	// descendantProbeDeadline bounds the stability probe so a live descendant fails promptly.
+	descendantProbeDeadline = 2 * time.Second
 )
 
 // runSpawner is the managed child launched by RunCommand. It starts a genuine descendant (the
@@ -81,8 +86,9 @@ func runSpawner(dir string) {
 		os.Exit(1)
 	}
 
-	// Hold until the Job Object kills us. Reaching os.Exit means the tree was not terminated.
-	time.Sleep(time.Minute)
+	// Hold until the Job Object terminates the tree: waiting on the descendant can only return
+	// once it has died, so reaching os.Exit means the tree was not terminated.
+	_ = grandchild.Wait() // any error still means the hold ended without the kill landing
 	os.Exit(0)
 }
 
@@ -95,9 +101,12 @@ func runGrandchild(dir string) {
 		os.Exit(1)
 	}
 
+	ticker := time.NewTicker(survivalTickInterval)
+	defer ticker.Stop()
+
 	for range 4000 {
 		appendSurvivalTick(survival)
-		time.Sleep(survivalTickInterval)
+		<-ticker.C
 	}
 }
 
@@ -106,13 +115,13 @@ func appendSurvivalTick(path string) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer file.Close() // a dropped tick only slows detection; tick bytes are never asserted
 	_, _ = file.WriteString("x")
 }
 
 // mergeEnv returns parent with the overrides applied (last value wins), folding names
 // case-insensitively so the role override actually replaces the inherited entry on Windows.
-func mergeEnv(parent []string, overrides map[string]string) []string {
+func mergeEnv(parent []string, overrides map[string]string) (merged []string) {
 	superseded := make(map[string]bool, len(overrides))
 	for name := range overrides {
 		superseded[strings.ToUpper(name)] = true
@@ -134,13 +143,16 @@ func mergeEnv(parent []string, overrides map[string]string) []string {
 	return merged
 }
 
-func waitUntilExists(path string, timeout time.Duration) bool {
+func waitUntilExists(path string, timeout time.Duration) (exists bool) {
+	ticker := time.NewTicker(readyPollInterval)
+	defer ticker.Stop()
+
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		if _, err := os.Stat(path); err == nil {
 			return true
 		}
-		time.Sleep(readyPollInterval)
+		<-ticker.C
 	}
 	return false
 }
@@ -155,7 +167,7 @@ func TestCancelJobTreeReportsDoneWithoutProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create job object: %v", err)
 	}
-	defer windows.CloseHandle(job)
+	defer windows.CloseHandle(job) // test-scoped job; nothing depends on the close result
 
 	state := &killState{}
 	if err := cancelJobTree(&exec.Cmd{}, job, state)(); !errors.Is(err, os.ErrProcessDone) {
@@ -167,7 +179,7 @@ func TestCancelJobTreeReportsDoneWithoutProcess(t *testing.T) {
 	}
 }
 
-/* --------------------------- Windows job-object descendant regression -------------------------- */
+/* -------------------------- Windows job-object descendant regression -------------------------- */
 
 // TestWindowsJobObjectKillsDescendantsOnCancel is the native regression for QUILL-TRUST-004. It
 // launches a managed child that spawns a real descendant, cancels after the tree reports readiness,
@@ -211,24 +223,51 @@ func TestWindowsJobObjectKillsDescendantsOnCancel(t *testing.T) {
 	assertDescendantDidNotSurvive(t, filepath.Join(dir, "survival"))
 }
 
-// assertDescendantDidNotSurvive samples the survival marker twice, separated by a settle window. A
-// descendant killed by the Job Object stops writing, so the two samples are equal; a survivor keeps
-// appending and the second sample is strictly larger.
+// assertDescendantDidNotSurvive proves the descendant stopped appending without relying on fixed
+// settle sleeps: the survival marker must first stabilise (letting any in-flight tick land) and
+// then stay unchanged for a full settle window. A descendant killed by the Job Object
+// stabilises quickly; a survivor keeps appending, so the probe returns a still-growing size and
+// the comparison below fails.
 func assertDescendantDidNotSurvive(t *testing.T, survival string) {
 	t.Helper()
 
-	time.Sleep(descendantLinger)
-	first := survivalSize(t, survival)
-
-	time.Sleep(descendantLinger)
-	second := survivalSize(t, survival)
+	first := waitForStableSize(t, survival)
+	second := waitForStableSize(t, survival)
 
 	if second > first {
-		t.Fatalf("descendant survived cancellation: survival marker grew %d -> %d bytes", first, second)
+		t.Fatalf(
+			"descendant survived cancellation: survival marker grew %d -> %d bytes",
+			first,
+			second,
+		)
 	}
 }
 
-func survivalSize(t *testing.T, path string) int {
+// waitForStableSize polls the marker until its size has stayed unchanged for
+// descendantSettleWindow, bounding the wait at descendantProbeDeadline and returning the latest
+// size when the deadline expires (the signature of a live, still-appending descendant).
+func waitForStableSize(t *testing.T, path string) (size int) {
+	t.Helper()
+
+	ticker := time.NewTicker(descendantPollInterval)
+	defer ticker.Stop()
+
+	deadline := time.Now().Add(descendantProbeDeadline)
+	settledSince, settledSize := time.Now(), survivalSize(t, path)
+	for time.Now().Before(deadline) {
+		<-ticker.C
+		if current := survivalSize(t, path); current != settledSize {
+			settledSince, settledSize = time.Now(), current
+			continue
+		}
+		if time.Since(settledSince) >= descendantSettleWindow {
+			return settledSize
+		}
+	}
+	return settledSize
+}
+
+func survivalSize(t *testing.T, path string) (size int) {
 	t.Helper()
 
 	info, err := os.Stat(path)
