@@ -328,7 +328,11 @@ requirement_ids = [
 id = "go/naming"
 enforcement = "required"
 scope = "all"
-requirement_ids = ["3.3.limit-single-letter-names"]
+requirement_ids = [
+  "3.3.limit-single-letter-names",
+  "3.3.no-weightless-suffixes",
+  "3.6.no-package-type-stutter",
+]
 
 [[rules]]
 id = "go/order"

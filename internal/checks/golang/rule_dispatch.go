@@ -193,6 +193,8 @@ func (scan fileScan) addNamingViolations() {
 	}
 
 	scan.addViolations(syntax.CheckSingleLetterVars(scan.state.fileSet, scan.file))
+	scan.addViolations(syntax.CheckPackageStutter(scan.state.fileSet, scan.file, scan.lines))
+	scan.addViolations(syntax.CheckWeightlessSuffixes(scan.state.fileSet, scan.file, scan.lines))
 }
 
 func (scan fileScan) addTestViolations() {

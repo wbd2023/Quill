@@ -1197,12 +1197,20 @@ reason=Whether surrounding context supplies enough meaning depends on local scop
 <!-- style:
 id=3.3.avoid-type-stutter
 mode=review_only
-reason=Whether a type word is redundant depends on local context.
+reason=Whether a qualifier adds information depends on local context.
 -->
-* Avoid type-stutter and roleless suffixes in local variable names. Do not add words such as
-  `Value`, `String`, `Rune`, `Slice`, `Map`, `List`, or `Data` when the type is already obvious from
-  local context. Prefer the value's role, such as `character`, `line`, `field`, `target`, or
-  `requirement`.
+* Avoid redundant qualifiers in identifiers at any level: locals, fields, types,
+  and functions. Prefer the shortest name that stays unambiguous in scope. Do not
+  add a qualifier that restates the declared type or distinguishes nothing
+  (`engineInstance` when only one engine exists); prefer the value's role, such
+  as `character`, `line`, `field`, `target`, or `requirement`. Keep a qualifying
+  word only when two same-role values coexist and the bare name would be ambiguous.
+
+<!-- style: id=3.3.no-weightless-suffixes -->
+* Identifiers MUST NOT end in a weightless suffix: `Instance`, `Impl`, or
+  `Wrapper`. These add no information in any context. Broader qualifier restraint
+  (including words such as `Value`, `List`, or `Map`) is covered by the
+  type-stutter rule above and reviewed rather than linted.
 <!-- style:
 id=3.3.avoid-acquisition-history-names
 mode=review_only
@@ -1239,7 +1247,10 @@ reason=Whether a roleless interface name is justified still needs contextual rev
 Public API naming:
 
 <!-- style: id=3.3.no-get-prefix-on-getters -->
-* Getters MUST NOT use a `Get` prefix: `obj.Owner()`, not `obj.GetOwner()`.
+* Getter methods on types MUST NOT use a `Get` prefix: `obj.Owner()`, not `obj.GetOwner()`.
+  This rule applies to accessor methods; package-level functions that compute or derive a
+  value are named freely, including a `get` prefix where the surrounding verb vocabulary
+  calls for one.
 
 <!-- style:
 id=3.3.keep-exported-api-families-coherent
@@ -1934,8 +1945,8 @@ id=3.9.names-add-information
 mode=review_only
 reason=Naming quality depends on local context and reader cost.
 -->
-* Names should add information not already obvious from the type or immediate context. Avoid type-
-  restating names such as `runeValue` when `rune` or a domain noun is clearer.
+* Names should add information not already obvious from the type or immediate
+  context; see the qualifier rules in section 3.3.
 <!-- style: id=3.9.scanner-entrypoint-first -->
 * First-party scanner files MUST place exported `Check...` entrypoints before unexported scan,
   diagnostic, parsing, and predicate helpers.

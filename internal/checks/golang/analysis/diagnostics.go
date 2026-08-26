@@ -39,6 +39,7 @@ const (
 	DiagnosticNoSecretsInRepository     = "go/security/no-secrets-in-repository"
 	DiagnosticNoShellInterpolation      = "go/process/no-shell-interpolation"
 	DiagnosticNoTypeElision             = "go/parameters/no-type-elision"
+	DiagnosticPackageStutter            = "go/naming/package-stutter"
 	DiagnosticSecretsLast               = "go/parameters/secrets-last"
 	DiagnosticSingleLetterNames         = "go/naming/single-letter-names"
 	DiagnosticScannerEntrypointOrder    = "go/order/scanner-entrypoint"
@@ -49,4 +50,5 @@ const (
 	DiagnosticTestHelperOrder           = "go/tests/helper-order"
 	DiagnosticTestSetenv                = "go/tests/use-setenv"
 	DiagnosticTestTempDir               = "go/tests/use-tempdir"
+	DiagnosticWeightlessSuffix          = "go/naming/weightless-suffix"
 )
