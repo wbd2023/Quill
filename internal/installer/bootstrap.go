@@ -63,8 +63,8 @@ func bootstrapExclusions(layout workspace.Layout) (roots []string) {
 // filterBootstrapPath returns canonical physical entries from path that are not equal to or
 // beneath any root, in their original order. Every retained entry is absolute and symlink-resolved:
 // a relative entry cannot be reinterpreted from the child working directory, and a later executable
-// lookup cannot follow a retained directory link into repository or state. An entry whose physical
-// location cannot be resolved is rejected rather than passed through ambiguously.
+// lookup cannot follow a retained directory link into repository or state. Missing entries are
+// omitted so they cannot become search locations later; other resolution failures are rejected.
 func filterBootstrapPath(path string, roots []string) (filtered string, err error) {
 	resolvedRoots := resolveSymlinkRoots(roots)
 
@@ -126,6 +126,9 @@ func canonicalBootstrapEntry(
 
 	canonical, err = filepath.EvalSymlinks(lexical)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return "", true, nil
+		}
 		return "", false, fmt.Errorf("resolve bootstrap PATH entry %q: %w", directory, err)
 	}
 	canonical = filepath.Clean(canonical)

@@ -2,6 +2,7 @@ package golang
 
 import (
 	"testing"
+	"time"
 
 	"github.com/wbd2023/quill/internal/toolchain"
 	"github.com/wbd2023/quill/internal/workspace"
@@ -44,5 +45,9 @@ func TestCommandBuildsGoInstallRequest(t *testing.T) {
 
 	if cmd.Arguments[1] != "golang.org/x/tools/cmd/goimports@v0.30.0" {
 		t.Fatalf("Arguments = %v, want install source@version", cmd.Arguments)
+	}
+
+	if cmd.Timeout != 30*time.Minute {
+		t.Fatalf("Timeout = %v, want 30m", cmd.Timeout)
 	}
 }

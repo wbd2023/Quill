@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/wbd2023/quill/internal/process"
 	"github.com/wbd2023/quill/internal/toolchain"
 	"github.com/wbd2023/quill/internal/workspace"
 )
+
+const installTimeout = 30 * time.Minute
 
 // Install runs go install for a tool that needs installation. The installer normally checks the
 // managed binary before resolving bootstrap PATH; this package repeats that early return so direct
@@ -80,5 +83,6 @@ func command(
 		Environment: process.EnvironmentInherit,
 		Variables:   environment,
 		Directory:   layout.StateDirectory,
+		Timeout:     installTimeout,
 	}, nil
 }

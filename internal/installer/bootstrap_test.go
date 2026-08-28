@@ -62,6 +62,23 @@ func TestBootstrapPathExcludesRepositoryAndStateEntries(t *testing.T) {
 	}
 }
 
+// TestBootstrapPathDropsMissingEntries keeps ordinary stale PATH entries from blocking tool
+// installation while ensuring they are absent from the child PATH and cannot become executable
+// search locations later.
+func TestBootstrapPathDropsMissingEntries(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing")
+	trusted := t.TempDir()
+	pathValue := strings.Join([]string{missing, trusted}, string(os.PathListSeparator))
+
+	filtered, err := filterBootstrapPath(pathValue, nil)
+	if err != nil {
+		t.Fatalf("filterBootstrapPath: %v", err)
+	}
+	if filtered != trusted {
+		t.Fatalf("filtered PATH = %q, want only trusted host %q", filtered, trusted)
+	}
+}
+
 // TestBootstrapPathFailsClosedWithoutTrustedHostDirectory pins the explicit non-empty invariant:
 // a host whose every PATH entry is repository or state cannot bootstrap installation and fails
 // closed rather than executing an untrusted candidate.
