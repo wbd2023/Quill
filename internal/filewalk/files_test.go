@@ -144,6 +144,23 @@ func TestCollectAllFilesKeepsConfigMentionsOfGeneratedMarker(t *testing.T) {
 	}
 }
 
+func TestCollectAllFilesExcludesGitAdministrativeFile(t *testing.T) {
+	root := t.TempDir()
+	kept := testutil.WriteFile(t, root, "kept.txt", "kept\n")
+	testutil.WriteFile(t, root, ".git", "gitdir: /tmp/repository.git/worktrees/main\n")
+
+	repository := profiles.RepositoryConfig()
+	files, err := CollectAllFiles(
+		repository.ResolveScopeRoots(root, style.Scope("all")),
+		walkConfig(repository),
+	)
+	if err != nil {
+		t.Fatalf("collect all files: %v", err)
+	}
+
+	requirePaths(t, files, []string{kept})
+}
+
 func TestCollectAllFilesSkipsBinaryFiles(t *testing.T) {
 	root := t.TempDir()
 	binaryFile := testutil.WriteFile(t, root, "quill", "\x00binary\n")

@@ -58,6 +58,14 @@ func collectFilesInRoots(
 					return walkErr
 				}
 
+				if entry.Name() == ".git" {
+					if entry.IsDir() {
+						return filepath.SkipDir
+					}
+
+					return nil
+				}
+
 				if entry.IsDir() && isExcludedDirectory(config, entry.Name()) {
 					return filepath.SkipDir
 				}
