@@ -127,7 +127,7 @@ func mergeEnv(parent []string, overrides map[string]string) (merged []string) {
 		superseded[strings.ToUpper(name)] = true
 	}
 
-	merged := make([]string, 0, len(parent)+len(overrides))
+	merged = make([]string, 0, len(parent)+len(overrides))
 	for _, entry := range parent {
 		name, _, ok := splitEnvEntry(entry)
 		if ok && superseded[strings.ToUpper(name)] {
