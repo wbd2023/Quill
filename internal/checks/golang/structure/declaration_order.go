@@ -24,9 +24,9 @@ const minCategoryKinds = 2
 
 /* --------------------------------------- Ordering Rules --------------------------------------- */
 
-// CheckStructureOrder enforces objective top-level declaration ordering. This check intentionally
-// avoids subjective formatting requirements.
-func CheckStructureOrder(
+// CheckOrder enforces objective top-level declaration ordering. This check intentionally avoids
+// subjective formatting requirements.
+func CheckOrder(
 	fileSet *token.FileSet,
 	file *ast.File,
 ) (violations []analysis.Violation) {

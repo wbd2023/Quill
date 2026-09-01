@@ -34,7 +34,7 @@ func scanVocabulary(
 		return style.ExecutionResult{}, err
 	}
 
-	return checks.CheckVocabulary(
+	return checks.Check(
 		context.Root,
 		context.Profile.Repository,
 		config,

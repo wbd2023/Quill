@@ -2,8 +2,8 @@ package drivers
 
 import "github.com/wbd2023/quill/internal/execution"
 
-// CheckDrivers returns the complete driver set for check execution.
-func CheckDrivers(bindings Bindings) (set execution.DriverSet) {
+// Checks returns the complete driver set for check execution.
+func Checks(bindings Bindings) (set execution.DriverSet) {
 	return execution.DriverSet{
 		Toolchain:      ToolchainDriver,
 		Profile:        profileCheckDriver(bindings.profileChecks),
@@ -15,8 +15,8 @@ func CheckDrivers(bindings Bindings) (set execution.DriverSet) {
 	}
 }
 
-// FixDrivers returns the driver set for fix execution (command and target only).
-func FixDrivers(bindings Bindings) (set execution.DriverSet) {
+// Fixes returns the driver set for fix execution (command and target only).
+func Fixes(bindings Bindings) (set execution.DriverSet) {
 	return execution.DriverSet{
 		FileCommand:   fileCommandFixDriver(),
 		TargetCommand: targetCommandDriver(bindings.targetCommands),

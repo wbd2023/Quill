@@ -86,8 +86,13 @@ func TestGoStyleReportsPackageStutter(t *testing.T) {
 	sourceCode := `package catalog
 
 type Catalog struct{}
+type CatalogEntry struct{}
+type Catalogued struct{}
 
 func Catalog() *Catalog { return nil }
+func NewCatalog() *Catalog { return nil }
+func ParseCatalog() *Catalog { return nil }
+func Catalogue() *Catalog { return nil }
 
 func (item Catalog) Reset() {}
 `
@@ -105,9 +110,9 @@ func (item Catalog) Reset() {}
 		}
 	}
 
-	if stutterDiagnostics != 2 {
+	if stutterDiagnostics != 5 {
 		t.Fatalf(
-			"expected 2 package-stutter diagnostics, got %d: %#v",
+			"expected 5 package-stutter diagnostics, got %d: %#v",
 			stutterDiagnostics,
 			result.Diagnostics,
 		)
@@ -122,6 +127,23 @@ func (item Catalog) Reset() {}
 		t,
 		result,
 		`[go/naming/package-stutter] exported function "Catalog" stutters with package "catalog"`,
+	)
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/naming/package-stutter] exported type "CatalogEntry" stutters with package "catalog"`,
+	)
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/naming/package-stutter] exported function "NewCatalog" `+
+			`stutters with package "catalog"`,
+	)
+	expectDiagnosticMessage(
+		t,
+		result,
+		`[go/naming/package-stutter] exported function "ParseCatalog" `+
+			`stutters with package "catalog"`,
 	)
 }
 
@@ -163,7 +185,7 @@ func TestGoStyleAllowsMarkedPackageStutter(t *testing.T) {
 
 type Tree struct{} // style: allow-package-stutter because: foundational container type
 
-func NewTree() *Tree { return &Tree{} }
+func NewTree() *Tree { return &Tree{} } // style: allow-package-stutter because: constructor
 `
 	writeSourceFile(t, sourcePath, sourceCode)
 
@@ -176,6 +198,11 @@ func NewTree() *Tree { return &Tree{} }
 		t,
 		result,
 		`exported type "Tree" stutters with package "tree"`,
+	)
+	rejectDiagnosticMessage(
+		t,
+		result,
+		`exported function "NewTree" stutters with package "tree"`,
 	)
 }
 

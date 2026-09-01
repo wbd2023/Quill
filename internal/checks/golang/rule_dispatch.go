@@ -167,7 +167,7 @@ func (scan fileScan) addOrderViolations() {
 	}
 
 	if !scan.isTestFile {
-		scan.addViolations(structure.CheckStructureOrder(
+		scan.addViolations(structure.CheckOrder(
 			scan.state.fileSet,
 			scan.file,
 		))

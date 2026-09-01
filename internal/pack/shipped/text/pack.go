@@ -18,7 +18,7 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 		FileSets: fileSets(),
 		Policy: pack.Policy{
 			Required: true,
-			Validate: textpolicy.ValidatePackPolicy,
+			Validate: textpolicy.Validate,
 		},
 		Rules: rules(),
 	}

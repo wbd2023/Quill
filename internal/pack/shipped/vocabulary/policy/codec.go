@@ -39,8 +39,8 @@ func DecodeConfig(policy profile.PackPolicy) (config Config, err error) {
 	return config, ValidateConfig(config)
 }
 
-// ValidatePackPolicy validates the raw Vocabulary Pack Policy subtree.
-func ValidatePackPolicy(policy profile.PackPolicy) (err error) {
+// Validate validates the raw Vocabulary Pack Policy subtree.
+func Validate(policy profile.PackPolicy) (err error) {
 	_, err = DecodeConfig(policy)
 	return err
 }

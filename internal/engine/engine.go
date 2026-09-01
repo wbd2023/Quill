@@ -212,8 +212,8 @@ func (engine *Engine) prepareRun(
 	}
 
 	driverSets := resolvedDrivers{
-		check: drivers.CheckDrivers(built),
-		fix:   drivers.FixDrivers(built),
+		check: drivers.Checks(built),
+		fix:   drivers.Fixes(built),
 	}
 
 	layout := workspace.NewLayout(engine.root)

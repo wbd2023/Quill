@@ -28,7 +28,7 @@ func Pack(toolIDs ...string) (definition pack.Definition) {
 		ToolIDs: append([]string{}, toolIDs...),
 		Policy: pack.Policy{
 			Required: true,
-			Validate: projectpolicy.ValidatePackPolicy,
+			Validate: projectpolicy.Validate,
 		},
 		Rules: rules(),
 	}

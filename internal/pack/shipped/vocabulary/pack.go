@@ -21,7 +21,7 @@ func Pack() (definition pack.Definition) {
 		Name: "Vocabulary",
 		Policy: pack.Policy{
 			Required: true,
-			Validate: vocabularypolicy.ValidatePackPolicy,
+			Validate: vocabularypolicy.Validate,
 		},
 		Rules: []style.RuleDefinition{
 			{

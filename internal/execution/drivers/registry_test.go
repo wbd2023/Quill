@@ -15,8 +15,8 @@ func TestShippedPackExecutionDetailsHaveDrivers(t *testing.T) {
 	}
 
 	bindings := NewBindings()
-	checkers := CheckDrivers(bindings)
-	fixers := FixDrivers(bindings)
+	checkers := Checks(bindings)
+	fixers := Fixes(bindings)
 	for _, rule := range registry.Rules() {
 		driver := driverForDetail(rule.Check, checkers)
 		if driver == nil {

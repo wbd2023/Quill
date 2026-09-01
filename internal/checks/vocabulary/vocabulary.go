@@ -11,9 +11,9 @@ const goTypeSuffixMatchLength = 2
 const goIdentifierSuffixMatchLength = 2
 const bashAssignmentMatchLength = 4
 
-// CheckVocabulary walks the scope's Go and shell files, skipping excluded and generated paths, and
-// flags identifiers and assignments that violate the pack's vocabulary policy.
-func CheckVocabulary(
+// Check walks the scope's Go and shell files, skipping excluded and generated paths, and flags
+// identifiers and assignments that violate the pack's vocabulary policy.
+func Check(
 	root string,
 	repository profile.RepositoryConfig,
 	config vocabularypolicy.Config,

@@ -209,11 +209,11 @@ func repositoryScanSpec(scanner string) (job style.RepositoryScan) {
 }
 
 func scanDriver() (driver execution.Driver) {
-	return drivers.CheckDrivers(Build()).RepositoryScan
+	return drivers.Checks(Build()).RepositoryScan
 }
 
 func targetCommandDriver() (driver execution.Driver) {
-	return drivers.CheckDrivers(Build()).TargetCommand
+	return drivers.Checks(Build()).TargetCommand
 }
 
 func testContext(

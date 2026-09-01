@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"strings"
+	"unicode"
 
 	"github.com/wbd2023/quill/internal/checks/golang/analysis"
 )
@@ -86,7 +87,7 @@ func packageStutterViolation(
 	kind string,
 	name *ast.Ident,
 ) (violation *analysis.Violation) {
-	if !ast.IsExported(name.Name) || !strings.EqualFold(name.Name, packageName) ||
+	if !ast.IsExported(name.Name) || !repeatsPackage(name.Name, packageName) ||
 		allowsInlineException(lines, fileSet.Position(name.Pos()), packageStutterMarker) {
 		return nil
 	}
@@ -101,4 +102,41 @@ func packageStutterViolation(
 			packageName,
 		),
 	}
+}
+
+func repeatsPackage(name string, packageName string) (repeats bool) {
+	identifier := []rune(name)
+	pkg := []rune(packageName)
+	if len(pkg) == 0 || len(pkg) > len(identifier) {
+		return false
+	}
+
+	for start := 0; start+len(pkg) <= len(identifier); start++ {
+		end := start + len(pkg)
+		if startsWord(identifier, start) && startsWord(identifier, end) &&
+			strings.EqualFold(string(identifier[start:end]), packageName) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func startsWord(identifier []rune, index int) (starts bool) {
+	if index == 0 || index == len(identifier) {
+		return true
+	}
+
+	previous := identifier[index-1]
+	current := identifier[index]
+	if previous == '_' || current == '_' || unicode.IsDigit(previous) != unicode.IsDigit(current) {
+		return true
+	}
+
+	if unicode.IsLower(previous) && unicode.IsUpper(current) {
+		return true
+	}
+
+	return unicode.IsUpper(previous) && unicode.IsUpper(current) &&
+		index+1 < len(identifier) && unicode.IsLower(identifier[index+1])
 }
