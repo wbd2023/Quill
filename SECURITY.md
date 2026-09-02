@@ -18,8 +18,8 @@ fix is available. No response-time guarantee is currently offered for this pre-1
 
 ## Supported versions
 
-The repository has a `v0.1.0` tag, but release publication and support status require separate
-verification. The Rust rewrite branch has no supported executable.
+The source-only `v0.2.0` archival release preserves the final Go implementation without binary
+assets. The Rust rewrite branch has no supported executable.
 
 ## Trust model
 

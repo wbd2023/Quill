@@ -32,6 +32,9 @@ specifications for the Rust implementation.
 
 ## Reference material
 
+- [CONTEXT.md](CONTEXT.md) defines the clean-slate domain language.
+- [docs/domain-model.md](docs/domain-model.md) records domain relationships, invariants, scenarios,
+  and unresolved product questions.
 - [STYLE.md](STYLE.md) is the existing human policy and an important parser/policy corpus. Its
   Go-specific requirements require deliberate Rust revision.
 - [docs/product.md](docs/product.md) records the current product direction.

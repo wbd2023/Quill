@@ -4,15 +4,20 @@ This directory currently retains only language-independent product decisions and
 contract evidence needed to design the Rust rewrite. These documents are inputs to the redesign,
 not automatic specifications for the new implementation.
 
+## Domain model
+
+- [The root glossary](../CONTEXT.md) defines Quill's canonical domain language.
+- [domain-model.md](domain-model.md) records relationships, invariants, distinguishing scenarios,
+  rejected term collapses, and unresolved product questions.
+
 ## Product and interface evidence
 
 - [product.md](product.md) records the current product direction and supported integration model.
 - [cli-protocol.md](cli-protocol.md) records the final-Go machine command interface.
 - [pack-protocol.md](pack-protocol.md) records the final-Go local External Pack interface.
 
-The protocol documents were added after the repository's `v0.1.0` tag. Before assigning
-compatibility status or reusing version number 1, determine whether these post-tag interfaces were
-published or adopted elsewhere.
+The protocol documents are published by the final-Go `v0.2.0` source release. External adoption and
+the Rust compatibility decision remain unestablished.
 
 ## Retained decisions
 

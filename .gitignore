@@ -15,7 +15,6 @@
 
 # Local agent context
 AGENTS.md
-CONTEXT.md
 .agents/
 .claude/
 .codex/
