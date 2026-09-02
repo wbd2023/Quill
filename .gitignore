@@ -19,8 +19,6 @@ CONTEXT.md
 .agents/
 .claude/
 .codex/
-.codex
-.context/
-.omp/
 .pi/
-.pi-lens/
+.omp/
+.context/
