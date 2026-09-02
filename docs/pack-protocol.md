@@ -2,9 +2,9 @@
 
 ## Status
 
-This document records the External Pack interface implemented on final-Go `main`. It was added after
-the repository's `v0.1.0` tag, so its publication and adoption status must be established before the
-Rust rewrite preserves `quill-pack-v1` or replaces it with an incompatible contract.
+This document records the External Pack interface published with the final-Go `v0.2.0` source
+release. Publication does not prove external adoption or require the Rust rewrite to preserve
+`quill-pack-v1`; retain, replace, or version it only after an explicit compatibility decision.
 
 A local external Pack is a repository-contained capability. The final Go implementation extends
 Quill through a versioned `pack.toml` manifest and subprocess protocol rather than native plugins,

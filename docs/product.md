@@ -13,12 +13,12 @@ Quill is a local developer and automation tool. It operates on a repository
 available to the caller and may execute tools selected by that repository's
 Profile. It is not a sandbox and is not a remote execution service.
 
-## Release target status
+## Release status
 
-The repository has a `v0.1.0` tag. This document also describes final-Go capabilities added after
-that tag, including interfaces whose publication and adoption have not been established. The Rust
-rewrite must classify each surface as retained, redesigned, or removed before assigning a new
-compatibility promise.
+The source-only `v0.2.0` release is the final Go implementation and Rust-rewrite archaeology
+anchor. It includes the final-Go product capabilities and protocol documents without binary
+artefacts. The Rust rewrite must still classify each surface as retained, redesigned, or removed
+before assigning a new compatibility promise.
 
 ## Supported integration model
 

@@ -16,9 +16,9 @@ The final Go implementation is preserved by this branch's parent commit:
 3ed482e569b92cd6b4b7f1be5a0b80d64fbaa4e5
 ```
 
-The existing `v0.1.0` tag predates some later product capabilities and protocol documents. Release
-and compatibility decisions must therefore be based on what was actually published and consumed,
-not on an assumption that every final-Go behavior is either public or disposable.
+The source-only `v0.2.0` release preserves the final Go implementation and its product/protocol
+documents as the rewrite's archaeology anchor. Publication is now established; adoption and the
+Rust compatibility commitment still require evidence rather than assumption.
 
 ## Design intent
 
