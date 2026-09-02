@@ -1,7 +1,8 @@
 # Security
 
-Quill installs and executes repository-pinned development tools. This document defines the trust
-boundary for maintainers and consuming repositories.
+This document retains security requirements and trust-boundary evidence from the final Go
+implementation. The Rust rewrite has no executable yet; each requirement must be revalidated and
+implemented before the new program can claim the corresponding protection.
 
 ## Reporting a vulnerability
 
@@ -17,8 +18,8 @@ fix is available. No response-time guarantee is currently offered for this pre-1
 
 ## Supported versions
 
-Before the first tagged release, only the current `main` branch is supported. After releases begin,
-security fixes will target the latest release unless a release announcement states otherwise.
+The repository has a `v0.1.0` tag, but release publication and support status require separate
+verification. The Rust rewrite branch has no supported executable.
 
 ## Trust model
 

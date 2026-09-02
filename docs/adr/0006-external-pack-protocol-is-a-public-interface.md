@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted.
+Accepted for revalidation during the Rust rewrite.
 
 ## Context
 

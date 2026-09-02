@@ -2,19 +2,16 @@
 
 ## Status
 
-This document defines the intended first-release external Pack interface. Until
-Quill's first tagged release, its schemas and field names remain pre-release
-commitments. A released protocol version is immutable except for additive
-fields.
+This document records the External Pack interface implemented on final-Go `main`. It was added after
+the repository's `v0.1.0` tag, so its publication and adoption status must be established before the
+Rust rewrite preserves `quill-pack-v1` or replaces it with an incompatible contract.
 
-A local external Pack is a repository-contained capability. It extends Quill
-through a versioned `pack.toml` manifest and a subprocess protocol, not Go
-imports, native plugins, a daemon, or a remote service.
+A local external Pack is a repository-contained capability. The final Go implementation extends
+Quill through a versioned `pack.toml` manifest and subprocess protocol rather than native plugins,
+a daemon, or a remote service.
 
-Use an External Pack only for a capability that is specific to the consuming repository or
-organisation. Reusable capabilities belong in a Shipped Pack; repository-specific variation of an
-existing capability belongs in that Pack's Profile-supplied Pack Policy. See
-[`architecture.md`](architecture.md#pack-model-and-selection) for the full selection model.
+Reusable capabilities and repository-specific variation currently have different ownership. The
+Rust redesign must revalidate that split before treating it as product policy.
 
 ## Source declaration and layout
 

@@ -2,9 +2,10 @@
 
 ## Status
 
-Accepted.
+Accepted for revalidation during the Rust rewrite.
 
-Supersedes [ADR 0003](0003-public-go-library-and-cli.md).
+The superseded ADR chain remains available at parent commit
+`3ed482e569b92cd6b4b7f1be5a0b80d64fbaa4e5`.
 
 ## Context
 

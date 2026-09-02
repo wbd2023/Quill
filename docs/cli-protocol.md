@@ -1,8 +1,8 @@
 # Quill CLI protocol
 
-Version 1 is implemented in source and defended by command-protocol tests. It
-becomes a supported released contract with the first tagged release that
-publishes it.
+This document records version 1 as implemented on final-Go `main`. It was added after the
+repository's `v0.1.0` tag, so its publication and adoption status must be established before the
+Rust rewrite preserves it as version 1 or replaces it with an incompatible contract.
 
 ## Invocation
 

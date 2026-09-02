@@ -1,5 +1,8 @@
 # Quill product specification
 
+> **Rust rewrite status:** This document is retained as product and compatibility evidence from the
+> final Go implementation. It is not automatically authoritative for the Rust redesign.
+
 ## Product
 
 Quill turns a repository's `STYLE.md` and `quill.toml` Profile into executable
@@ -12,10 +15,10 @@ Profile. It is not a sandbox and is not a remote execution service.
 
 ## Release target status
 
-[mvp.md](mvp.md) defines the ideal first public release. This
-document states that release's public contract. Until the first tag is
-published, release-distribution statements are commitments under validation,
-not claims that archives are already available.
+The repository has a `v0.1.0` tag. This document also describes final-Go capabilities added after
+that tag, including interfaces whose publication and adoption have not been established. The Rust
+rewrite must classify each surface as retained, redesigned, or removed before assigning a new
+compatibility promise.
 
 ## Supported integration model
 
@@ -23,10 +26,9 @@ Quill is language-neutral through its executable, not through native libraries.
 A caller pins a Quill release, invokes `quill` for a local repository, consumes
 its documented output, and handles its documented exit status.
 
-This works from Go, TypeScript, Python, Rust, Java, shell scripts, CI systems,
-and any environment that can execute the supported artefact. A consuming Go
-repository may use `go tool quill`; this is an executable integration, not an
-importable Go API.
+This model works from Go, TypeScript, Python, Rust, Java, shell scripts, CI systems, and any
+environment that can execute a supported artefact. The Rust rewrite must preserve or deliberately
+replace executable integration without accidentally creating a language-specific library contract.
 
 The supported public interfaces are:
 
@@ -101,17 +103,13 @@ published archive.
 
 Quill does not support:
 
-- importing a Go package as a stable product interface;
+- importing a language-specific library as a stable product interface;
 - native language SDKs or FFI bindings;
 - a local daemon or remote service API; or
 - remote execution against repositories unavailable on the caller's machine.
 
 ## Current implementation status
 
-The root Go facade has been removed. `internal/cli` now calls `internal/engine`
-directly, and no production Go package exists at the repository root.
-
-The source implements the CLI protocol, binary distribution workflow, local
-external-Pack manifest and subprocess protocol, and the contract tests required
-by ADRs 0004 and 0006. They remain release gates until the first standalone
-release is published.
+This branch contains no active implementation. The final Go implementation is preserved at parent
+commit `3ed482e569b92cd6b4b7f1be5a0b80d64fbaa4e5`. Its CLI, distribution workflow, local External
+Pack interface, and contract tests remain evidence for the Rust product decision inventory.
